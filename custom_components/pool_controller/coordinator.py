@@ -5,7 +5,6 @@ import asyncio
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util
-from homeassistant.components.calendar import async_get_events
 
 from .const import *
 
@@ -27,8 +26,6 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self.is_bathing = False
         self.last_filter_run = dt_util.now() - timedelta(hours=12)
         self.demo_mode = entry.data.get(CONF_DEMO_MODE, False)
-        
-        # Pausen-Logik
         self.pause_until = None
 
     async def _async_update_data(self):
@@ -41,7 +38,6 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             pv_surplus = self._get_float_state(self.entry.data.get(CONF_PV_SURPLUS_SENSOR))
             conductivity = self._get_float_state(self.entry.data.get(CONF_TDS_SENSOR))
             
-            # Dynamische Leistungsermittlung
             main_power = self._get_float_state(self.entry.data.get(CONF_MAIN_POWER_SENSOR)) or DEFAULT_MAIN_POWER
             aux_power = self._get_float_state(self.entry.data.get(CONF_AUX_POWER_SENSOR)) or DEFAULT_AUX_POWER
             
@@ -50,7 +46,6 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             is_holiday = await self._is_holiday()
             is_quiet = self._check_quiet_time(is_holiday)
             
-            # Pausen-Status prüfen
             is_paused = self.pause_until is not None and now < self.pause_until
             if is_paused and now >= self.pause_until:
                 self.pause_until = None
@@ -66,20 +61,17 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             filter_needed = self._check_filter_requirement()
 
             # 5. Entscheidungs-Logik
-            # Frostschutz gewinnt IMMER, auch vor der Pause
             should_main_on = (
                 frost_danger or 
                 (not is_paused and (preheat_needed or self.is_bathing or filter_needed or 
                 (pv_surplus is not None and pv_surplus > total_heating_power and water_temp < self.target_temp)))
             )
 
-            # Ruhezeit-Override (außer Frostschutz)
             if is_quiet and not frost_danger:
                 should_main_on = False
 
             should_aux_on = should_main_on and water_temp is not None and (self.target_temp - water_temp > 2.0)
             
-            # Keine Zusatzheizung beim reinen Filtern
             if filter_needed and not preheat_needed and not self.is_bathing:
                 should_aux_on = False
 
@@ -98,15 +90,14 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             }
 
         except Exception as err:
+            _LOGGER.error("Fehler im Pool-Coordinator: %s", err)
             raise UpdateFailed(f"Update fehlgeschlagen: {err}")
 
     def calculate_tds(self, conductivity):
-        """Berechnet TDS aus Leitfähigkeit (ppm = µS/cm * 0.64)."""
         if conductivity is None: return None
         return round(conductivity * 0.64)
 
     async def set_pause(self, minutes=30):
-        """Setzt den Pool für X Minuten auf Pause."""
         self.pause_until = dt_util.now() + timedelta(minutes=minutes)
         await self.async_request_refresh()
 
@@ -118,11 +109,24 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         except ValueError: return None
 
     async def _is_holiday(self):
+        """Prüft Feiertage über den Kalender-Service."""
         holiday_cal = self.entry.data.get(CONF_HOLIDAY_CALENDAR)
         if not holiday_cal: return False
+        
         now = dt_util.now()
-        events = await async_get_events(self.hass, holiday_cal, dt_util.start_of_local_day(now), dt_util.end_of_local_day(now))
-        return len(events) > 0
+        start = dt_util.start_of_local_day(now)
+        end = dt_util.end_of_local_day(now)
+        
+        try:
+            response = await self.hass.services.async_call(
+                "calendar", "get_events",
+                {"entity_id": holiday_cal, "start_date_time": start, "end_date_time": end},
+                blocking=True, return_response=True
+            )
+            events = response.get(holiday_cal, {}).get("events", [])
+            return len(events) > 0
+        except Exception:
+            return False
 
     def _check_quiet_time(self, is_holiday):
         now_time = dt_util.now().time()
@@ -139,14 +143,29 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         return round(hours * 60)
 
     async def _check_calendar_preheat(self, heat_up_mins):
+        """Prüft Pool-Events über den Kalender-Service."""
         cal_id = self.entry.data.get(CONF_POOL_CALENDAR)
         if not cal_id or heat_up_mins <= 0: return False
+        
         now = dt_util.now()
-        events = await async_get_events(self.hass, cal_id, now, now + timedelta(hours=24))
-        for event in events:
-            if (event.start - timedelta(minutes=heat_up_mins)) <= now <= event.start:
-                return True
-        return False
+        start = now
+        end = now + timedelta(hours=24)
+        
+        try:
+            response = await self.hass.services.async_call(
+                "calendar", "get_events",
+                {"entity_id": cal_id, "start_date_time": start, "end_date_time": end},
+                blocking=True, return_response=True
+            )
+            events = response.get(cal_id, {}).get("events", [])
+            
+            for event in events:
+                event_start = dt_util.parse_datetime(event["start"])
+                if (event_start - timedelta(minutes=heat_up_mins)) <= now <= event_start:
+                    return True
+            return False
+        except Exception:
+            return False
 
     def _check_filter_requirement(self):
         return (dt_util.now() - self.last_filter_run) > timedelta(hours=12)
