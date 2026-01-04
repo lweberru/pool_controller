@@ -3,14 +3,13 @@ from homeassistant.helpers.device_registry import DeviceInfo
 DOMAIN = "pool_controller"
 MANUFACTURER = "lweberru"
 
-# Alle Config-Keys (exakt für die Translation)
 CONF_POOL_NAME = "name"
 CONF_WATER_VOLUME = "water_volume"
 CONF_MAIN_SWITCH = "main_switch"
-CONF_MAIN_POWER_SENSOR = "main_power_sensor"
 CONF_TEMP_WATER = "temp_water_sensor"
 CONF_TEMP_OUTDOOR = "temp_outdoor_sensor"
 CONF_AUX_HEATING_SWITCH = "aux_heating_switch"
+CONF_MAIN_POWER_SENSOR = "main_power_sensor"
 CONF_AUX_POWER_SENSOR = "aux_power_sensor"
 CONF_PH_SENSOR = "ph_sensor"
 CONF_CHLORINE_SENSOR = "chlorine_sensor"
