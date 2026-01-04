@@ -51,10 +51,12 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             })
         )
 
+# In custom_components/pool_controller/config_flow.py (Auszug Schritt logic)
     async def async_step_logic(self, user_input=None):
         if user_input is not None:
             self.data.update(user_input)
             return self.async_create_entry(title=self.data[CONF_POOL_NAME], data=self.data)
+        
         return self.async_show_form(
             step_id="logic",
             data_schema=vol.Schema({
@@ -63,5 +65,7 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Optional(CONF_PV_SURPLUS_SENSOR): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="power")),
                 vol.Required(CONF_QUIET_START, default="22:00"): str,
                 vol.Required(CONF_QUIET_END, default="08:00"): str,
+                vol.Required(CONF_QUIET_START_WEEKEND, default="22:00"): str,
+                vol.Required(CONF_QUIET_END_WEEKEND, default="10:00"): str,
             })
         )
