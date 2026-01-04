@@ -1,0 +1,7 @@
+{
+  "name": "Advanced Pool Controller",
+  "render_readme": true,
+  "category": "integration",
+  "iot_class": "local_polling",
+  "homeassistant": "2025.1.0"
+}
