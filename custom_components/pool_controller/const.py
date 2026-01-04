@@ -25,7 +25,7 @@ CONF_QUIET_START_WEEKEND = "quiet_time_start_weekend"
 CONF_QUIET_END_WEEKEND = "quiet_time_end_weekend"
 CONF_DEMO_MODE = "demo_mode"
 
-# Standardwerte (Defaults)
+# Alle Standardwerte (Defaults)
 DEFAULT_NAME = "Whirlpool Demo"
 DEFAULT_VOL = 1000
 DEFAULT_MAIN_SW = "switch.whirlpool"
@@ -38,7 +38,7 @@ DEFAULT_PH_SENS = "sensor.esp32_5_cd41d8_whirlpool_ph"
 DEFAULT_CHLOR_SENS = "sensor.esp32_5_cd41d8_whirlpool_chlor"
 DEFAULT_SALT_SENS = "sensor.esp32_5_cd41d8_whirlpool_salt"
 DEFAULT_TDS_SENS = "sensor.esp32_5_cd41d8_whirlpool_conductivity"
-DEFAULT_PV_SENS = "sensor.scb_solar_power" # Dein neuer Default
+DEFAULT_PV_SENS = "sensor.scb_solar_power" 
 DEFAULT_CAL_POOL = "calendar.whirlpool"
 DEFAULT_CAL_HOLIDAY = "calendar.deutschland_bw"
 DEFAULT_Q_START = "22:00"
