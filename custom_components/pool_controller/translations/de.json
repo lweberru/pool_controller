@@ -5,13 +5,13 @@
         "title": "Basis-Setup",
         "data": {
           "name": "Name des Whirlpools",
-          "main_switch": "Hauptstromschalter",
-          "water_volume": "Wassermenge (Liter)",
-          "demo_mode": "Demo-Modus (Keine echte Schaltung)"
+          "main_switch": "Hauptschalter (Steckdose)",
+          "water_volume": "Wassermenge in Litern",
+          "demo_mode": "Demo-Modus aktiv"
         }
       },
       "heating": {
-        "title": "Heizung & Temperatur",
+        "title": "Heizung & Power",
         "data": {
           "temp_water_sensor": "Wassertemperatur",
           "temp_outdoor_sensor": "Außentemperatur",
@@ -21,20 +21,20 @@
         }
       },
       "water_quality": {
-        "title": "Wasserqualität",
+        "title": "Wasserqualität (ESP32)",
         "data": {
           "ph_sensor": "pH-Wert Sensor",
-          "chlorine_sensor": "Chlorgehalt Sensor",
+          "chlorine_sensor": "Chlorgehalt (Redox) Sensor",
           "salt_sensor": "Salzgehalt Sensor",
-          "tds_sensor": "Leitfähigkeit Sensor (TDS)"
+          "tds_sensor": "Leitfähigkeit Sensor"
         }
       },
       "logic": {
-        "title": "Zeitplanung",
+        "title": "Logik & Zeiten",
         "data": {
-          "pool_calendar": "Whirlpool Kalender",
+          "pool_calendar": "Pool Kalender",
           "holiday_calendar": "Feiertags Kalender",
-          "pv_surplus_sensor": "PV-Überschuss Sensor",
+          "pv_surplus_sensor": "PV Produktion Sensor",
           "quiet_time_start": "Ruhezeit Wochentag Start",
           "quiet_time_end": "Ruhezeit Wochentag Ende",
           "quiet_time_start_weekend": "Ruhezeit WE/Feiertag Start",
@@ -43,5 +43,20 @@
       }
     }
   },
-  "title": "Advanced Pool Controller"
+  "options": {
+    "step": {
+      "init": {
+        "title": "Whirlpool Einstellungen ändern",
+        "data": {
+          "water_volume": "Wassermenge (Liter)",
+          "quiet_time_start": "Ruhezeit Start (Mo-Fr)",
+          "quiet_time_end": "Ruhezeit Ende (Mo-Fr)",
+          "quiet_time_start_weekend": "Ruhezeit Start (WE/FT)",
+          "quiet_time_end_weekend": "Ruhezeit Ende (WE/FT)",
+          "ph_sensor": "pH Sensor",
+          "chlorine_sensor": "Chlor Sensor"
+        }
+      }
+    }
+  }
 }

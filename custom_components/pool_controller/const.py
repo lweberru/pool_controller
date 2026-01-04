@@ -3,7 +3,7 @@ from homeassistant.helpers.device_registry import DeviceInfo
 DOMAIN = "pool_controller"
 MANUFACTURER = "lweberru"
 
-# Konfigurations-Schlüssel (Keys)
+# Konfigurations-Schlüssel
 CONF_POOL_NAME = "name"
 CONF_WATER_VOLUME = "water_volume"
 CONF_MAIN_SWITCH = "main_switch"
@@ -32,10 +32,13 @@ DEFAULT_MAIN_SW = "switch.whirlpool"
 DEFAULT_AUX_SW = "switch.whirlpool_heizung"
 DEFAULT_TEMP_WATER = "sensor.esp32_5_cd41d8_whirlpool_temperature"
 DEFAULT_TEMP_OUTDOOR = "sensor.hue_outdoor_motion_sensor_1_temperatur"
+DEFAULT_MAIN_POWER_SENS = "sensor.whirlpool_leistung"
+DEFAULT_AUX_POWER_SENS = "sensor.whirlpool_heizung_leistung"
 DEFAULT_PH_SENS = "sensor.esp32_5_cd41d8_whirlpool_ph"
 DEFAULT_CHLOR_SENS = "sensor.esp32_5_cd41d8_whirlpool_chlor"
 DEFAULT_SALT_SENS = "sensor.esp32_5_cd41d8_whirlpool_salt"
 DEFAULT_TDS_SENS = "sensor.esp32_5_cd41d8_whirlpool_conductivity"
+DEFAULT_PV_SENS = "sensor.scb_solar_power" # Dein neuer Default
 DEFAULT_CAL_POOL = "calendar.whirlpool"
 DEFAULT_CAL_HOLIDAY = "calendar.deutschland_bw"
 DEFAULT_Q_START = "22:00"
