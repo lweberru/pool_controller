@@ -59,4 +59,39 @@
       }
     }
   }
+  ,
+  "entity": {
+    "button": {
+      "quick_chlor_btn": {"name": "Kurz Chloren"},
+      "pause_btn": {"name": "Pausieren"}
+    },
+    "switch": {
+      "main_switch": {"name": "Hauptschalter"},
+      "aux_heating": {"name": "Zusatzheizung"},
+      "bathing_mode": {"name": "Bade-Modus"}
+    },
+    "binary_sensor": {
+      "is_we_holiday": {"name": "Wochenende oder Feiertag"},
+      "frost_danger": {"name": "Frostgefahr"},
+      "is_quick_chlor": {"name": "Stoßchlorung aktiv"},
+      "is_paused": {"name": "Pausiert"},
+      "should_main_on": {"name": "Hauptstrom erforderlich"},
+      "low_chlor": {"name": "Niedriger Chlorwert"},
+      "ph_alert": {"name": "pH außerhalb Bereich"}
+    },
+    "sensor": {
+      "status": {"name": "Betriebsstatus", "state": {"frost_protection": "Frostschutz", "paused": "Pausiert", "normal": "Normal"}},
+      "ph_val": {"name": "pH-Wert"},
+      "chlor_val": {"name": "Chlorgehalt"},
+      "ph_minus_g": {"name": "Ph- Aktion"},
+      "ph_plus_g": {"name": "Ph+ Aktion"},
+      "chlor_spoons": {"name": "Chlor Aktion"},
+      "next_start_mins": {"name": "Nächster Start in"},
+      "next_event": {"name": "Nächster Event Start"}
+    }
+  }
+  ,
+  "climate": {
+    "pool_climate": {"name": "Whirlpool Heizung"}
+  }
 }

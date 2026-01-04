@@ -1,0 +1,114 @@
+title: Whirlpool
+path: whirlpool
+views:
+  - title: Whirlpool
+    path: whirlpool
+    badges:
+      - entity: sensor.pool_controller_water_temp
+      - entity: sensor.pool_controller_ph_val
+      - entity: sensor.pool_controller_chlor_val
+    cards:
+      - type: conditional
+        conditions:
+          - entity: binary_sensor.pool_controller_low_chlor
+            state: 'on'
+        card:
+          type: markdown
+          content: |
+            ## ⚠️ Niedriger Chlorwert
+            **Chlor unter 600 mV** — bitte prüfen und ggf. Stoßchlorung durchführen.
+
+      - type: conditional
+        conditions:
+          - entity: binary_sensor.pool_controller_ph_alert
+            state: 'on'
+        card:
+          type: markdown
+          content: |
+            ## ⚠️ pH außerhalb des Zielbereichs
+            **pH < 7.1** oder **pH > 7.4** — pH-Wert prüfen und korrigieren.
+
+      - type: vertical-stack
+        cards:
+          - type: thermostat
+            entity: climate.pool_controller_climate
+
+          - type: grid
+            columns: 3
+            square: false
+            cards:
+              - type: gauge
+                entity: sensor.pool_controller_water_temp
+                name: Wassertemperatur
+                min: 0
+                max: 40
+                severity:
+                  green: 36
+                  yellow: 30
+                  red: 25
+
+              - type: gauge
+                entity: sensor.pool_controller_chlor_val
+                name: Redox (mV)
+                min: 0
+                max: 1000
+                severity:
+                  green: 700
+                  yellow: 600
+                  red: 500
+
+              - type: gauge
+                entity: sensor.pool_controller_ph_val
+                name: pH-Wert
+                min: 6.0
+                max: 8.5
+                severity:
+                  green: 7.1
+                  yellow: 7.4
+                  red: 8.0
+
+          - type: horizontal-stack
+            cards:
+              - type: button
+                entity: button.pool_controller_quick_chlor_btn
+                name: Kurz chloren
+                icon: mdi:shaker
+              - type: button
+                entity: button.pool_controller_pause_btn
+                name: Pausieren
+                icon: mdi:pause-circle
+              - type: entity
+                entity: switch.pool_controller_main
+                name: Haupt (manuell)
+
+          - type: entities
+            title: Chemie & Aktionen
+            show_header_toggle: false
+            entities:
+              - entity: sensor.pool_controller_ph_minus_g
+                name: pH- (g)
+              - entity: sensor.pool_controller_ph_plus_g
+                name: pH+ (g)
+              - entity: sensor.pool_controller_chlor_spoons
+                name: Chlor (Löffel)
+              - entity: sensor.pool_controller_next_start_mins
+                name: Heizstart (Min.)
+              - entity: sensor.pool_controller_next_event
+                name: Nächster Event
+
+          - type: history-graph
+            title: Temperaturverlauf (24h)
+            hours_to_show: 24
+            refresh_interval: 60
+            entities:
+              - sensor.pool_controller_water_temp
+
+          - type: conditional
+            conditions:
+              - entity: binary_sensor.pool_controller_is_quick_chlor
+                state: 'on'
+            card:
+              type: markdown
+              content: |
+                ### 🔄 Stoßchlorung aktiv
+                Stoßchlorung läuft — Hauptversorgung ist für 5 Minuten priorisiert.

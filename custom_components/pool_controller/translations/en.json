@@ -1,0 +1,95 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Basic setup",
+        "data": {
+          "name": "Pool name",
+          "main_switch": "Main switch (outlet)",
+          "water_volume": "Water volume in liters",
+          "demo_mode": "Demo mode active"
+        }
+      },
+      "heating": {
+        "title": "Heating & Power",
+        "data": {
+          "temp_water_sensor": "Water temperature",
+          "temp_outdoor_sensor": "Outdoor temperature",
+          "aux_heating_switch": "Auxiliary heater switch",
+          "main_power_sensor": "Pool power sensor",
+          "aux_power_sensor": "Heater power sensor"
+        }
+      },
+      "water_quality": {
+        "title": "Water quality (ESP32)",
+        "data": {
+          "ph_sensor": "pH sensor",
+          "chlorine_sensor": "Chlorine (redox) sensor",
+          "salt_sensor": "Salt sensor",
+          "tds_sensor": "Conductivity sensor"
+        }
+      },
+      "logic": {
+        "title": "Logic & times",
+        "data": {
+          "pool_calendar": "Pool calendar",
+          "holiday_calendar": "Holiday calendar",
+          "pv_surplus_sensor": "PV production sensor",
+          "quiet_time_start": "Quiet time weekday start",
+          "quiet_time_end": "Quiet time weekday end",
+          "quiet_time_start_weekend": "Quiet time weekend/holiday start",
+          "quiet_time_end_weekend": "Quiet time weekend/holiday end"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Change pool settings",
+        "data": {
+          "water_volume": "Water volume (liters)",
+          "quiet_time_start": "Quiet time start (Mon-Fri)",
+          "quiet_time_end": "Quiet time end (Mon-Fri)",
+          "quiet_time_start_weekend": "Quiet time start (WE/Holiday)",
+          "quiet_time_end_weekend": "Quiet time end (WE/Holiday)",
+          "ph_sensor": "pH sensor",
+          "chlorine_sensor": "Chlorine sensor"
+        }
+      }
+    }
+  },
+  "entity": {
+    "button": {
+      "quick_chlor_btn": {"name": "Quick chlorinate"},
+      "pause_btn": {"name": "Pause"}
+    },
+    "switch": {
+      "main_switch": {"name": "Main switch"},
+      "aux_heating": {"name": "Auxiliary heater"},
+      "bathing_mode": {"name": "Bathing mode"}
+    },
+    "binary_sensor": {
+      "is_we_holiday": {"name": "Weekend or holiday"},
+      "frost_danger": {"name": "Frost danger"},
+      "is_quick_chlor": {"name": "Quick chlorination active"},
+      "is_paused": {"name": "Paused"},
+      "should_main_on": {"name": "Main power required"},
+      "low_chlor": {"name": "Low chlorine"},
+      "ph_alert": {"name": "pH out of range"}
+    },
+    "sensor": {
+      "status": {"name": "Operational status", "state": {"frost_protection": "Frost protection", "paused": "Paused", "normal": "Normal"}},
+      "ph_val": {"name": "pH value"},
+      "chlor_val": {"name": "Chlorine level"},
+      "ph_minus_g": {"name": "pH- action"},
+      "ph_plus_g": {"name": "pH+ action"},
+      "chlor_spoons": {"name": "Chlor action"},
+      "next_start_mins": {"name": "Next start in"},
+      "next_event": {"name": "Next event start"}
+    }
+  },
+  "climate": {
+    "pool_climate": {"name": "Pool heating"}
+  }
+}

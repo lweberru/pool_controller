@@ -1,0 +1,95 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configuration de base",
+        "data": {
+          "name": "Nom de la piscine",
+          "main_switch": "Interrupteur principal (prise)",
+          "water_volume": "Volume d'eau en litres",
+          "demo_mode": "Mode démo activé"
+        }
+      },
+      "heating": {
+        "title": "Chauffage & Puissance",
+        "data": {
+          "temp_water_sensor": "Température de l'eau",
+          "temp_outdoor_sensor": "Température extérieure",
+          "aux_heating_switch": "Interrupteur chauffage auxiliaire",
+          "main_power_sensor": "Capteur de puissance piscine",
+          "aux_power_sensor": "Capteur de puissance chauffage"
+        }
+      },
+      "water_quality": {
+        "title": "Qualité de l'eau (ESP32)",
+        "data": {
+          "ph_sensor": "Capteur de pH",
+          "chlorine_sensor": "Capteur de chlore (redox)",
+          "salt_sensor": "Capteur de sel",
+          "tds_sensor": "Capteur de conductivité"
+        }
+      },
+      "logic": {
+        "title": "Logique & horaires",
+        "data": {
+          "pool_calendar": "Calendrier piscine",
+          "holiday_calendar": "Calendrier jours fériés",
+          "pv_surplus_sensor": "Capteur production PV",
+          "quiet_time_start": "Heure silencieuse début (semaine)",
+          "quiet_time_end": "Heure silencieuse fin (semaine)",
+          "quiet_time_start_weekend": "Début silence WE/jour férié",
+          "quiet_time_end_weekend": "Fin silence WE/jour férié"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Modifier les paramètres du spa",
+        "data": {
+          "water_volume": "Volume d'eau (litres)",
+          "quiet_time_start": "Début silence (Lun-Ven)",
+          "quiet_time_end": "Fin silence (Lun-Ven)",
+          "quiet_time_start_weekend": "Début silence (WE/JF)",
+          "quiet_time_end_weekend": "Fin silence (WE/JF)",
+          "ph_sensor": "Capteur pH",
+          "chlorine_sensor": "Capteur chlore"
+        }
+      }
+    }
+  },
+  "entity": {
+    "button": {
+      "quick_chlor_btn": {"name": "Chloration rapide"},
+      "pause_btn": {"name": "Pause"}
+    },
+    "switch": {
+      "main_switch": {"name": "Interrupteur principal"},
+      "aux_heating": {"name": "Chauffage auxiliaire"},
+      "bathing_mode": {"name": "Mode baignade"}
+    },
+    "binary_sensor": {
+      "is_we_holiday": {"name": "Week-end ou jour férié"},
+      "frost_danger": {"name": "Risque de gel"},
+      "is_quick_chlor": {"name": "Chloration rapide active"},
+      "is_paused": {"name": "En pause"},
+      "should_main_on": {"name": "Alimentation principale requise"},
+      "low_chlor": {"name": "Chlore bas"},
+      "ph_alert": {"name": "pH hors plage"}
+    },
+    "sensor": {
+      "status": {"name": "État opérationnel", "state": {"frost_protection": "Protection antigel", "paused": "En pause", "normal": "Normal"}},
+      "ph_val": {"name": "Valeur pH"},
+      "chlor_val": {"name": "Taux de chlore"},
+      "ph_minus_g": {"name": "Action pH-"},
+      "ph_plus_g": {"name": "Action pH+"},
+      "chlor_spoons": {"name": "Action chlore"},
+      "next_start_mins": {"name": "Démarrage suivant dans"},
+      "next_event": {"name": "Début du prochain événement"}
+    }
+  },
+  "climate": {
+    "pool_climate": {"name": "Chauffage du spa"}
+  }
+}

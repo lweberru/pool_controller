@@ -22,17 +22,17 @@ class PoolBaseSensor(SensorEntity):
     def device_info(self): return {"identifiers": {(DOMAIN, self.coordinator.entry.entry_id)}, "name": self.coordinator.entry.data.get("name"), "manufacturer": MANUFACTURER}
 
 class PoolStatusSensor(PoolBaseSensor):
-    _attr_name = "Betriebsstatus"
+    _attr_translation_key = "status"
     @property
     def native_value(self):
-        if self.coordinator.data.get("frost_danger"): return "Frostschutz"
-        if self.coordinator.data.get("is_paused"): return "Pause"
-        return "Normal"
+        if self.coordinator.data.get("frost_danger"): return "frost_protection"
+        if self.coordinator.data.get("is_paused"): return "paused"
+        return "normal"
 
 class PoolChemSensor(PoolBaseSensor):
     def __init__(self, coordinator, key, name, unit, icon):
         super().__init__(coordinator)
-        self._key, self._attr_name, self._attr_native_unit_of_measurement, self._attr_icon = key, name, unit, icon
+        self._key, self._attr_translation_key, self._attr_native_unit_of_measurement, self._attr_icon = key, key, unit, icon
         self._attr_unique_id = f"{coordinator.entry.entry_id}_{key}"
     @property
     def native_value(self): return self.coordinator.data.get(self._key)
@@ -41,7 +41,7 @@ class PoolTimeSensor(PoolBaseSensor):
     _attr_device_class = SensorDeviceClass.TIMESTAMP
     def __init__(self, coordinator, key, name):
         super().__init__(coordinator)
-        self._key, self._attr_name = key, name
+        self._key, self._attr_translation_key = key, key
         self._attr_unique_id = f"{coordinator.entry.entry_id}_{key}"
     @property
     def native_value(self): return self.coordinator.data.get(self._key)

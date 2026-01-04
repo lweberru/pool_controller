@@ -15,17 +15,17 @@ class PoolButton(ButtonEntity):
         return {"identifiers": {(DOMAIN, self.coordinator.entry.entry_id)}, "name": self.coordinator.entry.data.get("name"), "manufacturer": MANUFACTURER}
 
 class QuickChlorineButton(PoolButton):
-    _attr_name = "Kurz Chloren"
+    _attr_translation_key = "quick_chlor_btn"
     _attr_unique_id = "quick_chlor_btn"
     _attr_icon = "mdi:fan"
     async def async_press(self):
-        self.coordinator.quick_chlorine_until = dt_util.now() + timedelta(minutes=5)
+        await self.coordinator.activate_quick_chlorine(minutes=5)
         await self.coordinator.async_request_refresh()
 
 class PauseButton(PoolButton):
-    _attr_name = "Pausieren"
+    _attr_translation_key = "pause_btn"
     _attr_unique_id = "pause_btn"
     _attr_icon = "mdi:pause-circle"
     async def async_press(self):
-        self.coordinator.pause_until = dt_util.now() + timedelta(minutes=30)
+        await self.coordinator.activate_pause(minutes=30)
         await self.coordinator.async_request_refresh()
