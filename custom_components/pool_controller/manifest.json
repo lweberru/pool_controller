@@ -1,0 +1,9 @@
+{
+  "domain": "pool_controller",
+  "name": "Advanced Pool Controller",
+  "codeowners": ["@lweberru"],
+  "config_flow": true,
+  "documentation": "https://github.com/lweberru/pool_controller",
+  "iot_class": "local_polling",
+  "version": "1.0.0"
+}

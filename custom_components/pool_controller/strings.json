@@ -1,0 +1,38 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Basis-Setup",
+        "data": {
+          "name": "Name des Whirlpools",
+          "main_switch": "Hauptschalter (Switch)",
+          "water_volume": "Wassermenge (Liter)"
+        }
+      },
+      "sensors": {
+        "title": "Sensoren & Wasserqualität",
+        "description": "Wähle die Sensoren aus, die du bereits in Home Assistant hast.",
+        "data": {
+          "temp_water_sensor": "Wassertemperatur-Sensor",
+          "temp_outdoor_sensor": "Außentemperatur-Sensor",
+          "ph_sensor": "pH-Wert Sensor",
+          "chlorine_sensor": "Chlorgehalt Sensor",
+          "salt_sensor": "Salzgehalt Sensor (Optional)",
+          "tds_sensor": "TDS Sensor (Optional)"
+        }
+      },
+      "logic": {
+        "title": "Zeitplanung & PV",
+        "description": "Einstellungen für die intelligente Steuerung.",
+        "data": {
+          "pool_calendar": "Pool-Kalender (für Events)",
+          "holiday_calendar": "Feiertagskalender",
+          "pv_surplus_sensor": "PV-Überschuss (Watt)",
+          "quiet_time_start": "Ruhezeit Beginn (z.B. 22:00)",
+          "quiet_time_end": "Ruhezeit Ende (z.B. 06:00)"
+        }
+      }
+    }
+  },
+  "title": "Advanced Pool Controller"
+}

@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "minor_version": 12,
+  "key": "core.device_registry",
+  "data": {
+    "devices": [
+      {"area_id":null,"config_entries":["01KE4EDV4CVY1ZF9N4ZF5P70TJ"],"config_entries_subentries":{"01KE4EDV4CVY1ZF9N4ZF5P70TJ":[null]},"configuration_url":null,"connections":[],"created_at":"2026-01-04T12:06:33.869677+00:00","disabled_by":null,"entry_type":"service","hw_version":null,"id":"ea7982661ce4f914b83b1300013eab1a","identifiers":[["sun","01KE4EDV4CVY1ZF9N4ZF5P70TJ"]],"labels":[],"manufacturer":null,"model":null,"model_id":null,"modified_at":"2026-01-04T12:06:33.869692+00:00","name_by_user":null,"name":"Sun","primary_config_entry":"01KE4EDV4CVY1ZF9N4ZF5P70TJ","serial_number":null,"sw_version":null,"via_device_id":null},
+      {"area_id":null,"config_entries":["01KE4EEFK9JSCCCP64TY7YZ4M2"],"config_entries_subentries":{"01KE4EEFK9JSCCCP64TY7YZ4M2":[null]},"configuration_url":"https://www.met.no/en","connections":[],"created_at":"2026-01-04T12:18:16.233394+00:00","disabled_by":null,"entry_type":"service","hw_version":null,"id":"6c78225decff16fce66a6075681f633f","identifiers":[["met","01KE4EEFK9JSCCCP64TY7YZ4M2"]],"labels":[],"manufacturer":"Met.no","model":"Forecast","model_id":null,"modified_at":"2026-01-04T12:18:16.233507+00:00","name_by_user":null,"name":"Forecast","primary_config_entry":"01KE4EEFK9JSCCCP64TY7YZ4M2","serial_number":null,"sw_version":null,"via_device_id":null},
+      {"area_id":null,"config_entries":["01KE4F3E6JWTEM839AGT4A23S3"],"config_entries_subentries":{"01KE4F3E6JWTEM839AGT4A23S3":[null]},"configuration_url":"homeassistant://config/backup","connections":[],"created_at":"2026-01-04T12:18:21.547947+00:00","disabled_by":null,"entry_type":"service","hw_version":null,"id":"902e021986770496b9a0e0f1332bfa51","identifiers":[["backup","backup_manager"]],"labels":[],"manufacturer":"Home Assistant","model":"Home Assistant Backup","model_id":null,"modified_at":"2026-01-04T12:18:21.547979+00:00","name_by_user":null,"name":"Backup","primary_config_entry":"01KE4F3E6JWTEM839AGT4A23S3","serial_number":null,"sw_version":"2025.12.5","via_device_id":null}
+    ],
+    "deleted_devices": []
+  }
+}

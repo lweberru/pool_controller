@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "minor_version": 5,
+  "key": "core.config_entries",
+  "data": {
+    "entries": [
+      {"created_at":"2026-01-04T12:06:33.868980+00:00","data":{},"disabled_by":null,"discovery_keys":{},"domain":"sun","entry_id":"01KE4EDV4CVY1ZF9N4ZF5P70TJ","minor_version":1,"modified_at":"2026-01-04T12:06:33.868983+00:00","options":{},"pref_disable_new_entities":false,"pref_disable_polling":false,"source":"import","subentries":[],"title":"Sun","unique_id":null,"version":1},
+      {"created_at":"2026-01-04T12:06:54.511856+00:00","data":{},"disabled_by":null,"discovery_keys":{},"domain":"shopping_list","entry_id":"01KE4EEF9FKZ627FX5N8DVVDN8","minor_version":1,"modified_at":"2026-01-04T12:06:54.511862+00:00","options":{},"pref_disable_new_entities":false,"pref_disable_polling":false,"source":"onboarding","subentries":[],"title":"Shopping list","unique_id":"shopping_list","version":1},
+      {"created_at":"2026-01-04T12:06:54.825469+00:00","data":{"track_home":true},"disabled_by":null,"discovery_keys":{},"domain":"met","entry_id":"01KE4EEFK9JSCCCP64TY7YZ4M2","minor_version":1,"modified_at":"2026-01-04T12:06:54.825474+00:00","options":{},"pref_disable_new_entities":false,"pref_disable_polling":false,"source":"onboarding","subentries":[],"title":"Home","unique_id":null,"version":1},
+      {"created_at":"2026-01-04T12:06:55.209772+00:00","data":{"language":"en","tld":"com"},"disabled_by":null,"discovery_keys":{},"domain":"google_translate","entry_id":"01KE4EEFZ9M8TDQPZMYZ48Z2MH","minor_version":1,"modified_at":"2026-01-04T12:06:55.209777+00:00","options":{},"pref_disable_new_entities":false,"pref_disable_polling":false,"source":"onboarding","subentries":[],"title":"Google Translate text-to-speech","unique_id":null,"version":1},
+      {"created_at":"2026-01-04T12:06:55.902085+00:00","data":{},"disabled_by":null,"discovery_keys":{},"domain":"radio_browser","entry_id":"01KE4EEGMYN3GHEV1W4WK8W03F","minor_version":1,"modified_at":"2026-01-04T12:06:55.902089+00:00","options":{},"pref_disable_new_entities":false,"pref_disable_polling":false,"source":"onboarding","subentries":[],"title":"Radio Browser","unique_id":null,"version":1},
+      {"created_at":"2026-01-04T12:18:21.522590+00:00","data":{},"disabled_by":null,"discovery_keys":{},"domain":"backup","entry_id":"01KE4F3E6JWTEM839AGT4A23S3","minor_version":1,"modified_at":"2026-01-04T12:18:21.522593+00:00","options":{},"pref_disable_new_entities":false,"pref_disable_polling":false,"source":"system","subentries":[],"title":"Backup","unique_id":null,"version":1}
+    ]
+  }
+}
