@@ -1,18 +1,14 @@
 import logging
 from datetime import timedelta, datetime
 import asyncio
-
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util
-
 from .const import *
 
 _LOGGER = logging.getLogger(__name__)
 
 class PoolControllerDataCoordinator(DataUpdateCoordinator):
-    """Zentrale Logik für den Whirlpool-Controller."""
-
     def __init__(self, hass: HomeAssistant, entry):
         self.entry = entry
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=timedelta(seconds=30))
@@ -21,103 +17,75 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self.last_filter_run = dt_util.now() - timedelta(hours=12)
         self.demo_mode = entry.data.get(CONF_DEMO_MODE, False)
         self.pause_until = None
+        self.quick_chlorine_until = None # Timer für 5 Min Chloren
 
     async def _async_update_data(self):
         try:
             now = dt_util.now()
-            water_temp = self._get_float_state(self.entry.data.get(CONF_TEMP_WATER))
-            outdoor_temp = self._get_float_state(self.entry.data.get(CONF_TEMP_OUTDOOR))
-            pv_surplus = self._get_float_state(self.entry.data.get(CONF_PV_SURPLUS_SENSOR))
-            conductivity = self._get_float_state(self.entry.data.get(CONF_TDS_SENSOR))
             
-            main_power = self._get_float_state(self.entry.data.get(CONF_MAIN_POWER_SENSOR)) or DEFAULT_MAIN_POWER
-            aux_power = self._get_float_state(self.entry.data.get(CONF_AUX_POWER_SENSOR)) or DEFAULT_AUX_POWER
+            # 1. Daten abrufen & Runden
+            raw_water_temp = self._get_float_state(self.entry.data.get(CONF_TEMP_WATER))
+            water_temp = round(raw_water_temp, 1) if raw_water_temp else None
             
-            tds_value = round(conductivity * 0.64) if conductivity else None
-            is_holiday = await self._is_holiday()
+            raw_ph = self._get_float_state(self.entry.data.get(CONF_PH_SENSOR))
+            ph_val = round(raw_ph, 2) if raw_ph else None
             
-            # Neue differenzierte Ruhezeit-Prüfung
-            is_quiet = self._check_quiet_time_advanced(is_holiday)
+            raw_chlor = self._get_float_state(self.entry.data.get(CONF_CHLORINE_SENSOR))
+            chlor_val = round(raw_chlor, 0) if raw_chlor else None # mV oft ganzzahlig
             
-            is_paused = self.pause_until is not None and now < self.pause_until
-            heat_up_time = self.calculate_heat_up_time(water_temp, main_power + aux_power)
-            frost_danger = outdoor_temp is not None and outdoor_temp < 3.0
-            
-            preheat_needed = await self._check_calendar_preheat(heat_up_time)
-            filter_needed = (dt_util.now() - self.last_filter_run) > timedelta(hours=12)
+            raw_salt = self._get_float_state(self.entry.data.get(CONF_SALT_SENSOR))
+            salt_val = round(raw_salt, 1) if raw_salt else 0.0
 
-            should_main_on = (frost_danger or (not is_paused and (preheat_needed or self.is_bathing or filter_needed or (pv_surplus is not None and pv_surplus > (main_power + aux_power) and water_temp < self.target_temp))))
-            if is_quiet and not frost_danger:
-                should_main_on = False
+            # 2. Chemie-Berechnung (Beispielwerte für 1000L)
+            # Ziel pH: 7.2 | 10g PH- senkt um 0.1 pro 1000L
+            vol = self.entry.data.get(CONF_WATER_VOLUME, 1000)
+            ph_minus = round((ph_val - 7.2) * (vol / 1000) * 100, 0) if ph_val and ph_val > 7.2 else 0
+            ph_plus = round((7.2 - ph_val) * (vol / 1000) * 100, 0) if ph_val and ph_val < 7.0 else 0
+            # Chlor: Ziel 450mV | 1 Löffel hebt um ca. 50mV
+            chlor_needed = round((450 - chlor_val) / 50, 2) if chlor_val and chlor_val < 450 else 0
 
-            should_aux_on = should_main_on and water_temp is not None and (self.target_temp - water_temp > 2.0)
-            if filter_needed and not preheat_needed and not self.is_bathing:
-                should_aux_on = False
+            # 3. Kalender-Details
+            cal_data = await self._get_next_calendar_event()
+            next_event = cal_data.get("start")
+            
+            heat_up_time = self.calculate_heat_up_time(water_temp, 3000)
+            preheat_start = next_event - timedelta(minutes=heat_up_time) if next_event else None
+            
+            # 4. Timer-Logik (Quick Chlorine / Pause)
+            is_quick_chlorine = self.quick_chlorine_until and now < self.quick_chlorine_until
+            is_paused = self.pause_until and now < self.pause_until
+
+            # 5. Finale Steuerung
+            should_main_on = (is_quick_chlorine or (not is_paused and (now >= (preheat_start or now + timedelta(days=1)) or self.is_bathing)))
 
             return {
-                "water_temp": water_temp, "outdoor_temp": outdoor_temp, "tds_value": tds_value,
-                "heat_up_time_mins": heat_up_time, "frost_danger": frost_danger,
-                "is_quiet_time": is_quiet, "is_paused": is_paused,
-                "should_main_on": should_main_on, "should_aux_on": should_aux_on,
-                "demo_mode": self.demo_mode, "is_holiday": is_holiday
+                "water_temp": water_temp, "ph_val": ph_val, "chlor_val": chlor_val, "salt_val": salt_val,
+                "ph_minus_g": ph_minus, "ph_plus_g": ph_plus, "chlor_spoons": chlor_needed,
+                "next_event": next_event, "preheat_start": preheat_start,
+                "heat_up_time_mins": heat_up_time, "is_paused": is_paused,
+                "is_quick_chlorine": is_quick_chlorine, "should_main_on": should_main_on
             }
         except Exception as err:
-            _LOGGER.error("Fehler im Pool-Coordinator: %s", err)
-            raise UpdateFailed(f"Update fehlgeschlagen: {err}")
+            raise UpdateFailed(f"Update Error: {err}")
 
-    def _check_quiet_time_advanced(self, is_holiday):
-        """Differenzierte Ruhezeiten für Wochentage vs. Wochenende/Feiertage."""
-        now = dt_util.now()
-        now_time = now.time()
-        is_weekend = now.weekday() >= 5 # 5=Samstag, 6=Sonntag
-        
-        # Bestimme aktive Zeitfenster
-        if is_weekend or is_holiday:
-            # Aktiv 10:00 - 22:00 -> Ruhe 22:00 - 10:00
-            start_quiet = datetime.strptime("22:00", "%H:%M").time()
-            end_quiet = datetime.strptime("10:00", "%H:%M").time()
-        else:
-            # Aktiv 08:00 - 22:00 -> Ruhe 22:00 - 08:00
-            start_quiet = datetime.strptime("22:00", "%H:%M").time()
-            end_quiet = datetime.strptime("08:00", "%H:%M").time()
-
-        if start_quiet <= end_quiet:
-            return start_quiet <= now_time <= end_quiet
-        return now_time >= start_quiet or now_time <= end_quiet
-
-    async def _is_holiday(self):
-        holiday_cal = self.entry.data.get(CONF_HOLIDAY_CALENDAR)
-        if not holiday_cal: return False
-        now = dt_util.now()
-        # Fix für end_of_local_day:
-        start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        end = now.replace(hour=23, minute=59, second=59, microsecond=999)
-        try:
-            response = await self.hass.services.async_call("calendar", "get_events", {"entity_id": holiday_cal, "start_date_time": start, "end_date_time": end}, blocking=True, return_response=True)
-            events = response.get(holiday_cal, {}).get("events", [])
-            return len(events) > 0
-        except Exception: return False
-
-    async def _check_calendar_preheat(self, heat_up_mins):
+    async def _get_next_calendar_event(self):
         cal_id = self.entry.data.get(CONF_POOL_CALENDAR)
-        if not cal_id or heat_up_mins <= 0: return False
+        if not cal_id: return {}
         now = dt_util.now()
-        try:
-            response = await self.hass.services.async_call("calendar", "get_events", {"entity_id": cal_id, "start_date_time": now, "end_date_time": now + timedelta(hours=24)}, blocking=True, return_response=True)
-            events = response.get(cal_id, {}).get("events", [])
-            for event in events:
-                event_start = dt_util.parse_datetime(event["start"])
-                if (event_start - timedelta(minutes=heat_up_mins)) <= now <= event_start: return True
-            return False
-        except Exception: return False
+        res = await self.hass.services.async_call("calendar", "get_events", 
+            {"entity_id": cal_id, "start_date_time": now, "end_date_time": now + timedelta(days=7)}, 
+            blocking=True, return_response=True)
+        events = res.get(cal_id, {}).get("events", [])
+        if not events: return {}
+        first = events[0]
+        return {"start": dt_util.parse_datetime(first["start"]), "summary": first.get("summary")}
 
-    def _get_float_state(self, entity_id):
-        if not entity_id: return None
-        state = self.hass.states.get(entity_id)
-        try: return float(state.state) if state and state.state not in ("unknown", "unavailable") else None
-        except ValueError: return None
+    def calculate_heat_up_time(self, current_temp, power):
+        if not current_temp or current_temp >= self.target_temp: return 0
+        delta_t = self.target_temp - current_temp
+        # Formel: $$t_{min} = \frac{V \cdot 1.16 \cdot \Delta T}{P} \cdot 60$$
+        return round((self.entry.data.get(CONF_WATER_VOLUME, 1000) * 1.16 * delta_t) / power * 60)
 
-    def calculate_heat_up_time(self, current_temp, power_watt):
-        if current_temp is None or current_temp >= self.target_temp or power_watt <= 0: return 0
-        volume = self.entry.data.get(CONF_WATER_VOLUME, 1000)
-        return round((volume * 1.16 * (self.target_temp - current_temp)) / power_watt * 60)
+    def _get_float_state(self, eid):
+        s = self.hass.states.get(eid)
+        return float(s.state) if s and s.state not in ("unknown", "unavailable") else None
