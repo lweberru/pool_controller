@@ -5,10 +5,10 @@ async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
     entities = [
         PoolStatusSensor(coordinator),
-        PoolChemSensor(coordinator, "ph_val", "pH-Wert", None),
-        PoolChemSensor(coordinator, "chlor_val", "Chlorgehalt", "mV"),
-        PoolChemSensor(coordinator, "ph_minus_g", "Ph- Aktion", "g"),
-        PoolChemSensor(coordinator, "chlor_spoons", "Chlor Aktion", "Löffel"),
+        PoolChemSensor(coordinator, "ph_val", "pH-Wert", None, "mdi:ph"),
+        PoolChemSensor(coordinator, "chlor_val", "Chlorgehalt", "mV", "mdi:pool"),
+        PoolChemSensor(coordinator, "ph_minus_g", "Ph- Aktion", "g", "mdi:pill"),
+        PoolChemSensor(coordinator, "chlor_spoons", "Chlor Aktion", "Löffel", "mdi:spoon-sugar"),
         PoolTimeSensor(coordinator, "next_event", "Nächster Event Start")
     ]
     async_add_entities(entities)
@@ -28,11 +28,12 @@ class PoolStatusSensor(PoolBaseSensor):
         return "Normal"
 
 class PoolChemSensor(PoolBaseSensor):
-    def __init__(self, coordinator, key, name, unit):
+    def __init__(self, coordinator, key, name, unit, icon):
         super().__init__(coordinator)
         self._key = key
         self._attr_name = name
         self._attr_native_unit_of_measurement = unit
+        self._attr_icon = icon
         self._attr_unique_id = f"{coordinator.entry.entry_id}_{key}"
     @property
     def native_value(self): return self.coordinator.data.get(self._key)

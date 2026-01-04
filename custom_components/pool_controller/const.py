@@ -3,6 +3,7 @@ from homeassistant.helpers.device_registry import DeviceInfo
 DOMAIN = "pool_controller"
 MANUFACTURER = "lweberru"
 
+# Konfigurations-Schlüssel (Keys)
 CONF_POOL_NAME = "name"
 CONF_WATER_VOLUME = "water_volume"
 CONF_MAIN_SWITCH = "main_switch"
@@ -24,5 +25,20 @@ CONF_QUIET_START_WEEKEND = "quiet_time_start_weekend"
 CONF_QUIET_END_WEEKEND = "quiet_time_end_weekend"
 CONF_DEMO_MODE = "demo_mode"
 
-DEFAULT_MAIN_POWER = 800
-DEFAULT_AUX_POWER = 2800
+# Standardwerte (Defaults)
+DEFAULT_NAME = "Whirlpool Demo"
+DEFAULT_VOL = 1000
+DEFAULT_MAIN_SW = "switch.whirlpool"
+DEFAULT_AUX_SW = "switch.whirlpool_heizung"
+DEFAULT_TEMP_WATER = "sensor.esp32_5_cd41d8_whirlpool_temperature"
+DEFAULT_TEMP_OUTDOOR = "sensor.hue_outdoor_motion_sensor_1_temperatur"
+DEFAULT_PH_SENS = "sensor.esp32_5_cd41d8_whirlpool_ph"
+DEFAULT_CHLOR_SENS = "sensor.esp32_5_cd41d8_whirlpool_chlor"
+DEFAULT_SALT_SENS = "sensor.esp32_5_cd41d8_whirlpool_salt"
+DEFAULT_TDS_SENS = "sensor.esp32_5_cd41d8_whirlpool_conductivity"
+DEFAULT_CAL_POOL = "calendar.whirlpool"
+DEFAULT_CAL_HOLIDAY = "calendar.deutschland_bw"
+DEFAULT_Q_START = "22:00"
+DEFAULT_Q_END = "08:00"
+DEFAULT_Q_START_WE = "22:00"
+DEFAULT_Q_END_WE = "10:00"
