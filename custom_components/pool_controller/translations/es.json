@@ -23,10 +23,21 @@
       "water_quality": {
         "title": "Calidad del agua (ESP32)",
         "data": {
+          "temp_water_sensor": "Temperatura del agua",
+          "temp_outdoor_sensor": "Temperatura exterior",
           "ph_sensor": "Sensor de pH",
           "chlorine_sensor": "Sensor de cloro (redox)",
           "salt_sensor": "Sensor de sal",
           "tds_sensor": "Sensor de conductividad"
+        }
+      },
+      "switches": {
+        "title": "Interruptores y potencia",
+        "data": {
+          "main_switch": "Interruptor principal",
+          "aux_heating_switch": "Interruptor calefacción auxiliar",
+          "main_power_sensor": "Sensor de potencia principal",
+          "aux_power_sensor": "Sensor de potencia calefacción auxiliar"
         }
       },
       "logic": {
@@ -39,6 +50,25 @@
           "quiet_time_end": "Fin silencio días laborables",
           "quiet_time_start_weekend": "Inicio silencio fin de semana/festivo",
           "quiet_time_end_weekend": "Fin silencio fin de semana/festivo"
+        }
+      },
+      "calendars": {
+        "title": "Calendarios y tiempos de silencio",
+        "data": {
+          "pool_calendar": "Calendario del spa",
+          "holiday_calendar": "Calendario de festivos",
+          "quiet_time_start": "Inicio silencio (día laborable)",
+          "quiet_time_end": "Fin silencio (día laborable)",
+          "quiet_time_start_weekend": "Inicio silencio (fin de semana)",
+          "quiet_time_end_weekend": "Fin silencio (fin de semana)"
+        }
+      },
+      "pv": {
+        "title": "Sensor PV y umbrales",
+        "data": {
+          "pv_surplus_sensor": "Sensor de excedente PV",
+          "pv_on_threshold": "Umbral PV ON (W)",
+          "pv_off_threshold": "Umbral PV OFF (W)"
         }
       }
     }
@@ -61,35 +91,35 @@
   },
   "entity": {
     "button": {
-      "quick_chlor_btn": {"name": "Cloración rápida"},
-      "pause_btn": {"name": "Pausar"}
+      "quick_chlor_btn": { "name": "Cloración rápida" },
+      "pause_btn": { "name": "Pausar" }
     },
     "switch": {
-      "main_switch": {"name": "Interruptor principal"},
-      "aux_heating": {"name": "Calefacción auxiliar"},
-      "bathing_mode": {"name": "Modo baño"}
+      "main_switch": { "name": "Interruptor principal" },
+      "aux_heating": { "name": "Calefacción auxiliar" },
+      "bathing_mode": { "name": "Modo baño" }
     },
     "binary_sensor": {
-      "is_we_holiday": {"name": "Fin de semana o festivo"},
-      "frost_danger": {"name": "Riesgo de heladas"},
-      "is_quick_chlor": {"name": "Cloración rápida activa"},
-      "is_paused": {"name": "Pausado"},
-      "should_main_on": {"name": "Se requiere alimentación principal"},
-      "low_chlor": {"name": "Cloro bajo"},
-      "ph_alert": {"name": "pH fuera de rango"}
+      "is_we_holiday": { "name": "Fin de semana o festivo" },
+      "frost_danger": { "name": "Riesgo de heladas" },
+      "is_quick_chlor": { "name": "Cloración rápida activa" },
+      "is_paused": { "name": "Pausado" },
+      "should_main_on": { "name": "Se requiere alimentación principal" },
+      "low_chlor": { "name": "Cloro bajo" },
+      "ph_alert": { "name": "pH fuera de rango" }
     },
     "sensor": {
-      "status": {"name": "Estado operativo", "state": {"frost_protection": "Protección contra heladas", "paused": "Pausado", "normal": "Normal"}},
-      "ph_val": {"name": "Valor pH"},
-      "chlor_val": {"name": "Nivel de cloro"},
-      "ph_minus_g": {"name": "Acción pH-"},
-      "ph_plus_g": {"name": "Acción pH+"},
-      "chlor_spoons": {"name": "Acción cloro"},
-      "next_start_mins": {"name": "Inicio siguiente en"},
-      "next_event": {"name": "Inicio del siguiente evento"}
+      "status": { "name": "Estado operativo", "state": { "frost_protection": "Protección contra heladas", "paused": "Pausado", "normal": "Normal" } },
+      "ph_val": { "name": "Valor pH" },
+      "chlor_val": { "name": "Nivel de cloro" },
+      "ph_minus_g": { "name": "Acción pH-" },
+      "ph_plus_g": { "name": "Acción pH+" },
+      "chlor_spoons": { "name": "Acción cloro" },
+      "next_start_mins": { "name": "Inicio siguiente en" },
+      "next_event": { "name": "Inicio del siguiente evento" }
     }
   },
   "climate": {
-    "pool_climate": {"name": "Calefacción del spa"}
+    "pool_climate": { "name": "Calefacción del spa" }
   }
 }

@@ -23,10 +23,21 @@
       "water_quality": {
         "title": "Water quality (ESP32)",
         "data": {
+          "temp_water_sensor": "Water temperature",
+          "temp_outdoor_sensor": "Outdoor temperature",
           "ph_sensor": "pH sensor",
           "chlorine_sensor": "Chlorine (redox) sensor",
           "salt_sensor": "Salt sensor",
           "tds_sensor": "Conductivity sensor"
+        }
+      },
+      "switches": {
+        "title": "Switches & Power",
+        "data": {
+          "main_switch": "Main switch",
+          "aux_heating_switch": "Auxiliary heater switch",
+          "main_power_sensor": "Main power sensor",
+          "aux_power_sensor": "Aux heater power sensor"
         }
       },
       "logic": {
@@ -39,6 +50,26 @@
           "quiet_time_end": "Quiet time weekday end",
           "quiet_time_start_weekend": "Quiet time weekend/holiday start",
           "quiet_time_end_weekend": "Quiet time weekend/holiday end"
+        }
+      }
+      ,
+      "calendars": {
+        "title": "Calendars & Quiet Times",
+        "data": {
+          "pool_calendar": "Pool calendar",
+          "holiday_calendar": "Holiday calendar",
+          "quiet_time_start": "Quiet time start (weekday)",
+          "quiet_time_end": "Quiet time end (weekday)",
+          "quiet_time_start_weekend": "Quiet time start (weekend)",
+          "quiet_time_end_weekend": "Quiet time end (weekend)"
+        }
+      },
+      "pv": {
+        "title": "PV Sensor & Thresholds",
+        "data": {
+          "pv_surplus_sensor": "PV surplus sensor",
+          "pv_on_threshold": "PV ON threshold (W)",
+          "pv_off_threshold": "PV OFF threshold (W)"
         }
       }
     }

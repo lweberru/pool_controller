@@ -23,10 +23,21 @@
       "water_quality": {
         "title": "Wasserqualität (ESP32)",
         "data": {
+          "temp_water_sensor": "Wassertemperatur",
+          "temp_outdoor_sensor": "Außentemperatur",
           "ph_sensor": "pH-Wert Sensor",
           "chlorine_sensor": "Chlorgehalt (Redox) Sensor",
           "salt_sensor": "Salzgehalt Sensor",
           "tds_sensor": "Leitfähigkeit Sensor"
+        }
+      },
+      "switches": {
+        "title": "Schalter & Leistung",
+        "data": {
+          "main_switch": "Hauptschalter",
+          "aux_heating_switch": "Zusatzheizung Schalter",
+          "main_power_sensor": "Haupt-Leistungssensor",
+          "aux_power_sensor": "Zusatzheizung Leistungssensor"
         }
       },
       "logic": {
@@ -39,6 +50,26 @@
           "quiet_time_end": "Ruhezeit Wochentag Ende",
           "quiet_time_start_weekend": "Ruhezeit WE/Feiertag Start",
           "quiet_time_end_weekend": "Ruhezeit WE/Feiertag Ende"
+        }
+      }
+      ,
+      "calendars": {
+        "title": "Kalender & Ruhezeiten",
+        "data": {
+          "pool_calendar": "Pool Kalender",
+          "holiday_calendar": "Feiertags Kalender",
+          "quiet_time_start": "Ruhezeit Start (Wochentag)",
+          "quiet_time_end": "Ruhezeit Ende (Wochentag)",
+          "quiet_time_start_weekend": "Ruhezeit Start (Wochenende)",
+          "quiet_time_end_weekend": "Ruhezeit Ende (Wochenende)"
+        }
+      },
+      "pv": {
+        "title": "PV Sensor & Schwellen",
+        "data": {
+          "pv_surplus_sensor": "PV-Überschuss Sensor",
+          "pv_on_threshold": "PV ON Schwelle (W)",
+          "pv_off_threshold": "PV OFF Schwelle (W)"
         }
       }
     }
