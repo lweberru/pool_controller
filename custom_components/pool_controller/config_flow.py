@@ -28,7 +28,7 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if user_input.get("back"):
                 return await self.async_step_user()
             self.data.update(user_input)
-            return await self.async_step_sensors()
+            return await self.async_step_water_quality()
 
         return self.async_show_form(step_id="switches", data_schema=vol.Schema({
             vol.Required(CONF_MAIN_SWITCH, default=DEFAULT_MAIN_SW): selector.EntitySelector(selector.EntitySelectorConfig(domain="switch")),
