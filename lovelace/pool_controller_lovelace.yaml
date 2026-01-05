@@ -11,7 +11,7 @@ sections:
     cards:
       - type: conditional
         conditions:
-          - entity: binary_sensor.whirlpool_demo_low_chlor
+          - entity: binary_sensor.whirlpool_demo_niedriger_chlorwert
             state: 'on'
         card:
           type: markdown
@@ -21,7 +21,7 @@ sections:
 
       - type: conditional
         conditions:
-          - entity: binary_sensor.whirlpool_demo_ph_alert
+          - entity: binary_sensor.whirlpool_demo_ph_ausserhalb_bereich
             state: 'on'
         card:
           type: markdown
@@ -39,16 +39,6 @@ sections:
         square: false
         cards:
           - type: gauge
-            entity: sensor.whirlpool_demo_water_temp
-            name: Wassertemperatur
-            min: 0
-            max: 40
-            severity:
-              green: 36
-              yellow: 30
-              red: 25
-
-          - type: gauge
             entity: sensor.whirlpool_demo_chlorgehalt
             name: Redox (mV)
             min: 0
@@ -57,6 +47,12 @@ sections:
               green: 700
               yellow: 600
               red: 500
+
+          - type: gauge
+            entity: sensor.whirlpool_demo_chlor_aktion
+            name: Chlor (Löffel)
+            min: 0
+            max: 20
 
           - type: gauge
             entity: sensor.whirlpool_demo_ph_wert
@@ -105,7 +101,7 @@ sections:
         hours_to_show: 24
         refresh_interval: 60
         entities:
-          - sensor.whirlpool_demo_water_temp
+          - sensor.whirlpool_demo_chlorgehalt
 
   - title: Stoßchlorung
     cards:

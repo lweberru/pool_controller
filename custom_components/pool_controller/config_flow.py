@@ -60,6 +60,7 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Optional(CONF_POOL_CALENDAR, default=DEFAULT_CAL_POOL): selector.EntitySelector(selector.EntitySelectorConfig(domain="calendar")),
             vol.Optional(CONF_HOLIDAY_CALENDAR, default=DEFAULT_CAL_HOLIDAY): selector.EntitySelector(selector.EntitySelectorConfig(domain="calendar")),
             vol.Optional(CONF_PV_SURPLUS_SENSOR, default=DEFAULT_PV_SENS): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+            
             vol.Required(CONF_QUIET_START, default=DEFAULT_Q_START): str,
             vol.Required(CONF_QUIET_END, default=DEFAULT_Q_END): str,
             vol.Required(CONF_QUIET_START_WEEKEND, default=DEFAULT_Q_START_WE): str,
@@ -71,7 +72,9 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def async_get_options_flow(config_entry): return PoolControllerOptionsFlowHandler(config_entry)
 
 class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
-    # def __init__(self, config_entry): self.config_entry = config_entry
+    def __init__(self, config_entry):
+        self.config_entry = config_entry
+
     async def async_step_init(self, user_input=None):
         errors = {}
         if user_input is not None:
@@ -84,10 +87,15 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
         curr = {**self.config_entry.data, **self.config_entry.options}
         return self.async_show_form(step_id="init", errors=errors, data_schema=vol.Schema({
             vol.Required(CONF_WATER_VOLUME, default=curr.get(CONF_WATER_VOLUME, DEFAULT_VOL)): vol.Coerce(int),
+            vol.Required(CONF_BATH_DURATION, default=curr.get(CONF_BATH_DURATION, DEFAULT_BATH_MINUTES)): vol.Coerce(int),
             vol.Required(CONF_QUIET_START, default=curr.get(CONF_QUIET_START, DEFAULT_Q_START)): str,
             vol.Required(CONF_QUIET_END, default=curr.get(CONF_QUIET_END, DEFAULT_Q_END)): str,
             vol.Required(CONF_QUIET_START_WEEKEND, default=curr.get(CONF_QUIET_START_WEEKEND, DEFAULT_Q_START_WE)): str,
             vol.Required(CONF_QUIET_END_WEEKEND, default=curr.get(CONF_QUIET_END_WEEKEND, DEFAULT_Q_END_WE)): str,
             vol.Optional(CONF_PH_SENSOR, default=curr.get(CONF_PH_SENSOR, DEFAULT_PH_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
             vol.Optional(CONF_CHLORINE_SENSOR, default=curr.get(CONF_CHLORINE_SENSOR, DEFAULT_CHLOR_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+            vol.Optional(CONF_FILTER_DURATION, default=curr.get(CONF_FILTER_DURATION, DEFAULT_FILTER_DURATION)): vol.Coerce(int),
+            vol.Optional(CONF_FILTER_INTERVAL, default=curr.get(CONF_FILTER_INTERVAL, DEFAULT_FILTER_INTERVAL)): vol.Coerce(int),
+            vol.Optional(CONF_PV_ON_THRESHOLD, default=curr.get(CONF_PV_ON_THRESHOLD, DEFAULT_PV_ON)): vol.Coerce(int),
+            vol.Optional(CONF_PV_OFF_THRESHOLD, default=curr.get(CONF_PV_OFF_THRESHOLD, DEFAULT_PV_OFF)): vol.Coerce(int),
         }))

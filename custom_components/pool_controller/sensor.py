@@ -13,6 +13,13 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolChemSensor(coordinator, "next_start_mins", "Nächster Start in", "min", "mdi:clock-start"),
         PoolTimeSensor(coordinator, "next_event", "Nächster Event Start")
     ]
+    # Timer/Status sensors
+    entities.extend([
+        PoolTimeSensor(coordinator, "pause_until", "Pause Until"),
+        PoolTimeSensor(coordinator, "is_bathing", "Bathing Until"),
+        PoolTimeSensor(coordinator, "filter_until", "Filter Until"),
+        PoolChemSensor(coordinator, "next_filter_mins", "Nächster Filter in", "min", "mdi:clock-start"),
+    ])
     async_add_entities(entities)
 
 class PoolBaseSensor(SensorEntity):

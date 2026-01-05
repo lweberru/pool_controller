@@ -5,7 +5,12 @@ from .const import DOMAIN, MANUFACTURER
 
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([QuickChlorineButton(coordinator), PauseButton(coordinator)])
+    async_add_entities([
+        QuickChlorineButton(coordinator),
+        PauseButton(coordinator),
+        BathNowButton(coordinator),
+        FilterNowButton(coordinator),
+    ])
 
 class PoolButton(ButtonEntity):
     _attr_has_entity_name = True
@@ -28,4 +33,22 @@ class PauseButton(PoolButton):
     _attr_icon = "mdi:pause-circle"
     async def async_press(self):
         await self.coordinator.activate_pause(minutes=30)
+        await self.coordinator.async_request_refresh()
+
+class BathNowButton(PoolButton):
+    _attr_translation_key = "bath_now"
+    _attr_unique_id = "bath_now"
+    _attr_icon = "mdi:pool"
+    async def async_press(self):
+        minutes = int(self.coordinator.entry.options.get("bathing_minutes", 60))
+        await self.coordinator.activate_bathing(minutes=minutes)
+        await self.coordinator.async_request_refresh()
+
+class FilterNowButton(PoolButton):
+    _attr_translation_key = "filter_now"
+    _attr_unique_id = "filter_now"
+    _attr_icon = "mdi:rotate-right"
+    async def async_press(self):
+        minutes = int(self.coordinator.entry.options.get("filter_minutes", 30))
+        await self.coordinator.activate_filter(minutes=minutes)
         await self.coordinator.async_request_refresh()

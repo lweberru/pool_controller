@@ -1,5 +1,6 @@
 from homeassistant.components.switch import SwitchEntity
 from .const import DOMAIN, MANUFACTURER, CONF_MAIN_SWITCH, CONF_AUX_HEATING_SWITCH
+from .const import CONF_DEMO_MODE
 
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
@@ -25,8 +26,17 @@ class PoolMainSwitch(PoolBaseSwitch):
     def is_on(self):
         return self.coordinator.data.get("should_main_on")
     async def async_turn_on(self, **kwargs):
+        demo = self.coordinator.entry.data.get(CONF_DEMO_MODE, False)
+        if demo:
+            return
         await self.hass.services.async_call("switch", "turn_on", {"entity_id": self.coordinator.entry.data.get(CONF_MAIN_SWITCH)})
     async def async_turn_off(self, **kwargs):
+        demo = self.coordinator.entry.data.get(CONF_DEMO_MODE, False)
+        # don't turn off main while bathing
+        if self.coordinator.data.get("is_bathing"):
+            return
+        if demo:
+            return
         await self.hass.services.async_call("switch", "turn_off", {"entity_id": self.coordinator.entry.data.get(CONF_MAIN_SWITCH)})
 
 class PoolAuxSwitch(PoolBaseSwitch):
@@ -36,9 +46,19 @@ class PoolAuxSwitch(PoolBaseSwitch):
         self._attr_unique_id = f"{coordinator.entry.entry_id}_aux"
     @property
     def is_on(self):
-        return self.coordinator.data.get("should_main_on")
+        return self.coordinator.data.get("should_aux_on")
     async def async_turn_on(self, **kwargs):
+        demo = self.coordinator.entry.data.get(CONF_DEMO_MODE, False)
+        if demo:
+            return
         await self.hass.services.async_call("switch", "turn_on", {"entity_id": self.coordinator.entry.data.get(CONF_AUX_HEATING_SWITCH)})
+    async def async_turn_off(self, **kwargs):
+        demo = self.coordinator.entry.data.get(CONF_DEMO_MODE, False)
+        if demo:
+            return
+        await self.hass.services.async_call("switch", "turn_off", {"entity_id": self.coordinator.entry.data.get(CONF_AUX_HEATING_SWITCH)})
+    async def async_turn_off(self, **kwargs):
+        await self.hass.services.async_call("switch", "turn_off", {"entity_id": self.coordinator.entry.data.get(CONF_AUX_HEATING_SWITCH)})
 
 class PoolBathingSwitch(PoolBaseSwitch):
     _attr_translation_key = "bathing"
@@ -47,10 +67,13 @@ class PoolBathingSwitch(PoolBaseSwitch):
         self._attr_unique_id = f"{coordinator.entry.entry_id}_bathing"
     @property
     def is_on(self):
-        return self.coordinator.is_bathing
+        # Show active bathing timer status
+        return self.coordinator.data.get("is_bathing")
     async def async_turn_on(self, **kwargs):
-        self.coordinator.is_bathing = True
+        # Start bathing timer using configured duration
+        minutes = int(self.coordinator.entry.options.get("bathing_minutes", 60))
+        await self.coordinator.activate_bathing(minutes=minutes)
         await self.coordinator.async_request_refresh()
     async def async_turn_off(self, **kwargs):
-        self.coordinator.is_bathing = False
+        await self.coordinator.deactivate_bathing()
         await self.coordinator.async_request_refresh()

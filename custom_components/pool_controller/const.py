@@ -25,6 +25,25 @@ CONF_QUIET_START_WEEKEND = "quiet_time_start_weekend"
 CONF_QUIET_END_WEEKEND = "quiet_time_end_weekend"
 CONF_DEMO_MODE = "demo_mode"
 
+# Bathing timer
+CONF_BATH_DURATION = "bathing_minutes"
+DEFAULT_BATH_MINUTES = 60
+# Filter cycle defaults
+CONF_FILTER_DURATION = "filter_minutes"
+CONF_FILTER_INTERVAL = "filter_interval_minutes"
+DEFAULT_FILTER_DURATION = 30
+DEFAULT_FILTER_INTERVAL = 24 * 60
+
+# PV thresholds (in Watts or sensor units)
+CONF_PV_ON_THRESHOLD = "pv_on_threshold"
+CONF_PV_OFF_THRESHOLD = "pv_off_threshold"
+DEFAULT_PV_ON = 1000
+DEFAULT_PV_OFF = 500
+
+# Persisted option keys for timers
+OPT_KEY_FILTER_UNTIL = "filter_until"
+OPT_KEY_FILTER_NEXT = "next_filter_start"
+
 # Alle Standardwerte (Defaults)
 DEFAULT_NAME = "Whirlpool Demo"
 DEFAULT_VOL = 1000

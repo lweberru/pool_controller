@@ -2,7 +2,7 @@ import logging
 from homeassistant.components.climate import ClimateEntity, ClimateEntityFeature, HVACMode, HVACAction
 from homeassistant.const import UnitOfTemperature, ATTR_TEMPERATURE
 from homeassistant.helpers.device_registry import DeviceInfo
-from .const import DOMAIN, MANUFACTURER, CONF_MAIN_SWITCH
+from .const import DOMAIN, MANUFACTURER, CONF_MAIN_SWITCH, CONF_AUX_HEATING_SWITCH, CONF_DEMO_MODE
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -56,10 +56,38 @@ class WhirlpoolClimate(ClimateEntity):
 
     async def async_set_hvac_mode(self, hvac_mode):
         main_switch_id = self.coordinator.entry.data.get(CONF_MAIN_SWITCH)
-        action = "turn_on" if hvac_mode == HVACMode.HEAT else "turn_off"
-        await self.hass.services.async_call("switch", action, {"entity_id": main_switch_id})
+        aux_switch_id = self.coordinator.entry.data.get(CONF_AUX_HEATING_SWITCH)
+        demo = self.coordinator.entry.data.get(CONF_DEMO_MODE, False)
+
+        if hvac_mode == HVACMode.HEAT:
+            if demo:
+                _LOGGER.debug("Demo mode active — skipping switch.turn_on for main")
+            else:
+                await self.hass.services.async_call("switch", "turn_on", {"entity_id": main_switch_id})
+                # if coordinator suggests aux heating, enable it
+                if self.coordinator.data.get("should_aux_on") and aux_switch_id:
+                    if demo:
+                        _LOGGER.debug("Demo mode active — skipping aux turn_on")
+                    else:
+                        await self.hass.services.async_call("switch", "turn_on", {"entity_id": aux_switch_id})
+        else:
+            # when turning off, do not disable main if bathing is active
+            if self.coordinator.data.get("is_bathing"):
+                _LOGGER.debug("Bathing active — skip turning off main switch")
+                return
+            if demo:
+                _LOGGER.debug("Demo mode active — skipping switch.turn_off for main/aux")
+                return
+            await self.hass.services.async_call("switch", "turn_off", {"entity_id": main_switch_id})
+            if aux_switch_id:
+                await self.hass.services.async_call("switch", "turn_off", {"entity_id": aux_switch_id})
 
     async def async_set_temperature(self, **kwargs):
         if (temp := kwargs.get(ATTR_TEMPERATURE)) is not None:
             self.coordinator.target_temp = temp
             await self.coordinator.async_request_refresh()
+            # After refresh, ensure switches reflect new target: if climate is in HEAT mode, ensure main/aux are on
+            if self.hvac_mode == HVACMode.HEAT:
+                await self.async_set_hvac_mode(HVACMode.HEAT)
+            else:
+                await self.async_set_hvac_mode(HVACMode.OFF)
