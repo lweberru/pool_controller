@@ -3,11 +3,18 @@ from __future__ import annotations
 from datetime import timedelta
 from typing import Optional
 
-from homeassistant.components.timer import TimerEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
+from homeassistant.helpers.entity import Entity
 
 from .const import DOMAIN, MANUFACTURER
+
+# Use the `Timer` class from the timer component (that's the exported class in core).
+# Provide a fallback to a plain Entity if the import fails for older/custom HA builds.
+try:
+    from homeassistant.components.timer import Timer  # type: ignore
+except Exception:
+    Timer = Entity
 
 
 async def async_setup_entry(hass, entry, async_add_entities):
@@ -19,7 +26,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     ])
 
 
-class PoolTimerBase(CoordinatorEntity, TimerEntity):
+class PoolTimerBase(CoordinatorEntity, Timer):
     _attr_has_entity_name = True
 
     def __init__(self, coordinator, key: str, name: str):
