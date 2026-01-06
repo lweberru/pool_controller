@@ -1,0 +1,403 @@
+substitutions:
+  name: esp32-5
+  roomname: Garten
+  staticip: 192.168.1.205
+  blueriiot1_mac: '00:A0:50:C7:46:C9'
+  blueriiot1_name_prefix: 'whirlpool'
+  blueriiot1_id_prefix: 'p2'
+  bluerioot1_write_delay: '2s'
+  blueriiot_send_service_uuid: 'F3300001-F0A2-9B06-0C59-1BC4763B5C00'
+  blueriiot_send_characteristic_uuid: 'F3300002-F0A2-9B06-0C59-1BC4763B5C00'
+  blueriiot_recieve_service_uuid: 'F3300001-F0A2-9B06-0C59-1BC4763B5C00'
+  blueriiot_recieve_characteristic_uuid: 'F3300003-F0A2-9B06-0C59-1BC4763B5C00'
+  my_led: GPIO14
+
+esphome:
+  name: ${name}
+  friendly_name: ${roomname} ${name}
+  name_add_mac_suffix: True
+  platformio_options:
+    board_build.flash_mode: dio
+    board_build.f_flash: 80000000L
+    board_build.arduino.memory_type: qio_opi
+    build_flags: 
+      - "-D FORECAST_DAYS=5"
+      - -Wno-maybe-uninitialized
+
+packages:
+  esphome.bluetooth-proxy: github://esphome/bluetooth-proxies/esp32-generic.yaml@main
+
+esp32:
+  board: esp32-s3-devkitc-1
+  framework:
+    type: esp-idf
+    version: recommended
+  flash_size: 16MB
+  variant: ESP32S3
+
+logger:
+
+api:
+  encryption:
+    key: "hNimJNWSN5J4JnRXhKUaSl7//R/Hxz0P1QvW8foFaXs="
+
+ota:
+  - platform: esphome
+    password: ""
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  manual_ip:
+    static_ip: ${staticip}
+    gateway: 192.168.1.3
+    subnet: 255.255.255.0
+  ap:
+    ssid: ${name}
+    password: "Pol8GUJw7wTe"
+
+bluetooth_proxy:
+  active: true
+
+esp32_ble_tracker:
+  scan_parameters:
+    interval: 1100ms
+    window: 1100ms
+    active: true
+  max_connections: 6
+
+globals:
+  - id: timeout
+    type: int
+    restore_value: no
+    initial_value: '30000'
+  - id: screen_index
+    type: int
+    restore_value: no
+    initial_value: '0'
+
+spi:
+  clk_pin: GPIO12
+  mosi_pin: GPIO11
+
+font:
+  - file: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+    id: font_mono
+    size: 15
+  - file: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"
+    id: font_mono_bold
+    size: 15
+
+output:
+  - platform: ledc
+    pin: GPIO7
+    id: gpio7
+    frequency: 2000
+
+light:
+  - platform: monochromatic
+    output: gpio7
+    name: "Backlight"
+    id: displaybacklight
+    icon: mdi:brightness-7
+    restore_mode: RESTORE_AND_ON
+
+display:
+  - platform: ili9xxx
+    model: 'TFT 2.4'
+    dimensions:
+      height: 240
+      width: 135
+      offset_height: 40
+      offset_width: 53
+    transform:
+      swap_xy: true
+    color_order: rgb
+    data_rate: 80MHz
+    cs_pin: GPIO10
+    dc_pin: GPIO8
+    reset_pin: GPIO9
+    invert_colors: true
+    pages:
+      - id: water
+        lambda: |-
+          it.clear();
+
+          // Temperatur
+          it.printf(8, 20, id(font_mono), id(color_white), "%-6s %.1f °C", "Temp:", id(sensor_${blueriiot1_id_prefix}_temperature).state);
+
+          // === pH Wert ===
+          float ph = id(sensor_${blueriiot1_id_prefix}_ph).state;
+          if (ph < 6.6 || ph > 8.4) {
+            it.filled_rectangle(0, 42, 135, 28, id(color_orange_alert_bg));
+            it.printf(8, 50, id(font_mono_bold), id(color_almost_black), "%-6s %.1f", "pH:", ph);
+          } else if (ph >= 7.2 && ph <= 7.6) {
+            it.printf(8, 50, id(font_mono), id(color_green), "%-6s %.1f", "pH:", ph);
+          } else {
+            it.printf(8, 50, id(font_mono), id(color_yellow), "%-6s %.1f", "pH:", ph);
+          }
+
+          // === Chlor Wert (als Prozent) ===
+          float chlor_percent = id(sensor_${blueriiot1_id_prefix}_chlor_percent).state;
+          float orp_raw = id(sensor_${blueriiot1_id_prefix}_orp).state; // Rohwert für die Farb-Logik
+          if (orp_raw < 400 || orp_raw > 900) {
+            it.filled_rectangle(0, 72, 135, 28, id(color_orange_alert_bg));
+            it.printf(8, 80, id(font_mono_bold), id(color_almost_black), "%-6s %.0f %%", "Chlor:", chlor_percent);
+          } else if (orp_raw >= 650 && orp_raw <= 750) {
+            it.printf(8, 80, id(font_mono), id(color_green), "%-6s %.0f %%", "Chlor:", chlor_percent);
+          } else {
+            it.printf(8, 80, id(font_mono), id(color_yellow), "%-6s %.0f %%", "Chlor:", chlor_percent);
+          }
+
+          // === Link Status ===
+          bool is_present = id(binary_sensor_${blueriiot1_id_prefix}_presence).state;
+          if (!is_present) {
+            it.filled_rectangle(0, 102, 135, 28, id(color_red_alert_bg));
+            it.printf(8, 110, id(font_mono_bold), id(color_white), "%-6s %s", "Link:", "OFF");
+          } else {
+            it.printf(8, 110, id(font_mono), id(color_white), "%-6s %s", "Link:", "OK");
+          }
+
+          // === Scan Status ===
+          bool scan_active = id(switch_${blueriiot1_id_prefix}_enable).state;
+          Color scan_color = scan_active ? id(color_green) : id(color_white);
+          it.printf(8, 140, id(font_mono), scan_color, "%-6s %s", "Scan:", scan_active ? "YES" : "NO");
+
+          // === Power ===
+          float power_val = id(power).state;
+          Color power_color = power_val > 0.0f ? id(color_green) : id(color_white);
+          it.printf(8, 170, id(font_mono), power_color, "%-6s %.1f W", "Power:", power_val);
+
+          // === WiFi Signal ===
+          float wifi = id(wifi_signal_percent).state;
+          if (wifi < 30.0f) {
+            it.filled_rectangle(0, 192, 135, 28, id(color_red_alert_bg));
+            it.printf(8, 200, id(font_mono_bold), id(color_white), "%-6s %.0f %%", "WiFi:", wifi);
+          } else {
+            it.printf(8, 200, id(font_mono), id(color_white), "%-6s %.0f %%", "WiFi:", wifi);
+          }
+
+color:
+  - id: color_almost_black
+    hex: '111111'
+  - id: color_light_grey
+    hex: BBBBBB
+  - id: color_white
+    hex: FFFFFF
+  - id: color_red_alert_bg
+    hex: D10000
+  - id: color_orange_alert_bg
+    hex: FF8C00
+  - id: color_green
+    hex: 14FF00
+  - id: color_yellow
+    hex: FFFF00
+
+ble_client:
+  - mac_address: ${blueriiot1_mac}
+    id: ble_client_${blueriiot1_id_prefix}
+    on_connect: 
+      then:
+        - logger.log: 
+            format: "Connected to Blueriiot sensor"
+            level: "INFO"
+        - lambda: |-
+            id(binary_sensor_${blueriiot1_id_prefix}_connected).publish_state(true);
+        - delay: ${bluerioot1_write_delay}
+        - button.press: button_${blueriiot1_id_prefix}_doreading
+    on_disconnect:
+      then:
+        - lambda: |-
+            id(binary_sensor_${blueriiot1_id_prefix}_connected).publish_state(false);
+
+switch:
+  - platform: ble_client
+    ble_client_id: ble_client_${blueriiot1_id_prefix}
+    name: "${blueriiot1_name_prefix} Enable"
+    id: switch_${blueriiot1_id_prefix}_enable
+    restore_mode: ALWAYS_OFF
+    
+sensor:
+  - platform: homeassistant
+    name: "Power"
+    id: power
+    entity_id: sensor.whirlpool_leistung_gesamt
+
+  - platform: wifi_signal
+    name: "WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 60s
+    entity_category: "diagnostic"
+
+  - platform: copy
+    source_id: wifi_signal_db
+    name: "WiFi Signal Percent"
+    id: wifi_signal_percent
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "Signal %"
+    entity_category: "diagnostic"
+    device_class: ""
+
+  - platform: template 
+    id: sensor_${blueriiot1_id_prefix}_temperature
+    name: ${blueriiot1_name_prefix} Temperature
+    unit_of_measurement: "°C"
+    icon: "mdi:thermometer"
+    device_class: "temperature"
+    state_class: "measurement"
+    accuracy_decimals: 1
+
+  - platform: template 
+    id: sensor_${blueriiot1_id_prefix}_ph
+    name: ${blueriiot1_name_prefix} PH
+    unit_of_measurement: "pH"
+    icon: "mdi:ph"
+    device_class: "ph"
+    state_class: "measurement"
+    accuracy_decimals: 1
+
+  - platform: template 
+    id: sensor_${blueriiot1_id_prefix}_orp
+    name: ${blueriiot1_name_prefix} Chlor
+    unit_of_measurement: "mV"
+    icon: "mdi:water-percent"
+    device_class: "voltage"
+    state_class: "measurement"
+    accuracy_decimals: 1
+  
+  - platform: copy
+    source_id: sensor_${blueriiot1_id_prefix}_orp
+    name: ${blueriiot1_name_prefix} Chlor Prozent
+    id: sensor_${blueriiot1_id_prefix}_chlor_percent
+    unit_of_measurement: "%"
+    icon: "mdi:water-percent"
+    accuracy_decimals: 0
+    state_class: "measurement"
+    filters:
+      - lambda: |-
+          #include <algorithm>
+          float mapped_value = (100.0f / 350.0f) * (x - 400.0f);
+          return std::max(0.0f, std::min(mapped_value, 150.0f));
+
+  - platform: template 
+    id: sensor_${blueriiot1_id_prefix}_bat
+    name: ${blueriiot1_name_prefix} Battery
+    unit_of_measurement: "%"
+    device_class: "battery"
+    state_class: "measurement"
+    accuracy_decimals: 1
+
+  - platform: template 
+    id: sensor_${blueriiot1_id_prefix}_salt
+    name: ${blueriiot1_name_prefix} Salt
+    unit_of_measurement: "g/L"
+    icon: "mdi:shaker-outline"
+    state_class: "measurement"
+    accuracy_decimals: 1
+
+  - platform: template 
+    id: sensor_${blueriiot1_id_prefix}_cond
+    name: ${blueriiot1_name_prefix} Conductivity
+    unit_of_measurement: "µS/cm"
+    state_class: "measurement"
+    accuracy_decimals: 1
+
+binary_sensor:
+  - platform: template
+    id: binary_sensor_${blueriiot1_id_prefix}_connected
+    name: ${blueriiot1_name_prefix} Connected
+    device_class: connectivity
+    entity_category: diagnostic
+
+  - platform: ble_presence
+    id: binary_sensor_${blueriiot1_id_prefix}_presence
+    mac_address: ${blueriiot1_mac}
+    name: ${blueriiot1_name_prefix} Presence
+
+  - platform: gpio
+    pin: 
+      number: GPIO0
+      inverted: true
+    name: "Baden Button"
+    id: baden_button
+    icon: mdi:swim
+    on_press:
+      then:
+        - logger.log: 
+            format: "Button pressed"
+
+button:
+  - platform: template
+    id: button_${blueriiot1_id_prefix}_doreading
+    name: ${blueriiot1_name_prefix} do reading
+    internal: true
+    on_press:
+      then:
+        - ble_client.ble_write:
+            id: ble_client_${blueriiot1_id_prefix}
+            service_uuid: ${blueriiot_send_service_uuid}
+            characteristic_uuid: ${blueriiot_send_characteristic_uuid}
+            value: !lambda |-
+              return {0x01};
+
+  - platform: template
+    id: button_start_scan
+    name: Start BLE Scan
+    on_press:
+      then:
+        - esp32_ble_tracker.start_scan:
+            continuous: false
+
+  - platform: template
+    id: button_stop_scan
+    name: Stop BLE Scan
+    on_press:
+      then:
+        - esp32_ble_tracker.stop_scan:
+
+  - platform: restart
+    name: "Restart"
+    
+text_sensor:
+  - platform: ble_client
+    id: ${blueriiot1_id_prefix}_reading_data
+    name: ${blueriiot1_name_prefix} reading data
+    internal: true
+    ble_client_id: ble_client_${blueriiot1_id_prefix}
+    service_uuid: ${blueriiot_recieve_service_uuid}
+    characteristic_uuid: ${blueriiot_recieve_characteristic_uuid}
+    notify: true
+    update_interval: never
+    on_notify:
+      then:
+        lambda: |-
+          std::string rawhex = format_hex_pretty((uint8_t *) x.c_str(), x.size()).c_str();
+          ESP_LOGD("raw_hex", "%s", rawhex.c_str());
+
+          float temperature = (float)((int16_t)(x[2] << 8) + x[1]) / 100;
+          ESP_LOGD("temp", "%f", temperature);
+          id(sensor_${blueriiot1_id_prefix}_temperature).publish_state(temperature);
+
+          float raw_ph = (float)((int16_t)(x[4] << 8) + x[3]);
+          float ph = (2048 - raw_ph) / 232.0 + 7.0;
+          ESP_LOGD("ph", "%f", ph);
+          id(sensor_${blueriiot1_id_prefix}_ph).publish_state(ph);
+
+          float orp = ((int16_t)(x[6] << 8) + x[5]) / 3.86 - 21.57826;
+          ESP_LOGD("orp", "%f", orp);
+          id(sensor_${blueriiot1_id_prefix}_orp).publish_state(orp);
+
+          float salt = ((int16_t)(x[8] << 8) + x[7]) / 25.0;
+          ESP_LOGD("salt", "%f", salt);
+          id(sensor_${blueriiot1_id_prefix}_salt).publish_state(salt);
+
+          float cond = ((int16_t)(x[10] << 8) + x[9]) / 0.4134;
+          ESP_LOGD("cond", "%f", cond);
+          id(sensor_${blueriiot1_id_prefix}_cond).publish_state(cond);
+
+          float bat = (float)((int16_t)x[11]);
+          ESP_LOGD("bat", "%f", bat);
+          id(sensor_${blueriiot1_id_prefix}_bat).publish_state(bat);
+
+          id(switch_${blueriiot1_id_prefix}_enable).turn_off();

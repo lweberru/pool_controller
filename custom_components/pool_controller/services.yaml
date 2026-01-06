@@ -1,0 +1,50 @@
+start_pause:
+  name: Start Pause
+  description: Pause the pool for a specified duration
+  fields:
+    duration_minutes:
+      name: Duration (minutes)
+      description: How long to pause (default 30)
+      example: 60
+      selector:
+        number:
+          min: 1
+          max: 1440
+
+stop_pause:
+  name: Stop Pause
+  description: Cancel the active pause
+
+start_bathing:
+  name: Start Bathing Session
+  description: Start a bathing session for a specified duration
+  fields:
+    duration_minutes:
+      name: Duration (minutes)
+      description: How long the bathing session should last (default 60)
+      example: 60
+      selector:
+        number:
+          min: 1
+          max: 1440
+
+stop_bathing:
+  name: Stop Bathing Session
+  description: End the active bathing session
+
+start_filter:
+  name: Start Filter Cycle
+  description: Start a filter cycle for a specified duration
+  fields:
+    duration_minutes:
+      name: Duration (minutes)
+      description: How long to run the filter cycle (default 30)
+      example: 30
+      selector:
+        number:
+          min: 1
+          max: 1440
+
+stop_filter:
+  name: Stop Filter Cycle
+  description: End the active filter cycle

@@ -92,17 +92,14 @@
   "entity": {
     "button": {
       "quick_chlor_btn": { "name": "Cloración rápida" },
-      "pause_btn": { "name": "Pausar (Predeterminado)" },
       "pause_30": { "name": "Pausar (30 min)" },
       "pause_60": { "name": "Pausar (60 min)" },
       "pause_120": { "name": "Pausar (120 min)" },
       "pause_stop": { "name": "Detener pausa" },
-      "bath_now": { "name": "Sesión de baño (Predeterminado)" },
       "bath_30": { "name": "Sesión de baño (30 min)" },
       "bath_60": { "name": "Sesión de baño (60 min)" },
       "bath_120": { "name": "Sesión de baño (120 min)" },
       "bath_stop": { "name": "Detener sesión de baño" },
-      "filter_now": { "name": "Ciclo de filtración (Predeterminado)" },
       "filter_30": { "name": "Ciclo de filtración (30 min)" },
       "filter_60": { "name": "Ciclo de filtración (60 min)" },
       "filter_120": { "name": "Ciclo de filtración (120 min)" },
