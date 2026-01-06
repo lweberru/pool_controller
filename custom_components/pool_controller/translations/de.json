@@ -3,6 +3,8 @@
     "step": {
       "user": {
         "title": "Basis-Setup",
+        "description": "Grundeinstellungen für Ihren Pool. Klicken Sie auf 'Abbrechen' um jederzeit abzubrechen.",
+        "submit": "Weiter",
         "data": {
           "name": "Name des Whirlpools",
           "main_switch": "Hauptschalter (Steckdose)",
@@ -22,6 +24,7 @@
       },
       "water_quality": {
         "title": "Wasserqualität (ESP32)",
+        "submit": "Weiter",
         "data": {
           "temp_water_sensor": "Wassertemperatur",
           "temp_outdoor_sensor": "Außentemperatur",
@@ -33,6 +36,7 @@
       },
       "switches": {
         "title": "Schalter & Leistung",
+        "submit": "Weiter",
         "data": {
           "main_switch": "Hauptschalter",
           "aux_heating_switch": "Zusatzheizung Schalter",
@@ -55,6 +59,7 @@
       ,
       "calendars": {
         "title": "Kalender & Ruhezeiten",
+        "submit": "Weiter",
         "data": {
           "pool_calendar": "Pool Kalender",
           "holiday_calendar": "Feiertags Kalender",
@@ -66,6 +71,7 @@
       },
       "pv": {
         "title": "PV Sensor & Schwellen",
+        "submit": "Abschließen",
         "data": {
           "pv_surplus_sensor": "PV-Überschuss Sensor",
           "pv_on_threshold": "PV ON Schwelle (W)",
@@ -77,15 +83,60 @@
   "options": {
     "step": {
       "init": {
-        "title": "Whirlpool Einstellungen ändern",
+        "title": "Pool Einstellungen",
+        "description": "Schritt 1 von 5 - Grundeinstellungen",
+        "submit": "Weiter",
         "data": {
-          "water_volume": "Wassermenge (Liter)",
-          "quiet_time_start": "Ruhezeit Start (Mo-Fr)",
-          "quiet_time_end": "Ruhezeit Ende (Mo-Fr)",
-          "quiet_time_start_weekend": "Ruhezeit Start (WE/FT)",
-          "quiet_time_end_weekend": "Ruhezeit Ende (WE/FT)",
-          "ph_sensor": "pH Sensor",
-          "chlorine_sensor": "Chlor Sensor"
+          "name": "Name des Whirlpools",
+          "water_volume": "Wassermenge in Litern",
+          "demo_mode": "Demo-Modus aktiv"
+        }
+      },
+      "switches": {
+        "title": "Schalter & Leistung",
+        "description": "Schritt 2 von 5",
+        "submit": "Weiter",
+        "data": {
+          "main_switch": "Hauptschalter",
+          "aux_heating_switch": "Zusatzheizung Schalter",
+          "main_power_sensor": "Haupt-Leistungssensor",
+          "aux_power_sensor": "Zusatzheizung Leistungssensor"
+        }
+      },
+      "water_quality": {
+        "title": "Wasserqualität",
+        "description": "Schritt 3 von 5",
+        "submit": "Weiter",
+        "data": {
+          "temp_water_sensor": "Wassertemperatur",
+          "temp_outdoor_sensor": "Außentemperatur",
+          "ph_sensor": "pH-Wert Sensor",
+          "chlorine_sensor": "Chlorgehalt (Redox) Sensor",
+          "salt_sensor": "Salzgehalt Sensor",
+          "tds_sensor": "Leitfähigkeit Sensor"
+        }
+      },
+      "calendars": {
+        "title": "Kalender & Ruhezeiten",
+        "description": "Schritt 4 von 5",
+        "submit": "Weiter",
+        "data": {
+          "pool_calendar": "Pool Kalender",
+          "holiday_calendar": "Feiertags Kalender",
+          "quiet_time_start": "Ruhezeit Start (Wochentag)",
+          "quiet_time_end": "Ruhezeit Ende (Wochentag)",
+          "quiet_time_start_weekend": "Ruhezeit Start (Wochenende)",
+          "quiet_time_end_weekend": "Ruhezeit Ende (Wochenende)"
+        }
+      },
+      "pv": {
+        "title": "PV Sensor & Schwellen",
+        "description": "Schritt 5 von 5",
+        "submit": "Abschließen",
+        "data": {
+          "pv_surplus_sensor": "PV-Überschuss Sensor",
+          "pv_on_threshold": "PV ON Schwelle (W)",
+          "pv_off_threshold": "PV OFF Schwelle (W)"
         }
       }
     }

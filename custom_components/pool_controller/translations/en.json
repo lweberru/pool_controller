@@ -3,6 +3,8 @@
     "step": {
       "user": {
         "title": "Basic setup",
+        "description": "Basic settings for your pool. Click 'Cancel' to abort at any time.",
+        "submit": "Continue",
         "data": {
           "name": "Pool name",
           "main_switch": "Main switch (outlet)",
@@ -12,6 +14,7 @@
       },
       "heating": {
         "title": "Heating & Power",
+        "submit": "Continue",
         "data": {
           "temp_water_sensor": "Water temperature",
           "temp_outdoor_sensor": "Outdoor temperature",
@@ -22,6 +25,7 @@
       },
       "water_quality": {
         "title": "Water quality (ESP32)",
+        "submit": "Continue",
         "data": {
           "temp_water_sensor": "Water temperature",
           "temp_outdoor_sensor": "Outdoor temperature",
@@ -33,6 +37,7 @@
       },
       "switches": {
         "title": "Switches & Power",
+        "submit": "Continue",
         "data": {
           "main_switch": "Main switch",
           "aux_heating_switch": "Auxiliary heater switch",
@@ -42,6 +47,7 @@
       },
       "logic": {
         "title": "Logic & times",
+        "submit": "Continue",
         "data": {
           "pool_calendar": "Pool calendar",
           "holiday_calendar": "Holiday calendar",
@@ -55,6 +61,7 @@
       ,
       "calendars": {
         "title": "Calendars & Quiet Times",
+        "submit": "Continue",
         "data": {
           "pool_calendar": "Pool calendar",
           "holiday_calendar": "Holiday calendar",
@@ -66,6 +73,7 @@
       },
       "pv": {
         "title": "PV Sensor & Thresholds",
+        "submit": "Finish",
         "data": {
           "pv_surplus_sensor": "PV surplus sensor",
           "pv_on_threshold": "PV ON threshold (W)",
@@ -77,7 +85,64 @@
   "options": {
     "step": {
       "init": {
-        "title": "Change pool settings",
+        "title": "Pool Settings",
+        "description": "Step 1 of 5 - Basic settings",
+        "submit": "Continue",
+        "data": {
+          "name": "Pool name",
+          "water_volume": "Water volume in liters",
+          "demo_mode": "Demo mode active"
+        }
+      },
+      "switches": {
+        "title": "Switches & Power",
+        "description": "Step 2 of 5",
+        "submit": "Continue",
+        "data": {
+          "main_switch": "Main switch",
+          "aux_heating_switch": "Auxiliary heater switch",
+          "main_power_sensor": "Main power sensor",
+          "aux_power_sensor": "Aux heater power sensor"
+        }
+      },
+      "water_quality": {
+        "title": "Water Quality",
+        "description": "Step 3 of 5",
+        "submit": "Continue",
+        "data": {
+          "temp_water_sensor": "Water temperature",
+          "temp_outdoor_sensor": "Outdoor temperature",
+          "ph_sensor": "pH sensor",
+          "chlorine_sensor": "Chlorine (redox) sensor",
+          "salt_sensor": "Salt sensor",
+          "tds_sensor": "Conductivity sensor"
+        }
+      },
+      "calendars": {
+        "title": "Calendars & Quiet Times",
+        "description": "Step 4 of 5",
+        "submit": "Continue",
+        "data": {
+          "pool_calendar": "Pool calendar",
+          "holiday_calendar": "Holiday calendar",
+          "quiet_time_start": "Quiet time start (weekday)",
+          "quiet_time_end": "Quiet time end (weekday)",
+          "quiet_time_start_weekend": "Quiet time start (weekend)",
+          "quiet_time_end_weekend": "Quiet time end (weekend)"
+        }
+      },
+      "pv": {
+        "title": "PV Sensor & Thresholds",
+        "description": "Step 5 of 5",
+        "submit": "Finish",
+        "data": {
+          "pv_surplus_sensor": "PV surplus sensor",
+          "pv_on_threshold": "PV ON threshold (W)",
+          "pv_off_threshold": "PV OFF threshold (W)"
+        }
+      }
+    }
+  },
         "data": {
           "water_volume": "Water volume (liters)",
           "quiet_time_start": "Quiet time start (Mon-Fri)",
