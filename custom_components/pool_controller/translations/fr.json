@@ -118,6 +118,10 @@
       "frost_danger": { "name": "Risque de gel" },
       "is_quick_chlor": { "name": "Chloration rapide active" },
       "is_paused": { "name": "En pause" },
+      "is_bathing": { "name": "Baignade active" },
+      "filter_active": { "name": "Filtre actif" },
+      "in_quiet": { "name": "Mode silencieux actif" },
+      "pv_allows": { "name": "Surplus PV disponible" },
       "should_main_on": { "name": "Alimentation principale requise" },
       "low_chlor": { "name": "Chlore bas" },
       "ph_alert": { "name": "pH hors plage" }
@@ -141,6 +145,8 @@
       "bathing_until": { "name": "Baignade jusqu'à" },
       "filter_until": { "name": "Filtration jusqu'à" },
       "next_filter_mins": { "name": "Prochaine filtration dans (min)" },
+      "main_power": { "name": "Puissance pompe principale" },
+      "aux_power": { "name": "Puissance chauffage" },
       "pool_status": { "name": "État du spa" },
       "pool_state": { "name": "État" }
     }

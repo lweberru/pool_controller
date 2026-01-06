@@ -1,4 +1,4 @@
-from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
+from homeassistant.components.sensor import SensorEntity, SensorDeviceClass, SensorStateClass
 from .const import DOMAIN, MANUFACTURER
 
 async def async_setup_entry(hass, entry, async_add_entities):
@@ -19,6 +19,11 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolTimeSensor(coordinator, "bathing_until", "Bathing Until"),
         PoolTimeSensor(coordinator, "filter_until", "Filter Until"),
         PoolChemSensor(coordinator, "next_filter_mins", "Nächster Filter in", "min", "mdi:clock-start"),
+    ])
+    # Power sensors
+    entities.extend([
+        PoolPowerSensor(coordinator, "main_power", "Hauptpumpe Leistung"),
+        PoolPowerSensor(coordinator, "aux_power", "Heizung Leistung"),
     ])
     async_add_entities(entities)
 
@@ -53,6 +58,19 @@ class PoolTimeSensor(PoolBaseSensor):
         super().__init__(coordinator)
         self._key = key
         self._attr_translation_key = key
+        self._attr_unique_id = f"{coordinator.entry.entry_id}_{key}"
+    @property
+    def native_value(self): return self.coordinator.data.get(self._key)
+
+class PoolPowerSensor(PoolBaseSensor):
+    _attr_device_class = SensorDeviceClass.POWER
+    _attr_native_unit_of_measurement = "W"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    def __init__(self, coordinator, key, name):
+        super().__init__(coordinator)
+        self._key = key
+        self._attr_translation_key = key
+        self._attr_icon = "mdi:lightning-bolt"
         self._attr_unique_id = f"{coordinator.entry.entry_id}_{key}"
     @property
     def native_value(self): return self.coordinator.data.get(self._key)

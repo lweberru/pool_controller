@@ -118,6 +118,10 @@
       "frost_danger": { "name": "Riesgo de heladas" },
       "is_quick_chlor": { "name": "Cloración rápida activa" },
       "is_paused": { "name": "Pausado" },
+      "is_bathing": { "name": "Sesión de baño activa" },
+      "filter_active": { "name": "Filtro activo" },
+      "in_quiet": { "name": "Modo silencioso activo" },
+      "pv_allows": { "name": "Excedente PV disponible" },
       "should_main_on": { "name": "Se requiere alimentación principal" },
       "low_chlor": { "name": "Cloro bajo" },
       "ph_alert": { "name": "pH fuera de rango" }
@@ -141,6 +145,8 @@
       "bathing_until": { "name": "Sesión de baño hasta" },
       "filter_until": { "name": "Filtración hasta" },
       "next_filter_mins": { "name": "Próxima filtración en (min)" },
+      "main_power": { "name": "Potencia bomba principal" },
+      "aux_power": { "name": "Potencia calefacción" },
       "pool_status": { "name": "Estado de la piscina" },
       "pool_state": { "name": "Estado" }
     }

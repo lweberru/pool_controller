@@ -139,6 +139,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             ph_val = self._get_float(conf.get(CONF_PH_SENSOR))
             chlor_val = self._get_float(conf.get(CONF_CHLORINE_SENSOR))
             main_power = self._get_float(conf.get(CONF_MAIN_POWER_SENSOR))
+            aux_power = self._get_float(conf.get(CONF_AUX_POWER_SENSOR))
             
             # 1. Frost & Wochenende
             frost_danger = outdoor_temp is not None and outdoor_temp < 3.0
@@ -237,6 +238,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "should_aux_on": (delta_t > 1.0),
                 "pv_allows": pv_allows,
                 "in_quiet": in_quiet,
+                "main_power": round(main_power, 1) if main_power else None,
+                "aux_power": round(aux_power, 1) if aux_power else None,
                 "should_main_on": (
                     (self.quick_chlorine_until is not None and now < self.quick_chlorine_until)
                     or frost_danger

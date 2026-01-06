@@ -119,6 +119,10 @@
       "frost_danger": {"name": "Frost danger"},
       "is_quick_chlor": {"name": "Quick chlorination active"},
       "is_paused": {"name": "Paused"},
+      "is_bathing": {"name": "Bathing active"},
+      "filter_active": {"name": "Filter active"},
+      "in_quiet": {"name": "Quiet mode active"},
+      "pv_allows": {"name": "PV surplus available"},
       "should_main_on": {"name": "Main power required"},
       "low_chlor": {"name": "Low chlorine"},
       "ph_alert": {"name": "pH out of range"}
@@ -135,7 +139,9 @@
       "next_filter_mins": {"name": "Next filter cycle in"},
       "pause_until": {"name": "Paused until"},
       "bathing_until": {"name": "Bathing until"},
-      "filter_until": {"name": "Filter cycle until"}
+      "filter_until": {"name": "Filter cycle until"},
+      "main_power": {"name": "Main pump power"},
+      "aux_power": {"name": "Heater power"}
     }
   },
   "climate": {

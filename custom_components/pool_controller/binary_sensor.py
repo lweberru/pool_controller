@@ -9,6 +9,10 @@ async def async_setup_entry(hass, entry, async_add_entities):
         # Derived / template-like binary sensors provided by the integration
         PoolBinary(coordinator, "is_quick_chlor", "Stoßchlorung aktiv", None),
         PoolBinary(coordinator, "is_paused", "Pausiert", None),
+        PoolBinary(coordinator, "is_bathing", "Baden aktiv", None),
+        PoolBinary(coordinator, "filter_active", "Filter aktiv", None),
+        PoolBinary(coordinator, "in_quiet", "Ruhemodus aktiv", None),
+        PoolBinary(coordinator, "pv_allows", "PV Überschuss verfügbar", None),
         PoolBinary(coordinator, "should_main_on", "Hauptstrom erforderlich", None),
         PoolBinary(coordinator, "low_chlor", "Niedriger Chlorwert", None),
         PoolBinary(coordinator, "ph_alert", "pH außerhalb Bereich", None),

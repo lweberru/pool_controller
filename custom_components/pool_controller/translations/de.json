@@ -120,6 +120,10 @@
       "frost_danger": {"name": "Frostgefahr"},
       "is_quick_chlor": {"name": "Stoßchlorung aktiv"},
       "is_paused": {"name": "Pausiert"},
+      "is_bathing": {"name": "Baden aktiv"},
+      "filter_active": {"name": "Filter aktiv"},
+      "in_quiet": {"name": "Ruhemodus aktiv"},
+      "pv_allows": {"name": "PV Überschuss verfügbar"},
       "should_main_on": {"name": "Hauptstrom erforderlich"},
       "low_chlor": {"name": "Niedriger Chlorwert"},
       "ph_alert": {"name": "pH außerhalb Bereich"}
@@ -136,9 +140,9 @@
       "next_filter_mins": {"name": "Nächster Filter-Zyklus in"},
       "pause_until": {"name": "Pause bis"},
       "bathing_until": {"name": "Badesession bis"},
-      "is_bathing": {"name": "Badesession bis"},
-      "filter_until": {"name": "Filter-Zyklus bis"}
-
+      "filter_until": {"name": "Filter-Zyklus bis"},
+      "main_power": {"name": "Hauptpumpe Leistung"},
+      "aux_power": {"name": "Heizung Leistung"}
     }
   }
   ,
