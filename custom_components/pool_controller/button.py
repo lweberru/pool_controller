@@ -21,24 +21,30 @@ class PoolButton(ButtonEntity):
 
 class QuickChlorineButton(PoolButton):
     _attr_translation_key = "quick_chlor_btn"
-    _attr_unique_id = "quick_chlor_btn"
     _attr_icon = "mdi:fan"
+    def __init__(self, coordinator):
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.entry.entry_id}_quick_chlor"
     async def async_press(self):
         await self.coordinator.activate_quick_chlorine(minutes=5)
         await self.coordinator.async_request_refresh()
 
 class PauseButton(PoolButton):
     _attr_translation_key = "pause_btn"
-    _attr_unique_id = "pause_btn"
     _attr_icon = "mdi:pause-circle"
+    def __init__(self, coordinator):
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.entry.entry_id}_pause"
     async def async_press(self):
         await self.coordinator.activate_pause(minutes=30)
         await self.coordinator.async_request_refresh()
 
 class BathNowButton(PoolButton):
     _attr_translation_key = "bath_now"
-    _attr_unique_id = "bath_now"
     _attr_icon = "mdi:pool"
+    def __init__(self, coordinator):
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.entry.entry_id}_bath_now"
     async def async_press(self):
         minutes = int(self.coordinator.entry.options.get("bathing_minutes", 60))
         await self.coordinator.activate_bathing(minutes=minutes)
@@ -46,8 +52,10 @@ class BathNowButton(PoolButton):
 
 class FilterNowButton(PoolButton):
     _attr_translation_key = "filter_now"
-    _attr_unique_id = "filter_now"
     _attr_icon = "mdi:rotate-right"
+    def __init__(self, coordinator):
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.entry.entry_id}_filter_now"
     async def async_press(self):
         minutes = int(self.coordinator.entry.options.get("filter_minutes", 30))
         await self.coordinator.activate_filter(minutes=minutes)

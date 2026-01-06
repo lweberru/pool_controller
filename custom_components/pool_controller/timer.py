@@ -29,11 +29,11 @@ async def async_setup_entry(hass, entry, async_add_entities):
 class PoolTimerBase(CoordinatorEntity, Timer):
     _attr_has_entity_name = True
 
-    def __init__(self, coordinator, key: str, name: str):
+    def __init__(self, coordinator, key: str, translation_key: str):
         super().__init__(coordinator)
         self.coordinator = coordinator
         self._key = key
-        self._attr_name = name
+        self._attr_translation_key = translation_key
         self._attr_unique_id = f"{coordinator.entry.entry_id}_{key}_timer"
 
     @property
@@ -75,7 +75,7 @@ class PoolTimerBase(CoordinatorEntity, Timer):
 
 class PoolPauseTimer(PoolTimerBase):
     def __init__(self, coordinator):
-        super().__init__(coordinator, "pause", "Pause Timer")
+        super().__init__(coordinator, "pause", "pause")
 
     def _get_timestamp(self):
         return self.coordinator.pause_until
@@ -97,7 +97,7 @@ class PoolPauseTimer(PoolTimerBase):
 
 class PoolFilterTimer(PoolTimerBase):
     def __init__(self, coordinator):
-        super().__init__(coordinator, "filter", "Filter Timer")
+        super().__init__(coordinator, "filter", "filter")
 
     def _get_timestamp(self):
         return getattr(self.coordinator, "filter_until", None)
@@ -118,7 +118,7 @@ class PoolFilterTimer(PoolTimerBase):
 
 class PoolBathingTimer(PoolTimerBase):
     def __init__(self, coordinator):
-        super().__init__(coordinator, "bathing", "Bathing Timer")
+        super().__init__(coordinator, "bathing", "bathing")
 
     def _get_timestamp(self):
         return self.coordinator.bathing_until

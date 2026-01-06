@@ -89,9 +89,14 @@
   "entity": {
     "button": {
       "quick_chlor_btn": {"name": "Kurz Chloren"},
-      "pause_btn": {"name": "Pausieren"}
+      "pause_btn": {"name": "Pausieren"},
+      "bath_now": {"name": "Badesession starten"},
+      "filter_now": {"name": "Filter-Zyklus starten"}
     },
     "switch": {
+      "main": {"name": "Hauptschalter"},
+      "aux": {"name": "Zusatzheizung"},
+      "bathing": {"name": "Badesession"},
       "main_switch": {"name": "Hauptschalter"},
       "aux_heating": {"name": "Zusatzheizung"},
       "bathing_mode": {"name": "Bade-Modus"}
@@ -109,14 +114,23 @@
       "status": {"name": "Betriebsstatus", "state": {"frost_protection": "Frostschutz", "paused": "Pausiert", "normal": "Normal"}},
       "ph_val": {"name": "pH-Wert"},
       "chlor_val": {"name": "Chlorgehalt"},
-      "ph_minus_g": {"name": "Ph- Aktion"},
-      "ph_plus_g": {"name": "Ph+ Aktion"},
+      "ph_minus_g": {"name": "pH- Aktion"},
+      "ph_plus_g": {"name": "pH+ Aktion"},
       "chlor_spoons": {"name": "Chlor Aktion"},
       "next_start_mins": {"name": "Nächster Start in"},
-      "next_event": {"name": "Nächster Event Start"}
+      "next_event": {"name": "Nächster Event Start"},
+      "next_filter_mins": {"name": "Nächster Filter-Zyklus in"},
+      "pause_until": {"name": "Pause bis"},
+      "bathing_until": {"name": "Badesession bis"},
+      "is_bathing": {"name": "Badesession bis"},
+      "filter_until": {"name": "Filter-Zyklus bis"}
+    },
+    "timer": {
+      "pause": {"name": "Pausieren"},
+      "filter": {"name": "Filter-Zyklus"},
+      "bathing": {"name": "Badesession"}
     }
-  }
-  ,
+  },
   "climate": {
     "pool_climate": {"name": "Whirlpool Heizung"}
   }

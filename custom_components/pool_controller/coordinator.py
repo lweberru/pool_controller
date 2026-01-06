@@ -74,11 +74,11 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
     async def activate_bathing(self, minutes: int = 60):
         """Start a bathing timer for `minutes` and persist in entry.options."""
-        until = dt_util.now() + timedelta(minutes=minutes)
+        until = dt_util.now() + timedelta(minutes=minutes) if minutes > 0 else None
         self.bathing_until = until
         try:
-            new_opts = {**self.entry.options, "bathing_until": until.isoformat()}
-            await self.hass.config_entries.async_update_entry(self.entry, options=new_opts)
+            new_opts = {**self.entry.options, "bathing_until": until.isoformat() if until else None}
+            self.hass.config_entries.async_update_entry(self.entry, options=new_opts)
         except Exception:
             _LOGGER.exception("Fehler beim Speichern von bathing_until")
 
@@ -91,7 +91,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self.next_filter_start = next_start
         try:
             new_opts = {**self.entry.options, OPT_KEY_FILTER_UNTIL: until.isoformat(), OPT_KEY_FILTER_NEXT: next_start.isoformat()}
-            await self.hass.config_entries.async_update_entry(self.entry, options=new_opts)
+            self.hass.config_entries.async_update_entry(self.entry, options=new_opts)
         except Exception:
             _LOGGER.exception("Fehler beim Speichern von filter timers")
 
@@ -105,7 +105,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             new_opts.pop(OPT_KEY_FILTER_UNTIL, None)
             new_opts[OPT_KEY_FILTER_NEXT] = next_start.isoformat()
             self.next_filter_start = next_start
-            await self.hass.config_entries.async_update_entry(self.entry, options=new_opts)
+            self.hass.config_entries.async_update_entry(self.entry, options=new_opts)
         except Exception:
             _LOGGER.exception("Fehler beim Deaktivieren von filter timers")
 
@@ -114,17 +114,17 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self.bathing_until = None
         try:
             new_opts = {k: v for k, v in self.entry.options.items() if k != "bathing_until"}
-            await self.hass.config_entries.async_update_entry(self.entry, options=new_opts)
+            self.hass.config_entries.async_update_entry(self.entry, options=new_opts)
         except Exception:
             _LOGGER.exception("Fehler beim Löschen von bathing_until")
 
     async def activate_pause(self, minutes: int = 30):
         """Setze Pause für `minutes` und persistiere den Timer in entry.options."""
-        until = dt_util.now() + timedelta(minutes=minutes)
+        until = dt_util.now() + timedelta(minutes=minutes) if minutes > 0 else None
         self.pause_until = until
         try:
-            new_opts = {**self.entry.options, "pause_until": until.isoformat()}
-            await self.hass.config_entries.async_update_entry(self.entry, options=new_opts)
+            new_opts = {**self.entry.options, "pause_until": until.isoformat() if until else None}
+            self.hass.config_entries.async_update_entry(self.entry, options=new_opts)
         except Exception:
             _LOGGER.exception("Fehler beim Speichern von pause_until")
 

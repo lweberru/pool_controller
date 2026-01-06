@@ -16,7 +16,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     # Timer/Status sensors
     entities.extend([
         PoolTimeSensor(coordinator, "pause_until", "Pause Until"),
-        PoolTimeSensor(coordinator, "is_bathing", "Bathing Until"),
+        PoolTimeSensor(coordinator, "bathing_until", "Bathing Until"),
         PoolTimeSensor(coordinator, "filter_until", "Filter Until"),
         PoolChemSensor(coordinator, "next_filter_mins", "Nächster Filter in", "min", "mdi:clock-start"),
     ])
@@ -39,7 +39,10 @@ class PoolStatusSensor(PoolBaseSensor):
 class PoolChemSensor(PoolBaseSensor):
     def __init__(self, coordinator, key, name, unit, icon):
         super().__init__(coordinator)
-        self._key, self._attr_translation_key, self._attr_native_unit_of_measurement, self._attr_icon = key, key, unit, icon
+        self._key = key
+        self._attr_translation_key = key
+        self._attr_native_unit_of_measurement = unit
+        self._attr_icon = icon
         self._attr_unique_id = f"{coordinator.entry.entry_id}_{key}"
     @property
     def native_value(self): return self.coordinator.data.get(self._key)
@@ -48,7 +51,8 @@ class PoolTimeSensor(PoolBaseSensor):
     _attr_device_class = SensorDeviceClass.TIMESTAMP
     def __init__(self, coordinator, key, name):
         super().__init__(coordinator)
-        self._key, self._attr_translation_key = key, key
+        self._key = key
+        self._attr_translation_key = key
         self._attr_unique_id = f"{coordinator.entry.entry_id}_{key}"
     @property
     def native_value(self): return self.coordinator.data.get(self._key)

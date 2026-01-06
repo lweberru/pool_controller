@@ -3,8 +3,8 @@ from homeassistant.config_entries import ConfigEntry
 from .const import DOMAIN
 from .coordinator import PoolControllerDataCoordinator
 
-# "button" und "timer" wurden hier hinzugefügt
-PLATFORMS = ["sensor", "switch", "climate", "binary_sensor", "button", "timer"]
+# "button" wurde hier hinzugefügt (timer ist keine Entity-Plattform)
+PLATFORMS = ["sensor", "switch", "climate", "binary_sensor", "button"]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Setup der Integration."""

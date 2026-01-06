@@ -17,7 +17,10 @@ async def async_setup_entry(hass, entry, async_add_entities):
 class PoolBinary(BinarySensorEntity):
     _attr_has_entity_name = True
     def __init__(self, coordinator, key, name, d_class):
-        self.coordinator, self._key, self._attr_translation_key, self._attr_device_class = coordinator, key, key, d_class
+        self.coordinator = coordinator
+        self._key = key
+        self._attr_translation_key = key
+        self._attr_device_class = d_class
         self._attr_unique_id = f"{coordinator.entry.entry_id}_{key}"
     @property
     def is_on(self):
