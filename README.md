@@ -74,6 +74,14 @@ If your spa or pool is connected to a simple smart switch (on/off only), you los
 7. Restart Home Assistant
 8. Go to **Settings → Devices & Services → Create Automation → Pool Controller**
 
+### Dashboard/Lovelace Card (separate repo)
+
+The UI card is shipped in a separate HACS **Plugin** repository: https://github.com/lweberru/pool_controller_dashboard_frontend
+
+1. Add that repo as custom repository in HACS (Category: Plugin)
+2. Install; HACS will register the resource (URL `/hacsfiles/pool_controller_dashboard/main.js`).
+3. Add the card `custom:pc-pool-controller` to your dashboard and use "Automatisch aus Instanz übernehmen" im Editor.
+
 ### Alternative: Manual Installation
 
 If you prefer manual installation without HACS:
