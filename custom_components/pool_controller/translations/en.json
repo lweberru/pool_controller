@@ -143,21 +143,11 @@
       }
     }
   },
-        "data": {
-          "water_volume": "Water volume (liters)",
-          "quiet_time_start": "Quiet time start (Mon-Fri)",
-          "quiet_time_end": "Quiet time end (Mon-Fri)",
-          "quiet_time_start_weekend": "Quiet time start (WE/Holiday)",
-          "quiet_time_end_weekend": "Quiet time end (WE/Holiday)",
-          "ph_sensor": "pH sensor",
-          "chlorine_sensor": "Chlorine sensor"
-        }
-      }
-    }
-  },
   "entity": {
     "button": {
-      "quick_chlor_btn": {"name": "Quick chlorinate"},      "quick_chlor_stop": {"name": "Stop Shock Chlorination"},      "pause_30": { "name": "Pause (30 Min)" },
+      "quick_chlor_btn": {"name": "Quick chlorinate"},
+      "quick_chlor_stop": {"name": "Stop Shock Chlorination"},
+      "pause_30": { "name": "Pause (30 Min)" },
       "pause_60": { "name": "Pause (60 Min)" },
       "pause_120": { "name": "Pause (120 Min)" },
       "pause_stop": { "name": "Stop Pause" },
