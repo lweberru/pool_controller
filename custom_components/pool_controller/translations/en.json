@@ -157,8 +157,7 @@
   },
   "entity": {
     "button": {
-      "quick_chlor_btn": {"name": "Quick chlorinate"},
-      "pause_30": { "name": "Pause (30 Min)" },
+      "quick_chlor_btn": {"name": "Quick chlorinate"},      "quick_chlor_stop": {"name": "Stop Shock Chlorination"},      "pause_30": { "name": "Pause (30 Min)" },
       "pause_60": { "name": "Pause (60 Min)" },
       "pause_120": { "name": "Pause (120 Min)" },
       "pause_stop": { "name": "Stop Pause" },

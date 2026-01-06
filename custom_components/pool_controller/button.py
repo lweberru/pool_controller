@@ -7,6 +7,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
     async_add_entities([
         QuickChlorineButton(coordinator),
+        QuickChlorineStopButton(coordinator),
         Pause30Button(coordinator),
         Pause60Button(coordinator),
         Pause120Button(coordinator),
@@ -36,6 +37,16 @@ class QuickChlorineButton(PoolButton):
         self._attr_unique_id = f"{coordinator.entry.entry_id}_quick_chlor"
     async def async_press(self):
         await self.coordinator.activate_quick_chlorine(minutes=5)
+        await self.coordinator.async_request_refresh()
+
+class QuickChlorineStopButton(PoolButton):
+    _attr_translation_key = "quick_chlor_stop"
+    _attr_icon = "mdi:stop-circle"
+    def __init__(self, coordinator):
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.entry.entry_id}_quick_chlor_stop"
+    async def async_press(self):
+        await self.coordinator.deactivate_quick_chlorine()
         await self.coordinator.async_request_refresh()
 
 # Pause-Buttons mit verschiedenen Dauern

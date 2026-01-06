@@ -71,7 +71,14 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             await self.hass.config_entries.async_update_entry(self.entry, options=new_opts)
         except Exception:
             _LOGGER.exception("Fehler beim Speichern von quick_chlorine_until")
-
+    async def deactivate_quick_chlorine(self):
+        """Stoppe die Stoßchlorung und entferne den Timer."""
+        self.quick_chlorine_until = None
+        try:
+            new_opts = {k: v for k, v in self.entry.options.items() if k != "quick_chlorine_until"}
+            self.hass.config_entries.async_update_entry(self.entry, options=new_opts)
+        except Exception:
+            _LOGGER.exception("Fehler beim Löschen von quick_chlorine_until")
     async def activate_bathing(self, minutes: int = 60):
         """Start a bathing timer for `minutes` and persist in entry.options."""
         until = dt_util.now() + timedelta(minutes=minutes) if minutes > 0 else None

@@ -91,8 +91,7 @@
   },
   "entity": {
     "button": {
-      "quick_chlor_btn": { "name": "Cloración rápida" },
-      "pause_30": { "name": "Pausar (30 min)" },
+      "quick_chlor_btn": { "name": "Cloración rápida" },      "quick_chlor_stop": {"name": "Detener cloración de choque"},      "pause_30": { "name": "Pausar (30 min)" },
       "pause_60": { "name": "Pausar (60 min)" },
       "pause_120": { "name": "Pausar (120 min)" },
       "pause_stop": { "name": "Detener pausa" },

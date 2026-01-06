@@ -145,6 +145,7 @@
   "entity": {
     "button": {
       "quick_chlor_btn": {"name": "Kurz Chloren"},
+      "quick_chlor_stop": {"name": "Stoßchlorung stoppen"},
       "pause_30": { "name": "Pausieren (30 Min)" },
       "pause_60": { "name": "Pausieren (60 Min)" },
       "pause_120": { "name": "Pausieren (120 Min)" },
