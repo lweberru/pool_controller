@@ -19,6 +19,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolTimeSensor(coordinator, "bathing_until", "Bathing Until"),
         PoolTimeSensor(coordinator, "filter_until", "Filter Until"),
         PoolChemSensor(coordinator, "next_filter_mins", "Nächster Filter in", "min", "mdi:clock-start"),
+        PoolTimeSensor(coordinator, "next_event_end", "Nächster Event Ende"),
+        PoolTextSensor(coordinator, "next_event_summary", "Nächster Event Name"),
     ])
     # Power sensors
     entities.extend([
@@ -71,6 +73,16 @@ class PoolPowerSensor(PoolBaseSensor):
         self._key = key
         self._attr_translation_key = key
         self._attr_icon = "mdi:lightning-bolt"
+        self._attr_unique_id = f"{coordinator.entry.entry_id}_{key}"
+    @property
+    def native_value(self): return self.coordinator.data.get(self._key)
+
+class PoolTextSensor(PoolBaseSensor):
+    def __init__(self, coordinator, key, name):
+        super().__init__(coordinator)
+        self._key = key
+        self._attr_translation_key = key
+        self._attr_icon = "mdi:calendar-text"
         self._attr_unique_id = f"{coordinator.entry.entry_id}_{key}"
     @property
     def native_value(self): return self.coordinator.data.get(self._key)

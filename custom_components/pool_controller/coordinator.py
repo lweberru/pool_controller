@@ -179,6 +179,11 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 next_start_mins = max(0, round((preheat_time - now).total_seconds() / 60))
             bathing_active = self.bathing_until is not None and now < self.bathing_until
             filter_active = getattr(self, "filter_until", None) is not None and now < getattr(self, "filter_until", None)
+            
+            # Initialisiere next_filter_start wenn nicht gesetzt (z.B. nach Neustart)
+            if not getattr(self, "next_filter_start", None):
+                self.next_filter_start = now + timedelta(minutes=self.filter_interval)
+            
             next_filter_mins = None
             if getattr(self, "next_filter_start", None):
                 next_filter_mins = max(0, round((self.next_filter_start - now).total_seconds() / 60))
@@ -224,6 +229,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "is_we_holiday": we_or_holiday,
                 "frost_danger": frost_danger,
                 "next_event": cal_data.get("start"),
+                "next_event_end": cal_data.get("end"),
+                "next_event_summary": cal_data.get("summary"),
                 "next_start_mins": next_start_mins,
                 "is_paused": self.pause_until is not None and now < self.pause_until,
                 "pause_until": self.pause_until,
@@ -238,8 +245,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "should_aux_on": (delta_t > 1.0),
                 "pv_allows": pv_allows,
                 "in_quiet": in_quiet,
-                "main_power": round(main_power, 1) if main_power else None,
-                "aux_power": round(aux_power, 1) if aux_power else None,
+                "main_power": round(main_power, 1) if main_power is not None else None,
+                "aux_power": round(aux_power, 1) if aux_power is not None else None,
                 "should_main_on": (
                     (self.quick_chlorine_until is not None and now < self.quick_chlorine_until)
                     or frost_danger
@@ -322,5 +329,6 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             ev = events[0]
             start = dt_util.parse_datetime(ev.get("start")) if ev.get("start") else None
             end = dt_util.parse_datetime(ev.get("end")) if ev.get("end") else None
-            return {k: v for k, v in (("start", start), ("end", end)) if v}
+            summary = ev.get("summary", "")
+            return {k: v for k, v in (("start", start), ("end", end), ("summary", summary)) if v}
         except: return {}

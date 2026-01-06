@@ -140,6 +140,8 @@
       "pause_until": {"name": "Paused until"},
       "bathing_until": {"name": "Bathing until"},
       "filter_until": {"name": "Filter cycle until"},
+      "next_event_end": {"name": "Next event end"},
+      "next_event_summary": {"name": "Next event name"},
       "main_power": {"name": "Main pump power"},
       "aux_power": {"name": "Heater power"}
     }

@@ -145,6 +145,8 @@
       "bathing_until": { "name": "Baignade jusqu'à" },
       "filter_until": { "name": "Filtration jusqu'à" },
       "next_filter_mins": { "name": "Prochaine filtration dans (min)" },
+      "next_event_end": { "name": "Fin du prochain événement" },
+      "next_event_summary": { "name": "Nom du prochain événement" },
       "main_power": { "name": "Puissance pompe principale" },
       "aux_power": { "name": "Puissance chauffage" },
       "pool_status": { "name": "État du spa" },

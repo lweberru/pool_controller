@@ -141,6 +141,8 @@
       "pause_until": {"name": "Pause bis"},
       "bathing_until": {"name": "Badesession bis"},
       "filter_until": {"name": "Filter-Zyklus bis"},
+      "next_event_end": {"name": "Nächster Event Ende"},
+      "next_event_summary": {"name": "Nächster Event Name"},
       "main_power": {"name": "Hauptpumpe Leistung"},
       "aux_power": {"name": "Heizung Leistung"}
     }
