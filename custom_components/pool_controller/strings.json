@@ -89,9 +89,21 @@
   "entity": {
     "button": {
       "quick_chlor_btn": {"name": "Kurz Chloren"},
-      "pause_btn": {"name": "Pausieren"},
-      "bath_now": {"name": "Badesession starten"},
-      "filter_now": {"name": "Filter-Zyklus starten"}
+      "pause_btn": {"name": "Pausieren (default)"},
+      "pause_30": {"name": "Pausieren (30 min)"},
+      "pause_60": {"name": "Pausieren (60 min)"},
+      "pause_120": {"name": "Pausieren (120 min)"},
+      "pause_stop": {"name": "Pause stoppen"},
+      "bath_now": {"name": "Badesession starten (default)"},
+      "bath_30": {"name": "Badesession (30 min)"},
+      "bath_60": {"name": "Badesession (60 min)"},
+      "bath_120": {"name": "Badesession (120 min)"},
+      "bath_stop": {"name": "Badesession stoppen"},
+      "filter_now": {"name": "Filter-Zyklus starten (default)"},
+      "filter_30": {"name": "Filter-Zyklus (30 min)"},
+      "filter_60": {"name": "Filter-Zyklus (60 min)"},
+      "filter_120": {"name": "Filter-Zyklus (120 min)"},
+      "filter_stop": {"name": "Filter-Zyklus stoppen"}
     },
     "switch": {
       "main": {"name": "Hauptschalter"},
@@ -122,13 +134,7 @@
       "next_filter_mins": {"name": "Nächster Filter-Zyklus in"},
       "pause_until": {"name": "Pause bis"},
       "bathing_until": {"name": "Badesession bis"},
-      "is_bathing": {"name": "Badesession bis"},
       "filter_until": {"name": "Filter-Zyklus bis"}
-    },
-    "timer": {
-      "pause": {"name": "Pausieren"},
-      "filter": {"name": "Filter-Zyklus"},
-      "bathing": {"name": "Badesession"}
     }
   },
   "climate": {

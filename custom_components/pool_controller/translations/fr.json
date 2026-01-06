@@ -92,9 +92,21 @@
   "entity": {
     "button": {
       "quick_chlor_btn": { "name": "Chloration rapide" },
-      "pause_btn": { "name": "Pause" },
-      "bath_now": { "name": "Démarrer baignade" },
-      "filter_now": { "name": "Démarrer cycle filtration" }
+      "pause_btn": { "name": "Pause (Par défaut)" },
+      "pause_30": { "name": "Pause (30 min)" },
+      "pause_60": { "name": "Pause (60 min)" },
+      "pause_120": { "name": "Pause (120 min)" },
+      "pause_stop": { "name": "Arrêter la pause" },
+      "bath_now": { "name": "Baignade (Par défaut)" },
+      "bath_30": { "name": "Baignade (30 min)" },
+      "bath_60": { "name": "Baignade (60 min)" },
+      "bath_120": { "name": "Baignade (120 min)" },
+      "bath_stop": { "name": "Arrêter la baignade" },
+      "filter_now": { "name": "Cycle de filtration (Par défaut)" },
+      "filter_30": { "name": "Cycle de filtration (30 min)" },
+      "filter_60": { "name": "Cycle de filtration (60 min)" },
+      "filter_120": { "name": "Cycle de filtration (120 min)" },
+      "filter_stop": { "name": "Arrêter le cycle de filtration" }
     },
     "switch": {
       "main": { "name": "Interrupteur principal" },
@@ -134,11 +146,6 @@
       "next_filter_mins": { "name": "Prochaine filtration dans (min)" },
       "pool_status": { "name": "État du spa" },
       "pool_state": { "name": "État" }
-    },
-    "timer": {
-      "pause": { "name": "Pause" },
-      "filter": { "name": "Filtration" },
-      "bathing": { "name": "Baignade" }
     }
   },
   "climate": {
