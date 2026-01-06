@@ -92,9 +92,14 @@
   "entity": {
     "button": {
       "quick_chlor_btn": { "name": "Chloration rapide" },
-      "pause_btn": { "name": "Pause" }
+      "pause_btn": { "name": "Pause" },
+      "bath_now": { "name": "Démarrer baignade" },
+      "filter_now": { "name": "Démarrer cycle filtration" }
     },
     "switch": {
+      "main": { "name": "Interrupteur principal" },
+      "aux": { "name": "Chauffage auxiliaire" },
+      "bathing": { "name": "Mode baignade" },
       "main_switch": { "name": "Interrupteur principal" },
       "aux_heating": { "name": "Chauffage auxiliaire" },
       "bathing_mode": { "name": "Mode baignade" }
@@ -116,7 +121,24 @@
       "ph_plus_g": { "name": "Action pH+" },
       "chlor_spoons": { "name": "Action chlore" },
       "next_start_mins": { "name": "Démarrage suivant dans" },
-      "next_event": { "name": "Début du prochain événement" }
+      "next_event": { "name": "Début du prochain événement" },
+      "filter_cycles": { "name": "Cycles de filtration" },
+      "filter_end_time": { "name": "Fin du cycle de filtration" },
+      "filter_next_mins": { "name": "Prochaine filtration dans (min)" },
+      "chlorine_timestamp": { "name": "Chloration" },
+      "ph_timestamp": { "name": "pH" },
+      "alk_timestamp": { "name": "Alcalinité" },
+      "pause_until": { "name": "Pause jusqu'à" },
+      "bathing_until": { "name": "Baignade jusqu'à" },
+      "filter_until": { "name": "Filtration jusqu'à" },
+      "next_filter_mins": { "name": "Prochaine filtration dans (min)" },
+      "pool_status": { "name": "État du spa" },
+      "pool_state": { "name": "État" }
+    },
+    "timer": {
+      "pause": { "name": "Pause" },
+      "filter": { "name": "Filtration" },
+      "bathing": { "name": "Baignade" }
     }
   },
   "climate": {

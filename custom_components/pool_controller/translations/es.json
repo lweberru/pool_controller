@@ -92,9 +92,14 @@
   "entity": {
     "button": {
       "quick_chlor_btn": { "name": "Cloración rápida" },
-      "pause_btn": { "name": "Pausar" }
+      "pause_btn": { "name": "Pausar" },
+      "bath_now": { "name": "Iniciar baño" },
+      "filter_now": { "name": "Iniciar ciclo de filtro" }
     },
     "switch": {
+      "main": { "name": "Interruptor principal" },
+      "aux": { "name": "Calefacción auxiliar" },
+      "bathing": { "name": "Sesión de baño" },
       "main_switch": { "name": "Interruptor principal" },
       "aux_heating": { "name": "Calefacción auxiliar" },
       "bathing_mode": { "name": "Modo baño" }
@@ -116,7 +121,24 @@
       "ph_plus_g": { "name": "Acción pH+" },
       "chlor_spoons": { "name": "Acción cloro" },
       "next_start_mins": { "name": "Inicio siguiente en" },
-      "next_event": { "name": "Inicio del siguiente evento" }
+      "next_event": { "name": "Inicio del siguiente evento" },
+      "filter_cycles": { "name": "Ciclos de filtración" },
+      "filter_end_time": { "name": "Fin del ciclo de filtración" },
+      "filter_next_mins": { "name": "Próxima filtración en (min)" },
+      "chlorine_timestamp": { "name": "Cloración" },
+      "ph_timestamp": { "name": "pH" },
+      "alk_timestamp": { "name": "Alcalinidad" },
+      "pause_until": { "name": "Pausa hasta" },
+      "bathing_until": { "name": "Sesión de baño hasta" },
+      "filter_until": { "name": "Filtración hasta" },
+      "next_filter_mins": { "name": "Próxima filtración en (min)" },
+      "pool_status": { "name": "Estado de la piscina" },
+      "pool_state": { "name": "Estado" }
+    },
+    "timer": {
+      "pause": { "name": "Pausa" },
+      "filter": { "name": "Filtración" },
+      "bathing": { "name": "Sesión de baño" }
     }
   },
   "climate": {

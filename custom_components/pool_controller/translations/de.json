@@ -94,9 +94,14 @@
   "entity": {
     "button": {
       "quick_chlor_btn": {"name": "Kurz Chloren"},
-      "pause_btn": {"name": "Pausieren"}
+      "pause_btn": {"name": "Pausieren"},
+      "bath_now": {"name": "Badesession starten"},
+      "filter_now": {"name": "Filter-Zyklus starten"}
     },
     "switch": {
+      "main": {"name": "Hauptschalter"},
+      "aux": {"name": "Zusatzheizung"},
+      "bathing": {"name": "Badesession"},
       "main_switch": {"name": "Hauptschalter"},
       "aux_heating": {"name": "Zusatzheizung"},
       "bathing_mode": {"name": "Bade-Modus"}
@@ -118,7 +123,17 @@
       "ph_plus_g": {"name": "Ph+ Aktion"},
       "chlor_spoons": {"name": "Chlor Aktion"},
       "next_start_mins": {"name": "Nächster Start in"},
-      "next_event": {"name": "Nächster Event Start"}
+      "next_event": {"name": "Nächster Event Start"},
+      "next_filter_mins": {"name": "Nächster Filter-Zyklus in"},
+      "pause_until": {"name": "Pause bis"},
+      "bathing_until": {"name": "Badesession bis"},
+      "is_bathing": {"name": "Badesession bis"},
+      "filter_until": {"name": "Filter-Zyklus bis"}
+    },
+    "timer": {
+      "pause": {"name": "Pausieren"},
+      "filter": {"name": "Filter-Zyklus"},
+      "bathing": {"name": "Badesession"}
     }
   }
   ,

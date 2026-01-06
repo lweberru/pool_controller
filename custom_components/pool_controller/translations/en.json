@@ -93,9 +93,14 @@
   "entity": {
     "button": {
       "quick_chlor_btn": {"name": "Quick chlorinate"},
-      "pause_btn": {"name": "Pause"}
+      "pause_btn": {"name": "Pause"},
+      "bath_now": {"name": "Start bathing"},
+      "filter_now": {"name": "Start filter cycle"}
     },
     "switch": {
+      "main": {"name": "Main switch"},
+      "aux": {"name": "Auxiliary heater"},
+      "bathing": {"name": "Bathing session"},
       "main_switch": {"name": "Main switch"},
       "aux_heating": {"name": "Auxiliary heater"},
       "bathing_mode": {"name": "Bathing mode"}
@@ -117,7 +122,17 @@
       "ph_plus_g": {"name": "pH+ action"},
       "chlor_spoons": {"name": "Chlor action"},
       "next_start_mins": {"name": "Next start in"},
-      "next_event": {"name": "Next event start"}
+      "next_event": {"name": "Next event start"},
+      "next_filter_mins": {"name": "Next filter cycle in"},
+      "pause_until": {"name": "Paused until"},
+      "bathing_until": {"name": "Bathing until"},
+      "is_bathing": {"name": "Bathing until"},
+      "filter_until": {"name": "Filter cycle until"}
+    },
+    "timer": {
+      "pause": {"name": "Pause"},
+      "filter": {"name": "Filter cycle"},
+      "bathing": {"name": "Bathing session"}
     }
   },
   "climate": {
