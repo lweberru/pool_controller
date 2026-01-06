@@ -76,6 +76,8 @@ class PoolPowerSensor(PoolBaseSensor):
         self._attr_unique_id = f"{coordinator.entry.entry_id}_{key}"
     @property
     def native_value(self): return self.coordinator.data.get(self._key)
+    @property
+    def available(self): return self.coordinator.data.get(self._key) is not None
 
 class PoolTextSensor(PoolBaseSensor):
     def __init__(self, coordinator, key, name):

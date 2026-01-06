@@ -101,7 +101,7 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
     def __init__(self, config_entry):
-        self.config_entry = config_entry
+        self._config_entry = config_entry
 
     async def async_step_init(self, user_input=None):
         errors = {}
@@ -112,7 +112,7 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
                 _LOGGER.exception("Fehler im Options Flow (Zahnrad)")
                 errors["base"] = "unknown"
 
-        curr = {**self.config_entry.data, **self.config_entry.options}
+        curr = {**self._config_entry.data, **self._config_entry.options}
         return self.async_show_form(step_id="init", errors=errors, data_schema=vol.Schema({
             vol.Required(CONF_WATER_VOLUME, default=curr.get(CONF_WATER_VOLUME, DEFAULT_VOL)): vol.Coerce(int),
             vol.Required(CONF_BATH_DURATION, default=curr.get(CONF_BATH_DURATION, DEFAULT_BATH_MINUTES)): vol.Coerce(int),
