@@ -22,6 +22,7 @@
       },
       "water_quality": {
         "title": "Calidad del agua (ESP32)",
+        "submit": "Continuar",
         "data": {
           "temp_water_sensor": "Temperatura del agua",
           "enable_frost_protection": "Activar protección contra heladas",
@@ -31,10 +32,21 @@
           "enable_saltwater": "Piscina de agua salada",
           "salt_sensor": "Sensor de sal",
           "tds_sensor": "Sensor de conductividad"
+        },
+        "data_description": {
+          "temp_water_sensor": "Sensor de temperatura del agua de la piscina (obligatorio)",
+          "enable_frost_protection": "Enciende automáticamente la bomba cuando la temperatura cae por debajo de 3°C (requiere sensor de temperatura exterior)",
+          "temp_outdoor_sensor": "Temperatura exterior para protección contra heladas y control de calefacción",
+          "ph_sensor": "Sensor de valor de pH (Blueriiot o similar)",
+          "chlorine_sensor": "Sensor redox para medición de cloro en mV",
+          "enable_saltwater": "Habilita funciones y sensores específicos para agua salada",
+          "salt_sensor": "Sensor de contenido de sal para piscinas de agua salada",
+          "tds_sensor": "Sensor de conductividad (TDS) para calidad del agua"
         }
       },
       "switches": {
         "title": "Interruptores y potencia",
+        "submit": "Continuar",
         "data": {
           "main_switch": "Interruptor principal",
           "filter_switch": "Interruptor del filtro (vacío = usar principal)",
@@ -42,6 +54,14 @@
           "aux_heating_switch": "Interruptor calefacción auxiliar",
           "main_power_sensor": "Sensor de potencia principal",
           "aux_power_sensor": "Sensor de potencia calefacción auxiliar"
+        },
+        "data_description": {
+          "main_switch": "Interruptor principal para bomba de piscina (obligatorio)",
+          "filter_switch": "Opcional: Interruptor separado para bomba de filtro (dejar vacío para usar interruptor principal)",
+          "enable_aux_heating": "Habilita calefacción adicional para calentamiento más rápido",
+          "aux_heating_switch": "Interruptor para calentador auxiliar eléctrico",
+          "main_power_sensor": "Sensor de potencia de la bomba principal en vatios",
+          "aux_power_sensor": "Sensor de potencia del calentador en vatios"
         }
       },
       "logic": {
@@ -58,6 +78,7 @@
       },
       "calendars": {
         "title": "Calendarios y tiempos de silencio",
+        "submit": "Continuar",
         "data": {
           "pool_calendar": "Calendario del spa",
           "holiday_calendar": "Calendario de festivos",
@@ -65,6 +86,14 @@
           "quiet_time_end": "Fin silencio (día laborable)",
           "quiet_time_start_weekend": "Inicio silencio (fin de semana)",
           "quiet_time_end_weekend": "Fin silencio (fin de semana)"
+        },
+        "data_description": {
+          "pool_calendar": "Calendario con eventos de piscina (inicia automáticamente modo baño para citas)",
+          "holiday_calendar": "Calendario de festivos (usa tiempos de silencio de fin de semana en festivos)",
+          "quiet_time_start": "Inicio de las horas de silencio en días laborables (ej. 22:00)",
+          "quiet_time_end": "Fin de las horas de silencio en días laborables (ej. 07:00)",
+          "quiet_time_start_weekend": "Inicio de las horas de silencio en fin de semana (ej. 23:00)",
+          "quiet_time_end_weekend": "Fin de las horas de silencio en fin de semana (ej. 08:00)"
         }
       },
       "filter": {
@@ -73,15 +102,26 @@
         "data": {
           "enable_auto_filter": "Activar filtración automática",
           "filter_interval_minutes": "Intervalo de filtro (minutos)"
+        },
+        "data_description": {
+          "enable_auto_filter": "Inicia automáticamente ciclos de filtro en el intervalo configurado (respeta horas de silencio)",
+          "filter_interval_minutes": "Intervalo de filtro automático en minutos (predeterminado: 720 = 12 horas, rango: 60 minutos a 7 días)"
         }
       },
       "pv": {
         "title": "Sensor PV y umbrales",
+        "submit": "Finalizar",
         "data": {
           "enable_pv_optimization": "Activar optimización PV",
           "pv_surplus_sensor": "Sensor de excedente PV",
           "pv_on_threshold": "Umbral PV ON (W)",
           "pv_off_threshold": "Umbral PV OFF (W)"
+        },
+        "data_description": {
+          "enable_pv_optimization": "Utiliza excedente PV para control inteligente de calefacción (solo con suficiente producción solar)",
+          "pv_surplus_sensor": "Sensor para excedente PV o inyección a red en vatios (negativo = consumo, positivo = inyección)",
+          "pv_on_threshold": "Encender bomba cuando el excedente supera este valor (predeterminado: 1000W)",
+          "pv_off_threshold": "Apagar bomba cuando el excedente cae por debajo de este valor (predeterminado: 500W, histéresis)"
         }
       }
     }
@@ -89,15 +129,103 @@
   "options": {
     "step": {
       "init": {
-        "title": "Cambiar ajustes del spa",
+        "title": "Configuración de piscina",
+        "description": "Paso 1 de 5 - Configuración básica",
+        "submit": "Continuar",
         "data": {
-          "water_volume": "Volumen de agua (litros)",
-          "quiet_time_start": "Inicio silencio (Lun-Vie)",
-          "quiet_time_end": "Fin silencio (Lun-Vie)",
-          "quiet_time_start_weekend": "Inicio silencio (Fin/Festivo)",
-          "quiet_time_end_weekend": "Fin silencio (Fin/Festivo)",
-          "ph_sensor": "Sensor pH",
-          "chlorine_sensor": "Sensor cloro"
+          "name": "Nombre de la piscina",
+          "water_volume": "Volumen de agua en litros",
+          "demo_mode": "Modo demo activo"
+        },
+        "data_description": {
+          "name": "Nombre de visualización para esta instalación de piscina",
+          "water_volume": "Volumen de agua en litros (utilizado para dosificación de pH y cálculos de tiempo de calentamiento)",
+          "demo_mode": "Modo demo: No conmuta dispositivos reales (solo para pruebas)"
+        }
+      },
+      "switches": {
+        "title": "Interruptores y potencia",
+        "description": "Paso 2 de 5",
+        "submit": "Continuar",
+        "data": {
+          "main_switch": "Interruptor principal",
+          "aux_heating_switch": "Interruptor calefacción auxiliar",
+          "main_power_sensor": "Sensor de potencia principal",
+          "aux_power_sensor": "Sensor de potencia calefacción auxiliar"
+        },
+        "data_description": {
+          "main_switch": "Interruptor principal para bomba de piscina (obligatorio)",
+          "aux_heating_switch": "Interruptor para calentador auxiliar eléctrico",
+          "main_power_sensor": "Sensor de potencia de la bomba principal en vatios",
+          "aux_power_sensor": "Sensor de potencia del calentador en vatios"
+        }
+      },
+      "water_quality": {
+        "title": "Calidad del agua",
+        "description": "Paso 3 de 5",
+        "submit": "Continuar",
+        "data": {
+          "temp_water_sensor": "Temperatura del agua",
+          "temp_outdoor_sensor": "Temperatura exterior",
+          "ph_sensor": "Sensor de pH",
+          "chlorine_sensor": "Sensor de cloro (redox)",
+          "salt_sensor": "Sensor de sal",
+          "tds_sensor": "Sensor de conductividad"
+        },
+        "data_description": {
+          "temp_water_sensor": "Sensor de temperatura del agua de la piscina (obligatorio)",
+          "temp_outdoor_sensor": "Temperatura exterior para protección contra heladas y control de calefacción",
+          "ph_sensor": "Sensor de valor de pH (Blueriiot o similar)",
+          "chlorine_sensor": "Sensor redox para medición de cloro en mV",
+          "salt_sensor": "Sensor de contenido de sal para piscinas de agua salada",
+          "tds_sensor": "Sensor de conductividad (TDS) para calidad del agua"
+        }
+      },
+      "calendars": {
+        "title": "Calendarios y tiempos de silencio",
+        "description": "Paso 4 de 6",
+        "submit": "Continuar",
+        "data": {
+          "pool_calendar": "Calendario del spa",
+          "holiday_calendar": "Calendario de festivos",
+          "quiet_time_start": "Inicio silencio (día laborable)",
+          "quiet_time_end": "Fin silencio (día laborable)",
+          "quiet_time_start_weekend": "Inicio silencio (fin de semana)",
+          "quiet_time_end_weekend": "Fin silencio (fin de semana)"
+        },
+        "data_description": {
+          "pool_calendar": "Calendario con eventos de piscina (inicia automáticamente modo baño para citas)",
+          "holiday_calendar": "Calendario de festivos (usa tiempos de silencio de fin de semana en festivos)",
+          "quiet_time_start": "Inicio de las horas de silencio en días laborables (ej. 22:00)",
+          "quiet_time_end": "Fin de las horas de silencio en días laborables (ej. 07:00)",
+          "quiet_time_start_weekend": "Inicio de las horas de silencio en fin de semana (ej. 23:00)",
+          "quiet_time_end_weekend": "Fin de las horas de silencio en fin de semana (ej. 08:00)"
+        }
+      },
+      "filter": {
+        "title": "Configuración del filtro",
+        "description": "Paso 5 de 6",
+        "submit": "Continuar",
+        "data": {
+          "filter_interval_minutes": "Intervalo de filtro (minutos)"
+        },
+        "data_description": {
+          "filter_interval_minutes": "Intervalo de filtro automático en minutos (predeterminado: 720 = 12 horas, rango: 60 minutos a 7 días)"
+        }
+      },
+      "pv": {
+        "title": "Sensor PV y umbrales",
+        "description": "Paso 6 de 6",
+        "submit": "Finalizar",
+        "data": {
+          "pv_surplus_sensor": "Sensor de excedente PV",
+          "pv_on_threshold": "Umbral PV ON (W)",
+          "pv_off_threshold": "Umbral PV OFF (W)"
+        },
+        "data_description": {
+          "pv_surplus_sensor": "Sensor para excedente PV o inyección a red en vatios (negativo = consumo, positivo = inyección)",
+          "pv_on_threshold": "Encender bomba cuando el excedente supera este valor (predeterminado: 1000W)",
+          "pv_off_threshold": "Apagar bomba cuando el excedente cae por debajo de este valor (predeterminado: 500W, histéresis)"
         }
       }
     }

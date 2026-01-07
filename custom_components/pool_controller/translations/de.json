@@ -36,8 +36,14 @@
           "tds_sensor": "Leitfähigkeit Sensor"
         },
         "data_description": {
+          "temp_water_sensor": "Sensor für Poolwasser-Temperatur (Pflichtfeld)",
           "enable_frost_protection": "Schaltet Pumpe automatisch bei Temperaturen unter 3°C ein (benötigt Außentemperatur-Sensor)",
-          "enable_saltwater": "Aktiviert Salzwasser-spezifische Funktionen und Sensoren"
+          "temp_outdoor_sensor": "Außentemperatur für Frostschutz und Heizungssteuerung",
+          "ph_sensor": "pH-Wert Sensor (Blueriiot oder ähnlich)",
+          "chlorine_sensor": "Redox-Sensor für Chlor-Messung in mV",
+          "enable_saltwater": "Aktiviert Salzwasser-spezifische Funktionen und Sensoren",
+          "salt_sensor": "Salzgehalt-Sensor für Salzwasserpools",
+          "tds_sensor": "Leitfähigkeits-Sensor (TDS) für Wasserqualität"
         }
       },
       "switches": {
@@ -52,8 +58,12 @@
           "aux_power_sensor": "Zusatzheizung Leistungssensor"
         },
         "data_description": {
+          "main_switch": "Hauptschalter für Poolpumpe (Pflichtfeld)",
           "filter_switch": "Optional: Separater Schalter für Filterpumpe (leer lassen um Hauptschalter zu nutzen)",
-          "enable_aux_heating": "Aktiviert zusätzliche Heizung für schnelleres Aufheizen"
+          "enable_aux_heating": "Aktiviert zusätzliche Heizung für schnelleres Aufheizen",
+          "aux_heating_switch": "Schalter für elektrische Zusatzheizung",
+          "main_power_sensor": "Leistungssensor der Hauptpumpe in Watt",
+          "aux_power_sensor": "Leistungssensor der Heizung in Watt"
         }
       },
       "logic": {
@@ -79,6 +89,14 @@
           "quiet_time_end": "Ruhezeit Ende (Wochentag)",
           "quiet_time_start_weekend": "Ruhezeit Start (Wochenende)",
           "quiet_time_end_weekend": "Ruhezeit Ende (Wochenende)"
+        },
+        "data_description": {
+          "pool_calendar": "Kalender mit Pool-Events (startet automatisch Baden-Modus bei Terminen)",
+          "holiday_calendar": "Feiertagskalender (nutzt Wochenend-Ruhezeiten an Feiertagen)",
+          "quiet_time_start": "Beginn der Ruhezeit an Wochentagen (z.B. 22:00)",
+          "quiet_time_end": "Ende der Ruhezeit an Wochentagen (z.B. 07:00)",
+          "quiet_time_start_weekend": "Beginn der Ruhezeit am Wochenende (z.B. 23:00)",
+          "quiet_time_end_weekend": "Ende der Ruhezeit am Wochenende (z.B. 08:00)"
         }
       },
       "filter": {
@@ -103,7 +121,10 @@
           "pv_off_threshold": "PV OFF Schwelle (W)"
         },
         "data_description": {
-          "enable_pv_optimization": "Nutzt PV-Überschuss für intelligente Heizungssteuerung (nur bei ausreichend Solarproduktion)"
+          "enable_pv_optimization": "Nutzt PV-Überschuss für intelligente Heizungssteuerung (nur bei ausreichend Solarproduktion)",
+          "pv_surplus_sensor": "Sensor für PV-Überschuss bzw. Einspeisung in Watt (negativ = Bezug, positiv = Einspeisung)",
+          "pv_on_threshold": "Pumpe einschalten bei Überschuss über diesem Wert (Standard: 1000W)",
+          "pv_off_threshold": "Pumpe ausschalten bei Überschuss unter diesem Wert (Standard: 500W, Hysterese)"
         }
       }
     }
@@ -118,6 +139,11 @@
           "name": "Name des Whirlpools",
           "water_volume": "Wassermenge in Litern",
           "demo_mode": "Demo-Modus aktiv"
+        },
+        "data_description": {
+          "name": "Anzeigename für diese Pool-Installation",
+          "water_volume": "Wasservolumen in Litern (wird für pH-Dosierung und Heizzeit-Berechnungen verwendet)",
+          "demo_mode": "Demo-Modus: Schaltet keine echten Geräte (nur zu Testzwecken)"
         }
       },
       "switches": {
@@ -129,6 +155,12 @@
           "aux_heating_switch": "Zusatzheizung Schalter",
           "main_power_sensor": "Haupt-Leistungssensor",
           "aux_power_sensor": "Zusatzheizung Leistungssensor"
+        },
+        "data_description": {
+          "main_switch": "Hauptschalter für Poolpumpe (Pflichtfeld)",
+          "aux_heating_switch": "Schalter für elektrische Zusatzheizung",
+          "main_power_sensor": "Leistungssensor der Hauptpumpe in Watt",
+          "aux_power_sensor": "Leistungssensor der Heizung in Watt"
         }
       },
       "water_quality": {
@@ -141,8 +173,14 @@
           "ph_sensor": "pH-Wert Sensor",
           "chlorine_sensor": "Chlorgehalt (Redox) Sensor",
           "salt_sensor": "Salzgehalt Sensor",
-          "tds_sensor": "Leitfähigkeit Sensor"
-        }
+          "tds_sensor": "Leitfähigkeit Sensor"        },
+        "data_description": {
+          "temp_water_sensor": "Sensor für Poolwasser-Temperatur (Pflichtfeld)",
+          "temp_outdoor_sensor": "Außentemperatur für Frostschutz und Heizungssteuerung",
+          "ph_sensor": "pH-Wert Sensor (Blueriiot oder ähnlich)",
+          "chlorine_sensor": "Redox-Sensor für Chlor-Messung in mV",
+          "salt_sensor": "Salzgehalt-Sensor für Salzwasserpools",
+          "tds_sensor": "Leitfähigkeits-Sensor (TDS) für Wasserqualität"        }
       },
       "calendars": {
         "title": "Kalender & Ruhezeiten",
@@ -155,6 +193,14 @@
           "quiet_time_end": "Ruhezeit Ende (Wochentag)",
           "quiet_time_start_weekend": "Ruhezeit Start (Wochenende)",
           "quiet_time_end_weekend": "Ruhezeit Ende (Wochenende)"
+        },
+        "data_description": {
+          "pool_calendar": "Kalender mit Pool-Events (startet automatisch Baden-Modus bei Terminen)",
+          "holiday_calendar": "Feiertagskalender (nutzt Wochenend-Ruhezeiten an Feiertagen)",
+          "quiet_time_start": "Beginn der Ruhezeit an Wochentagen (z.B. 22:00)",
+          "quiet_time_end": "Ende der Ruhezeit an Wochentagen (z.B. 07:00)",
+          "quiet_time_start_weekend": "Beginn der Ruhezeit am Wochenende (z.B. 23:00)",
+          "quiet_time_end_weekend": "Ende der Ruhezeit am Wochenende (z.B. 08:00)"
         }
       },
       "filter": {
@@ -176,6 +222,11 @@
           "pv_surplus_sensor": "PV-Überschuss Sensor",
           "pv_on_threshold": "PV ON Schwelle (W)",
           "pv_off_threshold": "PV OFF Schwelle (W)"
+        },
+        "data_description": {
+          "pv_surplus_sensor": "Sensor für PV-Überschuss bzw. Einspeisung in Watt (negativ = Bezug, positiv = Einspeisung)",
+          "pv_on_threshold": "Pumpe einschalten bei Überschuss über diesem Wert (Standard: 1000W)",
+          "pv_off_threshold": "Pumpe ausschalten bei Überschuss unter diesem Wert (Standard: 500W, Hysterese)"
         }
       }
     }

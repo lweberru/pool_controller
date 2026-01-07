@@ -22,6 +22,7 @@
       },
       "water_quality": {
         "title": "Qualité de l'eau (ESP32)",
+        "submit": "Continuer",
         "data": {
           "temp_water_sensor": "Température de l'eau",
           "enable_frost_protection": "Activer protection contre gel",
@@ -31,10 +32,21 @@
           "enable_saltwater": "Piscine d'eau salée",
           "salt_sensor": "Capteur sel",
           "tds_sensor": "Capteur conductivité"
+        },
+        "data_description": {
+          "temp_water_sensor": "Capteur de température de l'eau de la piscine (obligatoire)",
+          "enable_frost_protection": "Allume automatiquement la pompe lorsque la température descend en dessous de 3°C (nécessite capteur température extérieure)",
+          "temp_outdoor_sensor": "Température extérieure pour protection gel et contrôle chauffage",
+          "ph_sensor": "Capteur de valeur pH (Blueriiot ou similaire)",
+          "chlorine_sensor": "Capteur redox pour mesure du chlore en mV",
+          "enable_saltwater": "Active les fonctions et capteurs spécifiques à l'eau salée",
+          "salt_sensor": "Capteur de teneur en sel pour piscines d'eau salée",
+          "tds_sensor": "Capteur de conductivité (TDS) pour qualité de l'eau"
         }
       },
       "switches": {
         "title": "Interrupteurs & Puissance",
+        "submit": "Continuer",
         "data": {
           "main_switch": "Interrupteur principal",
           "filter_switch": "Interrupteur filtre (vide = utiliser principal)",
@@ -42,6 +54,14 @@
           "aux_heating_switch": "Interrupteur chauffage auxiliaire",
           "main_power_sensor": "Capteur puissance principal",
           "aux_power_sensor": "Capteur puissance chauffage auxiliaire"
+        },
+        "data_description": {
+          "main_switch": "Interrupteur principal pour pompe de piscine (obligatoire)",
+          "filter_switch": "Optionnel: Interrupteur séparé pour pompe de filtration (laisser vide pour utiliser interrupteur principal)",
+          "enable_aux_heating": "Active le chauffage supplémentaire pour un réchauffement plus rapide",
+          "aux_heating_switch": "Interrupteur pour chauffage auxiliaire électrique",
+          "main_power_sensor": "Capteur de puissance de la pompe principale en watts",
+          "aux_power_sensor": "Capteur de puissance du chauffage en watts"
         }
       },
       "logic": {
@@ -58,6 +78,7 @@
       },
       "calendars": {
         "title": "Calendriers & périodes de silence",
+        "submit": "Continuer",
         "data": {
           "pool_calendar": "Calendrier piscine",
           "holiday_calendar": "Calendrier jours fériés",
@@ -65,6 +86,14 @@
           "quiet_time_end": "Fin silence (semaine)",
           "quiet_time_start_weekend": "Début silence (week-end)",
           "quiet_time_end_weekend": "Fin silence (week-end)"
+        },
+        "data_description": {
+          "pool_calendar": "Calendrier avec événements piscine (démarre automatiquement le mode baignade pour les rendez-vous)",
+          "holiday_calendar": "Calendrier des jours fériés (utilise les heures de silence du week-end les jours fériés)",
+          "quiet_time_start": "Début des heures silencieuses en semaine (ex. 22:00)",
+          "quiet_time_end": "Fin des heures silencieuses en semaine (ex. 07:00)",
+          "quiet_time_start_weekend": "Début des heures silencieuses le week-end (ex. 23:00)",
+          "quiet_time_end_weekend": "Fin des heures silencieuses le week-end (ex. 08:00)"
         }
       },
       "filter": {
@@ -73,15 +102,26 @@
         "data": {
           "enable_auto_filter": "Activer filtration automatique",
           "filter_interval_minutes": "Intervalle de filtration (minutes)"
+        },
+        "data_description": {
+          "enable_auto_filter": "Démarre automatiquement des cycles de filtration à l'intervalle configuré (respecte les heures silencieuses)",
+          "filter_interval_minutes": "Intervalle de filtration automatique en minutes (par défaut: 720 = 12 heures, plage: 60 minutes à 7 jours)"
         }
       },
       "pv": {
         "title": "Capteur PV & seuils",
+        "submit": "Terminer",
         "data": {
           "enable_pv_optimization": "Activer optimisation PV",
           "pv_surplus_sensor": "Capteur excédent PV",
           "pv_on_threshold": "Seuil PV ON (W)",
           "pv_off_threshold": "Seuil PV OFF (W)"
+        },
+        "data_description": {
+          "enable_pv_optimization": "Utilise l'excédent PV pour contrôle intelligent du chauffage (uniquement avec production solaire suffisante)",
+          "pv_surplus_sensor": "Capteur pour excédent PV ou injection réseau en watts (négatif = consommation, positif = injection)",
+          "pv_on_threshold": "Allumer la pompe lorsque l'excédent dépasse cette valeur (par défaut: 1000W)",
+          "pv_off_threshold": "Éteindre la pompe lorsque l'excédent tombe en dessous de cette valeur (par défaut: 500W, hystérésis)"
         }
       }
     }
@@ -89,15 +129,103 @@
   "options": {
     "step": {
       "init": {
-        "title": "Modifier les paramètres du spa",
+        "title": "Paramètres de la piscine",
+        "description": "Étape 1 sur 5 - Paramètres de base",
+        "submit": "Continuer",
         "data": {
-          "water_volume": "Volume d'eau (litres)",
-          "quiet_time_start": "Début silence (Lun-Ven)",
-          "quiet_time_end": "Fin silence (Lun-Ven)",
-          "quiet_time_start_weekend": "Début silence (WE/JF)",
-          "quiet_time_end_weekend": "Fin silence (WE/JF)",
+          "name": "Nom de la piscine",
+          "water_volume": "Volume d'eau en litres",
+          "demo_mode": "Mode démo actif"
+        },
+        "data_description": {
+          "name": "Nom d'affichage pour cette installation de piscine",
+          "water_volume": "Volume d'eau en litres (utilisé pour le dosage du pH et les calculs de temps de chauffage)",
+          "demo_mode": "Mode démo: Ne commute pas les appareils réels (pour tests uniquement)"
+        }
+      },
+      "switches": {
+        "title": "Interrupteurs & Puissance",
+        "description": "Étape 2 sur 5",
+        "submit": "Continuer",
+        "data": {
+          "main_switch": "Interrupteur principal",
+          "aux_heating_switch": "Interrupteur chauffage auxiliaire",
+          "main_power_sensor": "Capteur puissance principal",
+          "aux_power_sensor": "Capteur puissance chauffage auxiliaire"
+        },
+        "data_description": {
+          "main_switch": "Interrupteur principal pour pompe de piscine (obligatoire)",
+          "aux_heating_switch": "Interrupteur pour chauffage auxiliaire électrique",
+          "main_power_sensor": "Capteur de puissance de la pompe principale en watts",
+          "aux_power_sensor": "Capteur de puissance du chauffage en watts"
+        }
+      },
+      "water_quality": {
+        "title": "Qualité de l'eau",
+        "description": "Étape 3 sur 5",
+        "submit": "Continuer",
+        "data": {
+          "temp_water_sensor": "Température de l'eau",
+          "temp_outdoor_sensor": "Température extérieure",
           "ph_sensor": "Capteur pH",
-          "chlorine_sensor": "Capteur chlore"
+          "chlorine_sensor": "Capteur chlore (redox)",
+          "salt_sensor": "Capteur sel",
+          "tds_sensor": "Capteur conductivité"
+        },
+        "data_description": {
+          "temp_water_sensor": "Capteur de température de l'eau de la piscine (obligatoire)",
+          "temp_outdoor_sensor": "Température extérieure pour protection gel et contrôle chauffage",
+          "ph_sensor": "Capteur de valeur pH (Blueriiot ou similaire)",
+          "chlorine_sensor": "Capteur redox pour mesure du chlore en mV",
+          "salt_sensor": "Capteur de teneur en sel pour piscines d'eau salée",
+          "tds_sensor": "Capteur de conductivité (TDS) pour qualité de l'eau"
+        }
+      },
+      "calendars": {
+        "title": "Calendriers & périodes de silence",
+        "description": "Étape 4 sur 6",
+        "submit": "Continuer",
+        "data": {
+          "pool_calendar": "Calendrier piscine",
+          "holiday_calendar": "Calendrier jours fériés",
+          "quiet_time_start": "Début silence (semaine)",
+          "quiet_time_end": "Fin silence (semaine)",
+          "quiet_time_start_weekend": "Début silence (week-end)",
+          "quiet_time_end_weekend": "Fin silence (week-end)"
+        },
+        "data_description": {
+          "pool_calendar": "Calendrier avec événements piscine (démarre automatiquement le mode baignade pour les rendez-vous)",
+          "holiday_calendar": "Calendrier des jours fériés (utilise les heures de silence du week-end les jours fériés)",
+          "quiet_time_start": "Début des heures silencieuses en semaine (ex. 22:00)",
+          "quiet_time_end": "Fin des heures silencieuses en semaine (ex. 07:00)",
+          "quiet_time_start_weekend": "Début des heures silencieuses le week-end (ex. 23:00)",
+          "quiet_time_end_weekend": "Fin des heures silencieuses le week-end (ex. 08:00)"
+        }
+      },
+      "filter": {
+        "title": "Paramètres du filtre",
+        "description": "Étape 5 sur 6",
+        "submit": "Continuer",
+        "data": {
+          "filter_interval_minutes": "Intervalle de filtration (minutes)"
+        },
+        "data_description": {
+          "filter_interval_minutes": "Intervalle de filtration automatique en minutes (par défaut: 720 = 12 heures, plage: 60 minutes à 7 jours)"
+        }
+      },
+      "pv": {
+        "title": "Capteur PV & seuils",
+        "description": "Étape 6 sur 6",
+        "submit": "Terminer",
+        "data": {
+          "pv_surplus_sensor": "Capteur excédent PV",
+          "pv_on_threshold": "Seuil PV ON (W)",
+          "pv_off_threshold": "Seuil PV OFF (W)"
+        },
+        "data_description": {
+          "pv_surplus_sensor": "Capteur pour excédent PV ou injection réseau en watts (négatif = consommation, positif = injection)",
+          "pv_on_threshold": "Allumer la pompe lorsque l'excédent dépasse cette valeur (par défaut: 1000W)",
+          "pv_off_threshold": "Éteindre la pompe lorsque l'excédent tombe en dessous de cette valeur (par défaut: 500W, hystérésis)"
         }
       }
     }

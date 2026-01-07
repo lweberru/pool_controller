@@ -37,8 +37,14 @@
           "tds_sensor": "Conductivity sensor"
         },
         "data_description": {
+          "temp_water_sensor": "Pool water temperature sensor (required)",
           "enable_frost_protection": "Automatically turns on pump when temperature drops below 3°C (requires outdoor temperature sensor)",
-          "enable_saltwater": "Enables saltwater-specific features and sensors"
+          "temp_outdoor_sensor": "Outdoor temperature for frost protection and heating control",
+          "ph_sensor": "pH value sensor (Blueriiot or similar)",
+          "chlorine_sensor": "Redox sensor for chlorine measurement in mV",
+          "enable_saltwater": "Enables saltwater-specific features and sensors",
+          "salt_sensor": "Salt content sensor for saltwater pools",
+          "tds_sensor": "Conductivity sensor (TDS) for water quality"
         }
       },
       "switches": {
@@ -53,8 +59,12 @@
           "aux_power_sensor": "Aux heater power sensor"
         },
         "data_description": {
+          "main_switch": "Main switch for pool pump (required)",
           "filter_switch": "Optional: Separate switch for filter pump (leave empty to use main switch)",
-          "enable_aux_heating": "Enables additional heating for faster warm-up"
+          "enable_aux_heating": "Enables additional heating for faster warm-up",
+          "aux_heating_switch": "Switch for electric auxiliary heater",
+          "main_power_sensor": "Main pump power sensor in watts",
+          "aux_power_sensor": "Heater power sensor in watts"
         }
       },
       "logic": {
@@ -81,6 +91,14 @@
           "quiet_time_end": "Quiet time end (weekday)",
           "quiet_time_start_weekend": "Quiet time start (weekend)",
           "quiet_time_end_weekend": "Quiet time end (weekend)"
+        },
+        "data_description": {
+          "pool_calendar": "Calendar with pool events (automatically starts bathing mode for appointments)",
+          "holiday_calendar": "Holiday calendar (uses weekend quiet times on holidays)",
+          "quiet_time_start": "Start of quiet hours on weekdays (e.g. 22:00)",
+          "quiet_time_end": "End of quiet hours on weekdays (e.g. 07:00)",
+          "quiet_time_start_weekend": "Start of quiet hours on weekends (e.g. 23:00)",
+          "quiet_time_end_weekend": "End of quiet hours on weekends (e.g. 08:00)"
         }
       },
       "filter": {
@@ -105,7 +123,10 @@
           "pv_off_threshold": "PV OFF threshold (W)"
         },
         "data_description": {
-          "enable_pv_optimization": "Uses PV surplus for intelligent heating control (only with sufficient solar production)"
+          "enable_pv_optimization": "Uses PV surplus for intelligent heating control (only with sufficient solar production)",
+          "pv_surplus_sensor": "Sensor for PV surplus or grid feed-in in watts (negative = consumption, positive = feed-in)",
+          "pv_on_threshold": "Turn on pump when surplus exceeds this value (default: 1000W)",
+          "pv_off_threshold": "Turn off pump when surplus falls below this value (default: 500W, hysteresis)"
         }
       }
     }
@@ -120,6 +141,11 @@
           "name": "Pool name",
           "water_volume": "Water volume in liters",
           "demo_mode": "Demo mode active"
+        },
+        "data_description": {
+          "name": "Display name for this pool installation",
+          "water_volume": "Water volume in liters (used for pH dosing and heating time calculations)",
+          "demo_mode": "Demo mode: Does not switch real devices (for testing only)"
         }
       },
       "switches": {
@@ -131,6 +157,12 @@
           "aux_heating_switch": "Auxiliary heater switch",
           "main_power_sensor": "Main power sensor",
           "aux_power_sensor": "Aux heater power sensor"
+        },
+        "data_description": {
+          "main_switch": "Main switch for pool pump (required)",
+          "aux_heating_switch": "Switch for electric auxiliary heater",
+          "main_power_sensor": "Main pump power sensor in watts",
+          "aux_power_sensor": "Heater power sensor in watts"
         }
       },
       "water_quality": {
@@ -144,6 +176,14 @@
           "chlorine_sensor": "Chlorine (redox) sensor",
           "salt_sensor": "Salt sensor",
           "tds_sensor": "Conductivity sensor"
+        },
+        "data_description": {
+          "temp_water_sensor": "Pool water temperature sensor (required)",
+          "temp_outdoor_sensor": "Outdoor temperature for frost protection and heating control",
+          "ph_sensor": "pH value sensor (Blueriiot or similar)",
+          "chlorine_sensor": "Redox sensor for chlorine measurement in mV",
+          "salt_sensor": "Salt content sensor for saltwater pools",
+          "tds_sensor": "Conductivity sensor (TDS) for water quality"
         }
       },
       "calendars": {
@@ -157,6 +197,14 @@
           "quiet_time_end": "Quiet time end (weekday)",
           "quiet_time_start_weekend": "Quiet time start (weekend)",
           "quiet_time_end_weekend": "Quiet time end (weekend)"
+        },
+        "data_description": {
+          "pool_calendar": "Calendar with pool events (automatically starts bathing mode for appointments)",
+          "holiday_calendar": "Holiday calendar (uses weekend quiet times on holidays)",
+          "quiet_time_start": "Start of quiet hours on weekdays (e.g. 22:00)",
+          "quiet_time_end": "End of quiet hours on weekdays (e.g. 07:00)",
+          "quiet_time_start_weekend": "Start of quiet hours on weekends (e.g. 23:00)",
+          "quiet_time_end_weekend": "End of quiet hours on weekends (e.g. 08:00)"
         }
       },
       "filter": {
@@ -178,6 +226,11 @@
           "pv_surplus_sensor": "PV surplus sensor",
           "pv_on_threshold": "PV ON threshold (W)",
           "pv_off_threshold": "PV OFF threshold (W)"
+        },
+        "data_description": {
+          "pv_surplus_sensor": "Sensor for PV surplus or grid feed-in in watts (negative = consumption, positive = feed-in)",
+          "pv_on_threshold": "Turn on pump when surplus exceeds this value (default: 1000W)",
+          "pv_off_threshold": "Turn off pump when surplus falls below this value (default: 500W, hysteresis)"
         }
       }
     }
