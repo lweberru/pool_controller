@@ -27,11 +27,17 @@
         "submit": "Weiter",
         "data": {
           "temp_water_sensor": "Wassertemperatur",
+          "enable_frost_protection": "Frostschutz aktivieren",
           "temp_outdoor_sensor": "Außentemperatur",
           "ph_sensor": "pH-Wert Sensor",
           "chlorine_sensor": "Chlorgehalt (Redox) Sensor",
+          "enable_saltwater": "Salzwasserpool",
           "salt_sensor": "Salzgehalt Sensor",
           "tds_sensor": "Leitfähigkeit Sensor"
+        },
+        "data_description": {
+          "enable_frost_protection": "Schaltet Pumpe automatisch bei Temperaturen unter 3°C ein (benötigt Außentemperatur-Sensor)",
+          "enable_saltwater": "Aktiviert Salzwasser-spezifische Funktionen und Sensoren"
         }
       },
       "switches": {
@@ -39,9 +45,15 @@
         "submit": "Weiter",
         "data": {
           "main_switch": "Hauptschalter",
+          "filter_switch": "Filter-Schalter (leer = Hauptschalter verwenden)",
+          "enable_aux_heating": "Zusatzheizung aktivieren",
           "aux_heating_switch": "Zusatzheizung Schalter",
           "main_power_sensor": "Haupt-Leistungssensor",
           "aux_power_sensor": "Zusatzheizung Leistungssensor"
+        },
+        "data_description": {
+          "filter_switch": "Optional: Separater Schalter für Filterpumpe (leer lassen um Hauptschalter zu nutzen)",
+          "enable_aux_heating": "Aktiviert zusätzliche Heizung für schnelleres Aufheizen"
         }
       },
       "logic": {
@@ -69,13 +81,29 @@
           "quiet_time_end_weekend": "Ruhezeit Ende (Wochenende)"
         }
       },
+      "filter": {
+        "title": "Filter-Einstellungen",
+        "submit": "Weiter",
+        "data": {
+          "enable_auto_filter": "Automatische Filterung aktivieren",
+          "filter_interval_minutes": "Filter-Intervall (Minuten)"
+        },
+        "data_description": {
+          "enable_auto_filter": "Startet automatisch Filterzyklen im konfigurierten Intervall (respektiert Ruhezeiten)",
+          "filter_interval_minutes": "Automatisches Filterintervall in Minuten (Standard: 720 = 12 Stunden, Bereich: 60 Minuten bis 7 Tage)"
+        }
+      },
       "pv": {
         "title": "PV Sensor & Schwellen",
         "submit": "Abschließen",
         "data": {
+          "enable_pv_optimization": "PV-Optimierung aktivieren",
           "pv_surplus_sensor": "PV-Überschuss Sensor",
           "pv_on_threshold": "PV ON Schwelle (W)",
           "pv_off_threshold": "PV OFF Schwelle (W)"
+        },
+        "data_description": {
+          "enable_pv_optimization": "Nutzt PV-Überschuss für intelligente Heizungssteuerung (nur bei ausreichend Solarproduktion)"
         }
       }
     }
@@ -129,9 +157,20 @@
           "quiet_time_end_weekend": "Ruhezeit Ende (Wochenende)"
         }
       },
+      "filter": {
+        "title": "Filter-Einstellungen",
+        "description": "Schritt 5 von 6",
+        "submit": "Weiter",
+        "data": {
+          "filter_interval_minutes": "Filter-Intervall (Minuten)"
+        },
+        "data_description": {
+          "filter_interval_minutes": "Automatisches Filterintervall in Minuten (Standard: 720 = 12 Stunden, Bereich: 60 Minuten bis 7 Tage)"
+        }
+      },
       "pv": {
         "title": "PV Sensor & Schwellen",
-        "description": "Schritt 5 von 5",
+        "description": "Schritt 6 von 6",
         "submit": "Abschließen",
         "data": {
           "pv_surplus_sensor": "PV-Überschuss Sensor",

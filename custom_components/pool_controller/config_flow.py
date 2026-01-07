@@ -36,6 +36,8 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="switches",
             data_schema=vol.Schema({
                 vol.Required(CONF_MAIN_SWITCH, default=DEFAULT_MAIN_SW): selector.EntitySelector(selector.EntitySelectorConfig(domain="switch")),
+                vol.Optional(CONF_FILTER_SWITCH, default=""): selector.EntitySelector(selector.EntitySelectorConfig(domain="switch")),
+                vol.Optional(CONF_ENABLE_AUX_HEATING, default=False): bool,
                 vol.Optional(CONF_AUX_HEATING_SWITCH, default=DEFAULT_AUX_SW): selector.EntitySelector(selector.EntitySelectorConfig(domain="switch")),
                 vol.Optional(CONF_MAIN_POWER_SENSOR, default=DEFAULT_MAIN_POWER_SENS): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="power")),
                 vol.Optional(CONF_AUX_POWER_SENSOR, default=DEFAULT_AUX_POWER_SENS): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="power")),
@@ -52,9 +54,11 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="water_quality",
             data_schema=vol.Schema({
                 vol.Required(CONF_TEMP_WATER, default=DEFAULT_TEMP_WATER): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="temperature")),
-                vol.Required(CONF_TEMP_OUTDOOR, default=DEFAULT_TEMP_OUTDOOR): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="temperature")),
+                vol.Optional(CONF_ENABLE_FROST_PROTECTION, default=True): bool,
+                vol.Optional(CONF_TEMP_OUTDOOR, default=DEFAULT_TEMP_OUTDOOR): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="temperature")),
                 vol.Optional(CONF_PH_SENSOR, default=DEFAULT_PH_SENS): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
                 vol.Optional(CONF_CHLORINE_SENSOR, default=DEFAULT_CHLOR_SENS): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+                vol.Optional(CONF_ENABLE_SALTWATER, default=False): bool,
                 vol.Optional(CONF_SALT_SENSOR, default=DEFAULT_SALT_SENS): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
                 vol.Optional(CONF_TDS_SENSOR, default=DEFAULT_TDS_SENS): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
             }),
@@ -66,7 +70,7 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
         if user_input is not None:
             self.data.update(user_input)
-            return await self.async_step_pv()
+            return await self.async_step_filter()
 
         return self.async_show_form(
             step_id="calendars",
@@ -82,8 +86,28 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             last_step=False
         )
 
+    async def async_step_filter(self, user_input=None):
+        """Fifth step: filter interval settings."""
+        errors = {}
+        if user_input is not None:
+            self.data.update(user_input)
+            return await self.async_step_pv()
+
+        return self.async_show_form(
+            step_id="filter",
+            errors=errors,
+            data_schema=vol.Schema({
+                vol.Optional(CONF_ENABLE_AUTO_FILTER, default=True): bool,
+                vol.Required(CONF_FILTER_INTERVAL, default=DEFAULT_FILTER_INTERVAL): vol.All(
+                    vol.Coerce(int),
+                    vol.Range(min=60, max=7*24*60)  # 1 Stunde bis 7 Tage
+                ),
+            }),
+            last_step=False
+        )
+
     async def async_step_pv(self, user_input=None):
-        """Fifth step: PV sensor and thresholds."""
+        """Sixth step: PV sensor and thresholds."""
         errors = {}
         if user_input is not None:
             try:
@@ -98,6 +122,7 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="pv",
             errors=errors,
             data_schema=vol.Schema({
+                vol.Optional(CONF_ENABLE_PV_OPTIMIZATION, default=False): bool,
                 vol.Optional(CONF_PV_SURPLUS_SENSOR, default=curr.get(CONF_PV_SURPLUS_SENSOR, DEFAULT_PV_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
                 vol.Optional(CONF_PV_ON_THRESHOLD, default=curr.get(CONF_PV_ON_THRESHOLD, DEFAULT_PV_ON)): vol.Coerce(int),
                 vol.Optional(CONF_PV_OFF_THRESHOLD, default=curr.get(CONF_PV_OFF_THRESHOLD, DEFAULT_PV_OFF)): vol.Coerce(int),
@@ -173,7 +198,7 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
         """Fourth step: calendars and quiet times."""
         if user_input is not None:
             self.options.update(user_input)
-            return await self.async_step_pv()
+            return await self.async_step_filter()
 
         curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
         return self.async_show_form(
@@ -189,8 +214,26 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
             last_step=False
         )
 
+    async def async_step_filter(self, user_input=None):
+        """Fifth step: filter interval settings."""
+        if user_input is not None:
+            self.options.update(user_input)
+            return await self.async_step_pv()
+
+        curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
+        return self.async_show_form(
+            step_id="filter",
+            data_schema=vol.Schema({
+                vol.Required(CONF_FILTER_INTERVAL, default=curr.get(CONF_FILTER_INTERVAL, DEFAULT_FILTER_INTERVAL)): vol.All(
+                    vol.Coerce(int),
+                    vol.Range(min=60, max=7*24*60)
+                ),
+            }),
+            last_step=False
+        )
+
     async def async_step_pv(self, user_input=None):
-        """Fifth step: PV sensor and thresholds."""
+        """Sixth step: PV sensor and thresholds."""
         errors = {}
         if user_input is not None:
             try:

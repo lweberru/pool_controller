@@ -28,11 +28,17 @@
         "submit": "Continue",
         "data": {
           "temp_water_sensor": "Water temperature",
+          "enable_frost_protection": "Enable frost protection",
           "temp_outdoor_sensor": "Outdoor temperature",
           "ph_sensor": "pH sensor",
           "chlorine_sensor": "Chlorine (redox) sensor",
+          "enable_saltwater": "Saltwater pool",
           "salt_sensor": "Salt sensor",
           "tds_sensor": "Conductivity sensor"
+        },
+        "data_description": {
+          "enable_frost_protection": "Automatically turns on pump when temperature drops below 3°C (requires outdoor temperature sensor)",
+          "enable_saltwater": "Enables saltwater-specific features and sensors"
         }
       },
       "switches": {
@@ -40,9 +46,15 @@
         "submit": "Continue",
         "data": {
           "main_switch": "Main switch",
+          "filter_switch": "Filter switch (empty = use main switch)",
+          "enable_aux_heating": "Enable auxiliary heating",
           "aux_heating_switch": "Auxiliary heater switch",
           "main_power_sensor": "Main power sensor",
           "aux_power_sensor": "Aux heater power sensor"
+        },
+        "data_description": {
+          "filter_switch": "Optional: Separate switch for filter pump (leave empty to use main switch)",
+          "enable_aux_heating": "Enables additional heating for faster warm-up"
         }
       },
       "logic": {
@@ -71,13 +83,29 @@
           "quiet_time_end_weekend": "Quiet time end (weekend)"
         }
       },
+      "filter": {
+        "title": "Filter Settings",
+        "submit": "Continue",
+        "data": {
+          "enable_auto_filter": "Enable automatic filtering",
+          "filter_interval_minutes": "Filter interval (minutes)"
+        },
+        "data_description": {
+          "enable_auto_filter": "Automatically starts filter cycles at configured interval (respects quiet hours)",
+          "filter_interval_minutes": "Automatic filter interval in minutes (default: 720 = 12 hours, range: 60 minutes to 7 days)"
+        }
+      },
       "pv": {
         "title": "PV Sensor & Thresholds",
         "submit": "Finish",
         "data": {
+          "enable_pv_optimization": "Enable PV optimization",
           "pv_surplus_sensor": "PV surplus sensor",
           "pv_on_threshold": "PV ON threshold (W)",
           "pv_off_threshold": "PV OFF threshold (W)"
+        },
+        "data_description": {
+          "enable_pv_optimization": "Uses PV surplus for intelligent heating control (only with sufficient solar production)"
         }
       }
     }
@@ -120,7 +148,7 @@
       },
       "calendars": {
         "title": "Calendars & Quiet Times",
-        "description": "Step 4 of 5",
+        "description": "Step 4 of 6",
         "submit": "Continue",
         "data": {
           "pool_calendar": "Pool calendar",
@@ -131,9 +159,20 @@
           "quiet_time_end_weekend": "Quiet time end (weekend)"
         }
       },
+      "filter": {
+        "title": "Filter Settings",
+        "description": "Step 5 of 6",
+        "submit": "Continue",
+        "data": {
+          "filter_interval_minutes": "Filter interval (minutes)"
+        },
+        "data_description": {
+          "filter_interval_minutes": "Automatic filter interval in minutes (default: 720 = 12 hours, range: 60 minutes to 7 days)"
+        }
+      },
       "pv": {
         "title": "PV Sensor & Thresholds",
-        "description": "Step 5 of 5",
+        "description": "Step 6 of 6",
         "submit": "Finish",
         "data": {
           "pv_surplus_sensor": "PV surplus sensor",

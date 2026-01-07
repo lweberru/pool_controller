@@ -24,9 +24,11 @@
         "title": "Calidad del agua (ESP32)",
         "data": {
           "temp_water_sensor": "Temperatura del agua",
+          "enable_frost_protection": "Activar protección contra heladas",
           "temp_outdoor_sensor": "Temperatura exterior",
           "ph_sensor": "Sensor de pH",
           "chlorine_sensor": "Sensor de cloro (redox)",
+          "enable_saltwater": "Piscina de agua salada",
           "salt_sensor": "Sensor de sal",
           "tds_sensor": "Sensor de conductividad"
         }
@@ -35,6 +37,8 @@
         "title": "Interruptores y potencia",
         "data": {
           "main_switch": "Interruptor principal",
+          "filter_switch": "Interruptor del filtro (vacío = usar principal)",
+          "enable_aux_heating": "Activar calefacción auxiliar",
           "aux_heating_switch": "Interruptor calefacción auxiliar",
           "main_power_sensor": "Sensor de potencia principal",
           "aux_power_sensor": "Sensor de potencia calefacción auxiliar"
@@ -63,9 +67,18 @@
           "quiet_time_end_weekend": "Fin silencio (fin de semana)"
         }
       },
+      "filter": {
+        "title": "Configuración del filtro",
+        "submit": "Continuar",
+        "data": {
+          "enable_auto_filter": "Activar filtración automática",
+          "filter_interval_minutes": "Intervalo de filtro (minutos)"
+        }
+      },
       "pv": {
         "title": "Sensor PV y umbrales",
         "data": {
+          "enable_pv_optimization": "Activar optimización PV",
           "pv_surplus_sensor": "Sensor de excedente PV",
           "pv_on_threshold": "Umbral PV ON (W)",
           "pv_off_threshold": "Umbral PV OFF (W)"

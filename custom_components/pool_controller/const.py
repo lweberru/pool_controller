@@ -7,6 +7,7 @@ MANUFACTURER = "lweberru"
 CONF_POOL_NAME = "name"
 CONF_WATER_VOLUME = "water_volume"
 CONF_MAIN_SWITCH = "main_switch"
+CONF_FILTER_SWITCH = "filter_switch"  # Optional: separater Filter-Schalter
 CONF_TEMP_WATER = "temp_water_sensor"
 CONF_TEMP_OUTDOOR = "temp_outdoor_sensor"
 CONF_AUX_HEATING_SWITCH = "aux_heating_switch"
@@ -25,6 +26,13 @@ CONF_QUIET_START_WEEKEND = "quiet_time_start_weekend"
 CONF_QUIET_END_WEEKEND = "quiet_time_end_weekend"
 CONF_DEMO_MODE = "demo_mode"
 
+# Feature-Toggles (aktivieren/deaktivieren von Funktionen)
+CONF_ENABLE_AUTO_FILTER = "enable_auto_filter"
+CONF_ENABLE_PV_OPTIMIZATION = "enable_pv_optimization"
+CONF_ENABLE_SALTWATER = "enable_saltwater"
+CONF_ENABLE_AUX_HEATING = "enable_aux_heating"
+CONF_ENABLE_FROST_PROTECTION = "enable_frost_protection"
+
 # Bathing timer
 CONF_BATH_DURATION = "bathing_minutes"
 DEFAULT_BATH_MINUTES = 60
@@ -32,7 +40,7 @@ DEFAULT_BATH_MINUTES = 60
 CONF_FILTER_DURATION = "filter_minutes"
 CONF_FILTER_INTERVAL = "filter_interval_minutes"
 DEFAULT_FILTER_DURATION = 30
-DEFAULT_FILTER_INTERVAL = 24 * 60
+DEFAULT_FILTER_INTERVAL = 12 * 60  # 12 hours = 720 minutes
 
 # PV thresholds (in Watts or sensor units)
 CONF_PV_ON_THRESHOLD = "pv_on_threshold"

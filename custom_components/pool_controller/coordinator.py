@@ -51,10 +51,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 except Exception:
                     self.next_filter_start = None
             # PV thresholds and filter config
-            self.filter_minutes = int(entry.options.get(CONF_FILTER_DURATION, DEFAULT_FILTER_DURATION))
-            self.filter_interval = int(entry.options.get(CONF_FILTER_INTERVAL, DEFAULT_FILTER_INTERVAL))
-            self.pv_on_threshold = int(entry.options.get(CONF_PV_ON_THRESHOLD, DEFAULT_PV_ON))
-            self.pv_off_threshold = int(entry.options.get(CONF_PV_OFF_THRESHOLD, DEFAULT_PV_OFF))
+            self.filter_minutes = int(entry.options.get(CONF_FILTER_DURATION, entry.data.get(CONF_FILTER_DURATION, DEFAULT_FILTER_DURATION)))
+            self.filter_interval = int(entry.options.get(CONF_FILTER_INTERVAL, entry.data.get(CONF_FILTER_INTERVAL, DEFAULT_FILTER_INTERVAL)))
+            self.pv_on_threshold = int(entry.options.get(CONF_PV_ON_THRESHOLD, entry.data.get(CONF_PV_ON_THRESHOLD, DEFAULT_PV_ON)))
+            self.pv_off_threshold = int(entry.options.get(CONF_PV_OFF_THRESHOLD, entry.data.get(CONF_PV_OFF_THRESHOLD, DEFAULT_PV_OFF)))
         else:
             self.filter_until = None
             self.next_filter_start = None
@@ -150,7 +150,9 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             aux_power = self._get_float(conf.get(CONF_AUX_POWER_SENSOR))
             
             # 1. Frost & Wochenende
-            frost_danger = outdoor_temp is not None and outdoor_temp < 3.0
+            # Frostschutz nur wenn aktiviert UND Outdoor-Sensor vorhanden
+            enable_frost = conf.get(CONF_ENABLE_FROST_PROTECTION, True)
+            frost_danger = enable_frost and outdoor_temp is not None and outdoor_temp < 3.0
             is_holiday = await self._check_holiday(conf.get(CONF_HOLIDAY_CALENDAR))
             we_or_holiday = is_holiday or (now.weekday() >= 5)
 
@@ -214,9 +216,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             if getattr(self, "next_filter_start", None):
                 next_filter_mins = max(0, round((self.next_filter_start - now).total_seconds() / 60))
             # PV sensor logic
-            pv_val = self._get_float(conf.get(CONF_PV_SURPLUS_SENSOR))
+            enable_pv = conf.get(CONF_ENABLE_PV_OPTIMIZATION, False)
+            pv_val = self._get_float(conf.get(CONF_PV_SURPLUS_SENSOR)) if enable_pv else None
             pv_allows = False
-            if pv_val is not None:
+            if enable_pv and pv_val is not None:
                 if pv_val >= getattr(self, "pv_on_threshold", DEFAULT_PV_ON):
                     pv_allows = True
                 elif pv_val <= getattr(self, "pv_off_threshold", DEFAULT_PV_OFF):
@@ -267,8 +270,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "filter_active": filter_active,
                 "filter_until": getattr(self, "filter_until", None),
                 "next_filter_mins": next_filter_mins,
-                # Aux-Heizung einschalten, wenn Temperatur signifikant unter Ziel liegt
-                "should_aux_on": (delta_t > 1.0),
+                # Aux-Heizung einschalten, wenn aktiviert UND Temperatur signifikant unter Ziel liegt
+                "should_aux_on": conf.get(CONF_ENABLE_AUX_HEATING, False) and (delta_t > 1.0),
                 "pv_allows": pv_allows,
                 "in_quiet": in_quiet,
                 "main_power": round(main_power, 1) if main_power is not None else None,
@@ -301,9 +304,11 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                             await self.activate_bathing(minutes=remaining_min)
 
                 # Auto-start filter when next_filter_start reached
-                if getattr(self, "next_filter_start", None) and now >= self.next_filter_start and not filter_active:
+                enable_auto_filter = conf.get(CONF_ENABLE_AUTO_FILTER, True)
+                if enable_auto_filter and getattr(self, "next_filter_start", None) and now >= self.next_filter_start and not filter_active:
                     # only start if not in quiet and PV allows (or PV not configured)
-                    if (not in_quiet) and (pv_allows or conf.get(CONF_PV_SURPLUS_SENSOR) is None):
+                    pv_check = pv_allows or not conf.get(CONF_ENABLE_PV_OPTIMIZATION, False)
+                    if (not in_quiet) and pv_check:
                         await self.activate_filter(minutes=self.filter_minutes)
 
                 # Toggle main switch according to desired state
