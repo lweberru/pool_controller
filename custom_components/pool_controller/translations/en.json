@@ -231,6 +231,7 @@
       "next_event": {"name": "Next event start"},
       "next_filter_mins": {"name": "Next filter cycle in"},
       "pause_until": {"name": "Paused until"},
+      "quick_chlorine_until": {"name": "Quick Chlorine Until"},
       "bathing_until": {"name": "Bathing until"},
       "filter_until": {"name": "Filter cycle until"},
       "next_event_end": {"name": "Next event end"},

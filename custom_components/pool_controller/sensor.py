@@ -17,6 +17,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     # Timer/Status sensors
     entities.extend([
         PoolTimeSensor(coordinator, "pause_until", "Pause Until"),
+        PoolTimeSensor(coordinator, "quick_chlorine_until", "Quick Chlorine Until"),
         PoolTimeSensor(coordinator, "bathing_until", "Bathing Until"),
         PoolTimeSensor(coordinator, "filter_until", "Filter Until"),
         PoolChemSensor(coordinator, "next_filter_mins", "Nächster Filter in", "min", "mdi:clock-start"),

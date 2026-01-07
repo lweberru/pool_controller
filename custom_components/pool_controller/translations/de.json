@@ -230,6 +230,7 @@
       "next_event": {"name": "Nächster Event Start"},
       "next_filter_mins": {"name": "Nächster Filter-Zyklus in"},
       "pause_until": {"name": "Pause bis"},
+      "quick_chlorine_until": {"name": "Stoßchlorung bis"},
       "bathing_until": {"name": "Badesession bis"},
       "filter_until": {"name": "Filter-Zyklus bis"},
       "next_event_end": {"name": "Nächster Event Ende"},

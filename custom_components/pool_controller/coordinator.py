@@ -264,6 +264,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "is_paused": self.pause_until is not None and now < self.pause_until,
                 "pause_until": self.pause_until,
                 "is_quick_chlor": self.quick_chlorine_until is not None and now < self.quick_chlorine_until,
+                "quick_chlorine_until": self.quick_chlorine_until,
                 # Priorisiere Stoßchlorung: wenn active, Main sollte an sein (5 Minuten Button-Press)
                 "is_bathing": bathing_active,
                 "bathing_until": self.bathing_until,
