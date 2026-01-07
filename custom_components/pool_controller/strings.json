@@ -1,140 +1,333 @@
 {
   "config": {
-    "error": {
-      "cannot_connect": "Verbindung fehlgeschlagen",
-      "unknown": "Unerwarteter Fehler - bitte HA-Logs prüfen!",
-      "invalid_time": "Zeitformat ungültig (bitte HH:MM nutzen)"
-    },
     "step": {
       "user": {
-        "title": "Basis-Setup",
+        "title": "Basic setup",
+        "description": "Basic settings for your pool. Click 'Cancel' to abort at any time.",
+        "submit": "Continue",
         "data": {
-          "name": "Name des Whirlpools",
-          "main_switch": "Hauptschalter (Steckdose)",
-          "water_volume": "Wassermenge in Litern",
-          "demo_mode": "Demo-Modus aktiv"
+          "name": "Pool name",
+          "main_switch": "Main switch (outlet)",
+          "water_volume": "Water volume in liters",
+          "demo_mode": "Demo mode active"
         }
       },
       "heating": {
-        "title": "Heizung & Power",
+        "title": "Heating & Power",
+        "submit": "Continue",
         "data": {
-          "temp_water_sensor": "Wassertemperatur",
-          "temp_outdoor_sensor": "Außentemperatur",
-          "aux_heating_switch": "Zusatzheizung Schalter",
-          "main_power_sensor": "Leistungssensor Pool",
-          "aux_power_sensor": "Leistungssensor Heizung"
+          "temp_water_sensor": "Water temperature",
+          "temp_outdoor_sensor": "Outdoor temperature",
+          "aux_heating_switch": "Auxiliary heater switch",
+          "main_power_sensor": "Pool power sensor",
+          "aux_power_sensor": "Heater power sensor"
         }
       },
       "water_quality": {
-        "title": "Wasserqualität (ESP32)",
+        "title": "Water quality (ESP32)",
+        "submit": "Continue",
         "data": {
-          "temp_water_sensor": "Wassertemperatur",
-          "temp_outdoor_sensor": "Außentemperatur",
-          "ph_sensor": "pH-Wert Sensor",
-          "chlorine_sensor": "Chlorgehalt (Redox) Sensor",
-          "salt_sensor": "Salzgehalt Sensor",
-          "tds_sensor": "Leitfähigkeit Sensor"
+          "temp_water_sensor": "Water temperature",
+          "enable_frost_protection": "Frost protection",
+          "temp_outdoor_sensor": "Outdoor temperature",
+          "ph_sensor": "pH sensor",
+          "chlorine_sensor": "Chlorine (redox) sensor",
+          "enable_saltwater": "Saltwater pool",
+          "salt_sensor": "Salt sensor",
+          "tds_sensor": "Conductivity sensor"
+        },
+        "data_description": {
+          "temp_water_sensor": "Pool water temperature sensor (required)",
+          "enable_frost_protection": "Automatically turns on pump when temperature drops below 3°C (requires outdoor temperature sensor)",
+          "temp_outdoor_sensor": "Outdoor temperature for frost protection and heating control",
+          "ph_sensor": "pH value sensor (Blueriiot or similar)",
+          "chlorine_sensor": "Redox sensor for chlorine measurement in mV",
+          "enable_saltwater": "Enables saltwater-specific features and sensors",
+          "salt_sensor": "Salt content sensor for saltwater pools",
+          "tds_sensor": "Conductivity sensor (TDS) for water quality"
         }
       },
       "switches": {
-        "title": "Schalter & Leistung",
+        "title": "Switches & Power",
+        "submit": "Continue",
         "data": {
-          "main_switch": "Hauptschalter",
-          "aux_heating_switch": "Zusatzheizung Schalter",
-          "main_power_sensor": "Haupt-Leistungssensor",
-          "aux_power_sensor": "Zusatzheizung Leistungssensor"
+          "main_switch": "Main switch",
+          "filter_switch": "Filter switch (empty = use main switch)",
+          "enable_aux_heating": "Auxiliary heating",
+          "aux_heating_switch": "Auxiliary heater switch",
+          "main_power_sensor": "Main power sensor",
+          "aux_power_sensor": "Aux heater power sensor"
+        },
+        "data_description": {
+          "main_switch": "Main switch for pool pump (required)",
+          "filter_switch": "Optional: Separate switch for filter pump (leave empty to use main switch)",
+          "enable_aux_heating": "Enables additional heating for faster warm-up",
+          "aux_heating_switch": "Switch for electric auxiliary heater",
+          "main_power_sensor": "Main pump power sensor in watts",
+          "aux_power_sensor": "Heater power sensor in watts"
+        }
+      },
+      "logic": {
+        "title": "Logic & times",
+        "submit": "Continue",
+        "data": {
+          "pool_calendar": "Pool calendar",
+          "holiday_calendar": "Holiday calendar",
+          "pv_surplus_sensor": "PV production sensor",
+          "quiet_time_start": "Quiet time weekday start",
+          "quiet_time_end": "Quiet time weekday end",
+          "quiet_time_start_weekend": "Quiet time weekend/holiday start",
+          "quiet_time_end_weekend": "Quiet time weekend/holiday end"
         }
       },
       "calendars": {
-        "title": "Kalender & Ruhezeiten",
+        "title": "Calendars & Quiet Times",
+        "submit": "Continue",
         "data": {
-          "pool_calendar": "Pool Kalender",
-          "holiday_calendar": "Feiertags Kalender",
-          "quiet_time_start": "Ruhezeit Start (Wochentag)",
-          "quiet_time_end": "Ruhezeit Ende (Wochentag)",
-          "quiet_time_start_weekend": "Ruhezeit Start (Wochenende)",
-          "quiet_time_end_weekend": "Ruhezeit Ende (Wochenende)"
+          "pool_calendar": "Pool calendar",
+          "holiday_calendar": "Holiday calendar",
+          "quiet_time_start": "Quiet time start (weekday)",
+          "quiet_time_end": "Quiet time end (weekday)",
+          "quiet_time_start_weekend": "Quiet time start (weekend)",
+          "quiet_time_end_weekend": "Quiet time end (weekend)"
+        },
+        "data_description": {
+          "pool_calendar": "Calendar with pool events (automatically starts bathing mode for appointments)",
+          "holiday_calendar": "Holiday calendar (uses weekend quiet times on holidays)",
+          "quiet_time_start": "Start of quiet hours on weekdays (e.g. 22:00)",
+          "quiet_time_end": "End of quiet hours on weekdays (e.g. 07:00)",
+          "quiet_time_start_weekend": "Start of quiet hours on weekends (e.g. 23:00)",
+          "quiet_time_end_weekend": "End of quiet hours on weekends (e.g. 08:00)"
+        }
+      },
+      "filter": {
+        "title": "Filter Settings",
+        "submit": "Continue",
+        "data": {
+          "enable_auto_filter": "Automatic filtering",
+          "filter_interval_minutes": "Filter interval (minutes)"
+        },
+        "data_description": {
+          "enable_auto_filter": "Automatically starts filter cycles at configured interval (respects quiet hours and PV availability)",
+          "filter_interval_minutes": "Automatic filter interval in minutes (default: 720 = 12 hours, range: 60 minutes to 7 days)"
         }
       },
       "pv": {
-        "title": "PV Sensor & Schwellen",
+        "title": "PV Sensor & Thresholds",
+        "submit": "Finish",
         "data": {
-          "pv_surplus_sensor": "PV-Überschuss Sensor",
-          "pv_on_threshold": "PV ON Schwelle (W)",
-          "pv_off_threshold": "PV OFF Schwelle (W)"
+          "enable_pv_optimization": "PV optimization",
+          "pv_surplus_sensor": "PV surplus sensor",
+          "pv_on_threshold": "PV ON threshold (W)",
+          "pv_off_threshold": "PV OFF threshold (W)"
+        },
+        "data_description": {
+          "enable_pv_optimization": "Uses PV surplus for intelligent pump control (only with sufficient solar production)",
+          "pv_surplus_sensor": "Sensor for PV surplus or grid feed-in in watts (negative = consumption, positive = feed-in)",
+          "pv_on_threshold": "Turn on pump when surplus exceeds this value (default: 1000W)",
+          "pv_off_threshold": "Turn off pump when surplus falls below this value (default: 500W, hysteresis)"
         }
       }
     }
   },
   "options": {
-    "error": {
-      "unknown": "Fehler beim Speichern - bitte HA-Logs prüfen!"
-    },
     "step": {
       "init": {
-        "title": "Whirlpool Einstellungen ändern",
+        "title": "Pool Settings",
+        "description": "Step 1 of 5 - Basic settings",
+        "submit": "Continue",
         "data": {
-          "water_volume": "Wassermenge (Liter)",
-          "quiet_time_start": "Ruhezeit Start (Mo-Fr)",
-          "quiet_time_end": "Ruhezeit Ende (Mo-Fr)",
-          "quiet_time_start_weekend": "Ruhezeit Start (WE/FT)",
-          "quiet_time_end_weekend": "Ruhezeit Ende (WE/FT)",
-          "ph_sensor": "pH Sensor",
-          "chlorine_sensor": "Chlor Sensor"
+          "name": "Pool name",
+          "water_volume": "Water volume in liters",
+          "demo_mode": "Demo mode active"
+        },
+        "data_description": {
+          "name": "Display name for this pool installation",
+          "water_volume": "Water volume in liters (used for pH dosing and heating time calculations)",
+          "demo_mode": "Demo mode: Does not switch real devices (for testing only)"
+        }
+      },
+      "switches": {
+        "title": "Switches & Power",
+        "description": "Step 2 of 5",
+        "submit": "Continue",
+        "data": {
+          "main_switch": "Main switch",
+          "filter_switch": "Filter switch",
+          "enable_aux_heating": "Auxiliary heating",
+          "aux_heating_switch": "Auxiliary heater switch",
+          "main_power_sensor": "Main power sensor",
+          "aux_power_sensor": "Aux heater power sensor"
+        },
+        "data_description": {
+          "main_switch": "Main switch for pool pump (required)",
+          "filter_switch": "Optional: Separate switch for filter pump (leave empty to use main switch)",
+          "enable_aux_heating": "Enables auxiliary heater for faster heating",
+          "aux_heating_switch": "Switch for electric auxiliary heater",
+          "main_power_sensor": "Main pump power sensor in watts",
+          "aux_power_sensor": "Heater power sensor in watts"
+        }
+      },
+      "water_quality": {
+        "title": "Water Quality",
+        "description": "Step 3 of 5",
+        "submit": "Continue",
+        "data": {
+          "temp_water_sensor": "Water temperature",
+          "enable_frost_protection": "Frost protection",
+          "temp_outdoor_sensor": "Outdoor temperature",
+          "ph_sensor": "pH sensor",
+          "chlorine_sensor": "Chlorine (redox) sensor",
+          "enable_saltwater": "Saltwater pool",
+          "salt_sensor": "Salt sensor",
+          "tds_sensor": "Conductivity sensor"
+        },
+        "data_description": {
+          "temp_water_sensor": "Pool water temperature sensor (required)",
+          "enable_frost_protection": "Automatically turns on pump when temperature drops below 3°C (requires outdoor temperature sensor)",
+          "temp_outdoor_sensor": "Outdoor temperature for frost protection and heating control",
+          "ph_sensor": "pH value sensor (Blueriiot or similar)",
+          "chlorine_sensor": "Redox sensor for chlorine measurement in mV",
+          "enable_saltwater": "Enables saltwater-specific features and sensors",
+          "salt_sensor": "Salt content sensor for saltwater pools",
+          "tds_sensor": "Conductivity sensor (TDS) for water quality"
+        }
+      },
+      "calendars": {
+        "title": "Calendars & Quiet Times",
+        "description": "Step 4 of 6",
+        "submit": "Continue",
+        "data": {
+          "pool_calendar": "Pool calendar",
+          "holiday_calendar": "Holiday calendar",
+          "quiet_time_start": "Quiet time start (weekday)",
+          "quiet_time_end": "Quiet time end (weekday)",
+          "quiet_time_start_weekend": "Quiet time start (weekend)",
+          "quiet_time_end_weekend": "Quiet time end (weekend)"
+        },
+        "data_description": {
+          "pool_calendar": "Calendar with pool events (automatically starts bathing mode for appointments)",
+          "holiday_calendar": "Holiday calendar (uses weekend quiet times on holidays)",
+          "quiet_time_start": "Start of quiet hours on weekdays (e.g. 22:00)",
+          "quiet_time_end": "End of quiet hours on weekdays (e.g. 07:00)",
+          "quiet_time_start_weekend": "Start of quiet hours on weekends (e.g. 23:00)",
+          "quiet_time_end_weekend": "End of quiet hours on weekends (e.g. 08:00)"
+        }
+      },
+      "filter": {
+        "title": "Filter Settings",
+        "description": "Step 5 of 6",
+        "submit": "Continue",
+        "data": {
+          "enable_auto_filter": "Automatic filtering",
+          "filter_interval_minutes": "Filter interval (minutes)"
+        },
+        "data_description": {
+          "enable_auto_filter": "Automatically starts filter cycles at configured interval (respects quiet hours and PV availability)",
+          "filter_interval_minutes": "Automatic filter interval in minutes (default: 720 = 12 hours, range: 60 minutes to 7 days)"
+        }
+      },
+      "pv": {
+        "title": "PV Sensor & Thresholds",
+        "description": "Step 6 of 6",
+        "submit": "Finish",
+        "data": {
+          "enable_pv_optimization": "PV optimization",
+          "pv_surplus_sensor": "PV surplus sensor",
+          "pv_on_threshold": "PV ON threshold (W)",
+          "pv_off_threshold": "PV OFF threshold (W)"
+        },
+        "data_description": {
+          "enable_pv_optimization": "Uses PV surplus for intelligent pump control (only with sufficient solar production)",
+          "pv_surplus_sensor": "Sensor for PV surplus or grid feed-in in watts (negative = consumption, positive = feed-in)",
+          "pv_on_threshold": "Turn on pump when surplus exceeds this value (default: 1000W)",
+          "pv_off_threshold": "Turn off pump when surplus falls below this value (default: 500W, hysteresis)"
         }
       }
     }
-  }
-  ,
+  },
   "entity": {
     "button": {
-      "quick_chlor_btn": {"name": "Kurz Chloren"},
-      "pause_30": {"name": "Pausieren (30 min)"},
-      "pause_60": {"name": "Pausieren (60 min)"},
-      "pause_120": {"name": "Pausieren (120 min)"},
-      "pause_stop": {"name": "Pause stoppen"},
-      "bath_30": {"name": "Badesession (30 min)"},
-      "bath_60": {"name": "Badesession (60 min)"},
-      "bath_120": {"name": "Badesession (120 min)"},
-      "bath_stop": {"name": "Badesession stoppen"},
-      "filter_30": {"name": "Filter-Zyklus (30 min)"},
-      "filter_60": {"name": "Filter-Zyklus (60 min)"},
-      "filter_120": {"name": "Filter-Zyklus (120 min)"},
-      "filter_stop": {"name": "Filter-Zyklus stoppen"}
+      "quick_chlor_btn": {"name": "Quick chlorinate"},
+      "quick_chlor_stop": {"name": "Stop shock chlorination"},
+      "pause_30": {"name": "Pause (30 min)"},
+      "pause_60": {"name": "Pause (60 min)"},
+      "pause_120": {"name": "Pause (120 min)"},
+      "pause_stop": {"name": "Stop pause"},
+      "bath_30": {"name": "Bathing (30 min)"},
+      "bath_60": {"name": "Bathing (60 min)"},
+      "bath_120": {"name": "Bathing (120 min)"},
+      "bath_stop": {"name": "Stop bathing"},
+      "filter_30": {"name": "Filter cycle (30 min)"},
+      "filter_60": {"name": "Filter cycle (60 min)"},
+      "filter_120": {"name": "Filter cycle (120 min)"},
+      "filter_stop": {"name": "Stop filter cycle"}
     },
     "switch": {
-      "main": {"name": "Hauptschalter"},
-      "aux": {"name": "Zusatzheizung"},
-      "bathing": {"name": "Badesession"},
-      "main_switch": {"name": "Hauptschalter"},
-      "aux_heating": {"name": "Zusatzheizung"},
-      "bathing_mode": {"name": "Bade-Modus"}
+      "main": {"name": "Main switch"},
+      "aux": {"name": "Auxiliary heater"},
+      "bathing": {"name": "Bathing session"},
+      "main_switch": {"name": "Main switch"},
+      "aux_heating": {"name": "Auxiliary heater"},
+      "bathing_mode": {"name": "Bathing mode"}
     },
     "binary_sensor": {
-      "is_we_holiday": {"name": "Wochenende oder Feiertag"},
-      "frost_danger": {"name": "Frostgefahr"},
-      "is_quick_chlor": {"name": "Stoßchlorung aktiv"},
-      "is_paused": {"name": "Pausiert"},
-      "should_main_on": {"name": "Hauptstrom erforderlich"},
-      "low_chlor": {"name": "Niedriger Chlorwert"},
-      "ph_alert": {"name": "pH außerhalb Bereich"}
+      "is_we_holiday": {"name": "Weekend or holiday"},
+      "frost_danger": {"name": "Frost danger"},
+      "is_quick_chlor": {"name": "Quick chlorination active"},
+      "is_paused": {"name": "Paused"},
+      "is_bathing": {"name": "Bathing active"},
+      "filter_active": {"name": "Filter active"},
+      "in_quiet": {"name": "Quiet mode active"},
+      "pv_allows": {"name": "PV surplus available"},
+      "should_main_on": {"name": "Main power required"},
+      "low_chlor": {"name": "Low chlorine"},
+      "ph_alert": {"name": "pH out of range"},
+      "tds_high": {"name": "TDS too high"}
     },
     "sensor": {
-      "status": {"name": "Betriebsstatus", "state": {"frost_protection": "Frostschutz", "paused": "Pausiert", "normal": "Normal"}},
-      "ph_val": {"name": "pH-Wert"},
-      "chlor_val": {"name": "Chlorgehalt"},
-      "ph_minus_g": {"name": "pH- Aktion"},
-      "ph_plus_g": {"name": "pH+ Aktion"},
-      "chlor_spoons": {"name": "Chlor Aktion"},
-      "next_start_mins": {"name": "Nächster Start in"},
-      "next_event": {"name": "Nächster Event Start"},
-      "next_filter_mins": {"name": "Nächster Filter-Zyklus in"},
-      "pause_until": {"name": "Pause bis"},
-      "bathing_until": {"name": "Badesession bis"},
-      "filter_until": {"name": "Filter-Zyklus bis"}
+      "status": {
+        "name": "Operational status",
+        "state": {
+          "frost_protection": "Frost protection",
+          "paused": "Paused",
+          "normal": "Normal"
+        }
+      },
+      "tds_status": {
+        "name": "TDS status",
+        "state": {
+          "optimal": "Optimal",
+          "good": "Good",
+          "high": "Water change recommended",
+          "critical": "Water change required",
+          "urgent": "Urgent",
+          "unknown": "Unknown"
+        }
+      },
+      "ph_val": {"name": "pH value"},
+      "chlor_val": {"name": "Chlorine level"},
+      "salt_val": {"name": "Salt content"},
+      "tds_val": {"name": "TDS (Conductivity)"},
+      "tds_water_change_liters": {"name": "Water change (liters)"},
+      "tds_water_change_percent": {"name": "Water change (percent)"},
+      "ph_minus_g": {"name": "pH- action"},
+      "ph_plus_g": {"name": "pH+ action"},
+      "chlor_spoons": {"name": "Chlorine action"},
+      "next_start_mins": {"name": "Next start in"},
+      "next_event": {"name": "Next event start"},
+      "next_filter_mins": {"name": "Next filter cycle in"},
+      "pause_until": {"name": "Paused until"},
+      "quick_chlorine_until": {"name": "Quick chlorine until"},
+      "bathing_until": {"name": "Bathing until"},
+      "filter_until": {"name": "Filter cycle until"},
+      "next_event_end": {"name": "Next event end"},
+      "next_event_summary": {"name": "Next event name"},
+      "main_power": {"name": "Main pump power"},
+      "aux_power": {"name": "Heater power"}
     }
   },
   "climate": {
-    "pool_climate": {"name": "Whirlpool Heizung"}
+    "pool_climate": {"name": "Pool heating"}
   }
 }
