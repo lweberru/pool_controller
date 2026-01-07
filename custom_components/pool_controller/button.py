@@ -1,4 +1,5 @@
 from homeassistant.components.button import ButtonEntity
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
 from datetime import timedelta
 from .const import DOMAIN, MANUFACTURER
@@ -22,9 +23,11 @@ async def async_setup_entry(hass, entry, async_add_entities):
         FilterStopButton(coordinator),
     ])
 
-class PoolButton(ButtonEntity):
+class PoolButton(CoordinatorEntity, ButtonEntity):
     _attr_has_entity_name = True
-    def __init__(self, coordinator): self.coordinator = coordinator
+    def __init__(self, coordinator):
+        super().__init__(coordinator)
+        self.coordinator = coordinator
     @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, self.coordinator.entry.entry_id)}, "name": self.coordinator.entry.data.get("name"), "manufacturer": MANUFACTURER}

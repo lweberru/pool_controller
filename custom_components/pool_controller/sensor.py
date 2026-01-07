@@ -1,4 +1,5 @@
 from homeassistant.components.sensor import SensorEntity, SensorDeviceClass, SensorStateClass
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import DOMAIN, MANUFACTURER
 
 async def async_setup_entry(hass, entry, async_add_entities):
@@ -29,9 +30,11 @@ async def async_setup_entry(hass, entry, async_add_entities):
     ])
     async_add_entities(entities)
 
-class PoolBaseSensor(SensorEntity):
+class PoolBaseSensor(CoordinatorEntity, SensorEntity):
     _attr_has_entity_name = True
-    def __init__(self, coordinator): self.coordinator = coordinator
+    def __init__(self, coordinator):
+        super().__init__(coordinator)
+        self.coordinator = coordinator
     @property
     def device_info(self): return {"identifiers": {(DOMAIN, self.coordinator.entry.entry_id)}, "name": self.coordinator.entry.data.get("name"), "manufacturer": MANUFACTURER}
 

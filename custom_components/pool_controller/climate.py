@@ -2,6 +2,7 @@ import logging
 from homeassistant.components.climate import ClimateEntity, ClimateEntityFeature, HVACMode, HVACAction
 from homeassistant.const import UnitOfTemperature, ATTR_TEMPERATURE
 from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import DOMAIN, MANUFACTURER, CONF_MAIN_SWITCH, CONF_AUX_HEATING_SWITCH, CONF_DEMO_MODE
 
 _LOGGER = logging.getLogger(__name__)
@@ -10,7 +11,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
     async_add_entities([WhirlpoolClimate(coordinator)])
 
-class WhirlpoolClimate(ClimateEntity):
+class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
     _attr_has_entity_name = True
     _attr_translation_key = "pool_climate" # Ermöglicht Übersetzung via de.json
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
@@ -20,6 +21,7 @@ class WhirlpoolClimate(ClimateEntity):
     _attr_max_temp = 40
 
     def __init__(self, coordinator):
+        super().__init__(coordinator)
         self.coordinator = coordinator
         self._attr_unique_id = f"{coordinator.entry.entry_id}_climate"
         self._attr_name = None # Name kommt vom Device

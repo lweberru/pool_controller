@@ -1,4 +1,5 @@
 from homeassistant.components.binary_sensor import BinarySensorEntity, BinarySensorDeviceClass
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import DOMAIN, MANUFACTURER
 
 async def async_setup_entry(hass, entry, async_add_entities):
@@ -18,14 +19,18 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolBinary(coordinator, "ph_alert", "pH außerhalb Bereich", None),
     ])
 
-class PoolBinary(BinarySensorEntity):
+class PoolBinary(CoordinatorEntity, BinarySensorEntity):
     _attr_has_entity_name = True
     def __init__(self, coordinator, key, name, d_class):
+        super().__init__(coordinator)
         self.coordinator = coordinator
         self._key = key
         self._attr_translation_key = key
         self._attr_device_class = d_class
         self._attr_unique_id = f"{coordinator.entry.entry_id}_{key}"
+    @property
+    def device_info(self):
+        return {"identifiers": {(DOMAIN, self.coordinator.entry.entry_id)}, "name": self.coordinator.entry.data.get("name"), "manufacturer": MANUFACTURER}
     @property
     def is_on(self):
         # Direct mapping if coordinator provides the key
@@ -40,5 +45,3 @@ class PoolBinary(BinarySensorEntity):
             val = data.get("ph_val")
             return val is not None and (float(val) < 7.1 or float(val) > 7.4)
         return False
-    @property
-    def device_info(self): return {"identifiers": {(DOMAIN, self.coordinator.entry.entry_id)}, "name": self.coordinator.entry.data.get("name"), "manufacturer": MANUFACTURER}

@@ -1,4 +1,5 @@
 from homeassistant.components.switch import SwitchEntity
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import DOMAIN, MANUFACTURER, CONF_MAIN_SWITCH, CONF_AUX_HEATING_SWITCH
 from .const import CONF_DEMO_MODE
 
@@ -9,9 +10,10 @@ async def async_setup_entry(hass, entry, async_add_entities):
         entities.append(PoolAuxSwitch(coordinator))
     async_add_entities(entities)
 
-class PoolBaseSwitch(SwitchEntity):
+class PoolBaseSwitch(CoordinatorEntity, SwitchEntity):
     _attr_has_entity_name = True
     def __init__(self, coordinator):
+        super().__init__(coordinator)
         self.coordinator = coordinator
     @property
     def device_info(self):
