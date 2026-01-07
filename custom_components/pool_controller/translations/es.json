@@ -269,8 +269,8 @@
     "sensor": {
       "status": { "name": "Estado operativo", "state": { "frost_protection": "Protección contra heladas", "paused": "Pausado", "normal": "Normal" } },
       "ph_val": { "name": "Valor pH" },
-      "chlor_val": { "name": "Nivel de cloro" },
-      "ph_minus_g": { "name": "Acción pH-" },
+      "chlor_val": { "name": "Nivel de cloro" },      "salt_val": {"name": "Contenido de sal"},
+      "tds_val": {"name": "TDS (Conductividad)"},      "ph_minus_g": { "name": "Acción pH-" },
       "ph_plus_g": { "name": "Acción pH+" },
       "chlor_spoons": { "name": "Acción cloro" },
       "next_start_mins": { "name": "Inicio siguiente en" },

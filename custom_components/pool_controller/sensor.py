@@ -8,6 +8,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolStatusSensor(coordinator),
         PoolChemSensor(coordinator, "ph_val", "pH-Wert", None, "mdi:ph"),
         PoolChemSensor(coordinator, "chlor_val", "Chlorgehalt", "mV", "mdi:pool"),
+        PoolChemSensor(coordinator, "salt_val", "Salzgehalt", "g/L", "mdi:shaker"),
+        PoolChemSensor(coordinator, "tds_val", "TDS", "ppm", "mdi:water-opacity"),
         PoolChemSensor(coordinator, "ph_minus_g", "Ph- Aktion", "g", "mdi:pill"),
         PoolChemSensor(coordinator, "ph_plus_g", "Ph+ Aktion", "g", "mdi:pill"),
         PoolChemSensor(coordinator, "chlor_spoons", "Chlor Aktion", "Löffel", "mdi:spoon-sugar"),

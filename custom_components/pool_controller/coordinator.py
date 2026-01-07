@@ -146,6 +146,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             outdoor_temp = self._get_float(conf.get(CONF_TEMP_OUTDOOR))
             ph_val = self._get_float(conf.get(CONF_PH_SENSOR))
             chlor_val = self._get_float(conf.get(CONF_CHLORINE_SENSOR))
+            salt_val = self._get_float(conf.get(CONF_SALT_SENSOR))
+            conductivity_val = self._get_float(conf.get(CONF_TDS_SENSOR))  # in μS/cm
+            # TDS-Umrechnung: μS/cm * 0.64 = ppm (Standard-Konversionsfaktor)
+            tds_val = round(conductivity_val * 0.64) if conductivity_val else None
             main_power = self._get_float(conf.get(CONF_MAIN_POWER_SENSOR))
             aux_power = self._get_float(conf.get(CONF_AUX_POWER_SENSOR))
             
@@ -252,6 +256,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "water_temp": round(water_temp, 1) if water_temp else None,
                 "ph_val": round(ph_val, 2) if ph_val else None,
                 "chlor_val": int(chlor_val) if chlor_val else None,
+                "salt_val": round(salt_val, 1) if salt_val else None,
+                "tds_val": tds_val,
                 "ph_minus_g": ph_minus,
                 "ph_plus_g": ph_plus,
                 "chlor_spoons": chlor_spoons,

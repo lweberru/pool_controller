@@ -274,6 +274,8 @@
       "status": {"name": "Betriebsstatus", "state": {"frost_protection": "Frostschutz", "paused": "Pausiert", "normal": "Normal"}},
       "ph_val": {"name": "pH-Wert"},
       "chlor_val": {"name": "Chlorgehalt"},
+      "salt_val": {"name": "Salzgehalt"},
+      "tds_val": {"name": "TDS (Leitfähigkeit)"},
       "ph_minus_g": {"name": "Ph- Aktion"},
       "ph_plus_g": {"name": "Ph+ Aktion"},
       "chlor_spoons": {"name": "Chlor Aktion"},

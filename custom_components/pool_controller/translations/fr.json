@@ -270,6 +270,8 @@
       "status": { "name": "État opérationnel", "state": { "frost_protection": "Protection antigel", "paused": "En pause", "normal": "Normal" } },
       "ph_val": { "name": "Valeur pH" },
       "chlor_val": { "name": "Taux de chlore" },
+      "salt_val": { "name": "Teneur en sel" },
+      "tds_val": { "name": "TDS (Conductivité)" },
       "ph_minus_g": { "name": "Action pH-" },
       "ph_plus_g": { "name": "Action pH+" },
       "chlor_spoons": { "name": "Action chlore" },

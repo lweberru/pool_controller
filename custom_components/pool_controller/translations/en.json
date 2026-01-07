@@ -277,6 +277,8 @@
       "status": {"name": "Operational status", "state": {"frost_protection": "Frost protection", "paused": "Paused", "normal": "Normal"}},
       "ph_val": {"name": "pH value"},
       "chlor_val": {"name": "Chlorine level"},
+      "salt_val": {"name": "Salt content"},
+      "tds_val": {"name": "TDS (Conductivity)"},
       "ph_minus_g": {"name": "pH- action"},
       "ph_plus_g": {"name": "pH+ action"},
       "chlor_spoons": {"name": "Chlor action"},
