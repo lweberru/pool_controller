@@ -36,7 +36,7 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="switches",
             data_schema=vol.Schema({
                 vol.Required(CONF_MAIN_SWITCH, default=DEFAULT_MAIN_SW): selector.EntitySelector(selector.EntitySelectorConfig(domain="switch")),
-                vol.Optional(CONF_FILTER_SWITCH, default=""): selector.EntitySelector(selector.EntitySelectorConfig(domain="switch")),
+                vol.Optional(CONF_FILTER_SWITCH): str,
                 vol.Optional(CONF_ENABLE_AUX_HEATING, default=False): bool,
                 vol.Optional(CONF_AUX_HEATING_SWITCH, default=DEFAULT_AUX_SW): selector.EntitySelector(selector.EntitySelectorConfig(domain="switch")),
                 vol.Optional(CONF_MAIN_POWER_SENSOR, default=DEFAULT_MAIN_POWER_SENS): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="power")),
@@ -167,6 +167,8 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
             step_id="switches",
             data_schema=vol.Schema({
                 vol.Required(CONF_MAIN_SWITCH, default=curr.get(CONF_MAIN_SWITCH, DEFAULT_MAIN_SW)): selector.EntitySelector(selector.EntitySelectorConfig(domain="switch")),
+                vol.Optional(CONF_FILTER_SWITCH, default=curr.get(CONF_FILTER_SWITCH, "")): str,
+                vol.Optional(CONF_ENABLE_AUX_HEATING, default=curr.get(CONF_ENABLE_AUX_HEATING, False)): bool,
                 vol.Optional(CONF_AUX_HEATING_SWITCH, default=curr.get(CONF_AUX_HEATING_SWITCH, DEFAULT_AUX_SW)): selector.EntitySelector(selector.EntitySelectorConfig(domain="switch")),
                 vol.Optional(CONF_MAIN_POWER_SENSOR, default=curr.get(CONF_MAIN_POWER_SENSOR, DEFAULT_MAIN_POWER_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="power")),
                 vol.Optional(CONF_AUX_POWER_SENSOR, default=curr.get(CONF_AUX_POWER_SENSOR, DEFAULT_AUX_POWER_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="power")),
@@ -185,9 +187,11 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
             step_id="water_quality",
             data_schema=vol.Schema({
                 vol.Required(CONF_TEMP_WATER, default=curr.get(CONF_TEMP_WATER, DEFAULT_TEMP_WATER)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="temperature")),
-                vol.Required(CONF_TEMP_OUTDOOR, default=curr.get(CONF_TEMP_OUTDOOR, DEFAULT_TEMP_OUTDOOR)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="temperature")),
+                vol.Optional(CONF_ENABLE_FROST_PROTECTION, default=curr.get(CONF_ENABLE_FROST_PROTECTION, True)): bool,
+                vol.Optional(CONF_TEMP_OUTDOOR, default=curr.get(CONF_TEMP_OUTDOOR, DEFAULT_TEMP_OUTDOOR)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="temperature")),
                 vol.Optional(CONF_PH_SENSOR, default=curr.get(CONF_PH_SENSOR, DEFAULT_PH_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
                 vol.Optional(CONF_CHLORINE_SENSOR, default=curr.get(CONF_CHLORINE_SENSOR, DEFAULT_CHLOR_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+                vol.Optional(CONF_ENABLE_SALTWATER, default=curr.get(CONF_ENABLE_SALTWATER, False)): bool,
                 vol.Optional(CONF_SALT_SENSOR, default=curr.get(CONF_SALT_SENSOR, DEFAULT_SALT_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
                 vol.Optional(CONF_TDS_SENSOR, default=curr.get(CONF_TDS_SENSOR, DEFAULT_TDS_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
             }),
@@ -224,6 +228,7 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
         return self.async_show_form(
             step_id="filter",
             data_schema=vol.Schema({
+                vol.Optional(CONF_ENABLE_AUTO_FILTER, default=curr.get(CONF_ENABLE_AUTO_FILTER, True)): bool,
                 vol.Required(CONF_FILTER_INTERVAL, default=curr.get(CONF_FILTER_INTERVAL, DEFAULT_FILTER_INTERVAL)): vol.All(
                     vol.Coerce(int),
                     vol.Range(min=60, max=7*24*60)
@@ -248,6 +253,7 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
             step_id="pv",
             errors=errors,
             data_schema=vol.Schema({
+                vol.Optional(CONF_ENABLE_PV_OPTIMIZATION, default=curr.get(CONF_ENABLE_PV_OPTIMIZATION, False)): bool,
                 vol.Optional(CONF_PV_SURPLUS_SENSOR, default=curr.get(CONF_PV_SURPLUS_SENSOR, DEFAULT_PV_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
                 vol.Optional(CONF_PV_ON_THRESHOLD, default=curr.get(CONF_PV_ON_THRESHOLD, DEFAULT_PV_ON)): vol.Coerce(int),
                 vol.Optional(CONF_PV_OFF_THRESHOLD, default=curr.get(CONF_PV_OFF_THRESHOLD, DEFAULT_PV_OFF)): vol.Coerce(int),
