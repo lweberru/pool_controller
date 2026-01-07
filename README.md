@@ -20,6 +20,14 @@ If your spa or pool is connected to a simple smart switch (on/off only), you los
 
 ---
 
+## Dashboard Card Preview
+
+![Pool Controller Dashboard Card](card_example_1.png)
+
+> **Complete UI Card available separately**: The beautiful dashboard card shown above is available as a HACS plugin at [lweberru/pool_controller_dashboard_frontend](https://github.com/lweberru/pool_controller_dashboard_frontend)
+
+---
+
 ## Core Features
 
 ### Essential Pool Functions
@@ -74,13 +82,32 @@ If your spa or pool is connected to a simple smart switch (on/off only), you los
 7. Restart Home Assistant
 8. Go to **Settings → Devices & Services → Create Automation → Pool Controller**
 
-### Dashboard/Lovelace Card (separate repo)
+### Dashboard Card (Separate HACS Plugin)
 
-The UI card is shipped in a separate HACS **Plugin** repository: https://github.com/lweberru/pool_controller_dashboard_frontend
+The beautiful dashboard card shown at the top of this README is available as a separate HACS plugin:
 
-1. Add that repo as custom repository in HACS (Category: Plugin)
-2. Install; HACS will register the resource (URL `/hacsfiles/pool_controller_dashboard/main.js`).
-3. Add the card `custom:pc-pool-controller` to your dashboard and use "Automatisch aus Instanz übernehmen" im Editor.
+**Repository**: [lweberru/pool_controller_dashboard_frontend](https://github.com/lweberru/pool_controller_dashboard_frontend)
+
+**Installation:**
+1. Go to **HACS → Frontend → ⋮ (menu) → Custom repositories**
+2. Add custom repository:
+   - **Repository**: `https://github.com/lweberru/pool_controller_dashboard_frontend`
+   - **Category**: `Lovelace`
+3. Click **Add**
+4. Search for "Pool Controller Dashboard" and install
+5. HACS will automatically register the resource (`/hacsfiles/pool_controller_dashboard/main.js`)
+6. Add the card to your dashboard:
+   - **Type**: `custom:pc-pool-controller`
+   - **Config**: Use "Automatically load from instance" in the card editor
+
+**Features:**
+- 📊 Real-time water quality monitoring (pH, Chlorine, Salt, TDS)
+- 🎮 Quick action buttons (Pause, Bathing, Filter, Quick Chlorine)
+- 🌡️ Temperature display and climate control
+- ⏱️ Timer displays for all active sessions
+- 🔔 Status indicators and alerts
+- 🎨 Customizable themes and layout
+- 🌍 Multi-language support (de, en, es, fr)
 
 ### Alternative: Manual Installation
 
@@ -155,27 +182,40 @@ All duration settings can be overridden per operation via **Services** (see belo
 | `binary_sensor.pool_frost_danger` | True when outdoor temp < 3°C |
 | `binary_sensor.pool_is_quick_chlor` | Active quick chlorination |
 | `binary_sensor.pool_is_paused` | Pool paused |
+| `binary_sensor.pool_is_bathing` | Bathing session active |
+| `binary_sensor.pool_filter_active` | Filter cycle running |
+| `binary_sensor.pool_in_quiet` | Quiet hours active |
+| `binary_sensor.pool_pv_allows` | PV surplus available for operation |
 | `binary_sensor.pool_should_main_on` | Main pump should be running |
 | `binary_sensor.pool_low_chlor` | Chlorine below recommended level |
 | `binary_sensor.pool_ph_alert` | pH outside acceptable range |
+| `binary_sensor.pool_tds_high` | TDS too high (water change needed) |
 
 ### Sensors (Numeric & Status)
 | Entity | Type | Description |
 |--------|------|-------------|
 | `sensor.pool_status` | Enum | Current state: `Normal`, `Paused`, `Frost Protection` |
+| `sensor.pool_tds_status` | Enum | Water quality: `Optimal`, `Good`, `High`, `Critical`, `Urgent` |
 | `sensor.pool_ph_value` | Float | Water pH (6.6-8.4 acceptable) |
 | `sensor.pool_chlorine_level` | Float | Chlorine/ORP in mV |
+| `sensor.pool_salt_content` | Float | Salt concentration in g/L |
+| `sensor.pool_tds_conductivity` | Integer | Total Dissolved Solids (TDS) in ppm |
+| `sensor.pool_tds_water_change_liters` | Integer | Recommended water change volume (liters) |
+| `sensor.pool_tds_water_change_percent` | Integer | Recommended water change (%) |
 | `sensor.pool_ph_minus_g` | Float | Recommended pH- dosage in grams |
 | `sensor.pool_ph_plus_g` | Float | Recommended pH+ dosage in grams |
 | `sensor.pool_chlorine_spoons` | Float | Recommended chlorine dosage in spoons |
 | `sensor.pool_next_start_mins` | Integer | Minutes until next operation |
 | `sensor.pool_next_event` | Timestamp | Next calendar event start |
-| `sensor.pool_filter_cycles` | Integer | Total completed filter cycles |
-| `sensor.pool_filter_end_time` | Timestamp | When current filter cycle ends |
+| `sensor.pool_next_event_end` | Timestamp | Next calendar event end |
+| `sensor.pool_next_event_summary` | String | Next calendar event name |
 | `sensor.pool_next_filter_mins` | Integer | Minutes until next filter cycle |
 | `sensor.pool_pause_until` | Timestamp | When pause ends (if active) |
+| `sensor.pool_quick_chlorine_until` | Timestamp | When quick chlorine ends |
 | `sensor.pool_bathing_until` | Timestamp | When bathing session ends |
 | `sensor.pool_filter_until` | Timestamp | When filter cycle ends |
+| `sensor.pool_main_power` | Float | Main pump power consumption (W) |
+| `sensor.pool_aux_power` | Float | Auxiliary heater power consumption (W) |
 
 ### Switches
 | Entity | Description |
@@ -193,10 +233,11 @@ All duration settings can be overridden per operation via **Services** (see belo
 
 ## Buttons & Manual Controls
 
-The integration provides 13 quick-action buttons:
+The integration provides 14 quick-action buttons:
 
 ### Chlorination
 - `button.pool_quick_chlorine` - 5-minute chlorine boost
+- `button.pool_quick_chlorine_stop` - Stop shock chlorination
 
 ### Pause Controls
 - `button.pool_pause_30` - Pause for 30 minutes
@@ -627,7 +668,40 @@ For issues, questions, or feature requests:
 
 ## Changelog
 
-See [CHANGELOG.md](CHANGELOG.md) for version history and updates.
+See [CHANGELOG.md](CHANGELOG.md) for complete version history.
+
+### Recent Updates
+
+**v1.5.7** (Jan 2026)
+- Updated strings.json with English as default fallback language
+- Complete synchronization with translations/en.json
+- Improved international usability
+
+**v1.5.6** (Jan 2026)
+- Fixed Feature Flag labels in config flow (removed verbose "Enable" prefix)
+- Added comprehensive data_description for all Feature Flags
+- Complete Options Flow integration for all toggles
+- All changes in 4 languages (de, en, es, fr)
+
+**v1.5.5** (Jan 2026)
+- TDS maintenance monitoring with intelligent water change recommendations
+- 5-tier TDS status system (optimal/good/high/critical/urgent)
+- Automatic water change calculations (liters and percent)
+- Binary sensor for TDS warnings
+
+**v1.5.4** (Jan 2026)
+- Salt and TDS sensors with automatic μS/cm → ppm conversion
+- Saltwater pool support
+- TDS conversion factor: 0.64 (standard pool water)
+
+**v1.5.3** (Jan 2026)
+- Comprehensive field descriptions for all config flow parameters
+- Improved UX with data_description for 56+ fields
+- Multi-language support for all descriptions
+
+**v1.5.2** (Jan 2026)
+- Added quick_chlorine_until timer sensor
+- Complete timer visualization support for dashboard
 
 ---
 
