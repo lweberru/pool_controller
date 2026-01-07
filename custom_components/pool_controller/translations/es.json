@@ -100,11 +100,11 @@
         "title": "Configuración del filtro",
         "submit": "Continuar",
         "data": {
-          "enable_auto_filter": "Activar filtración automática",
+          "enable_auto_filter": "Filtración automática",
           "filter_interval_minutes": "Intervalo de filtro (minutos)"
         },
         "data_description": {
-          "enable_auto_filter": "Inicia automáticamente ciclos de filtro en el intervalo configurado (respeta horas de silencio)",
+          "enable_auto_filter": "Inicia automáticamente ciclos de filtro en el intervalo configurado (respeta horas de silencio y disponibilidad PV)",
           "filter_interval_minutes": "Intervalo de filtro automático en minutos (predeterminado: 720 = 12 horas, rango: 60 minutos a 7 días)"
         }
       },
@@ -112,13 +112,13 @@
         "title": "Sensor PV y umbrales",
         "submit": "Finalizar",
         "data": {
-          "enable_pv_optimization": "Activar optimización PV",
+          "enable_pv_optimization": "Optimización PV",
           "pv_surplus_sensor": "Sensor de excedente PV",
           "pv_on_threshold": "Umbral PV ON (W)",
           "pv_off_threshold": "Umbral PV OFF (W)"
         },
         "data_description": {
-          "enable_pv_optimization": "Utiliza excedente PV para control inteligente de calefacción (solo con suficiente producción solar)",
+          "enable_pv_optimization": "Utiliza excedente PV para control inteligente de bomba (solo con suficiente producción solar)",
           "pv_surplus_sensor": "Sensor para excedente PV o inyección a red en vatios (negativo = consumo, positivo = inyección)",
           "pv_on_threshold": "Encender bomba cuando el excedente supera este valor (predeterminado: 1000W)",
           "pv_off_threshold": "Apagar bomba cuando el excedente cae por debajo de este valor (predeterminado: 500W, histéresis)"
@@ -149,12 +149,16 @@
         "submit": "Continuar",
         "data": {
           "main_switch": "Interruptor principal",
+          "filter_switch": "Interruptor del filtro",
+          "enable_aux_heating": "Calefacción auxiliar",
           "aux_heating_switch": "Interruptor calefacción auxiliar",
           "main_power_sensor": "Sensor de potencia principal",
           "aux_power_sensor": "Sensor de potencia calefacción auxiliar"
         },
         "data_description": {
           "main_switch": "Interruptor principal para bomba de piscina (obligatorio)",
+          "filter_switch": "Opcional: Interruptor separado para bomba de filtro (dejar vacío para usar interruptor principal)",
+          "enable_aux_heating": "Activa calentador auxiliar para calentamiento más rápido",
           "aux_heating_switch": "Interruptor para calentador auxiliar eléctrico",
           "main_power_sensor": "Sensor de potencia de la bomba principal en vatios",
           "aux_power_sensor": "Sensor de potencia del calentador en vatios"
@@ -166,17 +170,21 @@
         "submit": "Continuar",
         "data": {
           "temp_water_sensor": "Temperatura del agua",
+          "enable_frost_protection": "Protección antiheladas",
           "temp_outdoor_sensor": "Temperatura exterior",
           "ph_sensor": "Sensor de pH",
           "chlorine_sensor": "Sensor de cloro (redox)",
+          "enable_saltwater": "Piscina de agua salada",
           "salt_sensor": "Sensor de sal",
           "tds_sensor": "Sensor de conductividad"
         },
         "data_description": {
           "temp_water_sensor": "Sensor de temperatura del agua de la piscina (obligatorio)",
+          "enable_frost_protection": "Enciende automáticamente la bomba cuando la temperatura baja de 3°C (requiere sensor de temperatura exterior)",
           "temp_outdoor_sensor": "Temperatura exterior para protección contra heladas y control de calefacción",
           "ph_sensor": "Sensor de valor de pH (Blueriiot o similar)",
           "chlorine_sensor": "Sensor redox para medición de cloro en mV",
+          "enable_saltwater": "Activa funciones y sensores específicos para agua salada",
           "salt_sensor": "Sensor de contenido de sal para piscinas de agua salada",
           "tds_sensor": "Sensor de conductividad (TDS) para calidad del agua"
         }
@@ -207,9 +215,11 @@
         "description": "Paso 5 de 6",
         "submit": "Continuar",
         "data": {
+          "enable_auto_filter": "Filtración automática",
           "filter_interval_minutes": "Intervalo de filtro (minutos)"
         },
         "data_description": {
+          "enable_auto_filter": "Inicia automáticamente ciclos de filtro en el intervalo configurado (respeta horas de silencio y disponibilidad PV)",
           "filter_interval_minutes": "Intervalo de filtro automático en minutos (predeterminado: 720 = 12 horas, rango: 60 minutos a 7 días)"
         }
       },
@@ -218,11 +228,13 @@
         "description": "Paso 6 de 6",
         "submit": "Finalizar",
         "data": {
+          "enable_pv_optimization": "Optimización PV",
           "pv_surplus_sensor": "Sensor de excedente PV",
           "pv_on_threshold": "Umbral PV ON (W)",
           "pv_off_threshold": "Umbral PV OFF (W)"
         },
         "data_description": {
+          "enable_pv_optimization": "Utiliza excedente PV para control inteligente de bomba (solo con suficiente producción solar)",
           "pv_surplus_sensor": "Sensor para excedente PV o inyección a red en vatios (negativo = consumo, positivo = inyección)",
           "pv_on_threshold": "Encender bomba cuando el excedente supera este valor (predeterminado: 1000W)",
           "pv_off_threshold": "Apagar bomba cuando el excedente cae por debajo de este valor (predeterminado: 500W, histéresis)"

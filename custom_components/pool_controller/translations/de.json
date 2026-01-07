@@ -103,11 +103,11 @@
         "title": "Filter-Einstellungen",
         "submit": "Weiter",
         "data": {
-          "enable_auto_filter": "Automatische Filterung aktivieren",
+          "enable_auto_filter": "Automatische Filterung",
           "filter_interval_minutes": "Filter-Intervall (Minuten)"
         },
         "data_description": {
-          "enable_auto_filter": "Startet automatisch Filterzyklen im konfigurierten Intervall (respektiert Ruhezeiten)",
+          "enable_auto_filter": "Startet automatisch Filterzyklen im konfigurierten Intervall (respektiert Ruhezeiten und PV-Verfügbarkeit)",
           "filter_interval_minutes": "Automatisches Filterintervall in Minuten (Standard: 720 = 12 Stunden, Bereich: 60 Minuten bis 7 Tage)"
         }
       },
@@ -152,12 +152,16 @@
         "submit": "Weiter",
         "data": {
           "main_switch": "Hauptschalter",
+          "filter_switch": "Filter-Schalter",
+          "enable_aux_heating": "Zusatzheizung",
           "aux_heating_switch": "Zusatzheizung Schalter",
           "main_power_sensor": "Haupt-Leistungssensor",
           "aux_power_sensor": "Zusatzheizung Leistungssensor"
         },
         "data_description": {
           "main_switch": "Hauptschalter für Poolpumpe (Pflichtfeld)",
+          "filter_switch": "Optional: Separater Schalter für Filterpumpe (leer lassen um Hauptschalter zu nutzen)",
+          "enable_aux_heating": "Aktiviert zusätzliche Heizung für schnelleres Aufheizen",
           "aux_heating_switch": "Schalter für elektrische Zusatzheizung",
           "main_power_sensor": "Leistungssensor der Hauptpumpe in Watt",
           "aux_power_sensor": "Leistungssensor der Heizung in Watt"
@@ -169,18 +173,24 @@
         "submit": "Weiter",
         "data": {
           "temp_water_sensor": "Wassertemperatur",
+          "enable_frost_protection": "Frostschutz",
           "temp_outdoor_sensor": "Außentemperatur",
           "ph_sensor": "pH-Wert Sensor",
           "chlorine_sensor": "Chlorgehalt (Redox) Sensor",
+          "enable_saltwater": "Salzwasserpool",
           "salt_sensor": "Salzgehalt Sensor",
-          "tds_sensor": "Leitfähigkeit Sensor"        },
+          "tds_sensor": "Leitfähigkeit Sensor"
+        },
         "data_description": {
           "temp_water_sensor": "Sensor für Poolwasser-Temperatur (Pflichtfeld)",
+          "enable_frost_protection": "Schaltet Pumpe automatisch bei Temperaturen unter 3°C ein (benötigt Außentemperatur-Sensor)",
           "temp_outdoor_sensor": "Außentemperatur für Frostschutz und Heizungssteuerung",
           "ph_sensor": "pH-Wert Sensor (Blueriiot oder ähnlich)",
           "chlorine_sensor": "Redox-Sensor für Chlor-Messung in mV",
+          "enable_saltwater": "Aktiviert Salzwasser-spezifische Funktionen und Sensoren",
           "salt_sensor": "Salzgehalt-Sensor für Salzwasserpools",
-          "tds_sensor": "Leitfähigkeits-Sensor (TDS) für Wasserqualität"        }
+          "tds_sensor": "Leitfähigkeits-Sensor (TDS) für Wasserqualität"
+        }
       },
       "calendars": {
         "title": "Kalender & Ruhezeiten",
@@ -208,9 +218,11 @@
         "description": "Schritt 5 von 6",
         "submit": "Weiter",
         "data": {
+          "enable_auto_filter": "Automatische Filterung",
           "filter_interval_minutes": "Filter-Intervall (Minuten)"
         },
         "data_description": {
+          "enable_auto_filter": "Startet automatisch Filterzyklen im konfigurierten Intervall (respektiert Ruhezeiten und PV-Verfügbarkeit)",
           "filter_interval_minutes": "Automatisches Filterintervall in Minuten (Standard: 720 = 12 Stunden, Bereich: 60 Minuten bis 7 Tage)"
         }
       },
@@ -219,11 +231,13 @@
         "description": "Schritt 6 von 6",
         "submit": "Abschließen",
         "data": {
+          "enable_pv_optimization": "PV-Optimierung",
           "pv_surplus_sensor": "PV-Überschuss Sensor",
           "pv_on_threshold": "PV ON Schwelle (W)",
           "pv_off_threshold": "PV OFF Schwelle (W)"
         },
         "data_description": {
+          "enable_pv_optimization": "Nutzt PV-Überschuss für intelligente Pumpensteuerung (nur bei ausreichend Solarproduktion)",
           "pv_surplus_sensor": "Sensor für PV-Überschuss bzw. Einspeisung in Watt (negativ = Bezug, positiv = Einspeisung)",
           "pv_on_threshold": "Pumpe einschalten bei Überschuss über diesem Wert (Standard: 1000W)",
           "pv_off_threshold": "Pumpe ausschalten bei Überschuss unter diesem Wert (Standard: 500W, Hysterese)"

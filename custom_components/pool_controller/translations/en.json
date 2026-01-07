@@ -105,11 +105,11 @@
         "title": "Filter Settings",
         "submit": "Continue",
         "data": {
-          "enable_auto_filter": "Enable automatic filtering",
+          "enable_auto_filter": "Automatic filtering",
           "filter_interval_minutes": "Filter interval (minutes)"
         },
         "data_description": {
-          "enable_auto_filter": "Automatically starts filter cycles at configured interval (respects quiet hours)",
+          "enable_auto_filter": "Automatically starts filter cycles at configured interval (respects quiet hours and PV availability)",
           "filter_interval_minutes": "Automatic filter interval in minutes (default: 720 = 12 hours, range: 60 minutes to 7 days)"
         }
       },
@@ -117,13 +117,13 @@
         "title": "PV Sensor & Thresholds",
         "submit": "Finish",
         "data": {
-          "enable_pv_optimization": "Enable PV optimization",
+          "enable_pv_optimization": "PV optimization",
           "pv_surplus_sensor": "PV surplus sensor",
           "pv_on_threshold": "PV ON threshold (W)",
           "pv_off_threshold": "PV OFF threshold (W)"
         },
         "data_description": {
-          "enable_pv_optimization": "Uses PV surplus for intelligent heating control (only with sufficient solar production)",
+          "enable_pv_optimization": "Uses PV surplus for intelligent pump control (only with sufficient solar production)",
           "pv_surplus_sensor": "Sensor for PV surplus or grid feed-in in watts (negative = consumption, positive = feed-in)",
           "pv_on_threshold": "Turn on pump when surplus exceeds this value (default: 1000W)",
           "pv_off_threshold": "Turn off pump when surplus falls below this value (default: 500W, hysteresis)"
@@ -154,12 +154,16 @@
         "submit": "Continue",
         "data": {
           "main_switch": "Main switch",
+          "filter_switch": "Filter switch",
+          "enable_aux_heating": "Auxiliary heating",
           "aux_heating_switch": "Auxiliary heater switch",
           "main_power_sensor": "Main power sensor",
           "aux_power_sensor": "Aux heater power sensor"
         },
         "data_description": {
           "main_switch": "Main switch for pool pump (required)",
+          "filter_switch": "Optional: Separate switch for filter pump (leave empty to use main switch)",
+          "enable_aux_heating": "Enables auxiliary heater for faster heating",
           "aux_heating_switch": "Switch for electric auxiliary heater",
           "main_power_sensor": "Main pump power sensor in watts",
           "aux_power_sensor": "Heater power sensor in watts"
@@ -171,17 +175,21 @@
         "submit": "Continue",
         "data": {
           "temp_water_sensor": "Water temperature",
+          "enable_frost_protection": "Frost protection",
           "temp_outdoor_sensor": "Outdoor temperature",
           "ph_sensor": "pH sensor",
           "chlorine_sensor": "Chlorine (redox) sensor",
+          "enable_saltwater": "Saltwater pool",
           "salt_sensor": "Salt sensor",
           "tds_sensor": "Conductivity sensor"
         },
         "data_description": {
           "temp_water_sensor": "Pool water temperature sensor (required)",
+          "enable_frost_protection": "Automatically turns on pump when temperature drops below 3°C (requires outdoor temperature sensor)",
           "temp_outdoor_sensor": "Outdoor temperature for frost protection and heating control",
           "ph_sensor": "pH value sensor (Blueriiot or similar)",
           "chlorine_sensor": "Redox sensor for chlorine measurement in mV",
+          "enable_saltwater": "Enables saltwater-specific features and sensors",
           "salt_sensor": "Salt content sensor for saltwater pools",
           "tds_sensor": "Conductivity sensor (TDS) for water quality"
         }
@@ -212,9 +220,11 @@
         "description": "Step 5 of 6",
         "submit": "Continue",
         "data": {
+          "enable_auto_filter": "Automatic filtering",
           "filter_interval_minutes": "Filter interval (minutes)"
         },
         "data_description": {
+          "enable_auto_filter": "Automatically starts filter cycles at configured interval (respects quiet hours and PV availability)",
           "filter_interval_minutes": "Automatic filter interval in minutes (default: 720 = 12 hours, range: 60 minutes to 7 days)"
         }
       },
@@ -223,11 +233,13 @@
         "description": "Step 6 of 6",
         "submit": "Finish",
         "data": {
+          "enable_pv_optimization": "PV optimization",
           "pv_surplus_sensor": "PV surplus sensor",
           "pv_on_threshold": "PV ON threshold (W)",
           "pv_off_threshold": "PV OFF threshold (W)"
         },
         "data_description": {
+          "enable_pv_optimization": "Uses PV surplus for intelligent pump control (only with sufficient solar production)",
           "pv_surplus_sensor": "Sensor for PV surplus or grid feed-in in watts (negative = consumption, positive = feed-in)",
           "pv_on_threshold": "Turn on pump when surplus exceeds this value (default: 1000W)",
           "pv_off_threshold": "Turn off pump when surplus falls below this value (default: 500W, hysteresis)"
