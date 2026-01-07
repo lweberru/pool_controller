@@ -264,13 +264,16 @@
       "pv_allows": { "name": "Excedente PV disponible" },
       "should_main_on": { "name": "Se requiere alimentación principal" },
       "low_chlor": { "name": "Cloro bajo" },
-      "ph_alert": { "name": "pH fuera de rango" }
+      "ph_alert": { "name": "pH fuera de rango" },
+      "tds_high": { "name": "TDS demasiado alto" }
     },
     "sensor": {
       "status": { "name": "Estado operativo", "state": { "frost_protection": "Protección contra heladas", "paused": "Pausado", "normal": "Normal" } },
+      "tds_status": { "name": "Estado TDS", "state": { "optimal": "Óptimo", "good": "Bueno", "high": "Cambio de agua recomendado", "critical": "Cambio de agua requerido", "urgent": "Urgente", "unknown": "Desconocido" } },
       "ph_val": { "name": "Valor pH" },
       "chlor_val": { "name": "Nivel de cloro" },      "salt_val": {"name": "Contenido de sal"},
-      "tds_val": {"name": "TDS (Conductividad)"},      "ph_minus_g": { "name": "Acción pH-" },
+      "tds_val": {"name": "TDS (Conductividad)"},      "tds_water_change_liters": {"name": "Cambio de agua (litros)"},
+      "tds_water_change_percent": {"name": "Cambio de agua (porcentaje)"},      "ph_minus_g": { "name": "Acción pH-" },
       "ph_plus_g": { "name": "Acción pH+" },
       "chlor_spoons": { "name": "Acción cloro" },
       "next_start_mins": { "name": "Inicio siguiente en" },

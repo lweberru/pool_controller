@@ -264,14 +264,18 @@
       "pv_allows": { "name": "Surplus PV disponible" },
       "should_main_on": { "name": "Alimentation principale requise" },
       "low_chlor": { "name": "Chlore bas" },
-      "ph_alert": { "name": "pH hors plage" }
+      "ph_alert": { "name": "pH hors plage" },
+      "tds_high": { "name": "TDS trop élevé" }
     },
     "sensor": {
       "status": { "name": "État opérationnel", "state": { "frost_protection": "Protection antigel", "paused": "En pause", "normal": "Normal" } },
+      "tds_status": { "name": "Statut TDS", "state": { "optimal": "Optimal", "good": "Bon", "high": "Changement d'eau recommandé", "critical": "Changement d'eau requis", "urgent": "Urgent", "unknown": "Inconnu" } },
       "ph_val": { "name": "Valeur pH" },
       "chlor_val": { "name": "Taux de chlore" },
       "salt_val": { "name": "Teneur en sel" },
       "tds_val": { "name": "TDS (Conductivité)" },
+      "tds_water_change_liters": { "name": "Changement d'eau (litres)" },
+      "tds_water_change_percent": { "name": "Changement d'eau (pourcentage)" },
       "ph_minus_g": { "name": "Action pH-" },
       "ph_plus_g": { "name": "Action pH+" },
       "chlor_spoons": { "name": "Action chlore" },

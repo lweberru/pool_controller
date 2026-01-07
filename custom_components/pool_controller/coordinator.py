@@ -150,6 +150,34 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             conductivity_val = self._get_float(conf.get(CONF_TDS_SENSOR))  # in μS/cm
             # TDS-Umrechnung: μS/cm * 0.64 = ppm (Standard-Konversionsfaktor)
             tds_val = round(conductivity_val * 0.64) if conductivity_val else None
+            
+            # TDS-Wartung: Status und Wasserwechsel-Empfehlungen
+            tds_status = None
+            tds_water_change_liters = 0
+            tds_water_change_percent = 0
+            tds_high = False
+            
+            if tds_val is not None:
+                target_tds = 1200  # Ziel-TDS in ppm
+                if tds_val < 1500:
+                    tds_status = "optimal"
+                elif tds_val < 2000:
+                    tds_status = "good"
+                elif tds_val < 2500:
+                    tds_status = "high"
+                    tds_high = True
+                elif tds_val < 3000:
+                    tds_status = "critical"
+                    tds_high = True
+                else:
+                    tds_status = "urgent"
+                    tds_high = True
+                
+                # Wasserwechsel-Berechnung: Liter = Volumen × (TDS_aktuell - Ziel) / TDS_aktuell
+                if tds_val > target_tds:
+                    tds_water_change_liters = round(vol_l * (tds_val - target_tds) / tds_val)
+                    tds_water_change_percent = round((tds_water_change_liters / vol_l) * 100)
+            
             main_power = self._get_float(conf.get(CONF_MAIN_POWER_SENSOR))
             aux_power = self._get_float(conf.get(CONF_AUX_POWER_SENSOR))
             
@@ -258,6 +286,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "chlor_val": int(chlor_val) if chlor_val else None,
                 "salt_val": round(salt_val, 1) if salt_val else None,
                 "tds_val": tds_val,
+                "tds_status": tds_status,
+                "tds_high": tds_high,
+                "tds_water_change_liters": tds_water_change_liters,
+                "tds_water_change_percent": tds_water_change_percent,
                 "ph_minus_g": ph_minus,
                 "ph_plus_g": ph_plus,
                 "chlor_spoons": chlor_spoons,

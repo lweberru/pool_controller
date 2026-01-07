@@ -10,6 +10,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolChemSensor(coordinator, "chlor_val", "Chlorgehalt", "mV", "mdi:pool"),
         PoolChemSensor(coordinator, "salt_val", "Salzgehalt", "g/L", "mdi:shaker"),
         PoolChemSensor(coordinator, "tds_val", "TDS", "ppm", "mdi:water-opacity"),
+        PoolChemSensor(coordinator, "tds_water_change_liters", "TDS Wasserwechsel", "L", "mdi:water-sync"),
+        PoolChemSensor(coordinator, "tds_water_change_percent", "TDS Wasserwechsel", "%", "mdi:water-percent"),
         PoolChemSensor(coordinator, "ph_minus_g", "Ph- Aktion", "g", "mdi:pill"),
         PoolChemSensor(coordinator, "ph_plus_g", "Ph+ Aktion", "g", "mdi:pill"),
         PoolChemSensor(coordinator, "chlor_spoons", "Chlor Aktion", "Löffel", "mdi:spoon-sugar"),
@@ -18,6 +20,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     ]
     # Timer/Status sensors
     entities.extend([
+        PoolTdsStatusSensor(coordinator),
         PoolTimeSensor(coordinator, "pause_until", "Pause Until"),
         PoolTimeSensor(coordinator, "quick_chlorine_until", "Quick Chlorine Until"),
         PoolTimeSensor(coordinator, "bathing_until", "Bathing Until"),
@@ -48,6 +51,17 @@ class PoolStatusSensor(PoolBaseSensor):
         if self.coordinator.data.get("frost_danger"): return "frost_protection"
         if self.coordinator.data.get("is_paused"): return "paused"
         return "normal"
+
+class PoolTdsStatusSensor(PoolBaseSensor):
+    _attr_translation_key = "tds_status"
+    _attr_icon = "mdi:water-check"
+    def __init__(self, coordinator):
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.entry.entry_id}_tds_status"
+    @property
+    def native_value(self):
+        status = self.coordinator.data.get("tds_status")
+        return status if status else "unknown"
 
 class PoolChemSensor(PoolBaseSensor):
     def __init__(self, coordinator, key, name, unit, icon):

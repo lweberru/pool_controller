@@ -271,14 +271,18 @@
       "pv_allows": {"name": "PV surplus available"},
       "should_main_on": {"name": "Main power required"},
       "low_chlor": {"name": "Low chlorine"},
-      "ph_alert": {"name": "pH out of range"}
+      "ph_alert": {"name": "pH out of range"},
+      "tds_high": {"name": "TDS too high"}
     },
     "sensor": {
       "status": {"name": "Operational status", "state": {"frost_protection": "Frost protection", "paused": "Paused", "normal": "Normal"}},
+      "tds_status": {"name": "TDS Status", "state": {"optimal": "Optimal", "good": "Good", "high": "Water change recommended", "critical": "Water change required", "urgent": "Urgent", "unknown": "Unknown"}},
       "ph_val": {"name": "pH value"},
       "chlor_val": {"name": "Chlorine level"},
       "salt_val": {"name": "Salt content"},
       "tds_val": {"name": "TDS (Conductivity)"},
+      "tds_water_change_liters": {"name": "Water change (liters)"},
+      "tds_water_change_percent": {"name": "Water change (percent)"},
       "ph_minus_g": {"name": "pH- action"},
       "ph_plus_g": {"name": "pH+ action"},
       "chlor_spoons": {"name": "Chlor action"},
