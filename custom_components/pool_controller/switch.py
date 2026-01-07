@@ -48,19 +48,20 @@ class PoolAuxSwitch(PoolBaseSwitch):
         self._attr_unique_id = f"{coordinator.entry.entry_id}_aux"
     @property
     def is_on(self):
-        return self.coordinator.data.get("should_aux_on")
+        # Zeigt Master-Enable-Status, nicht den physischen Schalter
+        return self.coordinator.aux_enabled
     async def async_turn_on(self, **kwargs):
-        demo = self.coordinator.entry.data.get(CONF_DEMO_MODE, False)
-        if demo:
-            return
-        await self.hass.services.async_call("switch", "turn_on", {"entity_id": self.coordinator.entry.data.get(CONF_AUX_HEATING_SWITCH)})
+        # Aktiviere Master-Enable für Zusatzheizung
+        self.coordinator.aux_enabled = True
+        await self.coordinator.async_request_refresh()
     async def async_turn_off(self, **kwargs):
+        # Deaktiviere Master-Enable und schalte physischen Schalter sofort aus
+        self.coordinator.aux_enabled = False
         demo = self.coordinator.entry.data.get(CONF_DEMO_MODE, False)
-        if demo:
-            return
-        await self.hass.services.async_call("switch", "turn_off", {"entity_id": self.coordinator.entry.data.get(CONF_AUX_HEATING_SWITCH)})
-    async def async_turn_off(self, **kwargs):
-        await self.hass.services.async_call("switch", "turn_off", {"entity_id": self.coordinator.entry.data.get(CONF_AUX_HEATING_SWITCH)})
+        aux_switch_id = self.coordinator.entry.data.get(CONF_AUX_HEATING_SWITCH)
+        if not demo and aux_switch_id:
+            await self.hass.services.async_call("switch", "turn_off", {"entity_id": aux_switch_id})
+        await self.coordinator.async_request_refresh()
 
 class PoolBathingSwitch(PoolBaseSwitch):
     _attr_translation_key = "bathing"

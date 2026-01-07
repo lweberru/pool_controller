@@ -14,6 +14,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self.is_bathing = False
         self._last_should_main_on = None
         self._last_should_aux_on = None
+        self.aux_enabled = True  # Master-Enable für Zusatzheizung (default: aktiviert)
         # Wiederherstellung von timers aus entry.options (falls vorhanden)
         self.pause_until = None
         self.quick_chlorine_until = None
@@ -153,18 +154,36 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             is_holiday = await self._check_holiday(conf.get(CONF_HOLIDAY_CALENDAR))
             we_or_holiday = is_holiday or (now.weekday() >= 5)
 
-            # 2. Chemie (Ziel pH 7.2)
+            # 2. Chemie (Ziel pH 7.2, Toleranzbereich 7.0-7.4)
             vol_f = conf.get(CONF_WATER_VOLUME, DEFAULT_VOL) / 1000
-            ph_minus = max(0, round((ph_val - 7.3) * 100 * vol_f)) if ph_val and ph_val > 7.3 else 0
-            ph_plus = max(0, round((7.1 - ph_val) * 100 * vol_f)) if ph_val and ph_val < 7.1 else 0
-            chlor_spoons = max(0, round((650 - chlor_val) / 50, 1)) if chlor_val and chlor_val < 650 else 0
+            vol_l = conf.get(CONF_WATER_VOLUME, DEFAULT_VOL)
+            
+            # pH-Toleranzbereich: 7.0 - 7.4 (keine Dosierung nötig)
+            # Außerhalb: Differenz zu Zielwert 7.2 berechnen
+            if ph_val and ph_val > 7.4:
+                ph_minus = max(0, round((ph_val - 7.2) * 100 * vol_f))
+                ph_plus = 0
+            elif ph_val and ph_val < 7.0:
+                ph_plus = max(0, round((7.2 - ph_val) * 100 * vol_f))
+                ph_minus = 0
+            else:
+                ph_minus = 0
+                ph_plus = 0
+            
+            # Chlor: Zielwert 700 mV, pro 100 mV unter 700 -> 0.25 Löffel (für 1000L)
+            # Skalierung mit tatsächlicher Wassermenge
+            if chlor_val and chlor_val < 700:
+                quarter_spoons = round((700 - chlor_val) / 100)  # Viertellöffel
+                base_spoons = quarter_spoons / 4.0  # Zu Löffeln umrechnen
+                chlor_spoons = round(base_spoons * (vol_l / 1000.0), 2)  # Mit Wassermenge skalieren
+            else:
+                chlor_spoons = 0
 
             # 3. Kalender & Aufheizzeit
             # Heizung-Leistung: falls ein Power-Sensor konfiguriert ist, verwenden, sonst Fallback 3000W
             power_w = int(main_power) if main_power and main_power > 0 else 3000
 
-            # Volumen (Liter) und Temperaturdifferenz (DeltaT).
-            vol_l = conf.get(CONF_WATER_VOLUME, DEFAULT_VOL)
+            # Temperaturdifferenz (DeltaT).
             # Wenn Wassertemperatur fehlt, konservativer Default 20°C (statt Fehler)
             measured_temp = water_temp if water_temp is not None else 20.0
             delta_t = max(0.0, self.target_temp - measured_temp)
@@ -298,15 +317,18 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                             await self.hass.services.async_call("switch", "turn_off", {"entity_id": main_switch_id})
                     self._last_should_main_on = desired_main
 
-                # Toggle aux switch according to desired_aux
-                if desired_aux != self._last_should_aux_on:
-                    if desired_aux:
-                        if not demo and aux_switch_id:
-                            await self.hass.services.async_call("switch", "turn_on", {"entity_id": aux_switch_id})
-                    else:
-                        if not demo and aux_switch_id:
-                            await self.hass.services.async_call("switch", "turn_off", {"entity_id": aux_switch_id})
-                    self._last_should_aux_on = desired_aux
+                # Toggle aux switch according to desired_aux AND aux_enabled
+                # aux_enabled ist der Master-Enable: wenn False, bleibt physischer Schalter immer aus
+                if aux_switch_id:
+                    physical_aux_should_be_on = desired_aux and self.aux_enabled
+                    if physical_aux_should_be_on != self._last_should_aux_on:
+                        if physical_aux_should_be_on:
+                            if not demo:
+                                await self.hass.services.async_call("switch", "turn_on", {"entity_id": aux_switch_id})
+                        else:
+                            if not demo:
+                                await self.hass.services.async_call("switch", "turn_off", {"entity_id": aux_switch_id})
+                        self._last_should_aux_on = physical_aux_should_be_on
             except Exception:
                 _LOGGER.exception("Fehler beim Anwenden der gewünschten Schaltzustände")
         except Exception as err:

@@ -364,30 +364,60 @@ Time = (1000 × 1.16 × 18) / 3000 × 60 = 418 minutes ≈ 7 hours
 
 #### 2. pH Adjustment Dosage
 
-**Formulas:**
+**Formulas with Tolerance Range:**
 ```
-pH- (Senker) in grams = (Current pH - 7.3) × 100 × Volume (m³)
-pH+ (Heber) in grams = (7.1 - Current pH) × 100 × Volume (m³)
+Target pH: 7.2
+OK Range: 7.0 - 7.4 (no dosing needed)
 
-Target pH range: 7.1 - 7.3 (ideal: 7.2)
+pH- (Senker) in grams = (Current pH - 7.2) × 100 × Volume (m³)  [only when pH > 7.4]
+pH+ (Heber) in grams = (7.2 - Current pH) × 100 × Volume (m³)  [only when pH < 7.0]
+```
+
+**Examples:**
+- Pool: 1000 L (1 m³)
+
+**Case 1 - pH too high:**
+- Measured pH: 7.8
+- `pH- needed = (7.8 - 7.2) × 100 × 1 = 60 grams`
+
+**Case 2 - pH too low:**
+- Measured pH: 6.8
+- `pH+ needed = (7.2 - 6.8) × 100 × 1 = 40 grams`
+
+**Case 3 - pH in OK range:**
+- Measured pH: 7.15
+- `No dosing needed (within 7.0-7.4 tolerance)`
+
+#### Chlorine Dosing Calculation
+
+**Formula** (basis: 1000L reference volume):
+```
+Target: 700 mV (ideal chlorine level)
+Per 100 mV below 700 → +0.25 spoons (for 1000L)
+Rounded to 0.25 spoon increments
+
+chlorine_spoons = round((700 - chlor_mV) / 100) / 4 × (volume_L / 1000)
 ```
 
 **Example:**
-- Pool: 1000 L (1 m³)
-- Measured pH: 7.8 (too high)
+- Water volume: 1000L  
+- Current: 400 mV  
+- Calculation: `(700 - 400) / 100 = 3` → `3 / 4 = 0.75 spoons`
 
-```
-pH- needed = (7.8 - 7.3) × 100 × 1 = 50 grams
-```
+**For other volumes:**
+- 1500L pool at 400 mV: `0.75 × 1.5 = 1.13 spoons`
+- 500L pool at 400 mV: `0.75 × 0.5 = 0.38 spoons`
 
 **Usage:** The integration displays recommended dosages in sensors:
 - `sensor.pool_ph_minus_g` - Shows grams of pH- to add
 - `sensor.pool_ph_plus_g` - Shows grams of pH+ to add
+- `sensor.pool_chlorine_spoons` - Shows chlorine dosage in measuring spoons
 
 **Important Notes:**
 - ⚠️ **Accurate volume is essential** - A 20% error in volume translates to 20% error in dosing recommendations
 - 💡 Measure your pool volume carefully (length × width × average depth for rectangular pools)
-- 🧪 pH formulas assume standard pool chemistry products (strength may vary by brand)
+- 🧪 Formulas assume standard pool chemistry products (strength may vary by brand)
+- ⚡ Chlorine formula calibrated for typical granular chlorine dosing (adjust if using liquid/tablet forms)
 - 🔧 For irregular shapes, fill from empty and use water meter reading
 
 ---
