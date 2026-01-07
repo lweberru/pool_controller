@@ -335,14 +335,64 @@ Once configured, the integration automatically:
 - **Manual override**: Start/stop via buttons or services
 - **Duration control**: Adjustable per cycle
 
-### Temperature Control
-```
-Heating Formula:
-Time (minutes) = (Water Volume × 1.16 × ΔT) / Power (kW) × 60
+### Temperature Control & Water Volume Calculations
 
-Example: 1000L pool, 5°C difference, 3kW heater
-→ ~97 minutes to reach target
+The **water volume** setting is critical for two automated calculations:
+
+#### 1. Heating Time Calculation
+
+**Formula:**
 ```
+Time (minutes) = (Water Volume (L) × 1.16 × ΔT (°C)) / Power (W) × 60
+
+Where:
+- 1.16 = Specific heat capacity of water (Wh/L/°C)
+- ΔT = Target temperature - Current water temperature
+- Power = Heater power consumption (from power sensor or 3000W default)
+```
+
+**Example:**
+- Pool: 1000 L
+- Current temp: 20°C, Target: 38°C → ΔT = 18°C
+- Heater: 3000W (3kW)
+
+```
+Time = (1000 × 1.16 × 18) / 3000 × 60 = 418 minutes ≈ 7 hours
+```
+
+**Usage:** This calculation determines when to **pre-heat** before calendar events. If your pool calendar shows "Bathing at 18:00" and heating takes 7 hours, the pump automatically starts at 11:00.
+
+#### 2. pH Adjustment Dosage
+
+**Formulas:**
+```
+pH- (Senker) in grams = (Current pH - 7.3) × 100 × Volume (m³)
+pH+ (Heber) in grams = (7.1 - Current pH) × 100 × Volume (m³)
+
+Target pH range: 7.1 - 7.3 (ideal: 7.2)
+```
+
+**Example:**
+- Pool: 1000 L (1 m³)
+- Measured pH: 7.8 (too high)
+
+```
+pH- needed = (7.8 - 7.3) × 100 × 1 = 50 grams
+```
+
+**Usage:** The integration displays recommended dosages in sensors:
+- `sensor.pool_ph_minus_g` - Shows grams of pH- to add
+- `sensor.pool_ph_plus_g` - Shows grams of pH+ to add
+
+**Important Notes:**
+- ⚠️ **Accurate volume is essential** - A 20% error in volume translates to 20% error in dosing recommendations
+- 💡 Measure your pool volume carefully (length × width × average depth for rectangular pools)
+- 🧪 pH formulas assume standard pool chemistry products (strength may vary by brand)
+- 🔧 For irregular shapes, fill from empty and use water meter reading
+
+---
+
+### Temperature Control (Extended)
 
 **Heating enabled when:**
 - ✅ Pool not paused
