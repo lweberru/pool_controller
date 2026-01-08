@@ -216,6 +216,30 @@ Entity IDs depend on your instance name, but the integration uses stable suffix 
 | `sensor.<pool>_main_power` | Float | Main pump power consumption (W) |
 | `sensor.<pool>_aux_power` | Float | Auxiliary heater power consumption (W) |
 
+#### Timer sensor attributes (minute-based timers)
+
+All three timer sensors use **minutes remaining** as their state (unit: `min`).
+
+- **State (`sensor.*_timer_mins`)**: integer minutes remaining. When inactive, the state is `0`.
+- **Update cadence**: derived from persisted `*_until` timestamps and refreshed by the coordinator (default every 30s). The state decreases over time and can be slightly “stepwise” due to polling.
+
+**Common attribute:**
+- `active` (bool): `true` while the timer is considered active, otherwise `false`.
+
+**Manual timer (`sensor.<pool>_manual_timer_mins`) attributes:**
+- `type` (string | null): one of `bathing`, `filter`, `chlorine` while active; can be `null` when inactive.
+- `duration_minutes` (int | null): the originally requested duration in minutes.
+
+**Auto-filter timer (`sensor.<pool>_auto_filter_timer_mins`) attributes:**
+- `duration_minutes` (int | null): the configured/started auto-filter run duration.
+
+**Pause timer (`sensor.<pool>_pause_timer_mins`) attributes:**
+- `duration_minutes` (int | null): the requested pause duration.
+
+**Value ranges:**
+- `duration_minutes`: typically `1–1440` (the Home Assistant service UI selector enforces this range).
+- timer state (`*_timer_mins`): typically `0–1440` and never negative.
+
 ### Switches
 | Entity | Description |
 |--------|-------------|
@@ -459,9 +483,9 @@ chlorine_spoons = round((700 - chlor_mV) / 100) / 4 × (volume_L / 1000)
 - 500L pool at 400 mV: `0.75 × 0.5 = 0.38 spoons`
 
 **Usage:** The integration displays recommended dosages in sensors:
-- `sensor.pool_ph_minus_g` - Shows grams of pH- to add
-- `sensor.pool_ph_plus_g` - Shows grams of pH+ to add
-- `sensor.pool_chlorine_spoons` - Shows chlorine dosage in measuring spoons
+- `sensor.<pool>_ph_minus_g` - Shows grams of pH- to add
+- `sensor.<pool>_ph_plus_g` - Shows grams of pH+ to add
+- `sensor.<pool>_chlor_spoons` - Shows chlorine dosage in measuring spoons
 
 **Important Notes:**
 - ⚠️ **Accurate volume is essential** - A 20% error in volume translates to 20% error in dosing recommendations
