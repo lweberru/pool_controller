@@ -370,6 +370,7 @@ esp32:
 Once configured, the integration automatically:
 - ✅ Recommends pH adjustments (pH-, pH+)
 - ✅ Recommends chlorine dosing
+- ✅ Monitors TDS and recommends water changes
 - ✅ Flags low chlorine (ORP < 400mV)
 - ✅ Flags pH out of range
 - ✅ Displays all metrics in sensors
@@ -468,6 +469,66 @@ chlorine_spoons = round((700 - chlor_mV) / 100) / 4 × (volume_L / 1000)
 - 🧪 Formulas assume standard pool chemistry products (strength may vary by brand)
 - ⚡ Chlorine formula calibrated for typical granular chlorine dosing (adjust if using liquid/tablet forms)
 - 🔧 For irregular shapes, fill from empty and use water meter reading
+
+#### TDS (Total Dissolved Solids) & Water Change Recommendation
+
+If you provide a **conductivity sensor** (typically from Blueriiot), Pool Controller derives **TDS in ppm** and recommends how much water to replace to reduce TDS back toward a target level.
+
+##### 1) Conductivity → TDS conversion
+
+The integration expects conductivity in **μS/cm** and converts it to TDS (ppm) using a standard factor:
+
+```
+tds_ppm = round(conductivity_uS_cm × 0.64)
+```
+
+This value is exposed as:
+- `sensor.<pool>_tds_val` (ppm)
+
+##### 2) TDS status and alerting
+
+Based on the derived ppm value, the integration sets a status and a binary alert:
+
+- `sensor.<pool>_tds_status` (enum): `optimal`, `good`, `high`, `critical`, `urgent`
+- `binary_sensor.<pool>_tds_high`: `on` when water change is needed
+
+Current backend thresholds:
+
+- `< 1500 ppm` → `optimal`
+- `< 2000 ppm` → `good`
+- `< 2500 ppm` → `high` (sets `tds_high`)
+- `< 3000 ppm` → `critical` (sets `tds_high`)
+- `≥ 3000 ppm` → `urgent` (sets `tds_high`)
+
+##### 3) Recommended water change (liters + percent)
+
+To estimate how much water needs to be replaced to bring TDS down, the integration uses a simple dilution model with a target TDS:
+
+- Target TDS: `1200 ppm`
+
+Formula:
+
+```
+water_change_liters = round(volume_L × (tds_ppm - target_ppm) / tds_ppm)   [only when tds_ppm > target_ppm]
+water_change_percent = round((water_change_liters / volume_L) × 100)
+```
+
+These recommendations are exposed as:
+- `sensor.<pool>_tds_water_change_liters` (L)
+- `sensor.<pool>_tds_water_change_percent` (%)
+
+**Example:**
+- Pool volume: `1000 L`
+- TDS: `2400 ppm`
+
+```
+water_change_liters = 1000 × (2400 - 1200) / 2400 = 500 L
+water_change_percent = 500 / 1000 × 100 = 50 %
+```
+
+**Notes:**
+- Recommendations are only computed when a TDS/conductivity sensor is configured.
+- The calculation uses the configured **Water Volume** (liters); make sure it’s accurate.
 
 ---
 
