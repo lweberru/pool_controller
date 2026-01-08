@@ -33,6 +33,18 @@ CONF_ENABLE_SALTWATER = "enable_saltwater"
 CONF_ENABLE_AUX_HEATING = "enable_aux_heating"
 CONF_ENABLE_FROST_PROTECTION = "enable_frost_protection"
 
+# Frost protection (duty-cycle) tuning
+# Below CONF_FROST_START_TEMP the pump may run periodically to prevent freezing.
+# Below CONF_FROST_SEVERE_TEMP the pump runs more often.
+# During quiet hours, frost protection will only run if outdoor temperature is <= CONF_FROST_QUIET_OVERRIDE_BELOW_TEMP.
+CONF_FROST_START_TEMP = "frost_start_temp"
+CONF_FROST_SEVERE_TEMP = "frost_severe_temp"
+CONF_FROST_MILD_INTERVAL = "frost_mild_interval_minutes"
+CONF_FROST_MILD_RUN = "frost_mild_run_minutes"
+CONF_FROST_SEVERE_INTERVAL = "frost_severe_interval_minutes"
+CONF_FROST_SEVERE_RUN = "frost_severe_run_minutes"
+CONF_FROST_QUIET_OVERRIDE_BELOW_TEMP = "frost_quiet_override_below_temp"
+
 # Bathing timer
 CONF_BATH_DURATION = "bathing_minutes"
 DEFAULT_BATH_MINUTES = 60
@@ -85,3 +97,12 @@ DEFAULT_Q_START = "22:00"
 DEFAULT_Q_END = "08:00"
 DEFAULT_Q_START_WE = "22:00"
 DEFAULT_Q_END_WE = "10:00"
+
+# Frost duty-cycle defaults (intentionally conservative / neighbor-friendly)
+DEFAULT_FROST_START_TEMP = 2.0
+DEFAULT_FROST_SEVERE_TEMP = -2.0
+DEFAULT_FROST_MILD_INTERVAL = 240  # every 4 hours
+DEFAULT_FROST_MILD_RUN = 5  # minutes
+DEFAULT_FROST_SEVERE_INTERVAL = 120  # every 2 hours
+DEFAULT_FROST_SEVERE_RUN = 10  # minutes
+DEFAULT_FROST_QUIET_OVERRIDE_BELOW_TEMP = -8.0

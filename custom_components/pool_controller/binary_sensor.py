@@ -7,6 +7,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     async_add_entities([
         PoolBinary(coordinator, "is_we_holiday", "Wochenende oder Feiertag", None),
         PoolBinary(coordinator, "frost_danger", "Frostgefahr", BinarySensorDeviceClass.COLD),
+        PoolBinary(coordinator, "frost_active", "Frostschutz aktiv", BinarySensorDeviceClass.COLD),
         # Derived / template-like binary sensors provided by the integration
         PoolBinary(coordinator, "in_quiet", "Ruhemodus aktiv", None),
         PoolBinary(coordinator, "pv_allows", "PV Überschuss verfügbar", None),

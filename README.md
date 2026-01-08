@@ -33,7 +33,7 @@ If your spa or pool is connected to a simple smart switch (on/off only), you los
 ### Essential Pool Functions
 - **Filtration Cycles**: Automatic or manual filter running with configurable intervals and duration
 - **Temperature Control**: Smart heating based on calendar events and PV solar production
-- **Frost Protection**: Automatic pump activation when outdoor temperature drops below 3°C
+- **Frost Protection**: Configurable, neighbor-friendly duty-cycle based on outdoor temperature (quiet hours are respected; only overridden in extreme cold)
 - **Water Quality Monitoring**: Integration with ESP32 + Blueriiot sensors for real-time water parameters
 
 ### Comfort & Efficiency Features
@@ -119,11 +119,10 @@ If you prefer manual installation without HACS:
 
 ### Step 2: Configuration Flow
 
-The integration uses an interactive 5-step wizard:
+The integration uses an interactive 6-step wizard:
 
 #### Step 1: Basic Information
 - **Name**: Display name for your pool (e.g., "Whirlpool Demo")
-- **Main Switch**: Entity ID of main pump switch (required)
 - **Water Volume**: Liters of water (used for pH/chlorine calculations)
 - **Demo Mode**: Enable to test without actual devices
 
@@ -138,6 +137,7 @@ The integration uses an interactive 5-step wizard:
 Configure only if using ESP32 + Blueriiot:
 - **Water Temperature Sensor**: Current pool water temperature
 - **Outdoor Temperature Sensor**: For frost protection logic
+- **Frost Protection Tuning** (optional): duty-cycle settings and a quiet-hours emergency threshold
 - **pH Sensor**: Water pH value (0-14)
 - **Chlorine Sensor**: Redox/ORP value (mV)
 - **Salt Sensor**: Salt concentration (g/L) - optional
@@ -149,10 +149,14 @@ Configure only if using ESP32 + Blueriiot:
 - **Quiet Hours (Weekdays)**: Start/end times (e.g., 22:00 - 07:00)
 - **Quiet Hours (Weekends)**: Start/end times
 
-#### Step 5: PV Solar Integration
+#### Step 5: Filter Settings
+- **Automatic filtering**: Enable/disable automatic filter cycles
+- **Filter Interval**: Minutes between automatic filter cycles (default: 720 = 12 hours)
+
+#### Step 6: PV Solar Integration
 - **PV Surplus Sensor**: Entity measuring excess solar production (W)
-- **PV ON Threshold**: Minimum W to enable heating via solar (default: 500W)
-- **PV OFF Threshold**: Maximum W to disable heating (default: 100W)
+- **PV ON Threshold**: Turns pump/heating on when PV power >= threshold (default: 1000W)
+- **PV OFF Threshold**: Turns pump/heating off when PV power <= threshold (default: 500W)
 
 ---
 
@@ -161,11 +165,17 @@ Configure only if using ESP32 + Blueriiot:
 | Setting | Default | Range | Notes |
 |---------|---------|-------|-------|
 | Water Volume | 1000 | 100-10000 L | Used for pH/Chlorine dosing calculations |
-| Filter Interval | 12 | 1-168 hours | Time between automatic filter cycles |
+| Filter Interval | 720 | 60-10080 min | Time between automatic filter cycles |
 | Filter Duration | 30 | 5-480 min | How long each filter cycle runs |
 | Bathing Duration | 60 | 5-480 min | Default bathing session length |
 | Pause Duration | 60 | 5-480 min | Default pause duration |
-| Frost Temp Threshold | 3°C | -5 to 10°C | Trigger frost protection |
+| Frost Start Temp | 2°C | -20 to 10°C | Below this outdoor temperature `frost_danger` can become active |
+| Frost Severe Temp | -2°C | -30 to 5°C | Below this temperature the severe duty-cycle is used |
+| Frost Mild Interval | 240 | 1-1440 min | Mild duty-cycle interval (minutes) |
+| Frost Mild Run | 5 | 0-120 min | Run time within the mild interval (minutes) |
+| Frost Severe Interval | 120 | 1-1440 min | Severe duty-cycle interval (minutes) |
+| Frost Severe Run | 10 | 0-240 min | Run time within the severe interval (minutes) |
+| Quiet Override Below | -8°C | -30 to 0°C | During quiet hours frost cycling stays off unless outdoor temp is <= this value |
 | Heating Temp Target | 28°C | 20-40°C | Target water temperature |
 | Quick Chlorine Duration | 5 | 1-30 min | Duration of chlorine boost |
 | PV ON Threshold | 1000 | 0-20000 W | Enable PV operation above this surplus |
@@ -183,7 +193,8 @@ Entity IDs depend on your instance name, but the integration uses stable suffix 
 | Entity | Description |
 |--------|-------------|
 | `binary_sensor.<pool>_is_we_holiday` | True if today is weekend or holiday |
-| `binary_sensor.<pool>_frost_danger` | True when outdoor temp < 3°C |
+| `binary_sensor.<pool>_frost_danger` | True when outdoor temp is below the configured frost start temperature |
+| `binary_sensor.<pool>_frost_active` | True when the frost duty-cycle currently requests the pump to run |
 | `binary_sensor.<pool>_in_quiet` | Quiet hours active |
 | `binary_sensor.<pool>_pv_allows` | PV surplus available for operation |
 | `binary_sensor.<pool>_should_main_on` | Main pump should be running |
@@ -213,6 +224,7 @@ Entity IDs depend on your instance name, but the integration uses stable suffix 
 | `sensor.<pool>_manual_timer_mins` | Integer | Remaining minutes of the active manual timer (bathing/filter/chlorine). Attributes: `active`, `duration_minutes`, `type` |
 | `sensor.<pool>_auto_filter_timer_mins` | Integer | Remaining minutes of the automatic filter cycle timer. Attributes: `active`, `duration_minutes` |
 | `sensor.<pool>_pause_timer_mins` | Integer | Remaining minutes of the pause timer. Attributes: `active`, `duration_minutes` |
+| `sensor.<pool>_pv_power` | Float | PV power (W) derived from the configured PV sensor |
 | `sensor.<pool>_main_power` | Float | Main pump power consumption (W) |
 | `sensor.<pool>_aux_power` | Float | Auxiliary heater power consumption (W) |
 
@@ -569,7 +581,7 @@ When connected to solar:
 - Heating only engages if excess PV production > ON threshold
 - Heating stops when excess drops below OFF threshold
 - Maximizes self-consumption of solar energy
-- Example: Enable heating only when producing >500W surplus
+- Example: Enable heating only when producing >1000W surplus
 
 ### Quiet Hours
 Prevents noisy operations during sensitive times:
@@ -578,12 +590,14 @@ Prevents noisy operations during sensitive times:
 - **Holiday bypass**: No operations during calendar holidays
 - Overrideable via manual buttons
 
+Quiet hours are also respected by frost protection by default; an optional emergency threshold can allow frost cycling even during quiet hours in extreme cold.
+
 ### Frost Protection
-When outdoor temperature drops below 3°C:
-- ⚠️ Activates automatically
-- ⚠️ Keeps main pump running
-- ⚠️ Overrides quiet hours
-- ⚠️ Prevents water freezing in pipes
+When outdoor temperature drops below the configured frost start temperature:
+- ⚠️ `binary_sensor.<pool>_frost_danger` turns on (risk)
+- ✅ The pump is requested only in a duty-cycle (`binary_sensor.<pool>_frost_active`), with a stronger cycle below the configured severe temperature
+- ✅ During quiet hours the duty-cycle stays off by default; it only overrides quiet hours if outdoor temperature is below the configured emergency threshold
+- ✅ Prevents water freezing in pipes with less noise than continuous running
 
 ---
 
@@ -674,7 +688,7 @@ automation:
 |-------|---------|
 | `Normal` | Pool operating normally |
 | `Paused` | Pause timer active |
-| `Frost Protection` | Frost danger - protection active |
+| `Frost Protection` | Frost danger detected (see `binary_sensor.<pool>_frost_danger` / `binary_sensor.<pool>_frost_active`) |
 
 ### Useful Diagnostic Sensors
 - `sensor.pool_next_start_mins` - When next operation starts

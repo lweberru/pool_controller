@@ -56,6 +56,27 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_TEMP_WATER, default=DEFAULT_TEMP_WATER): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="temperature")),
                 vol.Optional(CONF_ENABLE_FROST_PROTECTION, default=True): bool,
                 vol.Optional(CONF_TEMP_OUTDOOR, default=DEFAULT_TEMP_OUTDOOR): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="temperature")),
+                vol.Optional(CONF_FROST_START_TEMP, default=DEFAULT_FROST_START_TEMP): selector.NumberSelector(
+                    selector.NumberSelectorConfig(min=-20, max=10, step=0.5, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="°C")
+                ),
+                vol.Optional(CONF_FROST_SEVERE_TEMP, default=DEFAULT_FROST_SEVERE_TEMP): selector.NumberSelector(
+                    selector.NumberSelectorConfig(min=-30, max=5, step=0.5, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="°C")
+                ),
+                vol.Optional(CONF_FROST_MILD_INTERVAL, default=DEFAULT_FROST_MILD_INTERVAL): selector.NumberSelector(
+                    selector.NumberSelectorConfig(min=30, max=12 * 60, step=10, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="min")
+                ),
+                vol.Optional(CONF_FROST_MILD_RUN, default=DEFAULT_FROST_MILD_RUN): selector.NumberSelector(
+                    selector.NumberSelectorConfig(min=1, max=60, step=1, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="min")
+                ),
+                vol.Optional(CONF_FROST_SEVERE_INTERVAL, default=DEFAULT_FROST_SEVERE_INTERVAL): selector.NumberSelector(
+                    selector.NumberSelectorConfig(min=30, max=12 * 60, step=10, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="min")
+                ),
+                vol.Optional(CONF_FROST_SEVERE_RUN, default=DEFAULT_FROST_SEVERE_RUN): selector.NumberSelector(
+                    selector.NumberSelectorConfig(min=1, max=60, step=1, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="min")
+                ),
+                vol.Optional(CONF_FROST_QUIET_OVERRIDE_BELOW_TEMP, default=DEFAULT_FROST_QUIET_OVERRIDE_BELOW_TEMP): selector.NumberSelector(
+                    selector.NumberSelectorConfig(min=-30, max=5, step=0.5, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="°C")
+                ),
                 vol.Optional(CONF_PH_SENSOR, default=DEFAULT_PH_SENS): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
                 vol.Optional(CONF_CHLORINE_SENSOR, default=DEFAULT_CHLOR_SENS): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
                 vol.Optional(CONF_ENABLE_SALTWATER, default=False): bool,
@@ -189,6 +210,27 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
                 vol.Required(CONF_TEMP_WATER, default=curr.get(CONF_TEMP_WATER, DEFAULT_TEMP_WATER)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="temperature")),
                 vol.Optional(CONF_ENABLE_FROST_PROTECTION, default=curr.get(CONF_ENABLE_FROST_PROTECTION, True)): bool,
                 vol.Optional(CONF_TEMP_OUTDOOR, default=curr.get(CONF_TEMP_OUTDOOR, DEFAULT_TEMP_OUTDOOR)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="temperature")),
+                vol.Optional(CONF_FROST_START_TEMP, default=curr.get(CONF_FROST_START_TEMP, DEFAULT_FROST_START_TEMP)): selector.NumberSelector(
+                    selector.NumberSelectorConfig(min=-20, max=10, step=0.5, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="°C")
+                ),
+                vol.Optional(CONF_FROST_SEVERE_TEMP, default=curr.get(CONF_FROST_SEVERE_TEMP, DEFAULT_FROST_SEVERE_TEMP)): selector.NumberSelector(
+                    selector.NumberSelectorConfig(min=-30, max=5, step=0.5, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="°C")
+                ),
+                vol.Optional(CONF_FROST_MILD_INTERVAL, default=curr.get(CONF_FROST_MILD_INTERVAL, DEFAULT_FROST_MILD_INTERVAL)): selector.NumberSelector(
+                    selector.NumberSelectorConfig(min=30, max=12 * 60, step=10, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="min")
+                ),
+                vol.Optional(CONF_FROST_MILD_RUN, default=curr.get(CONF_FROST_MILD_RUN, DEFAULT_FROST_MILD_RUN)): selector.NumberSelector(
+                    selector.NumberSelectorConfig(min=1, max=60, step=1, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="min")
+                ),
+                vol.Optional(CONF_FROST_SEVERE_INTERVAL, default=curr.get(CONF_FROST_SEVERE_INTERVAL, DEFAULT_FROST_SEVERE_INTERVAL)): selector.NumberSelector(
+                    selector.NumberSelectorConfig(min=30, max=12 * 60, step=10, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="min")
+                ),
+                vol.Optional(CONF_FROST_SEVERE_RUN, default=curr.get(CONF_FROST_SEVERE_RUN, DEFAULT_FROST_SEVERE_RUN)): selector.NumberSelector(
+                    selector.NumberSelectorConfig(min=1, max=60, step=1, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="min")
+                ),
+                vol.Optional(CONF_FROST_QUIET_OVERRIDE_BELOW_TEMP, default=curr.get(CONF_FROST_QUIET_OVERRIDE_BELOW_TEMP, DEFAULT_FROST_QUIET_OVERRIDE_BELOW_TEMP)): selector.NumberSelector(
+                    selector.NumberSelectorConfig(min=-30, max=5, step=0.5, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="°C")
+                ),
                 vol.Optional(CONF_PH_SENSOR, default=curr.get(CONF_PH_SENSOR, DEFAULT_PH_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
                 vol.Optional(CONF_CHLORINE_SENSOR, default=curr.get(CONF_CHLORINE_SENSOR, DEFAULT_CHLOR_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
                 vol.Optional(CONF_ENABLE_SALTWATER, default=curr.get(CONF_ENABLE_SALTWATER, False)): bool,

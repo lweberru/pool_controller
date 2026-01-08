@@ -327,7 +327,64 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             # 1. Frost & Wochenende
             # Frostschutz nur wenn aktiviert UND Outdoor-Sensor vorhanden
             enable_frost = conf.get(CONF_ENABLE_FROST_PROTECTION, True)
-            frost_danger = enable_frost and outdoor_temp is not None and outdoor_temp < 3.0
+            frost_start_temp = conf.get(CONF_FROST_START_TEMP, DEFAULT_FROST_START_TEMP)
+            frost_severe_temp = conf.get(CONF_FROST_SEVERE_TEMP, DEFAULT_FROST_SEVERE_TEMP)
+            frost_mild_interval = conf.get(CONF_FROST_MILD_INTERVAL, DEFAULT_FROST_MILD_INTERVAL)
+            frost_mild_run = conf.get(CONF_FROST_MILD_RUN, DEFAULT_FROST_MILD_RUN)
+            frost_severe_interval = conf.get(CONF_FROST_SEVERE_INTERVAL, DEFAULT_FROST_SEVERE_INTERVAL)
+            frost_severe_run = conf.get(CONF_FROST_SEVERE_RUN, DEFAULT_FROST_SEVERE_RUN)
+            frost_quiet_override_below = conf.get(CONF_FROST_QUIET_OVERRIDE_BELOW_TEMP, DEFAULT_FROST_QUIET_OVERRIDE_BELOW_TEMP)
+
+            try:
+                frost_start_temp = float(frost_start_temp)
+            except Exception:
+                frost_start_temp = DEFAULT_FROST_START_TEMP
+            try:
+                frost_severe_temp = float(frost_severe_temp)
+            except Exception:
+                frost_severe_temp = DEFAULT_FROST_SEVERE_TEMP
+            try:
+                frost_quiet_override_below = float(frost_quiet_override_below)
+            except Exception:
+                frost_quiet_override_below = DEFAULT_FROST_QUIET_OVERRIDE_BELOW_TEMP
+
+            try:
+                frost_mild_interval = int(frost_mild_interval)
+            except Exception:
+                frost_mild_interval = DEFAULT_FROST_MILD_INTERVAL
+            try:
+                frost_mild_run = int(frost_mild_run)
+            except Exception:
+                frost_mild_run = DEFAULT_FROST_MILD_RUN
+            try:
+                frost_severe_interval = int(frost_severe_interval)
+            except Exception:
+                frost_severe_interval = DEFAULT_FROST_SEVERE_INTERVAL
+            try:
+                frost_severe_run = int(frost_severe_run)
+            except Exception:
+                frost_severe_run = DEFAULT_FROST_SEVERE_RUN
+
+            frost_danger = False
+            frost_active = False
+            ot = None
+            if outdoor_temp is not None:
+                try:
+                    ot = float(outdoor_temp)
+                except Exception:
+                    ot = None
+
+            if enable_frost and ot is not None and ot < frost_start_temp:
+                frost_danger = True
+                interval = max(1, frost_mild_interval)
+                run_mins = max(0, frost_mild_run)
+                if ot <= frost_severe_temp:
+                    interval = max(1, frost_severe_interval)
+                    run_mins = max(0, frost_severe_run)
+                # duty-cycle uses epoch minutes to avoid daily "reset" artifacts
+                now_local = dt_util.as_local(now)
+                epoch_minutes = int(now_local.timestamp() // 60)
+                frost_active = (run_mins > 0) and ((epoch_minutes % interval) < run_mins)
             is_holiday = await self._check_holiday(conf.get(CONF_HOLIDAY_CALENDAR))
             we_or_holiday = is_holiday or (now.weekday() >= 5)
 
@@ -394,10 +451,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             # Initialisiere next_filter_start wenn nicht gesetzt (z.B. nach Neustart)
             if not getattr(self, "next_filter_start", None):
                 self.next_filter_start = now + timedelta(minutes=self.filter_interval)
-            
-            next_filter_mins = None
-            if getattr(self, "next_filter_start", None):
-                next_filter_mins = max(0, round((self.next_filter_start - now).total_seconds() / 60))
+
             # PV sensor logic
             enable_pv = conf.get(CONF_ENABLE_PV_OPTIMIZATION, False)
             pv_raw = self._get_float(conf.get(CONF_PV_SURPLUS_SENSOR))
@@ -430,7 +484,67 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 except Exception:
                     return False
 
+            def _quiet_times_for(dt_obj, cfg):
+                dt_local = dt_util.as_local(dt_obj)
+                weekday = dt_local.weekday()
+                if weekday >= 5:
+                    start_s = cfg.get(CONF_QUIET_START_WEEKEND, DEFAULT_Q_START_WE)
+                    end_s = cfg.get(CONF_QUIET_END_WEEKEND, DEFAULT_Q_END_WE)
+                else:
+                    start_s = cfg.get(CONF_QUIET_START, DEFAULT_Q_START)
+                    end_s = cfg.get(CONF_QUIET_END, DEFAULT_Q_END)
+                return dt_util.parse_time(start_s), dt_util.parse_time(end_s)
+
+            def _is_in_quiet_at(dt_obj, cfg):
+                try:
+                    dt_local = dt_util.as_local(dt_obj)
+                    t = dt_local.time()
+                    start_t, end_t = _quiet_times_for(dt_obj, cfg)
+                    if start_t <= end_t:
+                        return start_t <= t <= end_t
+                    return t >= start_t or t <= end_t
+                except Exception:
+                    return False
+
+            def _quiet_end_for(dt_obj, cfg):
+                dt_local = dt_util.as_local(dt_obj)
+                start_t, end_t = _quiet_times_for(dt_obj, cfg)
+                end_today = dt_local.replace(hour=end_t.hour, minute=end_t.minute, second=0, microsecond=0)
+                end_tomorrow = (dt_local + timedelta(days=1)).replace(hour=end_t.hour, minute=end_t.minute, second=0, microsecond=0)
+
+                if start_t <= end_t:
+                    # same-day window
+                    return end_today if dt_local <= end_today else end_tomorrow
+
+                # overnight window
+                if dt_local.time() >= start_t:
+                    return end_tomorrow
+                if dt_local.time() <= end_t:
+                    return end_today
+                return end_tomorrow
+
             in_quiet = _in_quiet_period(conf)
+
+            # Ruhezeit ist heilig: Frostschutz darf sie nur im "äußersten Notfall" stören.
+            # => Während Ruhezeit nur aktiv, wenn Außentemp <= frost_quiet_override_below
+            if in_quiet and ot is not None and ot > frost_quiet_override_below:
+                frost_active = False
+
+            # Wenn der geplante Filter-Start in eine Ruhezeit fällt: vorab auf das Ruhezeit-Ende verschieben.
+            enable_auto_filter = conf.get(CONF_ENABLE_AUTO_FILTER, True)
+            if enable_auto_filter and getattr(self, "next_filter_start", None) and _is_in_quiet_at(self.next_filter_start, conf):
+                shifted = _quiet_end_for(self.next_filter_start, conf)
+                if shifted and shifted != self.next_filter_start:
+                    self.next_filter_start = shifted
+                    try:
+                        new_opts = {**self.entry.options, OPT_KEY_FILTER_NEXT: shifted.isoformat()}
+                        await self.hass.config_entries.async_update_entry(self.entry, options=new_opts)
+                    except Exception:
+                        _LOGGER.exception("Fehler beim Verschieben von next_filter_start (Ruhezeit)")
+
+            next_filter_mins = None
+            if getattr(self, "next_filter_start", None):
+                next_filter_mins = max(0, round((self.next_filter_start - now).total_seconds() / 60))
 
             # Start calendar-driven bathing: if event is ongoing, ensure manual timer active
             if cal_data.get("start") and cal_data.get("end"):
@@ -443,10 +557,18 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                         manual_mins = _mins_left(self.manual_timer_until) if manual_active else 0
 
             # Auto-start filter when next_filter_start reached
-            enable_auto_filter = conf.get(CONF_ENABLE_AUTO_FILTER, True)
             if enable_auto_filter and getattr(self, "next_filter_start", None) and now >= self.next_filter_start and (not auto_filter_active) and (not pause_active):
                 pv_check = pv_allows or not conf.get(CONF_ENABLE_PV_OPTIMIZATION, False)
-                if (not in_quiet) and pv_check:
+                if in_quiet:
+                    shifted = _quiet_end_for(now, conf)
+                    if shifted and shifted != self.next_filter_start:
+                        self.next_filter_start = shifted
+                        try:
+                            new_opts = {**self.entry.options, OPT_KEY_FILTER_NEXT: shifted.isoformat()}
+                            await self.hass.config_entries.async_update_entry(self.entry, options=new_opts)
+                        except Exception:
+                            _LOGGER.exception("Fehler beim Umplanen von next_filter_start (Ruhezeit, fällig)")
+                elif pv_check:
                     await self._start_auto_filter(minutes=self.filter_minutes)
                     auto_filter_active = self.auto_filter_until is not None and now < self.auto_filter_until
                     auto_filter_mins = _mins_left(self.auto_filter_until) if auto_filter_active else 0
@@ -471,6 +593,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "chlor_spoons": chlor_spoons,
                 "is_we_holiday": we_or_holiday,
                 "frost_danger": frost_danger,
+                "frost_active": frost_active,
                 "next_event": cal_data.get("start"),
                 "next_event_end": cal_data.get("end"),
                 "next_event_summary": cal_data.get("summary"),
@@ -493,7 +616,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "main_power": round(main_power, 1) if main_power is not None else None,
                 "aux_power": round(aux_power, 1) if aux_power is not None else None,
                 "should_main_on": (
-                    (frost_danger)
+                    (frost_active)
                     or (not pause_active and (
                         is_bathing
                         or is_chlorinating
