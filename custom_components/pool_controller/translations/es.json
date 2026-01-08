@@ -289,6 +289,7 @@
       "next_filter_mins": { "name": "Próxima filtración en (min)" },
       "next_event_end": { "name": "Fin del próximo evento" },
       "next_event_summary": { "name": "Nombre del próximo evento" },
+      "pv_power": { "name": "Potencia FV" },
       "main_power": { "name": "Potencia bomba principal" },
       "aux_power": { "name": "Potencia calefacción" },
       "pool_status": { "name": "Estado de la piscina" },

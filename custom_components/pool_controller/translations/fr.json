@@ -292,6 +292,7 @@
       "next_filter_mins": { "name": "Prochaine filtration dans (min)" },
       "next_event_end": { "name": "Fin du prochain événement" },
       "next_event_summary": { "name": "Nom du prochain événement" },
+      "pv_power": {"name": "Puissance PV"},
       "main_power": { "name": "Puissance pompe principale" },
       "aux_power": { "name": "Puissance chauffage" },
       "pool_status": { "name": "État du spa" },

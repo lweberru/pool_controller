@@ -400,7 +400,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 next_filter_mins = max(0, round((self.next_filter_start - now).total_seconds() / 60))
             # PV sensor logic
             enable_pv = conf.get(CONF_ENABLE_PV_OPTIMIZATION, False)
-            pv_val = self._get_float(conf.get(CONF_PV_SURPLUS_SENSOR)) if enable_pv else None
+            pv_raw = self._get_float(conf.get(CONF_PV_SURPLUS_SENSOR))
+            pv_val = pv_raw if enable_pv else None
             pv_allows = False
             if enable_pv and pv_val is not None:
                 if pv_val >= getattr(self, "pv_on_threshold", DEFAULT_PV_ON):
@@ -485,6 +486,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "next_filter_mins": next_filter_mins,
                 # Aux-Heizung einschalten, wenn aktiviert UND Temperatur signifikant unter Ziel liegt
                 "should_aux_on": conf.get(CONF_ENABLE_AUX_HEATING, False) and (delta_t > 1.0),
+                # PV power reading (W) - used for UI display/more-info in the dashboard card
+                "pv_power": pv_raw,
                 "pv_allows": pv_allows,
                 "in_quiet": in_quiet,
                 "main_power": round(main_power, 1) if main_power is not None else None,

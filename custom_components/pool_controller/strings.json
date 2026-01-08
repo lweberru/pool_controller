@@ -262,6 +262,7 @@
       "pause_timer_mins": {"name": "Pause timer"},
       "next_event_end": {"name": "Next event end"},
       "next_event_summary": {"name": "Next event name"},
+      "pv_power": {"name": "PV power"},
       "main_power": {"name": "Main pump power"},
       "aux_power": {"name": "Heater power"}
     }
