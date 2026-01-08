@@ -228,5 +228,78 @@
         }
       }
     }
+  },
+  "entity": {
+    "climate": {
+      "pool_climate": {
+        "name": "Pool Controller"
+      }
+    },
+    "binary_sensor": {
+      "is_we_holiday": { "name": "Wochenende oder Feiertag" },
+      "frost_danger": { "name": "Frostgefahr" },
+      "frost_active": { "name": "Frostschutz aktiv" },
+      "in_quiet": { "name": "Ruhemodus aktiv" },
+      "pv_allows": { "name": "PV-Überschuss verfügbar" },
+      "should_main_on": { "name": "Hauptpumpe erforderlich" },
+      "low_chlor": { "name": "Niedriger Chlorwert" },
+      "ph_alert": { "name": "pH außerhalb Bereich" },
+      "tds_high": { "name": "TDS zu hoch" }
+    },
+    "sensor": {
+      "status": { "name": "Status" },
+      "tds_status": { "name": "TDS Status" },
+      "ph_val": { "name": "pH-Wert" },
+      "chlor_val": { "name": "Chlorgehalt" },
+      "salt_val": { "name": "Salzgehalt" },
+      "tds_val": { "name": "TDS" },
+      "tds_water_change_liters": { "name": "TDS Wasserwechsel (L)" },
+      "tds_water_change_percent": { "name": "TDS Wasserwechsel (%)" },
+      "ph_minus_g": { "name": "pH- Aktion" },
+      "ph_plus_g": { "name": "pH+ Aktion" },
+      "chlor_spoons": { "name": "Chlor Aktion" },
+      "next_start_mins": { "name": "Nächster Start in" },
+      "next_filter_mins": { "name": "Nächster Filter in" },
+      "next_event": { "name": "Nächster Event Start" },
+      "next_event_end": { "name": "Nächster Event Ende" },
+      "next_event_summary": { "name": "Nächster Event Name" },
+      "manual_timer_mins": { "name": "Manueller Timer" },
+      "auto_filter_timer_mins": { "name": "Filter-Timer" },
+      "pause_timer_mins": { "name": "Pausen-Timer" },
+      "pv_power": { "name": "PV Leistung" },
+      "main_power": { "name": "Hauptpumpe Leistung" },
+      "aux_power": { "name": "Heizung Leistung" }
+    },
+    "switch": {
+      "main": { "name": "Hauptschalter" },
+      "aux": { "name": "Zusatzheizung" }
+    },
+    "button": {
+      "pause_60": { "name": "Pause (60 min)" },
+      "bath_60": { "name": "Baden (60 min)" },
+      "filter_30": { "name": "Filtern (30 min)" },
+      "chlorine_5": { "name": "Chloren (5 min)" }
+    }
+  },
+  "state": {
+    "sensor": {
+      "status": {
+        "state": {
+          "normal": "Normal",
+          "paused": "Pause",
+          "frost_protection": "Frostschutz"
+        }
+      },
+      "tds_status": {
+        "state": {
+          "optimal": "Optimal",
+          "good": "Gut",
+          "high": "Hoch",
+          "critical": "Kritisch",
+          "urgent": "Dringend",
+          "unknown": "Unbekannt"
+        }
+      }
+    }
   }
 }

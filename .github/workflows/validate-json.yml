@@ -1,0 +1,48 @@
+name: Validate JSON
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  json:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Validate JSON files (translations + strings)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import glob
+          import sys
+
+          paths = [
+              'custom_components/pool_controller/strings.json',
+              *sorted(glob.glob('custom_components/pool_controller/translations/*.json')),
+          ]
+
+          failed = False
+          for p in paths:
+              try:
+                  with open(p, 'r', encoding='utf-8') as f:
+                      json.load(f)
+              except Exception as e:
+                  failed = True
+                  print(f'JSON FAIL: {p}: {e}', file=sys.stderr)
+              else:
+                  print(f'JSON OK:   {p}')
+
+          if failed:
+              raise SystemExit(1)
+          PY
