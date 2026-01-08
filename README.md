@@ -161,13 +161,15 @@ Configure only if using ESP32 + Blueriiot:
 | Setting | Default | Range | Notes |
 |---------|---------|-------|-------|
 | Water Volume | 1000 | 100-10000 L | Used for pH/Chlorine dosing calculations |
-| Filter Interval | 24 | 1-168 hours | Time between automatic filter cycles |
+| Filter Interval | 12 | 1-168 hours | Time between automatic filter cycles |
 | Filter Duration | 30 | 5-480 min | How long each filter cycle runs |
 | Bathing Duration | 60 | 5-480 min | Default bathing session length |
-| Pause Duration | 30 | 5-480 min | Default pause duration |
+| Pause Duration | 60 | 5-480 min | Default pause duration |
 | Frost Temp Threshold | 3°C | -5 to 10°C | Trigger frost protection |
 | Heating Temp Target | 28°C | 20-40°C | Target water temperature |
 | Quick Chlorine Duration | 5 | 1-30 min | Duration of chlorine boost |
+| PV ON Threshold | 1000 | 0-20000 W | Enable PV operation above this surplus |
+| PV OFF Threshold | 500 | 0-20000 W | Disable PV operation below this surplus |
 
 All duration settings can be overridden per operation via **Services** (see below).
 
@@ -175,87 +177,66 @@ All duration settings can be overridden per operation via **Services** (see belo
 
 ## Sensors & Entities
 
+Entity IDs depend on your instance name, but the integration uses stable suffix keys (translation_key / unique_id suffixes) as shown below.
+
 ### Binary Sensors
 | Entity | Description |
 |--------|-------------|
-| `binary_sensor.pool_is_we_holiday` | True if today is weekend or holiday |
-| `binary_sensor.pool_frost_danger` | True when outdoor temp < 3°C |
-| `binary_sensor.pool_is_quick_chlor` | Active quick chlorination |
-| `binary_sensor.pool_is_paused` | Pool paused |
-| `binary_sensor.pool_is_bathing` | Bathing session active |
-| `binary_sensor.pool_filter_active` | Filter cycle running |
-| `binary_sensor.pool_in_quiet` | Quiet hours active |
-| `binary_sensor.pool_pv_allows` | PV surplus available for operation |
-| `binary_sensor.pool_should_main_on` | Main pump should be running |
-| `binary_sensor.pool_low_chlor` | Chlorine below recommended level |
-| `binary_sensor.pool_ph_alert` | pH outside acceptable range |
-| `binary_sensor.pool_tds_high` | TDS too high (water change needed) |
+| `binary_sensor.<pool>_is_we_holiday` | True if today is weekend or holiday |
+| `binary_sensor.<pool>_frost_danger` | True when outdoor temp < 3°C |
+| `binary_sensor.<pool>_in_quiet` | Quiet hours active |
+| `binary_sensor.<pool>_pv_allows` | PV surplus available for operation |
+| `binary_sensor.<pool>_should_main_on` | Main pump should be running |
+| `binary_sensor.<pool>_low_chlor` | Chlorine below recommended level |
+| `binary_sensor.<pool>_ph_alert` | pH outside acceptable range |
+| `binary_sensor.<pool>_tds_high` | TDS too high (water change needed) |
 
 ### Sensors (Numeric & Status)
 | Entity | Type | Description |
 |--------|------|-------------|
-| `sensor.pool_status` | Enum | Current state: `Normal`, `Paused`, `Frost Protection` |
-| `sensor.pool_tds_status` | Enum | Water quality: `Optimal`, `Good`, `High`, `Critical`, `Urgent` |
-| `sensor.pool_ph_value` | Float | Water pH (6.6-8.4 acceptable) |
-| `sensor.pool_chlorine_level` | Float | Chlorine/ORP in mV |
-| `sensor.pool_salt_content` | Float | Salt concentration in g/L |
-| `sensor.pool_tds_conductivity` | Integer | Total Dissolved Solids (TDS) in ppm |
-| `sensor.pool_tds_water_change_liters` | Integer | Recommended water change volume (liters) |
-| `sensor.pool_tds_water_change_percent` | Integer | Recommended water change (%) |
-| `sensor.pool_ph_minus_g` | Float | Recommended pH- dosage in grams |
-| `sensor.pool_ph_plus_g` | Float | Recommended pH+ dosage in grams |
-| `sensor.pool_chlorine_spoons` | Float | Recommended chlorine dosage in spoons |
-| `sensor.pool_next_start_mins` | Integer | Minutes until next operation |
-| `sensor.pool_next_event` | Timestamp | Next calendar event start |
-| `sensor.pool_next_event_end` | Timestamp | Next calendar event end |
-| `sensor.pool_next_event_summary` | String | Next calendar event name |
-| `sensor.pool_next_filter_mins` | Integer | Minutes until next filter cycle |
-| `sensor.pool_pause_until` | Timestamp | When pause ends (if active) |
-| `sensor.pool_quick_chlorine_until` | Timestamp | When quick chlorine ends |
-| `sensor.pool_bathing_until` | Timestamp | When bathing session ends |
-| `sensor.pool_filter_until` | Timestamp | When filter cycle ends |
-| `sensor.pool_main_power` | Float | Main pump power consumption (W) |
-| `sensor.pool_aux_power` | Float | Auxiliary heater power consumption (W) |
+| `sensor.<pool>_status` | Enum | Current state: `normal`, `paused`, `frost_protection` |
+| `sensor.<pool>_tds_status` | Enum | Water quality assessment (backend-derived) |
+| `sensor.<pool>_ph_val` | Float | Water pH (0-14) |
+| `sensor.<pool>_chlor_val` | Float | Chlorine/ORP in mV |
+| `sensor.<pool>_salt_val` | Float | Salt concentration in g/L (optional) |
+| `sensor.<pool>_tds_val` | Integer | Total Dissolved Solids (TDS) in ppm (optional) |
+| `sensor.<pool>_tds_water_change_liters` | Integer | Recommended water change volume (liters) |
+| `sensor.<pool>_tds_water_change_percent` | Integer | Recommended water change (%) |
+| `sensor.<pool>_ph_minus_g` | Float | Recommended pH- dosage in grams |
+| `sensor.<pool>_ph_plus_g` | Float | Recommended pH+ dosage in grams |
+| `sensor.<pool>_chlor_spoons` | Float | Recommended chlorine dosage in spoons |
+| `sensor.<pool>_next_start_mins` | Integer | Minutes until next operation |
+| `sensor.<pool>_next_event` | Timestamp | Next calendar event start |
+| `sensor.<pool>_next_event_end` | Timestamp | Next calendar event end |
+| `sensor.<pool>_next_event_summary` | String | Next calendar event name |
+| `sensor.<pool>_next_filter_mins` | Integer | Minutes until next filter cycle |
+| `sensor.<pool>_manual_timer_mins` | Integer | Remaining minutes of the active manual timer (bathing/filter/chlorine). Attributes: `active`, `duration_minutes`, `type` |
+| `sensor.<pool>_auto_filter_timer_mins` | Integer | Remaining minutes of the automatic filter cycle timer. Attributes: `active`, `duration_minutes` |
+| `sensor.<pool>_pause_timer_mins` | Integer | Remaining minutes of the pause timer. Attributes: `active`, `duration_minutes` |
+| `sensor.<pool>_main_power` | Float | Main pump power consumption (W) |
+| `sensor.<pool>_aux_power` | Float | Auxiliary heater power consumption (W) |
 
 ### Switches
 | Entity | Description |
 |--------|-------------|
-| `switch.pool_main` | Main pump on/off |
-| `switch.pool_aux` | Auxiliary heater on/off |
-| `switch.pool_bathing` | Bathing mode on/off |
+| `switch.<pool>_main` | Main pump on/off |
+| `switch.<pool>_aux` | Auxiliary heater on/off |
 
 ### Climate
 | Entity | Description |
 |--------|-------------|
-| `climate.pool_heating` | Pool heater thermostat (target 28°C) |
+| `climate.<pool>_*` | Pool heater thermostat entity (select this as the controller entity in automations and the dashboard card) |
 
 ---
 
 ## Buttons & Manual Controls
 
-The integration provides 14 quick-action buttons:
+The integration provides four quick-action buttons (one per topic, using the default duration):
 
-### Chlorination
-- `button.pool_quick_chlorine` - 5-minute chlorine boost
-- `button.pool_quick_chlorine_stop` - Stop shock chlorination
-
-### Pause Controls
-- `button.pool_pause_30` - Pause for 30 minutes
-- `button.pool_pause_60` - Pause for 60 minutes
-- `button.pool_pause_120` - Pause for 120 minutes
-- `button.pool_pause_stop` - Cancel active pause
-
-### Bathing Session Controls
-- `button.pool_bath_30` - 30-minute bathing session
-- `button.pool_bath_60` - 60-minute bathing session
-- `button.pool_bath_120` - 120-minute bathing session
-- `button.pool_bath_stop` - End active bathing session
-
-### Filter Cycle Controls
-- `button.pool_filter_30` - 30-minute filter cycle
-- `button.pool_filter_60` - 60-minute filter cycle
-- `button.pool_filter_120` - 120-minute filter cycle
-- `button.pool_filter_stop` - Stop active filter cycle
+- `button.<pool>_bath_60` - Start bathing session (60 min)
+- `button.<pool>_filter_30` - Start filter cycle (30 min)
+- `button.<pool>_chlorine_5` - Start quick chlorine (5 min)
+- `button.<pool>_pause_60` - Start pause (60 min)
 
 ---
 
@@ -263,15 +244,22 @@ The integration provides 14 quick-action buttons:
 
 All services support optional `duration_minutes` parameter for custom durations.
 
+If you have multiple pool_controller instances, you should target the correct instance using one of:
+- `config_entry_id` (most explicit)
+- `climate_entity` (or alias `controller_entity`) of that instance
+
 ### Pause Management
 ```yaml
-# Start pause (default 30 minutes)
+# Start pause (default 60 minutes)
 service: pool_controller.start_pause
 data:
+  climate_entity: climate.my_pool  # recommended for multi-instance setups
   duration_minutes: 45  # optional
 
 # Stop active pause
 service: pool_controller.stop_pause
+data:
+  climate_entity: climate.my_pool
 ```
 
 **Use Case**: Pause pool when guests are sleeping or during maintenance
@@ -281,10 +269,13 @@ service: pool_controller.stop_pause
 # Start bathing session (default 60 minutes)
 service: pool_controller.start_bathing
 data:
+  climate_entity: climate.my_pool
   duration_minutes: 120  # optional - great for extended family gatherings!
 
 # End bathing session
 service: pool_controller.stop_bathing
+data:
+  climate_entity: climate.my_pool
 ```
 
 **Use Case**: Scheduled bath times via calendar or time automation
@@ -294,10 +285,27 @@ service: pool_controller.stop_bathing
 # Start filter cycle (default 30 minutes)
 service: pool_controller.start_filter
 data:
+  climate_entity: climate.my_pool
   duration_minutes: 60  # optional
 
 # Stop filter cycle
 service: pool_controller.stop_filter
+data:
+  climate_entity: climate.my_pool
+```
+
+### Chlorine (Quick Chlorination)
+```yaml
+# Start quick chlorine (default 5 minutes)
+service: pool_controller.start_chlorine
+data:
+  climate_entity: climate.my_pool
+  duration_minutes: 5  # optional
+
+# Stop chlorine
+service: pool_controller.stop_chlorine
+data:
+  climate_entity: climate.my_pool
 ```
 
 **Use Case**: Manual filter triggers or extended filtration on high-use days

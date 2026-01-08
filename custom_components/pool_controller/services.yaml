@@ -2,9 +2,27 @@ start_pause:
   name: Start Pause
   description: Pause the pool for a specified duration
   fields:
+    climate_entity:
+      name: Pool climate entity (optional)
+      description: Optional. If you have multiple pool_controller instances, specify the target instance by providing its climate entity_id (e.g. climate.my_pool).
+      example: climate.pool_controller
+      selector:
+        entity:
+          domain: climate
+    controller_entity:
+      name: Controller entity (alias, optional)
+      description: Alias for climate_entity.
+      example: climate.pool_controller
+      selector:
+        entity:
+          domain: climate
+    config_entry_id:
+      name: Config entry id (optional)
+      description: Optional advanced targeting. Config entry id of the pool_controller instance.
+      example: 1234567890abcdef1234567890abcdef
     duration_minutes:
       name: Duration (minutes)
-      description: How long to pause (default 30)
+      description: How long to pause (default 60)
       example: 60
       selector:
         number:
@@ -14,11 +32,48 @@ start_pause:
 stop_pause:
   name: Stop Pause
   description: Cancel the active pause
+  fields:
+    climate_entity:
+      name: Pool climate entity (optional)
+      description: Optional. If you have multiple pool_controller instances, specify the target instance by providing its climate entity_id.
+      example: climate.pool_controller
+      selector:
+        entity:
+          domain: climate
+    controller_entity:
+      name: Controller entity (alias, optional)
+      description: Alias for climate_entity.
+      example: climate.pool_controller
+      selector:
+        entity:
+          domain: climate
+    config_entry_id:
+      name: Config entry id (optional)
+      description: Optional advanced targeting. Config entry id of the pool_controller instance.
+      example: 1234567890abcdef1234567890abcdef
 
 start_bathing:
   name: Start Bathing Session
   description: Start a bathing session for a specified duration
   fields:
+    climate_entity:
+      name: Pool climate entity (optional)
+      description: Optional. If you have multiple pool_controller instances, specify the target instance by providing its climate entity_id.
+      example: climate.pool_controller
+      selector:
+        entity:
+          domain: climate
+    controller_entity:
+      name: Controller entity (alias, optional)
+      description: Alias for climate_entity.
+      example: climate.pool_controller
+      selector:
+        entity:
+          domain: climate
+    config_entry_id:
+      name: Config entry id (optional)
+      description: Optional advanced targeting. Config entry id of the pool_controller instance.
+      example: 1234567890abcdef1234567890abcdef
     duration_minutes:
       name: Duration (minutes)
       description: How long the bathing session should last (default 60)
@@ -31,11 +86,48 @@ start_bathing:
 stop_bathing:
   name: Stop Bathing Session
   description: End the active bathing session
+  fields:
+    climate_entity:
+      name: Pool climate entity (optional)
+      description: Optional. If you have multiple pool_controller instances, specify the target instance by providing its climate entity_id.
+      example: climate.pool_controller
+      selector:
+        entity:
+          domain: climate
+    controller_entity:
+      name: Controller entity (alias, optional)
+      description: Alias for climate_entity.
+      example: climate.pool_controller
+      selector:
+        entity:
+          domain: climate
+    config_entry_id:
+      name: Config entry id (optional)
+      description: Optional advanced targeting. Config entry id of the pool_controller instance.
+      example: 1234567890abcdef1234567890abcdef
 
 start_filter:
   name: Start Filter Cycle
   description: Start a filter cycle for a specified duration
   fields:
+    climate_entity:
+      name: Pool climate entity (optional)
+      description: Optional. If you have multiple pool_controller instances, specify the target instance by providing its climate entity_id.
+      example: climate.pool_controller
+      selector:
+        entity:
+          domain: climate
+    controller_entity:
+      name: Controller entity (alias, optional)
+      description: Alias for climate_entity.
+      example: climate.pool_controller
+      selector:
+        entity:
+          domain: climate
+    config_entry_id:
+      name: Config entry id (optional)
+      description: Optional advanced targeting. Config entry id of the pool_controller instance.
+      example: 1234567890abcdef1234567890abcdef
     duration_minutes:
       name: Duration (minutes)
       description: How long to run the filter cycle (default 30)
@@ -48,3 +140,76 @@ start_filter:
 stop_filter:
   name: Stop Filter Cycle
   description: End the active filter cycle
+  fields:
+    climate_entity:
+      name: Pool climate entity (optional)
+      description: Optional. If you have multiple pool_controller instances, specify the target instance by providing its climate entity_id.
+      example: climate.pool_controller
+      selector:
+        entity:
+          domain: climate
+    controller_entity:
+      name: Controller entity (alias, optional)
+      description: Alias for climate_entity.
+      example: climate.pool_controller
+      selector:
+        entity:
+          domain: climate
+    config_entry_id:
+      name: Config entry id (optional)
+      description: Optional advanced targeting. Config entry id of the pool_controller instance.
+      example: 1234567890abcdef1234567890abcdef
+
+start_chlorine:
+  name: Start Chlorine
+  description: Start chlorination for a specified duration
+  fields:
+    climate_entity:
+      name: Pool climate entity (optional)
+      description: Optional. If you have multiple pool_controller instances, specify the target instance by providing its climate entity_id.
+      example: climate.pool_controller
+      selector:
+        entity:
+          domain: climate
+    controller_entity:
+      name: Controller entity (alias, optional)
+      description: Alias for climate_entity.
+      example: climate.pool_controller
+      selector:
+        entity:
+          domain: climate
+    config_entry_id:
+      name: Config entry id (optional)
+      description: Optional advanced targeting. Config entry id of the pool_controller instance.
+      example: 1234567890abcdef1234567890abcdef
+    duration_minutes:
+      name: Duration (minutes)
+      description: How long chlorination should last (default 5)
+      example: 5
+      selector:
+        number:
+          min: 1
+          max: 1440
+
+stop_chlorine:
+  name: Stop Chlorine
+  description: End the active chlorination
+  fields:
+    climate_entity:
+      name: Pool climate entity (optional)
+      description: Optional. If you have multiple pool_controller instances, specify the target instance by providing its climate entity_id.
+      example: climate.pool_controller
+      selector:
+        entity:
+          domain: climate
+    controller_entity:
+      name: Controller entity (alias, optional)
+      description: Alias for climate_entity.
+      example: climate.pool_controller
+      selector:
+        entity:
+          domain: climate
+    config_entry_id:
+      name: Config entry id (optional)
+      description: Optional advanced targeting. Config entry id of the pool_controller instance.
+      example: 1234567890abcdef1234567890abcdef

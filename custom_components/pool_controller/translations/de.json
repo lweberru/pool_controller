@@ -248,25 +248,14 @@
   ,
   "entity": {
     "button": {
-      "quick_chlor_btn": {"name": "Kurz Chloren"},
-      "quick_chlor_stop": {"name": "Stoßchlorung stoppen"},
-      "pause_30": { "name": "Pausieren (30 Min)" },
       "pause_60": { "name": "Pausieren (60 Min)" },
-      "pause_120": { "name": "Pausieren (120 Min)" },
-      "pause_stop": { "name": "Pause stoppen" },
-      "bath_30": { "name": "Badesession (30 Min)" },
       "bath_60": { "name": "Badesession (60 Min)" },
-      "bath_120": { "name": "Badesession (120 Min)" },
-      "bath_stop": { "name": "Badesession stoppen" },
       "filter_30": { "name": "Filter-Zyklus (30 Min)" },
-      "filter_60": { "name": "Filter-Zyklus (60 Min)" },
-      "filter_120": { "name": "Filter-Zyklus (120 Min)" },
-      "filter_stop": { "name": "Filter-Zyklus stoppen" }
+      "chlorine_5": { "name": "Chloren (5 Min)" }
     },
     "switch": {
       "main": {"name": "Hauptschalter"},
       "aux": {"name": "Zusatzheizung"},
-      "bathing": {"name": "Badesession"},
       "main_switch": {"name": "Hauptschalter"},
       "aux_heating": {"name": "Zusatzheizung"},
       "bathing_mode": {"name": "Bade-Modus"}
@@ -274,10 +263,6 @@
     "binary_sensor": {
       "is_we_holiday": {"name": "Wochenende oder Feiertag"},
       "frost_danger": {"name": "Frostgefahr"},
-      "is_quick_chlor": {"name": "Stoßchlorung aktiv"},
-      "is_paused": {"name": "Pausiert"},
-      "is_bathing": {"name": "Baden aktiv"},
-      "filter_active": {"name": "Filter aktiv"},
       "in_quiet": {"name": "Ruhemodus aktiv"},
       "pv_allows": {"name": "PV Überschuss verfügbar"},
       "should_main_on": {"name": "Hauptstrom erforderlich"},
@@ -300,10 +285,9 @@
       "next_start_mins": {"name": "Nächster Start in"},
       "next_event": {"name": "Nächster Event Start"},
       "next_filter_mins": {"name": "Nächster Filter-Zyklus in"},
-      "pause_until": {"name": "Pause bis"},
-      "quick_chlorine_until": {"name": "Stoßchlorung bis"},
-      "bathing_until": {"name": "Badesession bis"},
-      "filter_until": {"name": "Filter-Zyklus bis"},
+      "manual_timer_mins": {"name": "Timer (Baden/Chloren/Filtern)"},
+      "auto_filter_timer_mins": {"name": "Filter-Zyklus Timer"},
+      "pause_timer_mins": {"name": "Pause Timer"},
       "next_event_end": {"name": "Nächster Event Ende"},
       "next_event_summary": {"name": "Nächster Event Name"},
       "main_power": {"name": "Hauptpumpe Leistung"},

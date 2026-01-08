@@ -49,7 +49,20 @@ DEFAULT_PV_ON = 1000
 DEFAULT_PV_OFF = 500
 
 # Persisted option keys for timers
-OPT_KEY_FILTER_UNTIL = "filter_until"
+# Manual timer (shared for bathing/chlorine/filter)
+OPT_KEY_MANUAL_UNTIL = "manual_timer_until"
+OPT_KEY_MANUAL_TYPE = "manual_timer_type"  # bathing | chlorine | filter
+OPT_KEY_MANUAL_DURATION = "manual_timer_duration"  # minutes
+
+# Auto filter cycle timer (interval-based)
+OPT_KEY_AUTO_FILTER_UNTIL = "auto_filter_until"
+OPT_KEY_AUTO_FILTER_DURATION = "auto_filter_duration"  # minutes
+
+# Pause timer
+OPT_KEY_PAUSE_UNTIL = "pause_until"
+OPT_KEY_PAUSE_DURATION = "pause_duration"  # minutes
+
+# Next scheduled auto-filter start
 OPT_KEY_FILTER_NEXT = "next_filter_start"
 
 # Alle Standardwerte (Defaults)

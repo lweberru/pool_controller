@@ -21,10 +21,9 @@ async def async_setup_entry(hass, entry, async_add_entities):
     # Timer/Status sensors
     entities.extend([
         PoolTdsStatusSensor(coordinator),
-        PoolTimeSensor(coordinator, "pause_until", "Pause Until"),
-        PoolTimeSensor(coordinator, "quick_chlorine_until", "Quick Chlorine Until"),
-        PoolTimeSensor(coordinator, "bathing_until", "Bathing Until"),
-        PoolTimeSensor(coordinator, "filter_until", "Filter Until"),
+        PoolTimerSensor(coordinator, "manual_timer_mins", "mdi:timer", kind="manual"),
+        PoolTimerSensor(coordinator, "auto_filter_timer_mins", "mdi:timer-cog", kind="auto_filter"),
+        PoolTimerSensor(coordinator, "pause_timer_mins", "mdi:pause-circle", kind="pause"),
         PoolChemSensor(coordinator, "next_filter_mins", "Nächster Filter in", "min", "mdi:clock-start"),
         PoolTimeSensor(coordinator, "next_event_end", "Nächster Event Ende"),
         PoolTextSensor(coordinator, "next_event_summary", "Nächster Event Name"),
@@ -49,7 +48,7 @@ class PoolStatusSensor(PoolBaseSensor):
     @property
     def native_value(self):
         if self.coordinator.data.get("frost_danger"): return "frost_protection"
-        if self.coordinator.data.get("is_paused"): return "paused"
+        if self.coordinator.data.get("pause_timer_active"): return "paused"
         return "normal"
 
 class PoolTdsStatusSensor(PoolBaseSensor):
@@ -108,3 +107,44 @@ class PoolTextSensor(PoolBaseSensor):
         self._attr_unique_id = f"{coordinator.entry.entry_id}_{key}"
     @property
     def native_value(self): return self.coordinator.data.get(self._key)
+
+
+class PoolTimerSensor(PoolBaseSensor):
+    _attr_native_unit_of_measurement = "min"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    def __init__(self, coordinator, key, icon, kind: str):
+        super().__init__(coordinator)
+        self._key = key
+        self._kind = kind
+        self._attr_translation_key = key
+        self._attr_icon = icon
+        self._attr_unique_id = f"{coordinator.entry.entry_id}_{key}"
+
+    @property
+    def native_value(self):
+        val = self.coordinator.data.get(self._key)
+        try:
+            return int(val) if val is not None else 0
+        except Exception:
+            return 0
+
+    @property
+    def extra_state_attributes(self):
+        if self._kind == "manual":
+            return {
+                "active": bool(self.coordinator.data.get("manual_timer_active")),
+                "duration_minutes": self.coordinator.manual_timer_duration,
+                "type": self.coordinator.manual_timer_type,
+            }
+        if self._kind == "auto_filter":
+            return {
+                "active": bool(self.coordinator.data.get("auto_filter_timer_active")),
+                "duration_minutes": self.coordinator.auto_filter_duration,
+            }
+        if self._kind == "pause":
+            return {
+                "active": bool(self.coordinator.data.get("pause_timer_active")),
+                "duration_minutes": self.coordinator.pause_duration,
+            }
+        return {}

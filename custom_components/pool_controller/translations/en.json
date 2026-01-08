@@ -249,25 +249,14 @@
   },
   "entity": {
     "button": {
-      "quick_chlor_btn": {"name": "Quick chlorinate"},
-      "quick_chlor_stop": {"name": "Stop Shock Chlorination"},
-      "pause_30": { "name": "Pause (30 Min)" },
       "pause_60": { "name": "Pause (60 Min)" },
-      "pause_120": { "name": "Pause (120 Min)" },
-      "pause_stop": { "name": "Stop Pause" },
-      "bath_30": { "name": "Bathing (30 Min)" },
       "bath_60": { "name": "Bathing (60 Min)" },
-      "bath_120": { "name": "Bathing (120 Min)" },
-      "bath_stop": { "name": "Stop Bathing" },
       "filter_30": { "name": "Filter Cycle (30 Min)" },
-      "filter_60": { "name": "Filter Cycle (60 Min)" },
-      "filter_120": { "name": "Filter Cycle (120 Min)" },
-      "filter_stop": { "name": "Stop Filter Cycle" }
+      "chlorine_5": { "name": "Chlorine (5 Min)" }
     },
     "switch": {
       "main": {"name": "Main switch"},
       "aux": {"name": "Auxiliary heater"},
-      "bathing": {"name": "Bathing session"},
       "main_switch": {"name": "Main switch"},
       "aux_heating": {"name": "Auxiliary heater"},
       "bathing_mode": {"name": "Bathing mode"}
@@ -275,10 +264,6 @@
     "binary_sensor": {
       "is_we_holiday": {"name": "Weekend or holiday"},
       "frost_danger": {"name": "Frost danger"},
-      "is_quick_chlor": {"name": "Quick chlorination active"},
-      "is_paused": {"name": "Paused"},
-      "is_bathing": {"name": "Bathing active"},
-      "filter_active": {"name": "Filter active"},
       "in_quiet": {"name": "Quiet mode active"},
       "pv_allows": {"name": "PV surplus available"},
       "should_main_on": {"name": "Main power required"},
@@ -301,10 +286,9 @@
       "next_start_mins": {"name": "Next start in"},
       "next_event": {"name": "Next event start"},
       "next_filter_mins": {"name": "Next filter cycle in"},
-      "pause_until": {"name": "Paused until"},
-      "quick_chlorine_until": {"name": "Quick Chlorine Until"},
-      "bathing_until": {"name": "Bathing until"},
-      "filter_until": {"name": "Filter cycle until"},
+      "manual_timer_mins": {"name": "Timer (bathing/chlorine/filter)"},
+      "auto_filter_timer_mins": {"name": "Filter cycle timer"},
+      "pause_timer_mins": {"name": "Pause timer"},
       "next_event_end": {"name": "Next event end"},
       "next_event_summary": {"name": "Next event name"},
       "main_power": {"name": "Main pump power"},

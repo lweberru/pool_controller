@@ -5,7 +5,7 @@ from .const import CONF_DEMO_MODE
 
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
-    entities = [PoolMainSwitch(coordinator), PoolBathingSwitch(coordinator)]
+    entities = [PoolMainSwitch(coordinator)]
     if entry.data.get(CONF_AUX_HEATING_SWITCH):
         entities.append(PoolAuxSwitch(coordinator))
     async_add_entities(entities)
@@ -61,22 +61,4 @@ class PoolAuxSwitch(PoolBaseSwitch):
         aux_switch_id = self.coordinator.entry.data.get(CONF_AUX_HEATING_SWITCH)
         if not demo and aux_switch_id:
             await self.hass.services.async_call("switch", "turn_off", {"entity_id": aux_switch_id})
-        await self.coordinator.async_request_refresh()
-
-class PoolBathingSwitch(PoolBaseSwitch):
-    _attr_translation_key = "bathing"
-    def __init__(self, coordinator):
-        super().__init__(coordinator)
-        self._attr_unique_id = f"{coordinator.entry.entry_id}_bathing"
-    @property
-    def is_on(self):
-        # Show active bathing timer status
-        return self.coordinator.data.get("is_bathing")
-    async def async_turn_on(self, **kwargs):
-        # Start bathing timer using configured duration
-        minutes = int(self.coordinator.entry.options.get("bathing_minutes", 60))
-        await self.coordinator.activate_bathing(minutes=minutes)
-        await self.coordinator.async_request_refresh()
-    async def async_turn_off(self, **kwargs):
-        await self.coordinator.deactivate_bathing()
         await self.coordinator.async_request_refresh()

@@ -392,7 +392,7 @@ text_sensor:
           ESP_LOGD("salt", "%f", salt);
           id(sensor_${blueriiot1_id_prefix}_salt).publish_state(salt);
 
-          float cond = ((int16_t)(x[10] << 8) + x[9]) / 0.4134;
+          float cond = ((int16_t)(x[10] << 8) + x[9]) / 4.134;
           ESP_LOGD("cond", "%f", cond);
           id(sensor_${blueriiot1_id_prefix}_cond).publish_state(cond);
 

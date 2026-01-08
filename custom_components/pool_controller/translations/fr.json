@@ -244,23 +244,14 @@
   },
   "entity": {
     "button": {
-      "quick_chlor_btn": { "name": "Chloration rapide" },      "quick_chlor_stop": {"name": "Arrêter chloration choc"},      "pause_30": { "name": "Pause (30 min)" },
       "pause_60": { "name": "Pause (60 min)" },
-      "pause_120": { "name": "Pause (120 min)" },
-      "pause_stop": { "name": "Arrêter la pause" },
-      "bath_30": { "name": "Baignade (30 min)" },
       "bath_60": { "name": "Baignade (60 min)" },
-      "bath_120": { "name": "Baignade (120 min)" },
-      "bath_stop": { "name": "Arrêter la baignade" },
       "filter_30": { "name": "Cycle de filtration (30 min)" },
-      "filter_60": { "name": "Cycle de filtration (60 min)" },
-      "filter_120": { "name": "Cycle de filtration (120 min)" },
-      "filter_stop": { "name": "Arrêter le cycle de filtration" }
+      "chlorine_5": { "name": "Chlore (5 min)" }
     },
     "switch": {
       "main": { "name": "Interrupteur principal" },
       "aux": { "name": "Chauffage auxiliaire" },
-      "bathing": { "name": "Mode baignade" },
       "main_switch": { "name": "Interrupteur principal" },
       "aux_heating": { "name": "Chauffage auxiliaire" },
       "bathing_mode": { "name": "Mode baignade" }
@@ -268,10 +259,6 @@
     "binary_sensor": {
       "is_we_holiday": { "name": "Week-end ou jour férié" },
       "frost_danger": { "name": "Risque de gel" },
-      "is_quick_chlor": { "name": "Chloration rapide active" },
-      "is_paused": { "name": "En pause" },
-      "is_bathing": { "name": "Baignade active" },
-      "filter_active": { "name": "Filtre actif" },
       "in_quiet": { "name": "Mode silencieux actif" },
       "pv_allows": { "name": "Surplus PV disponible" },
       "should_main_on": { "name": "Alimentation principale requise" },
@@ -299,8 +286,9 @@
       "chlorine_timestamp": { "name": "Chloration" },
       "ph_timestamp": { "name": "pH" },
       "alk_timestamp": { "name": "Alcalinité" },
-      "pause_until": { "name": "Pause jusqu'à" },      "quick_chlorine_until": {"name": "Chloration rapide jusqu'à"},      "bathing_until": { "name": "Baignade jusqu'à" },
-      "filter_until": { "name": "Filtration jusqu'à" },
+      "manual_timer_mins": { "name": "Minuteur (bain/chlore/filtrer)" },
+      "auto_filter_timer_mins": { "name": "Minuteur du cycle de filtration" },
+      "pause_timer_mins": { "name": "Minuteur de pause" },
       "next_filter_mins": { "name": "Prochaine filtration dans (min)" },
       "next_event_end": { "name": "Fin du prochain événement" },
       "next_event_summary": { "name": "Nom du prochain événement" },
