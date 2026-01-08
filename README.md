@@ -145,7 +145,7 @@ Configure only if using ESP32 + Blueriiot:
 
 #### Step 4: Calendar & Quiet Hours
 - **Pool Calendar**: Calendar entity for operation schedule
-- **Holiday Calendar**: Calendar for skipping noisy operations on holidays
+- **Holiday Calendar**: Calendar used to treat local holidays like weekends (weekend quiet hours apply)
 - **Quiet Hours (Weekdays)**: Start/end times (e.g., 22:00 - 07:00)
 - **Quiet Hours (Weekends)**: Start/end times
 
@@ -587,7 +587,7 @@ When connected to solar:
 Prevents noisy operations during sensitive times:
 - **Weekday quiet hours**: 22:00-07:00 (no pump)
 - **Weekend quiet hours**: 23:00-08:00 (no pump)
-- **Holiday bypass**: No operations during calendar holidays
+- **Holidays**: Holidays are treated like weekends (weekend quiet hours apply)
 - Overrideable via manual buttons
 
 Quiet hours are also respected by frost protection by default; an optional emergency threshold can allow frost cycling even during quiet hours in extreme cold.
