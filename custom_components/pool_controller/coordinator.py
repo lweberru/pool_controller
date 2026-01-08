@@ -367,6 +367,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
             frost_danger = False
             frost_active = False
+            frost_is_severe = False
+            frost_run_mins = 0
             ot = None
             if outdoor_temp is not None:
                 try:
@@ -379,8 +381,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 interval = max(1, frost_mild_interval)
                 run_mins = max(0, frost_mild_run)
                 if ot <= frost_severe_temp:
+                    frost_is_severe = True
                     interval = max(1, frost_severe_interval)
                     run_mins = max(0, frost_severe_run)
+                frost_run_mins = run_mins
                 # duty-cycle uses epoch minutes to avoid daily "reset" artifacts
                 now_local = dt_util.as_local(now)
                 epoch_minutes = int(now_local.timestamp() // 60)
@@ -465,10 +469,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             # quiet time check: C and E should not activate during quiet; A/B/D always allowed
             def _in_quiet_period(cfg):
                 try:
-                    now_local = dt_util.now()
+                    now_local = dt_util.as_local(now)
                     t = now_local.time()
                     weekday = now_local.weekday()
-                    if weekday >= 5:
+                    if weekday >= 5 or is_holiday:
                         start_s = cfg.get(CONF_QUIET_START_WEEKEND, DEFAULT_Q_START_WE)
                         end_s = cfg.get(CONF_QUIET_END_WEEKEND, DEFAULT_Q_END_WE)
                     else:
@@ -483,6 +487,45 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     return t >= start_t or t <= end_t
                 except Exception:
                     return False
+
+            def _next_quiet_start(cfg):
+                """Returns the next quiet-start datetime in local time, based on today's weekday/holiday settings."""
+                try:
+                    now_local = dt_util.as_local(now)
+                    t = now_local.time()
+                    weekday = now_local.weekday()
+                    if weekday >= 5 or is_holiday:
+                        start_s = cfg.get(CONF_QUIET_START_WEEKEND, DEFAULT_Q_START_WE)
+                        end_s = cfg.get(CONF_QUIET_END_WEEKEND, DEFAULT_Q_END_WE)
+                    else:
+                        start_s = cfg.get(CONF_QUIET_START, DEFAULT_Q_START)
+                        end_s = cfg.get(CONF_QUIET_END, DEFAULT_Q_END)
+
+                    start_t = dt_util.parse_time(start_s)
+                    end_t = dt_util.parse_time(end_s)
+                    if start_t is None or end_t is None:
+                        return None
+
+                    start_today = now_local.replace(hour=start_t.hour, minute=start_t.minute, second=0, microsecond=0)
+                    start_tomorrow = (now_local + timedelta(days=1)).replace(hour=start_t.hour, minute=start_t.minute, second=0, microsecond=0)
+
+                    if start_t <= end_t:
+                        # same-day window
+                        if t < start_t:
+                            return start_today
+                        if t > end_t:
+                            return start_tomorrow
+                        # currently in quiet
+                        return start_today
+
+                    # overnight window
+                    # not-in-quiet means we're between end_t and start_t (daytime)
+                    if t < start_t and t > end_t:
+                        return start_today
+                    # in quiet -> next start is later today (morning case) or already started (evening case)
+                    return start_today if t <= end_t else start_tomorrow
+                except Exception:
+                    return None
 
             def _quiet_times_for(dt_obj, cfg):
                 dt_local = dt_util.as_local(dt_obj)
@@ -524,6 +567,15 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 return end_tomorrow
 
             in_quiet = _in_quiet_period(conf)
+
+            # Optional optimization: In severe frost, force one run shortly before quiet hours start
+            # (quiet_start - frost_run_mins .. quiet_start). This reduces the chance of needing runs inside quiet hours.
+            if frost_danger and frost_is_severe and (not in_quiet) and frost_run_mins > 0:
+                qs = _next_quiet_start(conf)
+                if qs is not None:
+                    mins_to_qs = (qs - now).total_seconds() / 60
+                    if 0 <= mins_to_qs <= frost_run_mins:
+                        frost_active = True
 
             # Ruhezeit ist heilig: Frostschutz darf sie nur im "äußersten Notfall" stören.
             # => Während Ruhezeit nur aktiv, wenn Außentemp <= frost_quiet_override_below

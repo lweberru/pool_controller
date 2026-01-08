@@ -48,12 +48,30 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_water_quality(self, user_input=None):
         if user_input is not None:
             self.data.update(user_input)
-            return await self.async_step_calendars()
+            return await self.async_step_frost()
 
         return self.async_show_form(
             step_id="water_quality",
             data_schema=vol.Schema({
                 vol.Required(CONF_TEMP_WATER, default=DEFAULT_TEMP_WATER): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="temperature")),
+                vol.Optional(CONF_PH_SENSOR, default=DEFAULT_PH_SENS): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+                vol.Optional(CONF_CHLORINE_SENSOR, default=DEFAULT_CHLOR_SENS): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+                vol.Optional(CONF_ENABLE_SALTWATER, default=False): bool,
+                vol.Optional(CONF_SALT_SENSOR, default=DEFAULT_SALT_SENS): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+                vol.Optional(CONF_TDS_SENSOR, default=DEFAULT_TDS_SENS): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+            }),
+            last_step=False
+        )
+
+    async def async_step_frost(self, user_input=None):
+        """Frost protection tuning."""
+        if user_input is not None:
+            self.data.update(user_input)
+            return await self.async_step_calendars()
+
+        return self.async_show_form(
+            step_id="frost",
+            data_schema=vol.Schema({
                 vol.Optional(CONF_ENABLE_FROST_PROTECTION, default=True): bool,
                 vol.Optional(CONF_TEMP_OUTDOOR, default=DEFAULT_TEMP_OUTDOOR): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="temperature")),
                 vol.Optional(CONF_FROST_START_TEMP, default=DEFAULT_FROST_START_TEMP): selector.NumberSelector(
@@ -77,13 +95,8 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Optional(CONF_FROST_QUIET_OVERRIDE_BELOW_TEMP, default=DEFAULT_FROST_QUIET_OVERRIDE_BELOW_TEMP): selector.NumberSelector(
                     selector.NumberSelectorConfig(min=-30, max=5, step=0.5, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="°C")
                 ),
-                vol.Optional(CONF_PH_SENSOR, default=DEFAULT_PH_SENS): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
-                vol.Optional(CONF_CHLORINE_SENSOR, default=DEFAULT_CHLOR_SENS): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
-                vol.Optional(CONF_ENABLE_SALTWATER, default=False): bool,
-                vol.Optional(CONF_SALT_SENSOR, default=DEFAULT_SALT_SENS): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
-                vol.Optional(CONF_TDS_SENSOR, default=DEFAULT_TDS_SENS): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
             }),
-            last_step=False
+            last_step=False,
         )
 
     async def async_step_calendars(self, user_input=None):
@@ -201,13 +214,32 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
         """Third step: water quality sensors."""
         if user_input is not None:
             self.options.update(user_input)
-            return await self.async_step_calendars()
+            return await self.async_step_frost()
 
         curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
         return self.async_show_form(
             step_id="water_quality",
             data_schema=vol.Schema({
                 vol.Required(CONF_TEMP_WATER, default=curr.get(CONF_TEMP_WATER, DEFAULT_TEMP_WATER)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="temperature")),
+                vol.Optional(CONF_PH_SENSOR, default=curr.get(CONF_PH_SENSOR, DEFAULT_PH_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+                vol.Optional(CONF_CHLORINE_SENSOR, default=curr.get(CONF_CHLORINE_SENSOR, DEFAULT_CHLOR_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+                vol.Optional(CONF_ENABLE_SALTWATER, default=curr.get(CONF_ENABLE_SALTWATER, False)): bool,
+                vol.Optional(CONF_SALT_SENSOR, default=curr.get(CONF_SALT_SENSOR, DEFAULT_SALT_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+                vol.Optional(CONF_TDS_SENSOR, default=curr.get(CONF_TDS_SENSOR, DEFAULT_TDS_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+            }),
+            last_step=False
+        )
+
+    async def async_step_frost(self, user_input=None):
+        """Fourth step: frost protection tuning."""
+        if user_input is not None:
+            self.options.update(user_input)
+            return await self.async_step_calendars()
+
+        curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
+        return self.async_show_form(
+            step_id="frost",
+            data_schema=vol.Schema({
                 vol.Optional(CONF_ENABLE_FROST_PROTECTION, default=curr.get(CONF_ENABLE_FROST_PROTECTION, True)): bool,
                 vol.Optional(CONF_TEMP_OUTDOOR, default=curr.get(CONF_TEMP_OUTDOOR, DEFAULT_TEMP_OUTDOOR)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="temperature")),
                 vol.Optional(CONF_FROST_START_TEMP, default=curr.get(CONF_FROST_START_TEMP, DEFAULT_FROST_START_TEMP)): selector.NumberSelector(
@@ -231,13 +263,8 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
                 vol.Optional(CONF_FROST_QUIET_OVERRIDE_BELOW_TEMP, default=curr.get(CONF_FROST_QUIET_OVERRIDE_BELOW_TEMP, DEFAULT_FROST_QUIET_OVERRIDE_BELOW_TEMP)): selector.NumberSelector(
                     selector.NumberSelectorConfig(min=-30, max=5, step=0.5, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="°C")
                 ),
-                vol.Optional(CONF_PH_SENSOR, default=curr.get(CONF_PH_SENSOR, DEFAULT_PH_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
-                vol.Optional(CONF_CHLORINE_SENSOR, default=curr.get(CONF_CHLORINE_SENSOR, DEFAULT_CHLOR_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
-                vol.Optional(CONF_ENABLE_SALTWATER, default=curr.get(CONF_ENABLE_SALTWATER, False)): bool,
-                vol.Optional(CONF_SALT_SENSOR, default=curr.get(CONF_SALT_SENSOR, DEFAULT_SALT_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
-                vol.Optional(CONF_TDS_SENSOR, default=curr.get(CONF_TDS_SENSOR, DEFAULT_TDS_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
             }),
-            last_step=False
+            last_step=False,
         )
 
     async def async_step_calendars(self, user_input=None):
