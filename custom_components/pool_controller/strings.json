@@ -20,6 +20,7 @@
         "submit": "Continue",
         "data": {
           "main_switch": "Main switch",
+          "pump_switch": "Pump switch (optional)",
           "filter_switch": "Filter switch (optional)",
           "enable_aux_heating": "Enable auxiliary heating",
           "aux_heating_switch": "Auxiliary heater switch",
@@ -27,7 +28,8 @@
           "aux_power_sensor": "Aux heater power sensor"
         },
         "data_description": {
-          "main_switch": "Main switch for pool pump (required)",
+          "main_switch": "Main power / supply switch for the pool (required)",
+          "pump_switch": "Optional: dedicated circulation/pump switch (leave empty to use main switch)",
           "filter_switch": "Optional: separate switch for filter pump (leave empty to use main switch)",
           "enable_aux_heating": "Enables auxiliary heater for faster heating",
           "aux_heating_switch": "Switch for electric auxiliary heater",
@@ -53,6 +55,26 @@
           "enable_saltwater": "Enables saltwater-specific features and sensors",
           "salt_sensor": "Salt content sensor for saltwater pools",
           "tds_sensor": "Conductivity sensor (TDS) for water quality"
+        }
+      },
+      "climate": {
+        "title": "Temperature control",
+        "submit": "Continue",
+        "data": {
+          "target_temp": "Initial target temperature",
+          "min_temp": "Minimum temperature",
+          "max_temp": "Maximum temperature",
+          "target_temp_step": "Temperature step",
+          "cold_tolerance": "Cold tolerance",
+          "hot_tolerance": "Hot tolerance"
+        },
+        "data_description": {
+          "target_temp": "Initial target temperature (setpoint) used on first start; later the setpoint is persisted",
+          "min_temp": "Minimum setpoint available",
+          "max_temp": "Maximum setpoint available",
+          "target_temp_step": "Step size for setting the target temperature",
+          "cold_tolerance": "Heater starts when water temperature is below target minus this value",
+          "hot_tolerance": "Heater stops when water temperature is at or above target plus this value"
         }
       },
       "frost": {
@@ -147,6 +169,7 @@
         "submit": "Continue",
         "data": {
           "main_switch": "Main switch",
+          "pump_switch": "Pump switch (optional)",
           "filter_switch": "Filter switch (optional)",
           "enable_aux_heating": "Enable auxiliary heating",
           "aux_heating_switch": "Auxiliary heater switch",
@@ -164,6 +187,18 @@
           "enable_saltwater": "Saltwater pool",
           "salt_sensor": "Salt sensor",
           "tds_sensor": "Conductivity sensor"
+        }
+      },
+      "climate": {
+        "title": "Temperature control",
+        "submit": "Continue",
+        "data": {
+          "target_temp": "Initial target temperature",
+          "min_temp": "Minimum temperature",
+          "max_temp": "Maximum temperature",
+          "target_temp_step": "Temperature step",
+          "cold_tolerance": "Cold tolerance",
+          "hot_tolerance": "Hot tolerance"
         }
       },
       "frost": {
@@ -321,7 +356,10 @@
     },
     "switch": {
       "main": {
-        "name": "Main switch"
+        "name": "Power supply"
+      },
+      "pump": {
+        "name": "Pump"
       },
       "aux": {
         "name": "Auxiliary heater"

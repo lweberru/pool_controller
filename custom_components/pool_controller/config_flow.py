@@ -36,6 +36,8 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="switches",
             data_schema=vol.Schema({
                 vol.Required(CONF_MAIN_SWITCH, default=DEFAULT_MAIN_SW): selector.EntitySelector(selector.EntitySelectorConfig(domain="switch")),
+                # Optional: if you have a dedicated circulation pump switch. If omitted, main_switch is used.
+                vol.Optional(CONF_PUMP_SWITCH, default=DEFAULT_PUMP_SW): selector.EntitySelector(selector.EntitySelectorConfig(domain="switch")),
                 vol.Optional(CONF_FILTER_SWITCH): str,
                 vol.Optional(CONF_ENABLE_AUX_HEATING, default=False): bool,
                 vol.Optional(CONF_AUX_HEATING_SWITCH, default=DEFAULT_AUX_SW): selector.EntitySelector(selector.EntitySelectorConfig(domain="switch")),
@@ -48,7 +50,7 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_water_quality(self, user_input=None):
         if user_input is not None:
             self.data.update(user_input)
-            return await self.async_step_frost()
+            return await self.async_step_climate()
 
         return self.async_show_form(
             step_id="water_quality",
@@ -61,6 +63,26 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Optional(CONF_TDS_SENSOR, default=DEFAULT_TDS_SENS): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
             }),
             last_step=False
+        )
+
+    async def async_step_climate(self, user_input=None):
+        """Thermostat-like settings for temperature control."""
+        if user_input is not None:
+            self.data.update(user_input)
+            return await self.async_step_frost()
+
+        curr = {**self.data}
+        return self.async_show_form(
+            step_id="climate",
+            data_schema=vol.Schema({
+                vol.Optional(CONF_TARGET_TEMP, default=curr.get(CONF_TARGET_TEMP, DEFAULT_TARGET_TEMP)): vol.Coerce(float),
+                vol.Optional(CONF_MIN_TEMP, default=curr.get(CONF_MIN_TEMP, DEFAULT_MIN_TEMP)): vol.Coerce(float),
+                vol.Optional(CONF_MAX_TEMP, default=curr.get(CONF_MAX_TEMP, DEFAULT_MAX_TEMP)): vol.Coerce(float),
+                vol.Optional(CONF_TARGET_TEMP_STEP, default=curr.get(CONF_TARGET_TEMP_STEP, DEFAULT_TARGET_TEMP_STEP)): vol.Coerce(float),
+                vol.Optional(CONF_COLD_TOLERANCE, default=curr.get(CONF_COLD_TOLERANCE, DEFAULT_COLD_TOLERANCE)): vol.Coerce(float),
+                vol.Optional(CONF_HOT_TOLERANCE, default=curr.get(CONF_HOT_TOLERANCE, DEFAULT_HOT_TOLERANCE)): vol.Coerce(float),
+            }),
+            last_step=False,
         )
 
     async def async_step_frost(self, user_input=None):
@@ -201,6 +223,7 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
             step_id="switches",
             data_schema=vol.Schema({
                 vol.Required(CONF_MAIN_SWITCH, default=curr.get(CONF_MAIN_SWITCH, DEFAULT_MAIN_SW)): selector.EntitySelector(selector.EntitySelectorConfig(domain="switch")),
+                vol.Optional(CONF_PUMP_SWITCH, default=curr.get(CONF_PUMP_SWITCH, curr.get(CONF_MAIN_SWITCH, DEFAULT_PUMP_SW))): selector.EntitySelector(selector.EntitySelectorConfig(domain="switch")),
                 vol.Optional(CONF_FILTER_SWITCH, default=curr.get(CONF_FILTER_SWITCH, "")): str,
                 vol.Optional(CONF_ENABLE_AUX_HEATING, default=curr.get(CONF_ENABLE_AUX_HEATING, False)): bool,
                 vol.Optional(CONF_AUX_HEATING_SWITCH, default=curr.get(CONF_AUX_HEATING_SWITCH, DEFAULT_AUX_SW)): selector.EntitySelector(selector.EntitySelectorConfig(domain="switch")),
@@ -214,7 +237,7 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
         """Third step: water quality sensors."""
         if user_input is not None:
             self.options.update(user_input)
-            return await self.async_step_frost()
+            return await self.async_step_climate()
 
         curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
         return self.async_show_form(
@@ -228,6 +251,26 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
                 vol.Optional(CONF_TDS_SENSOR, default=curr.get(CONF_TDS_SENSOR, DEFAULT_TDS_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
             }),
             last_step=False
+        )
+
+    async def async_step_climate(self, user_input=None):
+        """Thermostat-like settings for temperature control."""
+        if user_input is not None:
+            self.options.update(user_input)
+            return await self.async_step_frost()
+
+        curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
+        return self.async_show_form(
+            step_id="climate",
+            data_schema=vol.Schema({
+                vol.Optional(CONF_TARGET_TEMP, default=curr.get(CONF_TARGET_TEMP, DEFAULT_TARGET_TEMP)): vol.Coerce(float),
+                vol.Optional(CONF_MIN_TEMP, default=curr.get(CONF_MIN_TEMP, DEFAULT_MIN_TEMP)): vol.Coerce(float),
+                vol.Optional(CONF_MAX_TEMP, default=curr.get(CONF_MAX_TEMP, DEFAULT_MAX_TEMP)): vol.Coerce(float),
+                vol.Optional(CONF_TARGET_TEMP_STEP, default=curr.get(CONF_TARGET_TEMP_STEP, DEFAULT_TARGET_TEMP_STEP)): vol.Coerce(float),
+                vol.Optional(CONF_COLD_TOLERANCE, default=curr.get(CONF_COLD_TOLERANCE, DEFAULT_COLD_TOLERANCE)): vol.Coerce(float),
+                vol.Optional(CONF_HOT_TOLERANCE, default=curr.get(CONF_HOT_TOLERANCE, DEFAULT_HOT_TOLERANCE)): vol.Coerce(float),
+            }),
+            last_step=False,
         )
 
     async def async_step_frost(self, user_input=None):

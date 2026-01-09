@@ -7,6 +7,9 @@ MANUFACTURER = "lweberru"
 CONF_POOL_NAME = "name"
 CONF_WATER_VOLUME = "water_volume"
 CONF_MAIN_SWITCH = "main_switch"
+# Optional: separate circulation/pump switch (if main_switch is only the power supply).
+# If not configured, the integration will fall back to CONF_MAIN_SWITCH.
+CONF_PUMP_SWITCH = "pump_switch"
 CONF_FILTER_SWITCH = "filter_switch"  # Optional: separater Filter-Schalter
 CONF_TEMP_WATER = "temp_water_sensor"
 CONF_TEMP_OUTDOOR = "temp_outdoor_sensor"
@@ -25,6 +28,14 @@ CONF_QUIET_END = "quiet_time_end"
 CONF_QUIET_START_WEEKEND = "quiet_time_start_weekend"
 CONF_QUIET_END_WEEKEND = "quiet_time_end_weekend"
 CONF_DEMO_MODE = "demo_mode"
+
+# Climate / thermostat-like behavior
+CONF_TARGET_TEMP = "target_temp"
+CONF_MIN_TEMP = "min_temp"
+CONF_MAX_TEMP = "max_temp"
+CONF_TARGET_TEMP_STEP = "target_temp_step"
+CONF_COLD_TOLERANCE = "cold_tolerance"
+CONF_HOT_TOLERANCE = "hot_tolerance"
 
 # Feature-Toggles (aktivieren/deaktivieren von Funktionen)
 CONF_ENABLE_AUTO_FILTER = "enable_auto_filter"
@@ -66,6 +77,9 @@ OPT_KEY_MANUAL_UNTIL = "manual_timer_until"
 OPT_KEY_MANUAL_TYPE = "manual_timer_type"  # bathing | chlorine | filter
 OPT_KEY_MANUAL_DURATION = "manual_timer_duration"  # minutes
 
+# Persisted target temperature (so HA restarts keep the setpoint)
+OPT_KEY_TARGET_TEMP = "target_temp"
+
 # Auto filter cycle timer (interval-based)
 OPT_KEY_AUTO_FILTER_UNTIL = "auto_filter_until"
 OPT_KEY_AUTO_FILTER_DURATION = "auto_filter_duration"  # minutes
@@ -85,6 +99,8 @@ OPT_KEY_MAINTENANCE_ACTIVE = "maintenance_active"
 DEFAULT_NAME = "Whirlpool Demo"
 DEFAULT_VOL = 1000
 DEFAULT_MAIN_SW = "switch.whirlpool"
+# Default: if not explicitly configured, the pump switch equals main switch.
+DEFAULT_PUMP_SW = DEFAULT_MAIN_SW
 DEFAULT_AUX_SW = "switch.whirlpool_heizung"
 DEFAULT_TEMP_WATER = "sensor.esp32_5_cd41d8_whirlpool_temperature"
 DEFAULT_TEMP_OUTDOOR = "sensor.hue_outdoor_motion_sensor_1_temperatur"
@@ -101,6 +117,17 @@ DEFAULT_Q_START = "22:00"
 DEFAULT_Q_END = "08:00"
 DEFAULT_Q_START_WE = "22:00"
 DEFAULT_Q_END_WE = "10:00"
+
+# Climate defaults
+DEFAULT_TARGET_TEMP = 38.0
+DEFAULT_MIN_TEMP = 10.0
+DEFAULT_MAX_TEMP = 40.0
+DEFAULT_TARGET_TEMP_STEP = 0.5
+
+# Thermostat-like tolerances (hysteresis)
+# Defaults preserve current behavior as close as possible, while allowing proper 'stop at target'.
+DEFAULT_COLD_TOLERANCE = 1.0
+DEFAULT_HOT_TOLERANCE = 0.0
 
 # Frost duty-cycle defaults (intentionally conservative / neighbor-friendly)
 DEFAULT_FROST_START_TEMP = 2.0

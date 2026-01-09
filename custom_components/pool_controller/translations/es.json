@@ -20,6 +20,7 @@
         "submit": "Siguiente",
         "data": {
           "main_switch": "Interruptor principal",
+          "pump_switch": "Interruptor de la bomba (opcional)",
           "filter_switch": "Interruptor del filtro (opcional)",
           "enable_aux_heating": "Activar calefacción auxiliar",
           "aux_heating_switch": "Interruptor calefacción auxiliar",
@@ -27,7 +28,8 @@
           "aux_power_sensor": "Sensor de potencia auxiliar"
         },
         "data_description": {
-          "main_switch": "Interruptor de la bomba principal (obligatorio)",
+          "main_switch": "Interruptor principal / alimentación eléctrica de la piscina (obligatorio)",
+          "pump_switch": "Opcional: interruptor dedicado para la bomba de circulación (dejar vacío para usar el principal)",
           "filter_switch": "Opcional: interruptor separado para la bomba del filtro (dejar vacío para usar el principal)",
           "enable_aux_heating": "Activa un calentador adicional",
           "aux_heating_switch": "Interruptor del calentador auxiliar",
@@ -53,6 +55,26 @@
           "enable_saltwater": "Activa funciones y sensores para agua salada",
           "salt_sensor": "Sensor de nivel de sal",
           "tds_sensor": "Sensor de TDS / conductividad"
+        }
+      },
+      "climate": {
+        "title": "Control de temperatura",
+        "submit": "Siguiente",
+        "data": {
+          "target_temp": "Temperatura objetivo inicial",
+          "min_temp": "Temperatura mínima",
+          "max_temp": "Temperatura máxima",
+          "target_temp_step": "Paso de temperatura",
+          "cold_tolerance": "Tolerancia fría",
+          "hot_tolerance": "Tolerancia caliente"
+        },
+        "data_description": {
+          "target_temp": "Temperatura objetivo (consigna) inicial; después se guarda automáticamente",
+          "min_temp": "Consigna mínima disponible",
+          "max_temp": "Consigna máxima disponible",
+          "target_temp_step": "Paso para ajustar la temperatura objetivo",
+          "cold_tolerance": "El calentador arranca cuando la temperatura del agua está por debajo de objetivo menos este valor",
+          "hot_tolerance": "El calentador se detiene cuando la temperatura del agua es igual o superior a objetivo más este valor"
         }
       },
       "frost": {
@@ -152,6 +174,7 @@
         "submit": "Siguiente",
         "data": {
           "main_switch": "Interruptor principal",
+          "pump_switch": "Interruptor de la bomba (opcional)",
           "filter_switch": "Interruptor del filtro (opcional)",
           "enable_aux_heating": "Activar calefacción auxiliar",
           "aux_heating_switch": "Interruptor calefacción auxiliar",
@@ -169,6 +192,18 @@
           "enable_saltwater": "Piscina de agua salada",
           "salt_sensor": "Sensor de sal",
           "tds_sensor": "Sensor de TDS"
+        }
+      },
+      "climate": {
+        "title": "Control de temperatura",
+        "submit": "Siguiente",
+        "data": {
+          "target_temp": "Temperatura objetivo inicial",
+          "min_temp": "Temperatura mínima",
+          "max_temp": "Temperatura máxima",
+          "target_temp_step": "Paso de temperatura",
+          "cold_tolerance": "Tolerancia fría",
+          "hot_tolerance": "Tolerancia caliente"
         }
       },
       "frost": {
@@ -231,8 +266,14 @@
   }
   ,
   "entity": {
+    "switch": {
+      "main": { "name": "Alimentación" },
+      "pump": { "name": "Bomba" }
+    },
     "binary_sensor": {
-      "maintenance_active": { "name": "Modo de mantenimiento" }
+      "maintenance_active": { "name": "Modo de mantenimiento" },
+      "should_main_on": { "name": "Alimentación requerida" },
+      "should_pump_on": { "name": "Bomba requerida" }
     }
   },
   "state": {

@@ -20,6 +20,7 @@
         "submit": "Weiter",
         "data": {
           "main_switch": "Hauptschalter",
+          "pump_switch": "Pumpen-Schalter (optional)",
           "filter_switch": "Filter-Schalter (optional)",
           "enable_aux_heating": "Zusatzheizung aktivieren",
           "aux_heating_switch": "Zusatzheizung Schalter",
@@ -27,7 +28,8 @@
           "aux_power_sensor": "Zusatzheizung Leistungssensor"
         },
         "data_description": {
-          "main_switch": "Hauptschalter für Poolpumpe (Pflichtfeld)",
+          "main_switch": "Hauptschalter / Stromversorgung für den Pool (Pflichtfeld)",
+          "pump_switch": "Optional: separater Schalter für Umwälzpumpe (leer lassen, um Hauptschalter zu nutzen)",
           "filter_switch": "Optional: separater Schalter für Filterpumpe (leer lassen, um Hauptschalter zu nutzen)",
           "enable_aux_heating": "Aktiviert zusätzliche Heizung für schnelleres Aufheizen",
           "aux_heating_switch": "Schalter für elektrische Zusatzheizung",
@@ -53,6 +55,26 @@
           "enable_saltwater": "Aktiviert salzwasser-spezifische Funktionen und Sensoren",
           "salt_sensor": "Salzgehalt-Sensor für Salzwasserpools",
           "tds_sensor": "Leitfähigkeits-Sensor (TDS) für Wasserqualität"
+        }
+      },
+      "climate": {
+        "title": "Temperaturregelung",
+        "submit": "Weiter",
+        "data": {
+          "target_temp": "Initiale Zieltemperatur",
+          "min_temp": "Minimum-Temperatur",
+          "max_temp": "Maximum-Temperatur",
+          "target_temp_step": "Schrittweite",
+          "cold_tolerance": "Kalt-Toleranz",
+          "hot_tolerance": "Warm-Toleranz"
+        },
+        "data_description": {
+          "target_temp": "Initiale Zieltemperatur (Sollwert) beim ersten Start; danach wird der Sollwert gespeichert",
+          "min_temp": "Minimaler einstellbarer Sollwert",
+          "max_temp": "Maximaler einstellbarer Sollwert",
+          "target_temp_step": "Schrittweite für das Setzen der Zieltemperatur",
+          "cold_tolerance": "Heizung startet, wenn Wassertemperatur unter Ziel minus diesem Wert liegt",
+          "hot_tolerance": "Heizung stoppt, wenn Wassertemperatur bei/über Ziel plus diesem Wert liegt"
         }
       },
       "frost": {
@@ -152,6 +174,7 @@
         "submit": "Weiter",
         "data": {
           "main_switch": "Hauptschalter",
+          "pump_switch": "Pumpen-Schalter (optional)",
           "filter_switch": "Filter-Schalter (optional)",
           "enable_aux_heating": "Zusatzheizung aktivieren",
           "aux_heating_switch": "Zusatzheizung Schalter",
@@ -169,6 +192,18 @@
           "enable_saltwater": "Salzwasserpool",
           "salt_sensor": "Salzgehalt Sensor",
           "tds_sensor": "Leitfähigkeit Sensor"
+        }
+      },
+      "climate": {
+        "title": "Temperaturregelung",
+        "submit": "Weiter",
+        "data": {
+          "target_temp": "Initiale Zieltemperatur",
+          "min_temp": "Minimum-Temperatur",
+          "max_temp": "Maximum-Temperatur",
+          "target_temp_step": "Schrittweite",
+          "cold_tolerance": "Kalt-Toleranz",
+          "hot_tolerance": "Warm-Toleranz"
         }
       },
       "frost": {
@@ -242,7 +277,8 @@
       "frost_active": { "name": "Frostschutz aktiv" },
       "in_quiet": { "name": "Ruhemodus aktiv" },
       "pv_allows": { "name": "PV-Überschuss verfügbar" },
-      "should_main_on": { "name": "Hauptpumpe erforderlich" },
+      "should_main_on": { "name": "Stromversorgung erforderlich" },
+      "should_pump_on": { "name": "Pumpe erforderlich" },
       "low_chlor": { "name": "Niedriger Chlorwert" },
       "ph_alert": { "name": "pH außerhalb Bereich" },
       "tds_high": { "name": "TDS zu hoch" }
@@ -272,7 +308,8 @@
       "aux_power": { "name": "Heizung Leistung" }
     },
     "switch": {
-      "main": { "name": "Hauptschalter" },
+      "main": { "name": "Stromversorgung" },
+      "pump": { "name": "Pumpe" },
       "aux": { "name": "Zusatzheizung" }
     },
     "button": {

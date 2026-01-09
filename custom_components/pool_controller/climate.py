@@ -3,7 +3,16 @@ from homeassistant.components.climate import ClimateEntity, ClimateEntityFeature
 from homeassistant.const import UnitOfTemperature, ATTR_TEMPERATURE
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from .const import DOMAIN, MANUFACTURER
+from .const import (
+    DOMAIN,
+    MANUFACTURER,
+    CONF_MIN_TEMP,
+    CONF_MAX_TEMP,
+    CONF_TARGET_TEMP_STEP,
+    DEFAULT_MIN_TEMP,
+    DEFAULT_MAX_TEMP,
+    DEFAULT_TARGET_TEMP_STEP,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -17,8 +26,10 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_hvac_modes = [HVACMode.OFF, HVACMode.HEAT]
     _attr_supported_features = ClimateEntityFeature.TARGET_TEMPERATURE | ClimateEntityFeature.PRESET_MODE
-    _attr_min_temp = 10
-    _attr_max_temp = 40
+    # Defaults; will be overridden from entry config/options in __init__.
+    _attr_min_temp = DEFAULT_MIN_TEMP
+    _attr_max_temp = DEFAULT_MAX_TEMP
+    _attr_target_temperature_step = DEFAULT_TARGET_TEMP_STEP
 
     PRESET_AUTO = "Auto"
     PRESET_BATHING = "Baden"
@@ -32,6 +43,27 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
         self.coordinator = coordinator
         self._attr_unique_id = f"{coordinator.entry.entry_id}_climate"
         self._attr_name = None # Name kommt vom Device
+
+        merged = {**(coordinator.entry.data or {}), **(coordinator.entry.options or {})}
+        try:
+            self._attr_min_temp = float(merged.get(CONF_MIN_TEMP, DEFAULT_MIN_TEMP))
+        except Exception:
+            self._attr_min_temp = DEFAULT_MIN_TEMP
+        try:
+            self._attr_max_temp = float(merged.get(CONF_MAX_TEMP, DEFAULT_MAX_TEMP))
+        except Exception:
+            self._attr_max_temp = DEFAULT_MAX_TEMP
+        try:
+            self._attr_target_temperature_step = float(merged.get(CONF_TARGET_TEMP_STEP, DEFAULT_TARGET_TEMP_STEP))
+        except Exception:
+            self._attr_target_temperature_step = DEFAULT_TARGET_TEMP_STEP
+
+        # Ensure the coordinator uses the same target temp bounds.
+        try:
+            if coordinator.target_temp is not None:
+                coordinator.target_temp = max(self._attr_min_temp, min(self._attr_max_temp, float(coordinator.target_temp)))
+        except Exception:
+            pass
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -113,6 +145,6 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
 
     async def async_set_temperature(self, **kwargs):
         if (temp := kwargs.get(ATTR_TEMPERATURE)) is not None:
-            self.coordinator.target_temp = temp
+            await self.coordinator.set_target_temperature(temp)
             await self.coordinator.async_request_refresh()
             # Switch control is handled by the coordinator.

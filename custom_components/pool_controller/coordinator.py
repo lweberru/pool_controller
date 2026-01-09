@@ -10,11 +10,25 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
     def __init__(self, hass, entry):
         self.entry = entry
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=timedelta(seconds=30))
-        self.target_temp = 38.0
+        # Target temperature: prefer persisted option, else config value, else default.
+        self.target_temp = DEFAULT_TARGET_TEMP
+        if entry:
+            try:
+                merged = {**(entry.data or {}), **(entry.options or {})}
+                if merged.get(OPT_KEY_TARGET_TEMP) is not None:
+                    self.target_temp = float(merged.get(OPT_KEY_TARGET_TEMP))
+                elif merged.get(CONF_TARGET_TEMP) is not None:
+                    self.target_temp = float(merged.get(CONF_TARGET_TEMP))
+            except Exception:
+                self.target_temp = DEFAULT_TARGET_TEMP
         self._last_should_main_on = None
+        self._last_should_pump_on = None
         self._last_should_aux_on = None
         self.aux_enabled = True  # Master-Enable für Zusatzheizung (default: aktiviert)
         self.maintenance_active = False
+        # Internal demand states (hysteresis)
+        self._aux_heat_demand = False
+        self._pv_heat_demand = False
         # Wiederherstellung von Timern aus entry.options (falls vorhanden)
         self.manual_timer_until = None
         self.manual_timer_type = None
@@ -296,6 +310,35 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         except Exception:
             _LOGGER.exception("Fehler beim Speichern von Wartungsmodus")
 
+    async def set_target_temperature(self, temperature: float):
+        """Set and persist the target temperature (setpoint)."""
+        try:
+            temperature = float(temperature)
+        except Exception:
+            return
+        self.target_temp = temperature
+        try:
+            new_opts = {**(self.entry.options or {})}
+            new_opts[OPT_KEY_TARGET_TEMP] = temperature
+            await self.hass.config_entries.async_update_entry(self.entry, options=new_opts)
+        except Exception:
+            _LOGGER.exception("Fehler beim Speichern von target_temp")
+
+    def _thermostat_demand(self, current_temp: float | None, target_temp: float, cold_tolerance: float, hot_tolerance: float, prev_on: bool) -> bool:
+        """Simple hysteresis: turn ON below (target-cold), turn OFF at/above (target+hot)."""
+        if current_temp is None:
+            return False
+        try:
+            ct = float(current_temp)
+            tt = float(target_temp)
+            cold = float(cold_tolerance)
+            hot = float(hot_tolerance)
+        except Exception:
+            return prev_on
+        if prev_on:
+            return ct < (tt + hot)
+        return ct < (tt - cold)
+
     async def _async_update_data(self):
         try:
             now = dt_util.now()
@@ -449,6 +492,16 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             # Wenn Wassertemperatur fehlt, konservativer Default 20°C (statt Fehler)
             measured_temp = water_temp if water_temp is not None else 20.0
             delta_t = max(0.0, self.target_temp - measured_temp)
+
+            # Thermostat-like tolerances (hysteresis)
+            try:
+                cold_tol = float(conf.get(CONF_COLD_TOLERANCE, DEFAULT_COLD_TOLERANCE))
+            except Exception:
+                cold_tol = DEFAULT_COLD_TOLERANCE
+            try:
+                hot_tol = float(conf.get(CONF_HOT_TOLERANCE, DEFAULT_HOT_TOLERANCE))
+            except Exception:
+                hot_tol = DEFAULT_HOT_TOLERANCE
 
             heat_time = None
             if vol_l is not None and power_w > 0 and delta_t > 0:
@@ -663,6 +716,43 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             is_chlorinating = manual_active and self.manual_timer_type == "chlorine"
             is_manual_filter = manual_active and self.manual_timer_type == "filter"
 
+            # Demand flags
+            aux_heat_demand = False
+            if (not maintenance_active) and (not pause_active) and conf.get(CONF_ENABLE_AUX_HEATING, False):
+                # Aux heater is strictly for heating. Once target is reached, keep it OFF
+                # even if a manual timer (e.g. bathing) is active.
+                try:
+                    if water_temp is not None and float(water_temp) >= float(self.target_temp):
+                        aux_heat_demand = False
+                    else:
+                        aux_heat_demand = self._thermostat_demand(
+                            current_temp=water_temp,
+                            target_temp=self.target_temp,
+                            cold_tolerance=cold_tol,
+                            hot_tolerance=hot_tol,
+                            prev_on=bool(self._aux_heat_demand),
+                        )
+                except Exception:
+                    aux_heat_demand = bool(self._aux_heat_demand)
+            self._aux_heat_demand = aux_heat_demand
+
+            # PV-based run should stop once target is reached (with same hysteresis).
+            try:
+                if water_temp is not None and float(water_temp) >= float(self.target_temp):
+                    pv_heat_demand = False
+                else:
+                    pv_heat_demand = self._thermostat_demand(
+                        current_temp=water_temp,
+                        target_temp=self.target_temp,
+                        cold_tolerance=cold_tol,
+                        hot_tolerance=hot_tol,
+                        prev_on=bool(self._pv_heat_demand),
+                    )
+            except Exception:
+                pv_heat_demand = bool(self._pv_heat_demand)
+            self._pv_heat_demand = pv_heat_demand
+            pv_run = bool(enable_pv and pv_allows and (not in_quiet) and (not maintenance_active) and (pv_heat_demand))
+
             data = {
                 "maintenance_active": maintenance_active,
                 "water_temp": round(water_temp, 1) if water_temp else None,
@@ -699,16 +789,34 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "in_quiet": in_quiet,
                 "main_power": round(main_power, 1) if main_power is not None else None,
                 "aux_power": round(aux_power, 1) if aux_power is not None else None,
-                "should_main_on": (
-                    (not maintenance_active) and (
-                        (frost_active)
+                # Stromversorgung an, wenn der Pool laufen muss (inkl. Frost) oder wenn die Pumpe laufen soll.
+                "should_pump_on": (
+                    (not maintenance_active)
+                    and (
+                        frost_active
                         or (not pause_active and (
                             is_bathing
                             or is_chlorinating
+                            or aux_heat_demand
                             or (is_manual_filter and not in_quiet)
                             or (auto_filter_active and not in_quiet)
                             or (next_start_mins is not None and next_start_mins == 0)
-                            or (pv_allows and not in_quiet)
+                            or pv_run
+                        ))
+                    )
+                ),
+                "should_main_on": (
+                    (not maintenance_active)
+                    and (
+                        frost_active
+                        or (not pause_active and (
+                            is_bathing
+                            or is_chlorinating
+                            or aux_heat_demand
+                            or (is_manual_filter and not in_quiet)
+                            or (auto_filter_active and not in_quiet)
+                            or (next_start_mins is not None and next_start_mins == 0)
+                            or pv_run
                         ))
                     )
                 ),
@@ -716,17 +824,19 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "should_aux_on": (
                     (not maintenance_active)
                     and conf.get(CONF_ENABLE_AUX_HEATING, False)
-                    and (delta_t > 1.0)
+                    and aux_heat_demand
                 ),
             }
 
             # After computing desired states, ensure physical switches follow the desired state
             try:
                 main_switch_id = conf.get(CONF_MAIN_SWITCH)
+                pump_switch_id = conf.get(CONF_PUMP_SWITCH) or main_switch_id
                 aux_switch_id = conf.get(CONF_AUX_HEATING_SWITCH)
                 demo = conf.get(CONF_DEMO_MODE, False)
 
                 desired_main = data.get("should_main_on")
+                desired_pump = data.get("should_pump_on")
                 desired_aux = data.get("should_aux_on")
 
                 # Toggle main switch according to desired state
@@ -739,6 +849,20 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                         if (maintenance_active or not is_bathing) and not demo and main_switch_id:
                             await self.hass.services.async_call("switch", "turn_off", {"entity_id": main_switch_id})
                     self._last_should_main_on = desired_main
+
+                # Toggle pump switch (may be same as main switch)
+                if pump_switch_id and pump_switch_id != main_switch_id:
+                    if desired_pump != self._last_should_pump_on:
+                        if desired_pump:
+                            if not demo:
+                                await self.hass.services.async_call("switch", "turn_on", {"entity_id": pump_switch_id})
+                        else:
+                            if (maintenance_active or not is_bathing) and not demo:
+                                await self.hass.services.async_call("switch", "turn_off", {"entity_id": pump_switch_id})
+                        self._last_should_pump_on = desired_pump
+                else:
+                    # Keep in sync when both are the same underlying entity
+                    self._last_should_pump_on = desired_main
 
                 # Toggle aux switch according to desired_aux AND aux_enabled
                 # aux_enabled ist der Master-Enable: wenn False, bleibt physischer Schalter immer aus

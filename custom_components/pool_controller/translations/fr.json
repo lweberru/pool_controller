@@ -20,6 +20,7 @@
         "submit": "Suivant",
         "data": {
           "main_switch": "Interrupteur principal",
+          "pump_switch": "Interrupteur de la pompe (optionnel)",
           "filter_switch": "Interrupteur du filtre (optionnel)",
           "enable_aux_heating": "Activer le chauffage auxiliaire",
           "aux_heating_switch": "Interrupteur du chauffage auxiliaire",
@@ -27,7 +28,8 @@
           "aux_power_sensor": "Capteur de puissance auxiliaire"
         },
         "data_description": {
-          "main_switch": "Interrupteur de la pompe principale (obligatoire)",
+          "main_switch": "Interrupteur principal / alimentation électrique de la piscine (obligatoire)",
+          "pump_switch": "Optionnel : interrupteur dédié pour la pompe de circulation (laisser vide pour utiliser l'interrupteur principal)",
           "filter_switch": "Optionnel : interrupteur séparé pour la pompe de filtration (laisser vide pour utiliser l'interrupteur principal)",
           "enable_aux_heating": "Active un chauffage supplémentaire pour une montée en température plus rapide",
           "aux_heating_switch": "Interrupteur du chauffage auxiliaire",
@@ -53,6 +55,26 @@
           "enable_saltwater": "Active les fonctions et capteurs spécifiques aux piscines au sel",
           "salt_sensor": "Capteur du taux de sel",
           "tds_sensor": "Capteur TDS / conductivité"
+        }
+      },
+      "climate": {
+        "title": "Contrôle de température",
+        "submit": "Suivant",
+        "data": {
+          "target_temp": "Température cible initiale",
+          "min_temp": "Température minimum",
+          "max_temp": "Température maximum",
+          "target_temp_step": "Pas de température",
+          "cold_tolerance": "Tolérance froide",
+          "hot_tolerance": "Tolérance chaude"
+        },
+        "data_description": {
+          "target_temp": "Température cible (consigne) initiale ; ensuite la consigne est enregistrée",
+          "min_temp": "Consigne minimale disponible",
+          "max_temp": "Consigne maximale disponible",
+          "target_temp_step": "Pas pour régler la température cible",
+          "cold_tolerance": "Le chauffage démarre lorsque la température de l'eau est inférieure à la consigne moins cette valeur",
+          "hot_tolerance": "Le chauffage s'arrête lorsque la température de l'eau est égale ou supérieure à la consigne plus cette valeur"
         }
       },
       "frost": {
@@ -152,6 +174,7 @@
         "submit": "Suivant",
         "data": {
           "main_switch": "Interrupteur principal",
+          "pump_switch": "Interrupteur de la pompe (optionnel)",
           "filter_switch": "Interrupteur du filtre (optionnel)",
           "enable_aux_heating": "Activer le chauffage auxiliaire",
           "aux_heating_switch": "Interrupteur du chauffage auxiliaire",
@@ -169,6 +192,18 @@
           "enable_saltwater": "Piscine au sel",
           "salt_sensor": "Capteur de sel",
           "tds_sensor": "Capteur TDS"
+        }
+      },
+      "climate": {
+        "title": "Contrôle de température",
+        "submit": "Suivant",
+        "data": {
+          "target_temp": "Température cible initiale",
+          "min_temp": "Température minimum",
+          "max_temp": "Température maximum",
+          "target_temp_step": "Pas de température",
+          "cold_tolerance": "Tolérance froide",
+          "hot_tolerance": "Tolérance chaude"
         }
       },
       "frost": {
@@ -231,8 +266,14 @@
   }
   ,
   "entity": {
+    "switch": {
+      "main": { "name": "Alimentation" },
+      "pump": { "name": "Pompe" }
+    },
     "binary_sensor": {
-      "maintenance_active": { "name": "Mode maintenance" }
+      "maintenance_active": { "name": "Mode maintenance" },
+      "should_main_on": { "name": "Alimentation requise" },
+      "should_pump_on": { "name": "Pompe requise" }
     }
   },
   "state": {

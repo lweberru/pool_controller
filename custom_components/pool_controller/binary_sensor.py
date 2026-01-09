@@ -13,6 +13,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolBinary(coordinator, "in_quiet", "Ruhemodus aktiv", None),
         PoolBinary(coordinator, "pv_allows", "PV Überschuss verfügbar", None),
         PoolBinary(coordinator, "should_main_on", "Hauptstrom erforderlich", None),
+        PoolBinary(coordinator, "should_pump_on", "Pumpe erforderlich", None),
         PoolBinary(coordinator, "low_chlor", "Niedriger Chlorwert", None),
         PoolBinary(coordinator, "ph_alert", "pH außerhalb Bereich", None),
         PoolBinary(coordinator, "tds_high", "TDS zu hoch", BinarySensorDeviceClass.PROBLEM),
