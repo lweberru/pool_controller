@@ -3,6 +3,7 @@
     "step": {
       "user": {
         "title": "Configuración básica",
+        "description": "Ajustes básicos para esta instancia.",
         "submit": "Siguiente",
         "data": {
           "name": "Nombre de la piscina",
@@ -17,6 +18,7 @@
       },
       "switches": {
         "title": "Interruptores y potencia",
+        "description": "Configura los interruptores y sensores de potencia. Opcionalmente puedes separar alimentación (principal) y bomba de circulación (bomba).",
         "submit": "Siguiente",
         "data": {
           "main_switch": "Interruptor principal",
@@ -39,6 +41,7 @@
       },
       "water_quality": {
         "title": "Calidad del agua",
+        "description": "Selecciona sensores para temperatura del agua y (opcionalmente) química.",
         "submit": "Siguiente",
         "data": {
           "temp_water_sensor": "Temperatura del agua",
@@ -59,6 +62,7 @@
       },
       "climate": {
         "title": "Control de temperatura",
+        "description": "Ajustes del termostato. La consigna se guarda después de cambiarla en el panel.",
         "submit": "Siguiente",
         "data": {
           "target_temp": "Temperatura objetivo inicial",
@@ -79,6 +83,7 @@
       },
       "frost": {
         "title": "Protección contra heladas",
+        "description": "Protege la piscina en clima frío haciendo funcionar la bomba por ciclos según la temperatura exterior.",
         "submit": "Siguiente",
         "data": {
           "enable_frost_protection": "Activar protección contra heladas",
@@ -105,6 +110,7 @@
       },
       "calendars": {
         "title": "Calendarios y horas silenciosas",
+        "description": "Automatización opcional por calendario y configuración de horas silenciosas.",
         "submit": "Siguiente",
         "data": {
           "pool_calendar": "Calendario de piscina",
@@ -125,6 +131,7 @@
       },
       "filter": {
         "title": "Filtración",
+        "description": "Ciclos automáticos de filtración por intervalo fijo. Si el inicio cae en horas silenciosas, se pospone.",
         "submit": "Siguiente",
         "data": {
           "enable_auto_filter": "Ciclos de filtrado automáticos",
@@ -137,6 +144,7 @@
       },
       "pv": {
         "title": "Excedente FV",
+        "description": "Optimización FV opcional: ejecutar bomba/calefacción cuando haya excedente. Umbrales ON/OFF actúan como histéresis.",
         "submit": "Finalizar",
         "data": {
           "enable_pv_optimization": "Activar optimización FV",
@@ -157,6 +165,7 @@
     "step": {
       "init": {
         "title": "Ajustes",
+        "description": "Ajustes generales. Los cambios se guardan en las opciones de la entrada.",
         "submit": "Siguiente",
         "data": {
           "name": "Nombre de la piscina",
@@ -171,6 +180,7 @@
       },
       "switches": {
         "title": "Interruptores y potencia",
+        "description": "Actualiza interruptores y sensores. Consejo: configura un interruptor de bomba separado solo si realmente son entidades distintas.",
         "submit": "Siguiente",
         "data": {
           "main_switch": "Interruptor principal",
@@ -180,10 +190,20 @@
           "aux_heating_switch": "Interruptor calefacción auxiliar",
           "main_power_sensor": "Sensor de potencia principal",
           "aux_power_sensor": "Sensor de potencia auxiliar"
+        },
+        "data_description": {
+          "main_switch": "Interruptor principal / alimentación eléctrica de la piscina (obligatorio)",
+          "pump_switch": "Opcional: interruptor dedicado para la bomba de circulación (dejar vacío para usar el principal)",
+          "filter_switch": "Opcional: interruptor separado para la bomba del filtro (dejar vacío para usar el principal)",
+          "enable_aux_heating": "Activa un calentador adicional",
+          "aux_heating_switch": "Interruptor del calentador auxiliar",
+          "main_power_sensor": "Sensor de potencia de la bomba principal (W)",
+          "aux_power_sensor": "Sensor de potencia del calentador (W)"
         }
       },
       "water_quality": {
         "title": "Calidad del agua",
+        "description": "Actualiza la asignación de sensores para temperatura y (opcionalmente) química.",
         "submit": "Siguiente",
         "data": {
           "temp_water_sensor": "Temperatura del agua",
@@ -192,10 +212,19 @@
           "enable_saltwater": "Piscina de agua salada",
           "salt_sensor": "Sensor de sal",
           "tds_sensor": "Sensor de TDS"
+        },
+        "data_description": {
+          "temp_water_sensor": "Sensor de temperatura del agua (obligatorio)",
+          "ph_sensor": "Sensor de pH (p. ej. Blueriiot)",
+          "chlorine_sensor": "Sensor redox para medición de cloro (mV)",
+          "enable_saltwater": "Activa funciones y sensores para agua salada",
+          "salt_sensor": "Sensor de nivel de sal",
+          "tds_sensor": "Sensor de TDS / conductividad"
         }
       },
       "climate": {
         "title": "Control de temperatura",
+        "description": "Ajusta límites del termostato e histéresis.",
         "submit": "Siguiente",
         "data": {
           "target_temp": "Temperatura objetivo inicial",
@@ -204,10 +233,19 @@
           "target_temp_step": "Paso de temperatura",
           "cold_tolerance": "Tolerancia fría",
           "hot_tolerance": "Tolerancia caliente"
+        },
+        "data_description": {
+          "target_temp": "Temperatura objetivo (consigna) inicial; después se guarda automáticamente",
+          "min_temp": "Consigna mínima disponible",
+          "max_temp": "Consigna máxima disponible",
+          "target_temp_step": "Paso para ajustar la temperatura objetivo",
+          "cold_tolerance": "El calentador arranca cuando la temperatura del agua está por debajo de objetivo menos este valor",
+          "hot_tolerance": "El calentador se detiene cuando la temperatura del agua es igual o superior a objetivo más este valor"
         }
       },
       "frost": {
         "title": "Protección contra heladas",
+        "description": "Ajusta el ciclo de heladas y el comportamiento durante horas silenciosas.",
         "submit": "Siguiente",
         "data": {
           "enable_frost_protection": "Activar protección contra heladas",
@@ -234,6 +272,7 @@
       },
       "calendars": {
         "title": "Calendarios y horas silenciosas",
+        "description": "Configura automatización por calendario y horas silenciosas.",
         "submit": "Siguiente",
         "data": {
           "pool_calendar": "Calendario de piscina",
@@ -242,24 +281,44 @@
           "quiet_time_end": "Fin horas silenciosas (entre semana)",
           "quiet_time_start_weekend": "Inicio horas silenciosas (fin de semana/festivo)",
           "quiet_time_end_weekend": "Fin horas silenciosas (fin de semana/festivo)"
+        },
+        "data_description": {
+          "pool_calendar": "Calendario con eventos (puede iniciar modo baño)",
+          "holiday_calendar": "Calendario de festivos (usa horario de fin de semana)",
+          "quiet_time_start": "Inicio entre semana (p. ej. 22:00)",
+          "quiet_time_end": "Fin entre semana (p. ej. 07:00)",
+          "quiet_time_start_weekend": "Inicio fin de semana/festivo (p. ej. 23:00)",
+          "quiet_time_end_weekend": "Fin fin de semana/festivo (p. ej. 08:00)"
         }
       },
       "filter": {
         "title": "Filtración",
+        "description": "Ciclos automáticos de filtración y su intervalo.",
         "submit": "Siguiente",
         "data": {
           "enable_auto_filter": "Ciclos de filtrado automáticos",
           "filter_interval_minutes": "Intervalo de filtrado (minutos)"
+        },
+        "data_description": {
+          "enable_auto_filter": "Inicia ciclos de filtración automáticamente según el intervalo",
+          "filter_interval_minutes": "Tiempo entre ciclos automáticos (60..10080 min)"
         }
       },
       "pv": {
         "title": "Excedente FV",
+        "description": "Configuración de optimización FV.",
         "submit": "Guardar",
         "data": {
           "enable_pv_optimization": "Activar optimización FV",
           "pv_surplus_sensor": "Sensor de excedente FV",
           "pv_on_threshold": "Umbral FV ENCENDER (W)",
           "pv_off_threshold": "Umbral FV APAGAR (W)"
+        },
+        "data_description": {
+          "enable_pv_optimization": "Usa excedente FV para controlar bomba/calefacción",
+          "pv_surplus_sensor": "Sensor de excedente / exportación FV en W",
+          "pv_on_threshold": "Encender por encima de este valor (por defecto: 1000W)",
+          "pv_off_threshold": "Apagar por debajo de este valor (por defecto: 500W)"
         }
       }
     }

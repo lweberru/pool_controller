@@ -3,6 +3,7 @@
     "step": {
       "user": {
         "title": "Basis-Setup",
+        "description": "Grundkonfiguration der Pool-Instanz.",
         "submit": "Weiter",
         "data": {
           "name": "Pool-Name",
@@ -17,6 +18,7 @@
       },
       "switches": {
         "title": "Schalter & Leistung",
+        "description": "Welche Schalter und Leistungssensoren soll der Controller verwenden? Optional kannst du Stromversorgung (Hauptschalter) und Umwälzpumpe (Pumpenschalter) trennen.",
         "submit": "Weiter",
         "data": {
           "main_switch": "Hauptschalter",
@@ -39,6 +41,7 @@
       },
       "water_quality": {
         "title": "Wasserqualität",
+        "description": "Sensoren für Wassertemperatur und (optional) Wasserwerte. Pflicht ist nur der Wassertemperatur-Sensor.",
         "submit": "Weiter",
         "data": {
           "temp_water_sensor": "Wassertemperatur",
@@ -59,6 +62,7 @@
       },
       "climate": {
         "title": "Temperaturregelung",
+        "description": "Thermostat-Einstellungen für die `climate.*` Entity. Der Sollwert (Zieltemperatur) wird nach dem ersten Setzen dauerhaft gespeichert.",
         "submit": "Weiter",
         "data": {
           "target_temp": "Initiale Zieltemperatur",
@@ -79,6 +83,7 @@
       },
       "frost": {
         "title": "Frostschutz",
+        "description": "Schützt die Anlage bei Kälte, indem die Pumpe abhängig von der Außentemperatur zyklisch läuft. Ruhezeiten werden respektiert und nur bei extremer Kälte überschrieben.",
         "submit": "Weiter",
         "data": {
           "enable_frost_protection": "Frostschutz aktivieren",
@@ -105,6 +110,7 @@
       },
       "calendars": {
         "title": "Kalender & Ruhezeiten",
+        "description": "Optional: Termin-Automation über Kalender und Ruhezeiten. In Ruhezeiten werden PV/Heizen/Filtern unterdrückt; Frostschutz kann bei extremer Kälte trotzdem laufen.",
         "submit": "Weiter",
         "data": {
           "pool_calendar": "Pool Kalender",
@@ -125,6 +131,7 @@
       },
       "filter": {
         "title": "Filter-Einstellungen",
+        "description": "Automatische Filterzyklen laufen in einem festen Intervall. Fällt der nächste Start in die Ruhezeit, wird er auf das Ende der Ruhezeit verschoben.",
         "submit": "Weiter",
         "data": {
           "enable_auto_filter": "Automatische Filterzyklen",
@@ -137,6 +144,7 @@
       },
       "pv": {
         "title": "PV-Überschuss",
+        "description": "Optional: PV-Optimierung. Pumpe/Heizung laufen nur, wenn ausreichend PV-Überschuss vorhanden ist. EIN/AUS-Schwellen wirken als Hysterese.",
         "submit": "Fertigstellen",
         "data": {
           "enable_pv_optimization": "PV-Optimierung aktivieren",
@@ -157,6 +165,7 @@
     "step": {
       "init": {
         "title": "Einstellungen",
+        "description": "Allgemeine Einstellungen. Änderungen werden in den Optionen der Config-Entry gespeichert.",
         "submit": "Weiter",
         "data": {
           "name": "Pool-Name",
@@ -171,6 +180,7 @@
       },
       "switches": {
         "title": "Schalter & Leistung",
+        "description": "Schalter- und Sensor-Zuordnung anpassen. Tipp: Einen separaten Pumpen-Schalter nur setzen, wenn Stromversorgung und Umwälzpumpe wirklich zwei verschiedene Entities sind.",
         "submit": "Weiter",
         "data": {
           "main_switch": "Hauptschalter",
@@ -180,10 +190,20 @@
           "aux_heating_switch": "Zusatzheizung Schalter",
           "main_power_sensor": "Haupt-Leistungssensor",
           "aux_power_sensor": "Zusatzheizung Leistungssensor"
+        },
+        "data_description": {
+          "main_switch": "Hauptschalter / Stromversorgung für den Pool (Pflichtfeld)",
+          "pump_switch": "Optional: separater Schalter für Umwälzpumpe (leer lassen, um Hauptschalter zu nutzen)",
+          "filter_switch": "Optional: separater Schalter für Filterpumpe (leer lassen, um Hauptschalter zu nutzen)",
+          "enable_aux_heating": "Aktiviert zusätzliche Heizung für schnelleres Aufheizen",
+          "aux_heating_switch": "Schalter für elektrische Zusatzheizung",
+          "main_power_sensor": "Leistungssensor der Hauptpumpe in Watt",
+          "aux_power_sensor": "Leistungssensor der Heizung in Watt"
         }
       },
       "water_quality": {
         "title": "Wasserqualität",
+        "description": "Sensor-Zuordnung für Temperatur und (optional) Wasserwerte.",
         "submit": "Weiter",
         "data": {
           "temp_water_sensor": "Wassertemperatur",
@@ -192,10 +212,19 @@
           "enable_saltwater": "Salzwasserpool",
           "salt_sensor": "Salzgehalt Sensor",
           "tds_sensor": "Leitfähigkeit Sensor"
+        },
+        "data_description": {
+          "temp_water_sensor": "Sensor für Poolwasser-Temperatur (Pflichtfeld)",
+          "ph_sensor": "pH-Wert Sensor (Blueriiot oder ähnlich)",
+          "chlorine_sensor": "Redox-Sensor für Chlor-Messung in mV",
+          "enable_saltwater": "Aktiviert salzwasser-spezifische Funktionen und Sensoren",
+          "salt_sensor": "Salzgehalt-Sensor für Salzwasserpools",
+          "tds_sensor": "Leitfähigkeits-Sensor (TDS) für Wasserqualität"
         }
       },
       "climate": {
         "title": "Temperaturregelung",
+        "description": "Thermostat-Grenzen und Hysterese einstellen. Der Sollwert selbst wird über die `climate.*` Entity geändert und gespeichert.",
         "submit": "Weiter",
         "data": {
           "target_temp": "Initiale Zieltemperatur",
@@ -204,10 +233,19 @@
           "target_temp_step": "Schrittweite",
           "cold_tolerance": "Kalt-Toleranz",
           "hot_tolerance": "Warm-Toleranz"
+        },
+        "data_description": {
+          "target_temp": "Initiale Zieltemperatur (Sollwert) beim ersten Start; danach wird der Sollwert gespeichert",
+          "min_temp": "Minimaler einstellbarer Sollwert",
+          "max_temp": "Maximaler einstellbarer Sollwert",
+          "target_temp_step": "Schrittweite für das Setzen der Zieltemperatur",
+          "cold_tolerance": "Heizung startet, wenn Wassertemperatur unter Ziel minus diesem Wert liegt",
+          "hot_tolerance": "Heizung stoppt, wenn Wassertemperatur bei/über Ziel plus diesem Wert liegt"
         }
       },
       "frost": {
         "title": "Frostschutz",
+        "description": "Frostschutz-Zyklen und Ruhezeit-Override einstellen.",
         "submit": "Weiter",
         "data": {
           "enable_frost_protection": "Frostschutz aktivieren",
@@ -234,6 +272,7 @@
       },
       "calendars": {
         "title": "Kalender & Ruhezeiten",
+        "description": "Kalender-Automation und Ruhezeiten konfigurieren.",
         "submit": "Weiter",
         "data": {
           "pool_calendar": "Pool Kalender",
@@ -242,24 +281,44 @@
           "quiet_time_end": "Ruhezeit Ende (Wochentag)",
           "quiet_time_start_weekend": "Ruhezeit Start (Wochenende/Feiertag)",
           "quiet_time_end_weekend": "Ruhezeit Ende (Wochenende/Feiertag)"
+        },
+        "data_description": {
+          "pool_calendar": "Kalender mit Pool-Events (startet automatisch Baden-Modus bei Terminen)",
+          "holiday_calendar": "Feiertagskalender (nutzt Wochenend-Ruhezeiten an Feiertagen)",
+          "quiet_time_start": "Beginn der Ruhezeit an Wochentagen (z.B. 22:00)",
+          "quiet_time_end": "Ende der Ruhezeit an Wochentagen (z.B. 07:00)",
+          "quiet_time_start_weekend": "Beginn der Ruhezeit am Wochenende/Feiertag (z.B. 23:00)",
+          "quiet_time_end_weekend": "Ende der Ruhezeit am Wochenende/Feiertag (z.B. 08:00)"
         }
       },
       "filter": {
         "title": "Filter-Einstellungen",
+        "description": "Automatische Filterzyklen und Intervall.",
         "submit": "Weiter",
         "data": {
           "enable_auto_filter": "Automatische Filterzyklen",
           "filter_interval_minutes": "Filter-Intervall (Minuten)"
+        },
+        "data_description": {
+          "enable_auto_filter": "Startet automatisch Filterzyklen basierend auf dem Intervall",
+          "filter_interval_minutes": "Zeit zwischen automatischen Filterzyklen (60..10080 min)"
         }
       },
       "pv": {
         "title": "PV-Überschuss",
+        "description": "PV-Optimierung konfigurieren.",
         "submit": "Speichern",
         "data": {
           "enable_pv_optimization": "PV-Optimierung aktivieren",
           "pv_surplus_sensor": "PV-Leistungssensor",
           "pv_on_threshold": "PV EIN-Schwelle (W)",
           "pv_off_threshold": "PV AUS-Schwelle (W)"
+        },
+        "data_description": {
+          "enable_pv_optimization": "Nutzt PV-Überschuss für intelligente Pumpen-/Heizungssteuerung (nur bei ausreichend Solarproduktion)",
+          "pv_surplus_sensor": "Sensor für PV-Überschuss bzw. Einspeisung in Watt (negativ = Bezug, positiv = Einspeisung)",
+          "pv_on_threshold": "Pumpe einschalten bei Überschuss über diesem Wert (Standard: 1000W)",
+          "pv_off_threshold": "Pumpe ausschalten bei Überschuss unter diesem Wert (Standard: 500W, Hysterese)"
         }
       }
     }

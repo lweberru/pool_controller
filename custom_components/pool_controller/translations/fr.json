@@ -3,6 +3,7 @@
     "step": {
       "user": {
         "title": "Configuration de base",
+        "description": "Paramètres de base pour cette instance.",
         "submit": "Suivant",
         "data": {
           "name": "Nom de la piscine",
@@ -17,6 +18,7 @@
       },
       "switches": {
         "title": "Interrupteurs & puissance",
+        "description": "Configure les interrupteurs et capteurs de puissance. Optionnellement, tu peux séparer l'alimentation (principal) et la pompe de circulation (pompe).",
         "submit": "Suivant",
         "data": {
           "main_switch": "Interrupteur principal",
@@ -39,6 +41,7 @@
       },
       "water_quality": {
         "title": "Qualité de l'eau",
+        "description": "Sélectionne les capteurs pour la température de l'eau et (optionnellement) la chimie.",
         "submit": "Suivant",
         "data": {
           "temp_water_sensor": "Température de l'eau",
@@ -59,6 +62,7 @@
       },
       "climate": {
         "title": "Contrôle de température",
+        "description": "Réglages de thermostat. La consigne est enregistrée après modification.",
         "submit": "Suivant",
         "data": {
           "target_temp": "Température cible initiale",
@@ -79,6 +83,7 @@
       },
       "frost": {
         "title": "Protection antigel",
+        "description": "Protège l'installation par cycles selon la température extérieure. Les heures de silence sont respectées sauf en cas de froid extrême.",
         "submit": "Suivant",
         "data": {
           "enable_frost_protection": "Activer la protection antigel",
@@ -105,6 +110,7 @@
       },
       "calendars": {
         "title": "Calendriers & heures de silence",
+        "description": "Automatisation optionnelle par calendrier et configuration des heures de silence.",
         "submit": "Suivant",
         "data": {
           "pool_calendar": "Calendrier de la piscine",
@@ -125,6 +131,7 @@
       },
       "filter": {
         "title": "Filtration",
+        "description": "Cycles de filtration automatiques basés sur un intervalle fixe. Si le démarrage tombe pendant les heures de silence, il est reporté.",
         "submit": "Suivant",
         "data": {
           "enable_auto_filter": "Cycles de filtration automatiques",
@@ -137,6 +144,7 @@
       },
       "pv": {
         "title": "Surplus PV",
+        "description": "Optimisation PV optionnelle : exécuter pompe/chauffage en cas de surplus. Seuils ON/OFF servent d'hystérésis.",
         "submit": "Terminer",
         "data": {
           "enable_pv_optimization": "Activer l'optimisation PV",
@@ -157,6 +165,7 @@
     "step": {
       "init": {
         "title": "Paramètres",
+        "description": "Paramètres généraux. Les modifications sont enregistrées dans les options de l'entrée.",
         "submit": "Suivant",
         "data": {
           "name": "Nom de la piscine",
@@ -171,6 +180,7 @@
       },
       "switches": {
         "title": "Interrupteurs & puissance",
+        "description": "Met à jour les interrupteurs et capteurs. Astuce : ne configure une pompe séparée que si ce sont vraiment des entités distinctes.",
         "submit": "Suivant",
         "data": {
           "main_switch": "Interrupteur principal",
@@ -180,10 +190,20 @@
           "aux_heating_switch": "Interrupteur du chauffage auxiliaire",
           "main_power_sensor": "Capteur de puissance principal",
           "aux_power_sensor": "Capteur de puissance auxiliaire"
+        },
+        "data_description": {
+          "main_switch": "Interrupteur principal / alimentation électrique de la piscine (obligatoire)",
+          "pump_switch": "Optionnel : interrupteur dédié pour la pompe de circulation (laisser vide pour utiliser l'interrupteur principal)",
+          "filter_switch": "Optionnel : interrupteur séparé pour la pompe de filtration (laisser vide pour utiliser l'interrupteur principal)",
+          "enable_aux_heating": "Active un chauffage supplémentaire",
+          "aux_heating_switch": "Interrupteur du chauffage auxiliaire",
+          "main_power_sensor": "Capteur de puissance de la pompe principale (W)",
+          "aux_power_sensor": "Capteur de puissance du chauffage (W)"
         }
       },
       "water_quality": {
         "title": "Qualité de l'eau",
+        "description": "Met à jour l'affectation des capteurs pour la température et (optionnellement) la chimie.",
         "submit": "Suivant",
         "data": {
           "temp_water_sensor": "Température de l'eau",
@@ -192,10 +212,19 @@
           "enable_saltwater": "Piscine au sel",
           "salt_sensor": "Capteur de sel",
           "tds_sensor": "Capteur TDS"
+        },
+        "data_description": {
+          "temp_water_sensor": "Capteur de température de l'eau (obligatoire)",
+          "ph_sensor": "Capteur pH (ex. Blueriiot)",
+          "chlorine_sensor": "Capteur redox pour la mesure du chlore (mV)",
+          "enable_saltwater": "Active les fonctions et capteurs spécifiques aux piscines au sel",
+          "salt_sensor": "Capteur du taux de sel",
+          "tds_sensor": "Capteur TDS / conductivité"
         }
       },
       "climate": {
         "title": "Contrôle de température",
+        "description": "Ajuste les limites du thermostat et l'hystérésis.",
         "submit": "Suivant",
         "data": {
           "target_temp": "Température cible initiale",
@@ -204,10 +233,19 @@
           "target_temp_step": "Pas de température",
           "cold_tolerance": "Tolérance froide",
           "hot_tolerance": "Tolérance chaude"
+        },
+        "data_description": {
+          "target_temp": "Température cible (consigne) initiale ; ensuite la consigne est enregistrée",
+          "min_temp": "Consigne minimale disponible",
+          "max_temp": "Consigne maximale disponible",
+          "target_temp_step": "Pas pour régler la température cible",
+          "cold_tolerance": "Le chauffage démarre lorsque la température de l'eau est inférieure à la consigne moins cette valeur",
+          "hot_tolerance": "Le chauffage s'arrête lorsque la température de l'eau est égale ou supérieure à la consigne plus cette valeur"
         }
       },
       "frost": {
         "title": "Protection antigel",
+        "description": "Ajuste le cycle antigel et le comportement pendant les heures de silence.",
         "submit": "Suivant",
         "data": {
           "enable_frost_protection": "Activer la protection antigel",
@@ -234,6 +272,7 @@
       },
       "calendars": {
         "title": "Calendriers & heures de silence",
+        "description": "Configure l'automatisation par calendrier et les heures de silence.",
         "submit": "Suivant",
         "data": {
           "pool_calendar": "Calendrier de la piscine",
@@ -242,24 +281,44 @@
           "quiet_time_end": "Fin des heures de silence (semaine)",
           "quiet_time_start_weekend": "Début des heures de silence (week-end/férié)",
           "quiet_time_end_weekend": "Fin des heures de silence (week-end/férié)"
+        },
+        "data_description": {
+          "pool_calendar": "Calendrier avec les événements piscine (peut démarrer le mode baignade)",
+          "holiday_calendar": "Calendrier des jours fériés (utilise les horaires week-end pendant les jours fériés)",
+          "quiet_time_start": "Début des heures de silence en semaine (ex. 22:00)",
+          "quiet_time_end": "Fin des heures de silence en semaine (ex. 07:00)",
+          "quiet_time_start_weekend": "Début des heures de silence le week-end/jours fériés (ex. 23:00)",
+          "quiet_time_end_weekend": "Fin des heures de silence le week-end/jours fériés (ex. 08:00)"
         }
       },
       "filter": {
         "title": "Filtration",
+        "description": "Cycles de filtration automatiques et intervalle.",
         "submit": "Suivant",
         "data": {
           "enable_auto_filter": "Cycles de filtration automatiques",
           "filter_interval_minutes": "Intervalle de filtration (minutes)"
+        },
+        "data_description": {
+          "enable_auto_filter": "Démarre automatiquement des cycles de filtration selon l'intervalle",
+          "filter_interval_minutes": "Temps entre deux cycles automatiques (60..10080 min)"
         }
       },
       "pv": {
         "title": "Surplus PV",
+        "description": "Configuration de l'optimisation PV.",
         "submit": "Enregistrer",
         "data": {
           "enable_pv_optimization": "Activer l'optimisation PV",
           "pv_surplus_sensor": "Capteur de surplus PV",
           "pv_on_threshold": "Seuil PV ON (W)",
           "pv_off_threshold": "Seuil PV OFF (W)"
+        },
+        "data_description": {
+          "enable_pv_optimization": "Utilise le surplus PV pour contrôler pompe/chauffage",
+          "pv_surplus_sensor": "Capteur du surplus / injection réseau en W",
+          "pv_on_threshold": "Allumer au-dessus de cette valeur (par défaut : 1000W)",
+          "pv_off_threshold": "Éteindre en dessous de cette valeur (par défaut : 500W)"
         }
       }
     }

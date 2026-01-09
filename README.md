@@ -99,10 +99,11 @@ The beautiful dashboard card shown at the top of this README is available as a s
    - **Category**: `Lovelace`
 3. Click **Add**
 4. Search for "Pool Controller Dashboard" and install
-5. HACS will automatically register the resource (`/hacsfiles/pool_controller_dashboard/main.js`)
+5. HACS will automatically register the resource (`/hacsfiles/pool_controller_dashboard_frontend/main.js`)
 6. Add the card to your dashboard:
    - **Type**: `custom:pc-pool-controller`
    - **Config**: Use "Automatically load from instance" in the card editor
+
 
 **Features:**
 - 📊 Real-time water quality monitoring (pH, Chlorine, Salt, TDS)
@@ -123,7 +124,7 @@ If you prefer manual installation without HACS:
 
 ### Step 2: Configuration Flow
 
-The integration uses an interactive 6-step wizard:
+The integration uses an interactive 8-step wizard:
 
 #### Step 1: Basic Information
 - **Name**: Display name for your pool (e.g., "Whirlpool Demo")
@@ -131,7 +132,8 @@ The integration uses an interactive 6-step wizard:
 - **Demo Mode**: Enable to test without actual devices
 
 #### Step 2: Switches & Power Sensors
-- **Main Switch**: Main pump switch entity (required)
+- **Main Switch**: Power supply / main relay (required)
+- **Pump Switch**: Circulation pump (optional; if omitted, the integration uses the main switch)
 - **Auxiliary Heating Switch**: Secondary heater (optional)
 - **Power Sensors**: 
   - Main power sensor (kW) for heating calculations
@@ -140,24 +142,31 @@ The integration uses an interactive 6-step wizard:
 #### Step 3: Water Quality Sensors (Optional)
 Configure only if using ESP32 + Blueriiot:
 - **Water Temperature Sensor**: Current pool water temperature
-- **Outdoor Temperature Sensor**: For frost protection logic
-- **Frost Protection Tuning** (optional): duty-cycle settings and a quiet-hours emergency threshold
 - **pH Sensor**: Water pH value (0-14)
 - **Chlorine Sensor**: Redox/ORP value (mV)
 - **Salt Sensor**: Salt concentration (g/L) - optional
 - **Conductivity Sensor**: µS/cm - optional
 
-#### Step 4: Calendar & Quiet Hours
+#### Step 4: Temperature Control (Thermostat)
+- **Target Temp**: Desired water temperature (persisted)
+- **Min/Max/Step**: UI bounds for the thermostat entity
+- **Tolerances**: Simple hysteresis (cold/hot tolerance)
+
+#### Step 5: Frost Protection
+- **Outdoor Temperature Sensor**: For frost protection logic
+- **Frost Protection Tuning** (optional): duty-cycle settings and a quiet-hours emergency threshold
+
+#### Step 6: Calendar & Quiet Hours
 - **Pool Calendar**: Calendar entity for operation schedule
 - **Holiday Calendar**: Calendar used to treat local holidays like weekends (weekend quiet hours apply)
 - **Quiet Hours (Weekdays)**: Start/end times (e.g., 22:00 - 07:00)
 - **Quiet Hours (Weekends)**: Start/end times
 
-#### Step 5: Filter Settings
+#### Step 7: Filter Settings
 - **Automatic filtering**: Enable/disable automatic filter cycles
 - **Filter Interval**: Minutes between automatic filter cycles (default: 720 = 12 hours)
 
-#### Step 6: PV Solar Integration
+#### Step 8: PV Solar Integration
 - **PV Surplus Sensor**: Entity measuring excess solar production (W)
 - **PV ON Threshold**: Turns pump/heating on when PV power >= threshold (default: 1000W)
 - **PV OFF Threshold**: Turns pump/heating off when PV power <= threshold (default: 500W)
@@ -180,7 +189,12 @@ Configure only if using ESP32 + Blueriiot:
 | Frost Severe Interval | 120 | 1-1440 min | Severe duty-cycle interval (minutes) |
 | Frost Severe Run | 10 | 0-240 min | Run time within the severe interval (minutes) |
 | Quiet Override Below | -8°C | -30 to 0°C | During quiet hours frost cycling stays off unless outdoor temp is <= this value |
-| Heating Temp Target | 28°C | 20-40°C | Target water temperature |
+| Heating Temp Target | 38°C | 10-40°C | Target water temperature (persisted) |
+| Min Temp | 10°C | - | Climate min temp bound |
+| Max Temp | 40°C | - | Climate max temp bound |
+| Temperature Step | 0.5°C | - | Climate target temperature step |
+| Cold Tolerance | 1.0°C | - | Hysteresis: turn ON below (target - cold) |
+| Hot Tolerance | 0.0°C | - | Hysteresis: keep ON until (target + hot) |
 | Quick Chlorine Duration | 5 | 1-30 min | Duration of chlorine boost |
 | PV ON Threshold | 1000 | 0-20000 W | Enable PV operation above this surplus |
 | PV OFF Threshold | 500 | 0-20000 W | Disable PV operation below this surplus |
@@ -201,7 +215,8 @@ Entity IDs depend on your instance name, but the integration uses stable suffix 
 | `binary_sensor.<pool>_frost_active` | True when the frost duty-cycle currently requests the pump to run |
 | `binary_sensor.<pool>_in_quiet` | Quiet hours active |
 | `binary_sensor.<pool>_pv_allows` | PV surplus available for operation |
-| `binary_sensor.<pool>_should_main_on` | Main pump should be running |
+| `binary_sensor.<pool>_should_main_on` | Power supply should be on |
+| `binary_sensor.<pool>_should_pump_on` | Circulation pump should be on |
 | `binary_sensor.<pool>_low_chlor` | Chlorine below recommended level |
 | `binary_sensor.<pool>_ph_alert` | pH outside acceptable range |
 | `binary_sensor.<pool>_tds_high` | TDS too high (water change needed) |
@@ -259,7 +274,8 @@ All three timer sensors use **minutes remaining** as their state (unit: `min`).
 ### Switches
 | Entity | Description |
 |--------|-------------|
-| `switch.<pool>_main` | Main pump on/off |
+| `switch.<pool>_main` | Power supply / main relay on/off |
+| `switch.<pool>_pump` | Circulation pump on/off (may point to the same physical entity as `main` if not configured separately) |
 | `switch.<pool>_aux` | Auxiliary heater on/off |
 
 ### Climate
@@ -697,8 +713,8 @@ automation:
 ### Useful Diagnostic Sensors
 - `sensor.pool_next_start_mins` - When next operation starts
 - `sensor.pool_next_event` - Next calendar event
-- `binary_sensor.pool_should_main_on` - What *should* be running
-- `sensor.pool_filter_cycles` - Maintenance indicator
+- `binary_sensor.pool_should_main_on` - Power supply requested
+- `binary_sensor.pool_should_pump_on` - Pump requested
 
 Enable debug logging in Home Assistant:
 ```yaml
@@ -729,14 +745,14 @@ All entity names, buttons, and configuration labels are translated automatically
 - Check entity IDs spelling (case-sensitive)
 
 ### Pool not turning on
-- Check `binary_sensor.pool_should_main_on` state
+- Check `binary_sensor.pool_should_main_on` and `binary_sensor.pool_should_pump_on`
 - Review quiet hours and calendar events
 - Verify frost protection not active
 - Check `sensor.pool_status` for current state
 
 ### Heating not working
 - Verify power sensor is configured and reporting
-- Check heating thermostat target (default 28°C)
+- Check heating thermostat target (default 38°C)
 - Ensure calendar event is active (if required)
 - Review PV thresholds if solar-dependent
 

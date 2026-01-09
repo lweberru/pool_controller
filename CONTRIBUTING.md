@@ -13,6 +13,7 @@ Wenn du Änderungen machst, prüfe immer, ob der Cross-Repo Vertrag betroffen is
 - Der Coordinator ist „authoritative“: Schaltlogik/State-Machine gehört in den Coordinator; Entities toggeln keine Hardware „nebenbei“.
 - Nach Zustandsänderungen immer `await coordinator.async_request_refresh()` auslösen.
 - Übersetzungen: Änderungen an Entities/Strings müssen in allen Sprachen gepflegt werden: `custom_components/pool_controller/translations/{de,en,es,fr}.json`.
+- Config-/Options-Flow UX: Jeder Tab/Step braucht eine verständliche Kurzbeschreibung (`description`) und jedes Feld eine Erklärung (`data_description`) – in `strings.json` *und* in allen Sprachen (`de/en/es/fr`).
 
 ## Release/Test-Workflow (kein lokales HA erforderlich)
 Dieses Projekt wird **über HACS via GitHub Releases** deployt und getestet.
@@ -33,6 +34,7 @@ Konkrete Schritte: siehe [Release-Checkliste in AGENTS.md](AGENTS.md).
 - Keine Breaking Changes an `unique_id`-Suffixen ohne sehr guten Grund + Migration/Kommunikation.
 - Änderungen an Timern/Services müssen Multi-Instanz-Routing über `climate_entity`/`config_entry_id` berücksichtigen.
 - Neue Entities/Keys: `coordinator.data` + Entity-Setup + Übersetzungen (de/en/es/fr) vollständig.
+- Config-/Options-Flow Änderungen: Step-`description` und Feld-`data_description` vollständig (inkl. Options-Flow), in `strings.json` sowie `de/en/es/fr`.
 - Release-Fähigkeit: `manifest.json` Version-Bump ist Teil der Änderung, wenn HACS-Deploy geplant ist.
 
 ## Dateien, die du dir zuerst ansehen solltest
