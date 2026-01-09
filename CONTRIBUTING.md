@@ -24,6 +24,18 @@ Dieses Projekt wird **über HACS via GitHub Releases** deployt und getestet.
 
 Konkrete Schritte: siehe [Release-Checkliste in AGENTS.md](AGENTS.md).
 
+## Lokale Dev-Umgebung (optional, für schnelleres Feedback)
+Wenn du schneller `homeassistant.*` Imports/Type-Hints und statische Fehler sehen willst (ohne eine Home-Assistant-Instanz laufen zu lassen), nutze die Dev-Abhängigkeiten.
+
+- Variante B (empfohlen): `pytest-homeassistant-custom-component`
+	- Installiert passende Home-Assistant-Pakete/Dependencies für Tests/Analyse.
+	- Setup:
+		- `python3 -m venv .venv`
+		- `source .venv/bin/activate`
+		- `pip install -r requirements-dev.txt`
+
+Falls die Installation lokal wegen Python-Version/Native-Deps hakt: nutze den vorhandenen Devcontainer in `.devcontainer/` (läuft auf dem `homeassistant/home-assistant:stable` Image und bringt eine kompatible Umgebung mit).
+
 ## Was in einen PR gehört
 - Klare Beschreibung (Motivation + erwartetes Verhalten)
 - Falls neue/umbenannte Entities/Keys: Hinweis, ob Frontend-Mapping/Auto-Discovery betroffen ist

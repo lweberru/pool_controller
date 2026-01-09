@@ -1,0 +1,6 @@
+# Dev dependencies for local type checking and tests (no Home Assistant instance required)
+# Install into a virtualenv in this repo, e.g.:
+#   python3 -m venv .venv
+#   source .venv/bin/activate
+#   pip install -r requirements-dev.txt
+pytest-homeassistant-custom-component

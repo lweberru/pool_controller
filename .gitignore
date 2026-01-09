@@ -8,3 +8,6 @@ config/
 __pycache__/
 *.py[cod]
 .DS_Store
+
+# Python virtual environments
+.venv/
