@@ -236,6 +236,7 @@
       }
     },
     "binary_sensor": {
+      "maintenance_active": { "name": "Wartung aktiv" },
       "is_we_holiday": { "name": "Wochenende oder Feiertag" },
       "frost_danger": { "name": "Frostgefahr" },
       "frost_active": { "name": "Frostschutz aktiv" },
@@ -287,7 +288,8 @@
         "state": {
           "normal": "Normal",
           "paused": "Pause",
-          "frost_protection": "Frostschutz"
+          "frost_protection": "Frostschutz",
+          "maintenance": "Wartung"
         }
       },
       "tds_status": {

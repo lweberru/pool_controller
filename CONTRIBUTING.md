@@ -1,0 +1,42 @@
+# Contributing (pool_controller)
+
+Danke fürs Mithelfen!
+
+## Repos & Scope
+- Backend-Integration: `pool_controller` (dieses Repo)
+- Frontend-Card: `pool_controller_dashboard_frontend` (separates Repo)
+
+Wenn du Änderungen machst, prüfe immer, ob der Cross-Repo Vertrag betroffen ist (siehe [AGENTS.md](AGENTS.md)).
+
+## Wichtige Regeln (projektspezifisch)
+- `unique_id`-Suffixe sind Teil des API/UX-Vertrags mit dem Frontend (Auto-Discovery via Entity Registry). Suffixe nicht ohne sehr guten Grund ändern.
+- Der Coordinator ist „authoritative“: Schaltlogik/State-Machine gehört in den Coordinator; Entities toggeln keine Hardware „nebenbei“.
+- Nach Zustandsänderungen immer `await coordinator.async_request_refresh()` auslösen.
+- Übersetzungen: Änderungen an Entities/Strings müssen in allen Sprachen gepflegt werden: `custom_components/pool_controller/translations/{de,en,es,fr}.json`.
+
+## Release/Test-Workflow (kein lokales HA erforderlich)
+Dieses Projekt wird **über HACS via GitHub Releases** deployt und getestet.
+
+- Version bump: `custom_components/pool_controller/manifest.json` → `version`
+- Release: GitHub Release erstellen, **Tag-Name = `vX.Y.Z`** (Datei-Version bleibt `X.Y.Z`)
+- Test: in Home Assistant via HACS updaten
+
+Konkrete Schritte: siehe [Release-Checkliste in AGENTS.md](AGENTS.md).
+
+## Was in einen PR gehört
+- Klare Beschreibung (Motivation + erwartetes Verhalten)
+- Falls neue/umbenannte Entities/Keys: Hinweis, ob Frontend-Mapping/Auto-Discovery betroffen ist
+- Übersetzungen in `de/en/es/fr` vollständig
+
+## Akzeptanzkriterien (kurz)
+- Breaking Changes nur in Major-Releases (und nur mit Migrationshinweisen/Kommunikation).
+- Keine Breaking Changes an `unique_id`-Suffixen ohne sehr guten Grund + Migration/Kommunikation.
+- Änderungen an Timern/Services müssen Multi-Instanz-Routing über `climate_entity`/`config_entry_id` berücksichtigen.
+- Neue Entities/Keys: `coordinator.data` + Entity-Setup + Übersetzungen (de/en/es/fr) vollständig.
+- Release-Fähigkeit: `manifest.json` Version-Bump ist Teil der Änderung, wenn HACS-Deploy geplant ist.
+
+## Dateien, die du dir zuerst ansehen solltest
+- `custom_components/pool_controller/coordinator.py`
+- `custom_components/pool_controller/__init__.py` (Services)
+- `custom_components/pool_controller/const.py` (Keys/Defaults)
+- `custom_components/pool_controller/translations/`

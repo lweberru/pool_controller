@@ -77,6 +77,10 @@ OPT_KEY_PAUSE_DURATION = "pause_duration"  # minutes
 # Next scheduled auto-filter start
 OPT_KEY_FILTER_NEXT = "next_filter_start"
 
+# Maintenance mode (hard lockout)
+# When active, all automation is suppressed (including frost protection).
+OPT_KEY_MAINTENANCE_ACTIVE = "maintenance_active"
+
 # Alle Standardwerte (Defaults)
 DEFAULT_NAME = "Whirlpool Demo"
 DEFAULT_VOL = 1000

@@ -14,6 +14,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self._last_should_main_on = None
         self._last_should_aux_on = None
         self.aux_enabled = True  # Master-Enable für Zusatzheizung (default: aktiviert)
+        self.maintenance_active = False
         # Wiederherstellung von Timern aus entry.options (falls vorhanden)
         self.manual_timer_until = None
         self.manual_timer_type = None
@@ -27,6 +28,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
         self._did_migrate_timers = False
         if entry and entry.options:
+            self.maintenance_active = bool(entry.options.get(OPT_KEY_MAINTENANCE_ACTIVE, False))
             # New timers
             mu = entry.options.get(OPT_KEY_MANUAL_UNTIL)
             if mu:
@@ -272,10 +274,36 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         except Exception:
             _LOGGER.exception("Fehler beim Stoppen von filter")
 
+    async def set_maintenance(self, active: bool):
+        """Aktiviert/deaktiviert Wartung (Hard-Lockout) und persistiert den Zustand."""
+        active = bool(active)
+        if active == bool(getattr(self, "maintenance_active", False)):
+            return
+
+        self.maintenance_active = active
+        try:
+            new_opts = {**self.entry.options}
+            if active:
+                new_opts[OPT_KEY_MAINTENANCE_ACTIVE] = True
+                _LOGGER.warning(
+                    "Wartung aktiviert (%s): Automatik inkl. Frostschutz ist deaktiviert.",
+                    self.entry.entry_id,
+                )
+            else:
+                new_opts.pop(OPT_KEY_MAINTENANCE_ACTIVE, None)
+                _LOGGER.info("Wartung deaktiviert (%s): Automatik läuft wieder.", self.entry.entry_id)
+            await self.hass.config_entries.async_update_entry(self.entry, options=new_opts)
+        except Exception:
+            _LOGGER.exception("Fehler beim Speichern von Wartungsmodus")
+
     async def _async_update_data(self):
         try:
             now = dt_util.now()
             conf = {**self.entry.data, **self.entry.options}
+
+            maintenance_active = bool(conf.get(OPT_KEY_MAINTENANCE_ACTIVE, False))
+            # Keep attribute in sync so other entities (e.g. climate) can read it.
+            self.maintenance_active = maintenance_active
 
             # First run: migrate legacy timer options (best effort)
             await self.async_migrate_legacy_timers()
@@ -568,6 +596,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
             in_quiet = _in_quiet_period(conf)
 
+            # Wartung = Hard-Lockout: keine Automatik-Aktionen (auch kein Frostschutz)
+            if maintenance_active:
+                frost_active = False
+
             # Optional optimization: In severe frost, force one run shortly before quiet hours start
             # (quiet_start - frost_run_mins .. quiet_start). This reduces the chance of needing runs inside quiet hours.
             if frost_danger and frost_is_severe and (not in_quiet) and frost_run_mins > 0:
@@ -599,7 +631,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 next_filter_mins = max(0, round((self.next_filter_start - now).total_seconds() / 60))
 
             # Start calendar-driven bathing: if event is ongoing, ensure manual timer active
-            if cal_data.get("start") and cal_data.get("end"):
+            # (in Wartung deaktiviert)
+            if (not maintenance_active) and cal_data.get("start") and cal_data.get("end"):
                 if now >= cal_data["start"] and now < cal_data["end"]:
                     remaining_min = max(1, int((cal_data["end"] - now).total_seconds() / 60))
                     if (not pause_active) and (not manual_active):
@@ -608,8 +641,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                         manual_active = self.manual_timer_until is not None and now < self.manual_timer_until and self.manual_timer_type in ("bathing", "chlorine", "filter")
                         manual_mins = _mins_left(self.manual_timer_until) if manual_active else 0
 
-            # Auto-start filter when next_filter_start reached
-            if enable_auto_filter and getattr(self, "next_filter_start", None) and now >= self.next_filter_start and (not auto_filter_active) and (not pause_active):
+            # Auto-start filter when next_filter_start reached (in Wartung deaktiviert)
+            if (not maintenance_active) and enable_auto_filter and getattr(self, "next_filter_start", None) and now >= self.next_filter_start and (not auto_filter_active) and (not pause_active):
                 pv_check = pv_allows or not conf.get(CONF_ENABLE_PV_OPTIMIZATION, False)
                 if in_quiet:
                     shifted = _quiet_end_for(now, conf)
@@ -631,6 +664,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             is_manual_filter = manual_active and self.manual_timer_type == "filter"
 
             data = {
+                "maintenance_active": maintenance_active,
                 "water_temp": round(water_temp, 1) if water_temp else None,
                 "ph_val": round(ph_val, 2) if ph_val else None,
                 "chlor_val": int(chlor_val) if chlor_val else None,
@@ -659,8 +693,6 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "pause_timer_active": pause_active,
                 "is_bathing": is_bathing,
                 "next_filter_mins": next_filter_mins,
-                # Aux-Heizung einschalten, wenn aktiviert UND Temperatur signifikant unter Ziel liegt
-                "should_aux_on": conf.get(CONF_ENABLE_AUX_HEATING, False) and (delta_t > 1.0),
                 # PV power reading (W) - used for UI display/more-info in the dashboard card
                 "pv_power": pv_raw,
                 "pv_allows": pv_allows,
@@ -668,16 +700,24 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "main_power": round(main_power, 1) if main_power is not None else None,
                 "aux_power": round(aux_power, 1) if aux_power is not None else None,
                 "should_main_on": (
-                    (frost_active)
-                    or (not pause_active and (
-                        is_bathing
-                        or is_chlorinating
-                        or (is_manual_filter and not in_quiet)
-                        or (auto_filter_active and not in_quiet)
-                        or (next_start_mins is not None and next_start_mins == 0)
-                        or (pv_allows and not in_quiet)
-                    ))
-                )
+                    (not maintenance_active) and (
+                        (frost_active)
+                        or (not pause_active and (
+                            is_bathing
+                            or is_chlorinating
+                            or (is_manual_filter and not in_quiet)
+                            or (auto_filter_active and not in_quiet)
+                            or (next_start_mins is not None and next_start_mins == 0)
+                            or (pv_allows and not in_quiet)
+                        ))
+                    )
+                ),
+                # Aux-Heizung einschalten, wenn aktiviert UND Temperatur signifikant unter Ziel liegt
+                "should_aux_on": (
+                    (not maintenance_active)
+                    and conf.get(CONF_ENABLE_AUX_HEATING, False)
+                    and (delta_t > 1.0)
+                ),
             }
 
             # After computing desired states, ensure physical switches follow the desired state
@@ -696,7 +736,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                             await self.hass.services.async_call("switch", "turn_on", {"entity_id": main_switch_id})
                     else:
                         # don't turn off main while bathing
-                        if not is_bathing and not demo and main_switch_id:
+                        if (maintenance_active or not is_bathing) and not demo and main_switch_id:
                             await self.hass.services.async_call("switch", "turn_off", {"entity_id": main_switch_id})
                     self._last_should_main_on = desired_main
 

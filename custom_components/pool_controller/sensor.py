@@ -48,6 +48,7 @@ class PoolStatusSensor(PoolBaseSensor):
     _attr_translation_key = "status"
     @property
     def native_value(self):
+        if self.coordinator.data.get("maintenance_active"): return "maintenance"
         if self.coordinator.data.get("frost_danger"): return "frost_protection"
         if self.coordinator.data.get("pause_timer_active"): return "paused"
         return "normal"

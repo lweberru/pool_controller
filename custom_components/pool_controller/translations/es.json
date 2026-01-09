@@ -229,4 +229,22 @@
       }
     }
   }
+  ,
+  "entity": {
+    "binary_sensor": {
+      "maintenance_active": { "name": "Modo de mantenimiento" }
+    }
+  },
+  "state": {
+    "sensor": {
+      "status": {
+        "state": {
+          "normal": "Normal",
+          "paused": "Pausa",
+          "frost_protection": "Protección contra heladas",
+          "maintenance": "Mantenimiento"
+        }
+      }
+    }
+  }
 }

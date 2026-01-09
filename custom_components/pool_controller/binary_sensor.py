@@ -5,6 +5,7 @@ from .const import DOMAIN, MANUFACTURER
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
     async_add_entities([
+        PoolBinary(coordinator, "maintenance_active", "Wartung aktiv", BinarySensorDeviceClass.PROBLEM),
         PoolBinary(coordinator, "is_we_holiday", "Wochenende oder Feiertag", None),
         PoolBinary(coordinator, "frost_danger", "Frostgefahr", BinarySensorDeviceClass.COLD),
         PoolBinary(coordinator, "frost_active", "Frostschutz aktiv", BinarySensorDeviceClass.COLD),

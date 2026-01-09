@@ -24,6 +24,8 @@ SERVICE_START_FILTER = "start_filter"
 SERVICE_STOP_FILTER = "stop_filter"
 SERVICE_START_CHLORINE = "start_chlorine"
 SERVICE_STOP_CHLORINE = "stop_chlorine"
+SERVICE_START_MAINTENANCE = "start_maintenance"
+SERVICE_STOP_MAINTENANCE = "stop_maintenance"
 
 TARGET_SCHEMA = {
     vol.Optional("climate_entity"): cv.entity_id,
@@ -109,19 +111,19 @@ def _ensure_services_registered(hass: HomeAssistant):
     if hass.data[DOMAIN].get(_SERVICES_REGISTERED_KEY):
         return
 
-    def _warn_no_target(service_name: str):
+    def _warn_no_target(service_name: str, call):
         coords = list(_iter_coordinators(hass))
         _LOGGER.warning(
             "pool_controller.%s: no target instance resolved (provide climate_entity/controller_entity or config_entry_id). instances=%s payload_keys=%s",
             service_name,
             len(coords),
-            sorted(list((call.data or {}).keys())),
+            sorted(list((call.data or {}).keys())) if call else [],
         )
 
     async def handle_start_pause(call):
         coordinator = _resolve_coordinator(hass, call)
         if not coordinator:
-            _warn_no_target("start_pause")
+            _warn_no_target("start_pause", call)
             return
         duration = call.data.get("duration_minutes", 60)
         await coordinator.activate_pause(minutes=duration)
@@ -130,7 +132,7 @@ def _ensure_services_registered(hass: HomeAssistant):
     async def handle_stop_pause(call):
         coordinator = _resolve_coordinator(hass, call)
         if not coordinator:
-            _warn_no_target("stop_pause")
+            _warn_no_target("stop_pause", call)
             return
         await coordinator.deactivate_pause()
         await coordinator.async_request_refresh()
@@ -138,7 +140,7 @@ def _ensure_services_registered(hass: HomeAssistant):
     async def handle_start_bathing(call):
         coordinator = _resolve_coordinator(hass, call)
         if not coordinator:
-            _warn_no_target("start_bathing")
+            _warn_no_target("start_bathing", call)
             return
         duration = call.data.get("duration_minutes", 60)
         await coordinator.activate_manual_timer(timer_type="bathing", minutes=duration)
@@ -147,7 +149,7 @@ def _ensure_services_registered(hass: HomeAssistant):
     async def handle_stop_bathing(call):
         coordinator = _resolve_coordinator(hass, call)
         if not coordinator:
-            _warn_no_target("stop_bathing")
+            _warn_no_target("stop_bathing", call)
             return
         await coordinator.deactivate_manual_timer(only_type="bathing")
         await coordinator.async_request_refresh()
@@ -155,7 +157,7 @@ def _ensure_services_registered(hass: HomeAssistant):
     async def handle_start_filter(call):
         coordinator = _resolve_coordinator(hass, call)
         if not coordinator:
-            _warn_no_target("start_filter")
+            _warn_no_target("start_filter", call)
             return
         duration = call.data.get("duration_minutes", 30)
         await coordinator.activate_manual_timer(timer_type="filter", minutes=duration)
@@ -164,7 +166,7 @@ def _ensure_services_registered(hass: HomeAssistant):
     async def handle_stop_filter(call):
         coordinator = _resolve_coordinator(hass, call)
         if not coordinator:
-            _warn_no_target("stop_filter")
+            _warn_no_target("stop_filter", call)
             return
         await coordinator.stop_filter()
         await coordinator.async_request_refresh()
@@ -172,7 +174,7 @@ def _ensure_services_registered(hass: HomeAssistant):
     async def handle_start_chlorine(call):
         coordinator = _resolve_coordinator(hass, call)
         if not coordinator:
-            _warn_no_target("start_chlorine")
+            _warn_no_target("start_chlorine", call)
             return
         duration = call.data.get("duration_minutes", 5)
         await coordinator.activate_manual_timer(timer_type="chlorine", minutes=duration)
@@ -181,9 +183,25 @@ def _ensure_services_registered(hass: HomeAssistant):
     async def handle_stop_chlorine(call):
         coordinator = _resolve_coordinator(hass, call)
         if not coordinator:
-            _warn_no_target("stop_chlorine")
+            _warn_no_target("stop_chlorine", call)
             return
         await coordinator.deactivate_manual_timer(only_type="chlorine")
+        await coordinator.async_request_refresh()
+
+    async def handle_start_maintenance(call):
+        coordinator = _resolve_coordinator(hass, call)
+        if not coordinator:
+            _warn_no_target("start_maintenance", call)
+            return
+        await coordinator.set_maintenance(True)
+        await coordinator.async_request_refresh()
+
+    async def handle_stop_maintenance(call):
+        coordinator = _resolve_coordinator(hass, call)
+        if not coordinator:
+            _warn_no_target("stop_maintenance", call)
+            return
+        await coordinator.set_maintenance(False)
         await coordinator.async_request_refresh()
 
     hass.services.async_register(
@@ -232,6 +250,19 @@ def _ensure_services_registered(hass: HomeAssistant):
         DOMAIN,
         SERVICE_STOP_CHLORINE,
         handle_stop_chlorine,
+        schema=STOP_SCHEMA,
+    )
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_START_MAINTENANCE,
+        handle_start_maintenance,
+        schema=STOP_SCHEMA,
+    )
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_STOP_MAINTENANCE,
+        handle_stop_maintenance,
         schema=STOP_SCHEMA,
     )
 

@@ -26,6 +26,10 @@ If your spa or pool is connected to a simple smart switch (on/off only), you los
 
 > **Complete UI Card available separately**: The beautiful dashboard card shown above is available as a HACS plugin at [lweberru/pool_controller_dashboard_frontend](https://github.com/lweberru/pool_controller_dashboard_frontend)
 
+## Contributing
+
+Development rules and release workflow (HACS via GitHub Releases): see [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ---
 
 ## Core Features

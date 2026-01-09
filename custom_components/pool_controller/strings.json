@@ -220,6 +220,9 @@
       }
     },
     "binary_sensor": {
+      "maintenance_active": {
+        "name": "Maintenance mode"
+      },
       "is_we_holiday": {
         "name": "Weekend/holiday"
       },
