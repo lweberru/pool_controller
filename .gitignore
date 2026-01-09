@@ -1,3 +1,4 @@
+custom_components/pool_controller/pool_controller_dashboard_frontend.code-workspace
 # Home Assistant
 config/
 *.db
