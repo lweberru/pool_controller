@@ -1,4 +1,5 @@
 import logging
+import re
 from datetime import timedelta, datetime
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
@@ -755,10 +756,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
             data = {
                 "maintenance_active": maintenance_active,
-                "water_temp": round(water_temp, 1) if water_temp else None,
-                "ph_val": round(ph_val, 2) if ph_val else None,
-                "chlor_val": int(chlor_val) if chlor_val else None,
-                "salt_val": round(salt_val, 1) if salt_val else None,
+                "water_temp": round(water_temp, 1) if water_temp is not None else None,
+                "ph_val": round(ph_val, 2) if ph_val is not None else None,
+                "chlor_val": int(chlor_val) if chlor_val is not None else None,
+                "salt_val": round(salt_val, 1) if salt_val is not None else None,
                 "tds_val": tds_val,
                 "tds_status": tds_status,
                 "tds_high": tds_high,
@@ -885,10 +886,30 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             raise UpdateFailed(err)
 
     def _get_float(self, eid):
-        if not eid: return None
+        if not eid:
+            return None
         state = self.hass.states.get(eid)
-        try: return float(state.state) if state and state.state not in ("unknown", "unavailable") else None
-        except: return None
+        if not state:
+            return None
+        raw = state.state
+        if raw in ("unknown", "unavailable", None):
+            return None
+
+        # Fast path: already a plain numeric string
+        try:
+            return float(raw)
+        except Exception:
+            pass
+
+        # More robust parsing: allow commas and strip units (best effort).
+        try:
+            s = str(raw).strip()
+            s = s.replace(",", ".")
+            # Keep digits, sign, decimal point, exponent (e/E)
+            s = re.sub(r"[^0-9eE+\-\.]", "", s)
+            return float(s) if s else None
+        except Exception:
+            return None
 
     async def _check_holiday(self, cal_id):
         if not cal_id: return False

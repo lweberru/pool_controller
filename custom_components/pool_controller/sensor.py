@@ -1,21 +1,26 @@
 from homeassistant.components.sensor import SensorEntity, SensorDeviceClass, SensorStateClass
+from homeassistant.const import EntityCategory
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import DOMAIN, MANUFACTURER
+
+
+_AUTO_STATE_CLASS = object()
 
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
     entities = [
         PoolStatusSensor(coordinator),
-        PoolChemSensor(coordinator, "ph_val", "pH-Wert", None, "mdi:ph"),
+        PoolChemSensor(coordinator, "ph_val", "pH-Wert", "pH", "mdi:ph"),
         PoolChemSensor(coordinator, "chlor_val", "Chlorgehalt", "mV", "mdi:pool"),
         PoolChemSensor(coordinator, "salt_val", "Salzgehalt", "g/L", "mdi:shaker"),
         PoolChemSensor(coordinator, "tds_val", "TDS", "ppm", "mdi:water-opacity"),
-        PoolChemSensor(coordinator, "tds_water_change_liters", "TDS Wasserwechsel", "L", "mdi:water-sync"),
-        PoolChemSensor(coordinator, "tds_water_change_percent", "TDS Wasserwechsel", "%", "mdi:water-percent"),
-        PoolChemSensor(coordinator, "ph_minus_g", "Ph- Aktion", "g", "mdi:pill"),
-        PoolChemSensor(coordinator, "ph_plus_g", "Ph+ Aktion", "g", "mdi:pill"),
-        PoolChemSensor(coordinator, "chlor_spoons", "Chlor Aktion", "Löffel", "mdi:spoon-sugar"),
-        PoolChemSensor(coordinator, "next_start_mins", "Nächster Start in", "min", "mdi:clock-start"),
+        # Recommendations (not measurements): keep units but do not set state_class.
+        PoolChemSensor(coordinator, "tds_water_change_liters", "TDS Wasserwechsel", "L", "mdi:water-sync", device_class=SensorDeviceClass.VOLUME, state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
+        PoolChemSensor(coordinator, "tds_water_change_percent", "TDS Wasserwechsel", "%", "mdi:water-percent", state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
+        PoolChemSensor(coordinator, "ph_minus_g", "Ph- Aktion", "g", "mdi:pill", device_class=SensorDeviceClass.WEIGHT, state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
+        PoolChemSensor(coordinator, "ph_plus_g", "Ph+ Aktion", "g", "mdi:pill", device_class=SensorDeviceClass.WEIGHT, state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
+        PoolChemSensor(coordinator, "chlor_spoons", "Chlor Aktion", "Löffel", "mdi:spoon-sugar", state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
+        PoolChemSensor(coordinator, "next_start_mins", "Nächster Start in", "min", "mdi:clock-start", device_class=SensorDeviceClass.DURATION),
         PoolTimeSensor(coordinator, "next_event", "Nächster Event Start")
     ]
     # Timer/Status sensors
@@ -24,7 +29,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolTimerSensor(coordinator, "manual_timer_mins", "mdi:timer", kind="manual"),
         PoolTimerSensor(coordinator, "auto_filter_timer_mins", "mdi:timer-cog", kind="auto_filter"),
         PoolTimerSensor(coordinator, "pause_timer_mins", "mdi:pause-circle", kind="pause"),
-        PoolChemSensor(coordinator, "next_filter_mins", "Nächster Filter in", "min", "mdi:clock-start"),
+        PoolChemSensor(coordinator, "next_filter_mins", "Nächster Filter in", "min", "mdi:clock-start", device_class=SensorDeviceClass.DURATION),
         PoolTimeSensor(coordinator, "next_event_end", "Nächster Event Ende"),
         PoolTextSensor(coordinator, "next_event_summary", "Nächster Event Name"),
     ])
@@ -65,12 +70,29 @@ class PoolTdsStatusSensor(PoolBaseSensor):
         return status if status else "unknown"
 
 class PoolChemSensor(PoolBaseSensor):
-    def __init__(self, coordinator, key, name, unit, icon):
+    def __init__(
+        self,
+        coordinator,
+        key,
+        name,
+        unit,
+        icon,
+        *,
+        device_class=None,
+        state_class=_AUTO_STATE_CLASS,
+        entity_category=None,
+    ):
         super().__init__(coordinator)
         self._key = key
         self._attr_translation_key = key
         self._attr_native_unit_of_measurement = unit
         self._attr_icon = icon
+        self._attr_device_class = device_class
+        self._attr_entity_category = entity_category
+        # Auto-default: treat numeric unit-based sensors as measurements unless explicitly disabled.
+        if state_class is _AUTO_STATE_CLASS:
+            state_class = SensorStateClass.MEASUREMENT if unit is not None else None
+        self._attr_state_class = state_class  # may be None (e.g. recommendations)
         self._attr_unique_id = f"{coordinator.entry.entry_id}_{key}"
     @property
     def native_value(self): return self.coordinator.data.get(self._key)
@@ -114,6 +136,7 @@ class PoolTextSensor(PoolBaseSensor):
 class PoolTimerSensor(PoolBaseSensor):
     _attr_native_unit_of_measurement = "min"
     _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_device_class = SensorDeviceClass.DURATION
 
     def __init__(self, coordinator, key, icon, kind: str):
         super().__init__(coordinator)
