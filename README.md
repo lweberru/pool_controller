@@ -137,7 +137,7 @@ If you prefer manual installation without HACS:
 
 ### Step 2: Configuration Flow
 
-The integration uses an interactive 8-step wizard:
+The integration uses a guided wizard (9–10 steps depending on sanitizer mode):
 
 #### Step 1: Basic Information
 - **Name**: Display name for your pool (e.g., "Whirlpool Demo")
@@ -160,26 +160,32 @@ Configure only if using ESP32 + Blueriiot:
 - **Salt Sensor**: Salt concentration (g/L) - optional
 - **Conductivity Sensor**: µS/cm - optional
 
-#### Step 4: Temperature Control (Thermostat)
+#### Step 4: Sanitizer / Disinfection
+Pool Controller supports different disinfection styles and adapts some water-quality interpretation accordingly.
+
+- **Sanitizer Mode**: `chlorine`, `saltwater`, or `mixed` (salt + chlorine)
+- **Step 4b (Saltwater/Mixed only)**: **Target Salt (g/L)** (used as a baseline for effective TDS)
+
+#### Step 5: Temperature Control (Thermostat)
 - **Target Temp**: Desired water temperature (persisted)
 - **Min/Max/Step**: UI bounds for the thermostat entity
 - **Tolerances**: Simple hysteresis (cold/hot tolerance)
 
-#### Step 5: Frost Protection
+#### Step 6: Frost Protection
 - **Outdoor Temperature Sensor**: For frost protection logic
 - **Frost Protection Tuning** (optional): duty-cycle settings and a quiet-hours emergency threshold
 
-#### Step 6: Calendar & Quiet Hours
+#### Step 7: Calendar & Quiet Hours
 - **Pool Calendar**: Calendar entity for operation schedule
 - **Holiday Calendar**: Calendar used to treat local holidays like weekends (weekend quiet hours apply)
 - **Quiet Hours (Weekdays)**: Start/end times (e.g., 22:00 - 07:00)
 - **Quiet Hours (Weekends)**: Start/end times
 
-#### Step 7: Filter Settings
+#### Step 8: Filter Settings
 - **Automatic filtering**: Enable/disable automatic filter cycles
 - **Filter Interval**: Minutes between automatic filter cycles (default: 720 = 12 hours)
 
-#### Step 8: PV Solar Integration
+#### Step 9: PV Solar Integration
 - **PV Surplus Sensor**: Entity measuring excess solar production (W)
 - **PV ON Threshold**: Turns pump/heating on when PV power >= threshold (default: 1000W)
 - **PV OFF Threshold**: Turns pump/heating off when PV power <= threshold (default: 500W)
@@ -191,6 +197,8 @@ Configure only if using ESP32 + Blueriiot:
 | Setting | Default | Range | Notes |
 |---------|---------|-------|-------|
 | Water Volume | 1000 | 100-10000 L | Used for pH/Chlorine dosing calculations |
+| Sanitizer Mode | chlorine | chlorine / saltwater / mixed | Affects how TDS is interpreted (effective TDS for saltwater/mixed) |
+| Target Salt (g/L) | 4.0 | 0-10 g/L | Only used for saltwater/mixed; baseline for effective TDS |
 | Filter Interval | 720 | 60-10080 min | Time between automatic filter cycles |
 | Filter Duration | 30 | 5-480 min | How long each filter cycle runs |
 | Bathing Duration | 60 | 5-480 min | Default bathing session length |
@@ -243,11 +251,13 @@ Entity IDs depend on your instance name, but the integration uses stable suffix 
 | `sensor.<pool>_status` | Enum | Current state: `normal`, `paused`, `frost_protection` |
 | `sensor.<pool>_run_reason` | Enum | Why the pool is running right now: `idle`, `bathing`, `chlorine`, `filter`, `preheat`, `pv`, `frost`, `pause`, `maintenance` |
 | `sensor.<pool>_heat_reason` | Enum | Why heating is allowed/active: `off`, `disabled`, `bathing`, `preheat`, `pv` |
+| `sensor.<pool>_sanitizer_mode` | Enum | Disinfection style: `chlorine`, `saltwater`, `mixed` |
 | `sensor.<pool>_tds_status` | Enum | Water quality assessment (backend-derived) |
 | `sensor.<pool>_ph_val` | Float | Water pH (0-14) |
 | `sensor.<pool>_chlor_val` | Float | Chlorine/ORP in mV |
 | `sensor.<pool>_salt_val` | Float | Salt concentration in g/L (optional) |
 | `sensor.<pool>_tds_val` | Integer | Total Dissolved Solids (TDS) in ppm (optional) |
+| `sensor.<pool>_tds_effective` | Integer | Effective TDS in ppm (saltwater/mixed only; salt baseline subtracted) |
 | `sensor.<pool>_tds_water_change_liters` | Integer | Recommended water change volume (liters) |
 | `sensor.<pool>_tds_water_change_percent` | Integer | Recommended water change (%) |
 | `sensor.<pool>_ph_minus_g` | Float | Recommended pH- dosage in grams |
@@ -544,6 +554,19 @@ chlorine_spoons = round((700 - chlor_mV) / 100) / 4 × (volume_L / 1000)
 - ⚡ Chlorine formula calibrated for typical granular chlorine dosing (adjust if using liquid/tablet forms)
 - 🔧 For irregular shapes, fill from empty and use water meter reading
 
+#### Sanitizer mode (chlorine / saltwater / mixed)
+
+Pool Controller can run in different disinfection modes:
+
+- `chlorine`: classic chlorine-based pool/spa; water-quality interpretation uses the raw (derived) TDS.
+- `saltwater`: salt chlorinator systems; conductivity/TDS is dominated by salt, so Pool Controller computes an **effective TDS** value (approx. non-salt dissolved solids).
+- `mixed`: saltwater + chlorine dosing; also uses **effective TDS**.
+
+The selected mode is exposed as:
+- `sensor.<pool>_sanitizer_mode`
+
+If you upgrade from an older version: the legacy boolean `enable_saltwater` is still recognized for backward compatibility, but the preferred configuration is `sanitizer_mode`.
+
 #### TDS (Total Dissolved Solids) & Water Change Recommendation
 
 If you provide a **conductivity sensor** (typically from Blueriiot), Pool Controller derives **TDS in ppm** and recommends how much water to replace to reduce TDS back toward a target level.
@@ -559,9 +582,24 @@ tds_ppm = round(conductivity_uS_cm × 0.64)
 This value is exposed as:
 - `sensor.<pool>_tds_val` (ppm)
 
+##### 1b) Effective TDS (saltwater/mixed)
+
+In `saltwater` / `mixed` mode, raw conductivity/TDS is mostly reflecting the intended salt level.
+To avoid permanently showing “too high”, Pool Controller computes:
+
+```
+salt_baseline_ppm = target_salt_g_l × 1000
+tds_effective = max(0, tds_val - salt_baseline_ppm)
+```
+
+This value is exposed as:
+- `sensor.<pool>_tds_effective` (ppm)
+
+All status/alerting and water-change recommendations use **effective TDS** when available (otherwise they fall back to raw `tds_val`).
+
 ##### 2) TDS status and alerting
 
-Based on the derived ppm value, the integration sets a status and a binary alert:
+Based on the ppm value used for maintenance (effective TDS when available), the integration sets a status and a binary alert:
 
 - `sensor.<pool>_tds_status` (enum): `optimal`, `good`, `high`, `critical`, `urgent`
 - `binary_sensor.<pool>_tds_high`: `on` when water change is needed
@@ -580,10 +618,10 @@ To estimate how much water needs to be replaced to bring TDS down, the integrati
 
 - Target TDS: `1200 ppm`
 
-Formula:
+Formula (uses the maintenance TDS value: effective when available, otherwise raw):
 
 ```
-water_change_liters = round(volume_L × (tds_ppm - target_ppm) / tds_ppm)   [only when tds_ppm > target_ppm]
+water_change_liters = round(volume_L × (tds_maint_ppm - target_ppm) / tds_maint_ppm)   [only when tds_maint_ppm > target_ppm]
 water_change_percent = round((water_change_liters / volume_L) × 100)
 ```
 
