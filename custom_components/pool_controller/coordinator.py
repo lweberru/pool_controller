@@ -486,8 +486,15 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 chlor_spoons = 0
 
             # 3. Kalender & Aufheizzeit
-            # Heizung-Leistung: falls ein Power-Sensor konfiguriert ist, verwenden, sonst Fallback 3000W
-            power_w = int(main_power) if main_power and main_power > 0 else 3000
+            # Heizleistung ist eine Konstante (W) und darf NICHT aus einem Live-Pumpen-Power-Sensor abgeleitet werden.
+            # Sonst wird die Preheat-Berechnung massiv falsch und startet u.U. Tage zu früh.
+            power_w = None
+            try:
+                power_w = int(conf.get(CONF_HEATER_POWER_W, DEFAULT_HEATER_POWER_W))
+            except Exception:
+                power_w = DEFAULT_HEATER_POWER_W
+            if not power_w or power_w <= 0:
+                power_w = DEFAULT_HEATER_POWER_W
 
             # Temperaturdifferenz (DeltaT).
             # Wenn Wassertemperatur fehlt, konservativer Default 20°C (statt Fehler)

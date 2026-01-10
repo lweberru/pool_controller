@@ -37,6 +37,10 @@ CONF_TARGET_TEMP_STEP = "target_temp_step"
 CONF_COLD_TOLERANCE = "cold_tolerance"
 CONF_HOT_TOLERANCE = "hot_tolerance"
 
+# Heating power used for preheat time estimation (watts).
+# Do NOT derive this from a live pump power sensor.
+CONF_HEATER_POWER_W = "heater_power_w"
+
 # Feature-Toggles (aktivieren/deaktivieren von Funktionen)
 CONF_ENABLE_AUTO_FILTER = "enable_auto_filter"
 CONF_ENABLE_PV_OPTIMIZATION = "enable_pv_optimization"
@@ -123,6 +127,9 @@ DEFAULT_TARGET_TEMP = 38.0
 DEFAULT_MIN_TEMP = 10.0
 DEFAULT_MAX_TEMP = 40.0
 DEFAULT_TARGET_TEMP_STEP = 0.5
+
+# Default heater power used for preheat estimation
+DEFAULT_HEATER_POWER_W = 3000
 
 # Thermostat-like tolerances (hysteresis)
 # Defaults preserve current behavior as close as possible, while allowing proper 'stop at target'.
