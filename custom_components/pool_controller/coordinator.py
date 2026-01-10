@@ -345,6 +345,20 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             now = dt_util.now()
             conf = {**self.entry.data, **self.entry.options}
 
+            # Physical switch entity IDs (may be external entities). Used for state mirroring.
+            main_switch_id = conf.get(CONF_MAIN_SWITCH)
+            pump_switch_id = conf.get(CONF_PUMP_SWITCH) or main_switch_id
+            aux_switch_id = conf.get(CONF_AUX_HEATING_SWITCH)
+            demo = conf.get(CONF_DEMO_MODE, False)
+
+            # Mirror physical switch states (best-effort; unknown/unavailable -> False).
+            main_sw_state = self.hass.states.get(main_switch_id) if main_switch_id else None
+            pump_sw_state = self.hass.states.get(pump_switch_id) if pump_switch_id else None
+            aux_sw_state = self.hass.states.get(aux_switch_id) if aux_switch_id else None
+            main_switch_on = bool(main_sw_state and main_sw_state.state == "on")
+            pump_switch_on = bool(pump_sw_state and pump_sw_state.state == "on")
+            aux_heating_switch_on = bool(aux_sw_state and aux_sw_state.state == "on")
+
             maintenance_active = bool(conf.get(OPT_KEY_MAINTENANCE_ACTIVE, False))
             # Keep attribute in sync so other entities (e.g. climate) can read it.
             self.maintenance_active = maintenance_active
@@ -490,9 +504,26 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             # Sonst wird die Preheat-Berechnung massiv falsch und startet u.U. Tage zu früh.
             power_w = None
             try:
-                power_w = int(conf.get(CONF_HEATER_POWER_W, DEFAULT_HEATER_POWER_W))
+                base_w = int(conf.get(CONF_HEATER_BASE_POWER_W, DEFAULT_HEATER_BASE_POWER_W))
             except Exception:
-                power_w = DEFAULT_HEATER_POWER_W
+                base_w = DEFAULT_HEATER_BASE_POWER_W
+            try:
+                aux_w = int(conf.get(CONF_HEATER_AUX_POWER_W, DEFAULT_HEATER_AUX_POWER_W))
+            except Exception:
+                aux_w = DEFAULT_HEATER_AUX_POWER_W
+            base_w = max(0, int(base_w or 0))
+            aux_w = max(0, int(aux_w or 0))
+
+            # Prefer split model if configured to a meaningful value.
+            split_effective = base_w + (aux_w if conf.get(CONF_ENABLE_AUX_HEATING, False) else 0)
+            if split_effective > 0:
+                power_w = split_effective
+            else:
+                try:
+                    power_w = int(conf.get(CONF_HEATER_POWER_W, DEFAULT_HEATER_POWER_W))
+                except Exception:
+                    power_w = DEFAULT_HEATER_POWER_W
+
             if not power_w or power_w <= 0:
                 power_w = DEFAULT_HEATER_POWER_W
 
@@ -887,15 +918,16 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     and conf.get(CONF_ENABLE_AUX_HEATING, False)
                     and aux_heat_demand
                 ),
+
+                # Physical switch states (mirror the configured external switches).
+                # These are *not* the desired/required states; they reflect what is currently ON.
+                "main_switch_on": main_switch_on,
+                "pump_switch_on": pump_switch_on,
+                "aux_heating_switch_on": aux_heating_switch_on,
             }
 
             # After computing desired states, ensure physical switches follow the desired state
             try:
-                main_switch_id = conf.get(CONF_MAIN_SWITCH)
-                pump_switch_id = conf.get(CONF_PUMP_SWITCH) or main_switch_id
-                aux_switch_id = conf.get(CONF_AUX_HEATING_SWITCH)
-                demo = conf.get(CONF_DEMO_MODE, False)
-
                 desired_main = data.get("should_main_on")
                 desired_pump = data.get("should_pump_on")
                 desired_aux = data.get("should_aux_on")

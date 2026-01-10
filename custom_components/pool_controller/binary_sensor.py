@@ -14,6 +14,10 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolBinary(coordinator, "pv_allows", "PV Überschuss verfügbar", None),
         PoolBinary(coordinator, "should_main_on", "Hauptstrom erforderlich", None),
         PoolBinary(coordinator, "should_pump_on", "Pumpe erforderlich", None),
+        # Physical switch state mirrors (configured external switches)
+        PoolBinary(coordinator, "main_switch_on", "Hauptschalter an", BinarySensorDeviceClass.POWER),
+        PoolBinary(coordinator, "pump_switch_on", "Pumpe an", None),
+        PoolBinary(coordinator, "aux_heating_switch_on", "Zusatzheizung an", BinarySensorDeviceClass.HEAT),
         PoolBinary(coordinator, "low_chlor", "Niedriger Chlorwert", None),
         PoolBinary(coordinator, "ph_alert", "pH außerhalb Bereich", None),
         PoolBinary(coordinator, "tds_high", "TDS zu hoch", BinarySensorDeviceClass.PROBLEM),

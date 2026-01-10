@@ -69,6 +69,9 @@
           "min_temp": "Température minimum",
           "max_temp": "Température maximum",
           "target_temp_step": "Pas de température",
+          "heater_power_w": "Puissance de chauffage (W)",
+          "heater_base_power_w": "Puissance de chauffage de base (W)",
+          "heater_aux_power_w": "Puissance du chauffage auxiliaire (W)",
           "cold_tolerance": "Tolérance froide",
           "hot_tolerance": "Tolérance chaude"
         },
@@ -77,6 +80,9 @@
           "min_temp": "Consigne minimale disponible",
           "max_temp": "Consigne maximale disponible",
           "target_temp_step": "Pas pour régler la température cible",
+          "heater_power_w": "Puissance nominale utilisée pour estimer le préchauffage (W). Ne pas la déduire d'un capteur de puissance en temps réel.",
+          "heater_base_power_w": "Optionnel : contribution de base (p. ex. chaleur résiduelle de la pompe) utilisée pour l'estimation du préchauffage.",
+          "heater_aux_power_w": "Optionnel : puissance nominale du chauffage auxiliaire (W) utilisée pour l'estimation du préchauffage lorsque le chauffage auxiliaire est activé.",
           "cold_tolerance": "Le chauffage démarre lorsque la température de l'eau est inférieure à la consigne moins cette valeur",
           "hot_tolerance": "Le chauffage s'arrête lorsque la température de l'eau est égale ou supérieure à la consigne plus cette valeur"
         }
@@ -333,7 +339,10 @@
     "binary_sensor": {
       "maintenance_active": { "name": "Mode maintenance" },
       "should_main_on": { "name": "Alimentation requise" },
-      "should_pump_on": { "name": "Pompe requise" }
+      "should_pump_on": { "name": "Pompe requise" },
+      "main_switch_on": { "name": "Interrupteur principal actif" },
+      "pump_switch_on": { "name": "Pompe active" },
+      "aux_heating_switch_on": { "name": "Chauffage auxiliaire actif" }
     },
     "sensor": {
       "status": { "name": "Statut" },

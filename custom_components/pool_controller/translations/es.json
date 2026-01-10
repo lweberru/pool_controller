@@ -69,6 +69,9 @@
           "min_temp": "Temperatura mínima",
           "max_temp": "Temperatura máxima",
           "target_temp_step": "Paso de temperatura",
+          "heater_power_w": "Potencia de calefacción (W)",
+          "heater_base_power_w": "Potencia base de calefacción (W)",
+          "heater_aux_power_w": "Potencia del calentador auxiliar (W)",
           "cold_tolerance": "Tolerancia fría",
           "hot_tolerance": "Tolerancia caliente"
         },
@@ -77,6 +80,9 @@
           "min_temp": "Consigna mínima disponible",
           "max_temp": "Consigna máxima disponible",
           "target_temp_step": "Paso para ajustar la temperatura objetivo",
+          "heater_power_w": "Potencia nominal usada para estimar el tiempo de precalentamiento (W). No la derives de un sensor de potencia en vivo.",
+          "heater_base_power_w": "Opcional: contribución base (p. ej. calor residual de la bomba) usada para estimar el precalentamiento.",
+          "heater_aux_power_w": "Opcional: potencia nominal del calentador auxiliar (W) usada para estimar el precalentamiento cuando la calefacción auxiliar está activada.",
           "cold_tolerance": "El calentador arranca cuando la temperatura del agua está por debajo de objetivo menos este valor",
           "hot_tolerance": "El calentador se detiene cuando la temperatura del agua es igual o superior a objetivo más este valor"
         }
@@ -333,7 +339,10 @@
     "binary_sensor": {
       "maintenance_active": { "name": "Modo de mantenimiento" },
       "should_main_on": { "name": "Alimentación requerida" },
-      "should_pump_on": { "name": "Bomba requerida" }
+      "should_pump_on": { "name": "Bomba requerida" },
+      "main_switch_on": { "name": "Interruptor principal encendido" },
+      "pump_switch_on": { "name": "Bomba encendida" },
+      "aux_heating_switch_on": { "name": "Calentador auxiliar encendido" }
     },
     "sensor": {
       "status": { "name": "Estado" },

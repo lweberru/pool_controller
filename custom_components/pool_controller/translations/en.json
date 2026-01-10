@@ -68,6 +68,9 @@
           "min_temp": "Minimum temperature",
           "max_temp": "Maximum temperature",
           "target_temp_step": "Temperature step",
+          "heater_power_w": "Heater power (W)",
+          "heater_base_power_w": "Base heating power (W)",
+          "heater_aux_power_w": "Aux heater power (W)",
           "cold_tolerance": "Cold tolerance",
           "hot_tolerance": "Hot tolerance"
         },
@@ -76,6 +79,9 @@
           "min_temp": "Minimum setpoint available",
           "max_temp": "Maximum setpoint available",
           "target_temp_step": "Step size for setting the target temperature",
+          "heater_power_w": "Rated heater power used for preheat timing estimation (watts). Do not derive from a live power sensor.",
+          "heater_base_power_w": "Optional: base heating contribution while the circulation pump runs (e.g. waste heat), used for preheat estimation.",
+          "heater_aux_power_w": "Optional: auxiliary heater rated power (watts), used for preheat estimation when aux heating is enabled.",
           "cold_tolerance": "Heater starts when water temperature is below target minus this value",
           "hot_tolerance": "Heater stops when water temperature is at or above target plus this value"
         }
@@ -332,7 +338,10 @@
     "binary_sensor": {
       "maintenance_active": { "name": "Maintenance mode" },
       "should_main_on": { "name": "Power required" },
-      "should_pump_on": { "name": "Pump required" }
+      "should_pump_on": { "name": "Pump required" },
+      "main_switch_on": { "name": "Main switch on" },
+      "pump_switch_on": { "name": "Pump on" },
+      "aux_heating_switch_on": { "name": "Aux heater on" }
     },
     "sensor": {
       "status": { "name": "Status" },

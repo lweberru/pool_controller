@@ -69,6 +69,9 @@
           "min_temp": "Minimum-Temperatur",
           "max_temp": "Maximum-Temperatur",
           "target_temp_step": "Schrittweite",
+          "heater_power_w": "Heizleistung (W)",
+          "heater_base_power_w": "Basis-Heizleistung (W)",
+          "heater_aux_power_w": "Zusatzheizung-Leistung (W)",
           "cold_tolerance": "Kalt-Toleranz",
           "hot_tolerance": "Warm-Toleranz"
         },
@@ -77,6 +80,9 @@
           "min_temp": "Minimaler einstellbarer Sollwert",
           "max_temp": "Maximaler einstellbarer Sollwert",
           "target_temp_step": "Schrittweite für das Setzen der Zieltemperatur",
+          "heater_power_w": "Konstante Heizleistung für die Vorheiz-Zeitberechnung (W). Nicht aus einem Live-Leistungs-Sensor ableiten.",
+          "heater_base_power_w": "Optional: Basis-Heizanteil (z.B. Pumpen-Abwärme) für die Vorheiz-Zeitberechnung.",
+          "heater_aux_power_w": "Optional: Nennleistung der Zusatzheizung (W) für die Vorheiz-Zeitberechnung (wenn Zusatzheizung aktiviert ist).",
           "cold_tolerance": "Heizung startet, wenn Wassertemperatur unter Ziel minus diesem Wert liegt",
           "hot_tolerance": "Heizung stoppt, wenn Wassertemperatur bei/über Ziel plus diesem Wert liegt"
         }
@@ -338,6 +344,9 @@
       "pv_allows": { "name": "PV-Überschuss verfügbar" },
       "should_main_on": { "name": "Stromversorgung erforderlich" },
       "should_pump_on": { "name": "Pumpe erforderlich" },
+      "main_switch_on": { "name": "Hauptschalter an" },
+      "pump_switch_on": { "name": "Pumpe an" },
+      "aux_heating_switch_on": { "name": "Zusatzheizung an" },
       "low_chlor": { "name": "Niedriger Chlorwert" },
       "ph_alert": { "name": "pH außerhalb Bereich" },
       "tds_high": { "name": "TDS zu hoch" }

@@ -69,6 +69,8 @@
           "max_temp": "Maximum temperature",
           "target_temp_step": "Temperature step",
           "heater_power_w": "Heater power (W)",
+          "heater_base_power_w": "Base heating power (W)",
+          "heater_aux_power_w": "Aux heater power (W)",
           "cold_tolerance": "Cold tolerance",
           "hot_tolerance": "Hot tolerance"
         },
@@ -78,6 +80,8 @@
           "max_temp": "Maximum setpoint available",
           "target_temp_step": "Step size for setting the target temperature",
           "heater_power_w": "Rated heater power used for preheat timing estimation (watts). Do not use a live pump power sensor value.",
+          "heater_base_power_w": "Optional: base heating contribution while circulation pump runs (e.g. waste heat). Used for preheat estimation.",
+          "heater_aux_power_w": "Optional: auxiliary heater rated power (watts). Used for preheat estimation when aux heating is enabled.",
           "cold_tolerance": "Heater starts when water temperature is below target minus this value",
           "hot_tolerance": "Heater stops when water temperature is at or above target plus this value"
         }
@@ -233,6 +237,8 @@
           "max_temp": "Maximum temperature",
           "target_temp_step": "Temperature step",
           "heater_power_w": "Heater power (W)",
+          "heater_base_power_w": "Base heating power (W)",
+          "heater_aux_power_w": "Aux heater power (W)",
           "cold_tolerance": "Cold tolerance",
           "hot_tolerance": "Hot tolerance"
         },
@@ -242,6 +248,8 @@
           "max_temp": "Maximum setpoint available",
           "target_temp_step": "Step size for setting the target temperature",
           "heater_power_w": "Rated heater power used for preheat timing estimation (watts).",
+          "heater_base_power_w": "Optional: base heating contribution while circulation pump runs (e.g. waste heat).",
+          "heater_aux_power_w": "Optional: auxiliary heater rated power (watts).",
           "cold_tolerance": "Heater starts when water temperature is below target minus this value",
           "hot_tolerance": "Heater stops when water temperature is at or above target plus this value"
         }

@@ -41,6 +41,12 @@ CONF_HOT_TOLERANCE = "hot_tolerance"
 # Do NOT derive this from a live pump power sensor.
 CONF_HEATER_POWER_W = "heater_power_w"
 
+# Optional split heating powers (watts) to better model installations where
+# the circulation pump contributes some waste heat and the auxiliary heater adds more.
+# Effective heating power for preheat = base + (aux if aux heating is enabled).
+CONF_HEATER_BASE_POWER_W = "heater_base_power_w"
+CONF_HEATER_AUX_POWER_W = "heater_aux_power_w"
+
 # Feature-Toggles (aktivieren/deaktivieren von Funktionen)
 CONF_ENABLE_AUTO_FILTER = "enable_auto_filter"
 CONF_ENABLE_PV_OPTIMIZATION = "enable_pv_optimization"
@@ -130,6 +136,10 @@ DEFAULT_TARGET_TEMP_STEP = 0.5
 
 # Default heater power used for preheat estimation
 DEFAULT_HEATER_POWER_W = 3000
+
+# Default split powers (disabled by default -> use DEFAULT_HEATER_POWER_W)
+DEFAULT_HEATER_BASE_POWER_W = 0
+DEFAULT_HEATER_AUX_POWER_W = DEFAULT_HEATER_POWER_W
 
 # Thermostat-like tolerances (hysteresis)
 # Defaults preserve current behavior as close as possible, while allowing proper 'stop at target'.
