@@ -327,12 +327,18 @@
   "entity": {
     "switch": {
       "main": { "name": "Alimentation" },
-      "pump": { "name": "Pompe" }
+      "pump": { "name": "Pompe" },
+      "aux": { "name": "Chauffage auxiliaire" }
     },
     "binary_sensor": {
       "maintenance_active": { "name": "Mode maintenance" },
       "should_main_on": { "name": "Alimentation requise" },
       "should_pump_on": { "name": "Pompe requise" }
+    },
+    "sensor": {
+      "status": { "name": "Statut" },
+      "run_reason": { "name": "Raison de fonctionnement" },
+      "heat_reason": { "name": "Raison de chauffage" }
     }
   },
   "state": {
@@ -343,6 +349,29 @@
           "paused": "Pause",
           "frost_protection": "Protection antigel",
           "maintenance": "Maintenance"
+        }
+      }
+      ,
+      "run_reason": {
+        "state": {
+          "idle": "Inactif",
+          "bathing": "Bain",
+          "chlorine": "Chlore",
+          "filter": "Filtration",
+          "preheat": "Préchauffage",
+          "pv": "PV",
+          "frost": "Protection antigel",
+          "pause": "Pause",
+          "maintenance": "Maintenance"
+        }
+      },
+      "heat_reason": {
+        "state": {
+          "off": "Arrêt",
+          "disabled": "Désactivé",
+          "bathing": "Bain",
+          "preheat": "Préchauffage",
+          "pv": "PV"
         }
       }
     }

@@ -344,6 +344,8 @@
     },
     "sensor": {
       "status": { "name": "Status" },
+      "run_reason": { "name": "Laufgrund" },
+      "heat_reason": { "name": "Heizgrund" },
       "tds_status": { "name": "TDS Status" },
       "ph_val": { "name": "pH-Wert" },
       "chlor_val": { "name": "Chlorgehalt" },
@@ -386,6 +388,28 @@
           "paused": "Pause",
           "frost_protection": "Frostschutz",
           "maintenance": "Wartung"
+        }
+      },
+      "run_reason": {
+        "state": {
+          "idle": "Inaktiv",
+          "bathing": "Baden",
+          "chlorine": "Chloren",
+          "filter": "Filtern",
+          "preheat": "Vorheizen",
+          "pv": "PV",
+          "frost": "Frostschutz",
+          "pause": "Pause",
+          "maintenance": "Wartung"
+        }
+      },
+      "heat_reason": {
+        "state": {
+          "off": "Aus",
+          "disabled": "Deaktiviert",
+          "bathing": "Baden",
+          "preheat": "Vorheizen",
+          "pv": "PV"
         }
       },
       "tds_status": {

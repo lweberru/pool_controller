@@ -11,6 +11,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
     entities = [
         PoolStatusSensor(coordinator),
+        PoolRunReasonSensor(coordinator),
+        PoolHeatReasonSensor(coordinator),
         # SensorDeviceClass.PH expects no unit_of_measurement.
         PoolChemSensor(
             coordinator,
@@ -67,6 +69,31 @@ class PoolStatusSensor(PoolBaseSensor):
         if self.coordinator.data.get("frost_danger"): return "frost_protection"
         if self.coordinator.data.get("pause_timer_active"): return "paused"
         return "normal"
+
+class PoolRunReasonSensor(PoolBaseSensor):
+    _attr_translation_key = "run_reason"
+    _attr_icon = "mdi:information-outline"
+
+    def __init__(self, coordinator):
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.entry.entry_id}_run_reason"
+
+    @property
+    def native_value(self):
+        return self.coordinator.data.get("run_reason") or "idle"
+
+
+class PoolHeatReasonSensor(PoolBaseSensor):
+    _attr_translation_key = "heat_reason"
+    _attr_icon = "mdi:fire"
+
+    def __init__(self, coordinator):
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.entry.entry_id}_heat_reason"
+
+    @property
+    def native_value(self):
+        return self.coordinator.data.get("heat_reason") or "off"
 
 class PoolTdsStatusSensor(PoolBaseSensor):
     _attr_translation_key = "tds_status"

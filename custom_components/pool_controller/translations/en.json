@@ -322,4 +322,56 @@
       }
     }
   }
+  ,
+  "entity": {
+    "switch": {
+      "main": { "name": "Power" },
+      "pump": { "name": "Pump" },
+      "aux": { "name": "Aux heater" }
+    },
+    "binary_sensor": {
+      "maintenance_active": { "name": "Maintenance mode" },
+      "should_main_on": { "name": "Power required" },
+      "should_pump_on": { "name": "Pump required" }
+    },
+    "sensor": {
+      "status": { "name": "Status" },
+      "run_reason": { "name": "Run reason" },
+      "heat_reason": { "name": "Heating reason" }
+    }
+  },
+  "state": {
+    "sensor": {
+      "status": {
+        "state": {
+          "normal": "Normal",
+          "paused": "Paused",
+          "frost_protection": "Frost protection",
+          "maintenance": "Maintenance"
+        }
+      },
+      "run_reason": {
+        "state": {
+          "idle": "Idle",
+          "bathing": "Bathing",
+          "chlorine": "Chlorine",
+          "filter": "Filtering",
+          "preheat": "Preheating",
+          "pv": "PV",
+          "frost": "Frost protection",
+          "pause": "Pause",
+          "maintenance": "Maintenance"
+        }
+      },
+      "heat_reason": {
+        "state": {
+          "off": "Off",
+          "disabled": "Disabled",
+          "bathing": "Bathing",
+          "preheat": "Preheating",
+          "pv": "PV"
+        }
+      }
+    }
+  }
 }

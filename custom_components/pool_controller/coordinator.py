@@ -717,26 +717,6 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             is_chlorinating = manual_active and self.manual_timer_type == "chlorine"
             is_manual_filter = manual_active and self.manual_timer_type == "filter"
 
-            # Demand flags
-            aux_heat_demand = False
-            if (not maintenance_active) and (not pause_active) and conf.get(CONF_ENABLE_AUX_HEATING, False):
-                # Aux heater is strictly for heating. Once target is reached, keep it OFF
-                # even if a manual timer (e.g. bathing) is active.
-                try:
-                    if water_temp is not None and float(water_temp) >= float(self.target_temp):
-                        aux_heat_demand = False
-                    else:
-                        aux_heat_demand = self._thermostat_demand(
-                            current_temp=water_temp,
-                            target_temp=self.target_temp,
-                            cold_tolerance=cold_tol,
-                            hot_tolerance=hot_tol,
-                            prev_on=bool(self._aux_heat_demand),
-                        )
-                except Exception:
-                    aux_heat_demand = bool(self._aux_heat_demand)
-            self._aux_heat_demand = aux_heat_demand
-
             # PV-based run should stop once target is reached (with same hysteresis).
             try:
                 if water_temp is not None and float(water_temp) >= float(self.target_temp):
@@ -754,8 +734,81 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             self._pv_heat_demand = pv_heat_demand
             pv_run = bool(enable_pv and pv_allows and (not in_quiet) and (not maintenance_active) and (pv_heat_demand))
 
+            # "Preheat" ist nur die Phase VOR einem Kalender-Event, in der wir bereits starten dürfen.
+            # Wenn das Event bereits läuft, wird oben automatisch ein bathing-Manual-Timer aktiviert.
+            preheat_active = bool(
+                (next_start_mins is not None and next_start_mins == 0)
+                and cal_data.get("start")
+                and now < cal_data["start"]
+            )
+
+            # Heizen ist NICHT "immer wenn Solltemp nicht erreicht".
+            # Heizen ist nur erlaubt, wenn ein expliziter Grund vorliegt (Baden/Preheat/PV).
+            heat_allowed = (not maintenance_active) and (not pause_active) and (not in_quiet) and (
+                is_bathing
+                or preheat_active
+                or pv_run
+            )
+
+            # Demand flags
+            aux_heat_demand = False
+            if heat_allowed and conf.get(CONF_ENABLE_AUX_HEATING, False):
+                # Aux heater is strictly for heating. Once target is reached, keep it OFF
+                # even if a manual timer (e.g. bathing) is active.
+                try:
+                    if water_temp is not None and float(water_temp) >= float(self.target_temp):
+                        aux_heat_demand = False
+                    else:
+                        aux_heat_demand = self._thermostat_demand(
+                            current_temp=water_temp,
+                            target_temp=self.target_temp,
+                            cold_tolerance=cold_tol,
+                            hot_tolerance=hot_tol,
+                            prev_on=bool(self._aux_heat_demand),
+                        )
+                except Exception:
+                    aux_heat_demand = bool(self._aux_heat_demand)
+            self._aux_heat_demand = aux_heat_demand
+
+            # Transparenz: Warum läuft der Pool (Main/Pumpe) gerade?
+            if maintenance_active:
+                run_reason = "maintenance"
+            elif frost_active:
+                run_reason = "frost"
+            elif pause_active:
+                run_reason = "pause"
+            elif is_bathing:
+                run_reason = "bathing"
+            elif is_chlorinating:
+                run_reason = "chlorine"
+            elif (is_manual_filter and (not in_quiet)) or (auto_filter_active and (not in_quiet)):
+                run_reason = "filter"
+            elif preheat_active:
+                run_reason = "preheat"
+            elif pv_run:
+                run_reason = "pv"
+            else:
+                run_reason = "idle"
+
+            # Transparenz: Warum darf/soll die Heizung laufen?
+            if not conf.get(CONF_ENABLE_AUX_HEATING, False):
+                heat_reason = "disabled"
+            elif heat_allowed:
+                if is_bathing:
+                    heat_reason = "bathing"
+                elif preheat_active:
+                    heat_reason = "preheat"
+                elif pv_run:
+                    heat_reason = "pv"
+                else:
+                    heat_reason = "off"
+            else:
+                heat_reason = "off"
+
             data = {
                 "maintenance_active": maintenance_active,
+                "run_reason": run_reason,
+                "heat_reason": heat_reason,
                 "water_temp": round(water_temp, 1) if water_temp is not None else None,
                 "ph_val": round(ph_val, 2) if ph_val is not None else None,
                 "chlor_val": int(chlor_val) if chlor_val is not None else None,

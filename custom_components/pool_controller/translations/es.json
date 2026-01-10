@@ -327,12 +327,18 @@
   "entity": {
     "switch": {
       "main": { "name": "Alimentación" },
-      "pump": { "name": "Bomba" }
+      "pump": { "name": "Bomba" },
+      "aux": { "name": "Calentador auxiliar" }
     },
     "binary_sensor": {
       "maintenance_active": { "name": "Modo de mantenimiento" },
       "should_main_on": { "name": "Alimentación requerida" },
       "should_pump_on": { "name": "Bomba requerida" }
+    },
+    "sensor": {
+      "status": { "name": "Estado" },
+      "run_reason": { "name": "Motivo de funcionamiento" },
+      "heat_reason": { "name": "Motivo de calefacción" }
     }
   },
   "state": {
@@ -343,6 +349,29 @@
           "paused": "Pausa",
           "frost_protection": "Protección contra heladas",
           "maintenance": "Mantenimiento"
+        }
+      }
+      ,
+      "run_reason": {
+        "state": {
+          "idle": "Inactivo",
+          "bathing": "Baño",
+          "chlorine": "Cloro",
+          "filter": "Filtrando",
+          "preheat": "Precalentamiento",
+          "pv": "FV",
+          "frost": "Protección contra heladas",
+          "pause": "Pausa",
+          "maintenance": "Mantenimiento"
+        }
+      },
+      "heat_reason": {
+        "state": {
+          "off": "Apagado",
+          "disabled": "Desactivado",
+          "bathing": "Baño",
+          "preheat": "Precalentamiento",
+          "pv": "FV"
         }
       }
     }
