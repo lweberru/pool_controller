@@ -514,6 +514,17 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             base_w = max(0, int(base_w or 0))
             aux_w = max(0, int(aux_w or 0))
 
+            # Backward compatibility:
+            # Older versions used a single `heater_power_w` value.
+            # If split values are not configured (both unset/zero), fall back to the legacy value.
+            try:
+                legacy_present = CONF_HEATER_POWER_W in conf and conf.get(CONF_HEATER_POWER_W) is not None
+                split_effective_raw = base_w + aux_w
+                if legacy_present and split_effective_raw <= 0:
+                    base_w = max(0, int(float(conf.get(CONF_HEATER_POWER_W))))
+            except Exception:
+                pass
+
             # Prefer split model if configured to a meaningful value.
             split_effective = base_w + (aux_w if conf.get(CONF_ENABLE_AUX_HEATING, False) else 0)
             if split_effective > 0:
@@ -551,11 +562,17 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 except Exception:
                     heat_time = None
 
-            cal_data = await self._get_next_event(conf.get(CONF_POOL_CALENDAR))
+            cal = await self._get_next_event(conf.get(CONF_POOL_CALENDAR))
+            cal_next = (cal or {}).get("next") or {}
+            cal_ongoing = (cal or {}).get("ongoing") or {}
 
+            # Next start (preheat start): if we can't compute a heat_time (e.g. delta_t == 0 because
+            # water is already at/above target), still expose a meaningful countdown to the event.
+            # In that case, we treat heat_time as 0 minutes => next_start_mins == minutes until event start.
             next_start_mins = None
-            if cal_data.get("start") and heat_time is not None:
-                preheat_time = cal_data["start"] - timedelta(minutes=heat_time)
+            if cal_next.get("start"):
+                effective_heat_time = heat_time if heat_time is not None else 0
+                preheat_time = cal_next["start"] - timedelta(minutes=effective_heat_time)
                 next_start_mins = max(0, round((preheat_time - now).total_seconds() / 60))
             def _mins_left(until_dt: datetime | None):
                 if until_dt is None:
@@ -724,9 +741,9 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
             # Start calendar-driven bathing: if event is ongoing, ensure manual timer active
             # (in Wartung deaktiviert)
-            if (not maintenance_active) and cal_data.get("start") and cal_data.get("end"):
-                if now >= cal_data["start"] and now < cal_data["end"]:
-                    remaining_min = max(1, int((cal_data["end"] - now).total_seconds() / 60))
+            if (not maintenance_active) and cal_ongoing.get("start") and cal_ongoing.get("end"):
+                if now >= cal_ongoing["start"] and now < cal_ongoing["end"]:
+                    remaining_min = max(1, int((cal_ongoing["end"] - now).total_seconds() / 60))
                     if (not pause_active) and (not manual_active):
                         await self.activate_manual_timer(timer_type="bathing", minutes=remaining_min)
                         # recompute
@@ -776,8 +793,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             # Wenn das Event bereits läuft, wird oben automatisch ein bathing-Manual-Timer aktiviert.
             preheat_active = bool(
                 (next_start_mins is not None and next_start_mins == 0)
-                and cal_data.get("start")
-                and now < cal_data["start"]
+                and cal_next.get("start")
+                and now < cal_next["start"]
             )
 
             # Heizen ist NICHT "immer wenn Solltemp nicht erreicht".
@@ -862,9 +879,9 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "is_we_holiday": we_or_holiday,
                 "frost_danger": frost_danger,
                 "frost_active": frost_active,
-                "next_event": cal_data.get("start"),
-                "next_event_end": cal_data.get("end"),
-                "next_event_summary": cal_data.get("summary"),
+                "next_event": cal_next.get("start"),
+                "next_event_end": cal_next.get("end"),
+                "next_event_summary": cal_next.get("summary"),
                 "next_start_mins": next_start_mins,
                 # Timers: states are remaining minutes
                 "manual_timer_mins": manual_mins,
@@ -1011,15 +1028,77 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         except: return False
 
     async def _get_next_event(self, cal_id):
-        if not cal_id: return {}
+        if not cal_id:
+            return {}
+
         try:
-            res = await self.hass.services.async_call("calendar", "get_events", {"entity_id": cal_id, "start_date_time": dt_util.now(), "end_date_time": dt_util.now() + timedelta(days=7)}, blocking=True, return_response=True)
-            events = res.get(cal_id, {}).get("events", [])
-            if not events:
+            now = dt_util.now()
+            res = await self.hass.services.async_call(
+                "calendar",
+                "get_events",
+                {
+                    "entity_id": cal_id,
+                    "start_date_time": now,
+                    "end_date_time": now + timedelta(days=7),
+                },
+                blocking=True,
+                return_response=True,
+            )
+            raw_events = res.get(cal_id, {}).get("events", [])
+            if not raw_events:
                 return {}
-            ev = events[0]
-            start = dt_util.parse_datetime(ev.get("start")) if ev.get("start") else None
-            end = dt_util.parse_datetime(ev.get("end")) if ev.get("end") else None
-            summary = ev.get("summary", "")
-            return {k: v for k, v in (("start", start), ("end", end), ("summary", summary)) if v}
-        except: return {}
+
+            parsed = []
+            for ev in raw_events:
+                start_raw = ev.get("start")
+                end_raw = ev.get("end")
+                start = dt_util.parse_datetime(start_raw) if start_raw else None
+                end = dt_util.parse_datetime(end_raw) if end_raw else None
+                if not start:
+                    continue
+                # Normalize to UTC (dt_util.now() is UTC-aware).
+                try:
+                    start_utc = dt_util.as_utc(start)
+                except Exception:
+                    start_utc = start
+                end_utc = None
+                if end:
+                    try:
+                        end_utc = dt_util.as_utc(end)
+                    except Exception:
+                        end_utc = end
+
+                parsed.append(
+                    {
+                        "start": start_utc,
+                        "end": end_utc,
+                        "summary": ev.get("summary", ""),
+                    }
+                )
+
+            if not parsed:
+                return {}
+
+            # Prefer the next future event (start >= now). This avoids showing 0 minutes
+            # just because an overlapping/all-day event is included in the result window.
+            future = [e for e in parsed if e.get("start") and e["start"] >= now]
+            future.sort(key=lambda e: e["start"])
+            next_ev = future[0] if future else None
+
+            # Still keep track of an ongoing event (start <= now < end) for auto-start bathing.
+            ongoing = [e for e in parsed if e.get("start") and e.get("end") and e["start"] <= now < e["end"]]
+            ongoing.sort(key=lambda e: e.get("end") or e.get("start"))
+            ongoing_ev = ongoing[0] if ongoing else None
+
+            def _compact(e):
+                if not e:
+                    return {}
+                # Keep keys stable; omit empty summary.
+                out = {"start": e.get("start"), "end": e.get("end")}
+                if e.get("summary"):
+                    out["summary"] = e.get("summary")
+                return out
+
+            return {"next": _compact(next_ev), "ongoing": _compact(ongoing_ev)}
+        except Exception:
+            return {}

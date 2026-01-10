@@ -68,7 +68,6 @@
           "min_temp": "Minimum temperature",
           "max_temp": "Maximum temperature",
           "target_temp_step": "Temperature step",
-          "heater_power_w": "Heater power (W)",
           "heater_base_power_w": "Base heating power (W)",
           "heater_aux_power_w": "Aux heater power (W)",
           "cold_tolerance": "Cold tolerance",
@@ -79,9 +78,8 @@
           "min_temp": "Minimum setpoint available",
           "max_temp": "Maximum setpoint available",
           "target_temp_step": "Step size for setting the target temperature",
-          "heater_power_w": "Rated heater power used for preheat timing estimation (watts). Do not derive from a live power sensor.",
-          "heater_base_power_w": "Optional: base heating contribution while the circulation pump runs (e.g. waste heat), used for preheat estimation.",
-          "heater_aux_power_w": "Optional: auxiliary heater rated power (watts), used for preheat estimation when aux heating is enabled.",
+          "heater_base_power_w": "Base heating contribution while the circulation pump runs (e.g. waste heat). Used for preheat estimation.",
+          "heater_aux_power_w": "Aux heater rated power (watts). Used for preheat estimation when aux heating is enabled. Total = base + aux.",
           "cold_tolerance": "Heater starts when water temperature is below target minus this value",
           "hot_tolerance": "Heater stops when water temperature is at or above target plus this value"
         }
@@ -236,6 +234,8 @@
           "min_temp": "Minimum temperature",
           "max_temp": "Maximum temperature",
           "target_temp_step": "Temperature step",
+          "heater_base_power_w": "Base heating power (W)",
+          "heater_aux_power_w": "Aux heater power (W)",
           "cold_tolerance": "Cold tolerance",
           "hot_tolerance": "Hot tolerance"
         },
@@ -244,6 +244,8 @@
           "min_temp": "Minimum setpoint available",
           "max_temp": "Maximum setpoint available",
           "target_temp_step": "Step size for setting the target temperature",
+          "heater_base_power_w": "Base heating contribution while the circulation pump runs (e.g. waste heat). Used for preheat estimation.",
+          "heater_aux_power_w": "Aux heater rated power (watts). Used for preheat estimation when aux heating is enabled. Total = base + aux.",
           "cold_tolerance": "Heater starts when water temperature is below target minus this value",
           "hot_tolerance": "Heater stops when water temperature is at or above target plus this value"
         }

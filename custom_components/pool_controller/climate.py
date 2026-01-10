@@ -72,7 +72,7 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
             name=self.coordinator.entry.data.get("name", "Whirlpool"),
             manufacturer=MANUFACTURER,
             model="Advanced Controller v1",
-            sw_version="1.0.6",
+            sw_version="1.6.15",
         )
 
     @property

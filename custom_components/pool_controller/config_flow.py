@@ -79,9 +79,33 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Optional(CONF_MIN_TEMP, default=curr.get(CONF_MIN_TEMP, DEFAULT_MIN_TEMP)): vol.Coerce(float),
                 vol.Optional(CONF_MAX_TEMP, default=curr.get(CONF_MAX_TEMP, DEFAULT_MAX_TEMP)): vol.Coerce(float),
                 vol.Optional(CONF_TARGET_TEMP_STEP, default=curr.get(CONF_TARGET_TEMP_STEP, DEFAULT_TARGET_TEMP_STEP)): vol.Coerce(float),
-                vol.Optional(CONF_HEATER_POWER_W, default=curr.get(CONF_HEATER_POWER_W, DEFAULT_HEATER_POWER_W)): vol.Coerce(int),
-                vol.Optional(CONF_HEATER_BASE_POWER_W, default=curr.get(CONF_HEATER_BASE_POWER_W, DEFAULT_HEATER_BASE_POWER_W)): vol.Coerce(int),
-                vol.Optional(CONF_HEATER_AUX_POWER_W, default=curr.get(CONF_HEATER_AUX_POWER_W, DEFAULT_HEATER_AUX_POWER_W)): vol.Coerce(int),
+                # Heating power model for preheat estimation:
+                # - base: heat contribution while circulating (e.g. waste heat)
+                # - aux: electric heater rated power (only counted when aux heating is enabled)
+                vol.Optional(
+                    CONF_HEATER_BASE_POWER_W,
+                    default=curr.get(CONF_HEATER_BASE_POWER_W, DEFAULT_HEATER_BASE_POWER_W),
+                ): selector.NumberSelector(
+                    selector.NumberSelectorConfig(
+                        min=0,
+                        max=20000,
+                        step=50,
+                        mode=selector.NumberSelectorMode.BOX,
+                        unit_of_measurement="W",
+                    )
+                ),
+                vol.Optional(
+                    CONF_HEATER_AUX_POWER_W,
+                    default=curr.get(CONF_HEATER_AUX_POWER_W, DEFAULT_HEATER_AUX_POWER_W),
+                ): selector.NumberSelector(
+                    selector.NumberSelectorConfig(
+                        min=0,
+                        max=20000,
+                        step=50,
+                        mode=selector.NumberSelectorMode.BOX,
+                        unit_of_measurement="W",
+                    )
+                ),
                 vol.Optional(CONF_COLD_TOLERANCE, default=curr.get(CONF_COLD_TOLERANCE, DEFAULT_COLD_TOLERANCE)): vol.Coerce(float),
                 vol.Optional(CONF_HOT_TOLERANCE, default=curr.get(CONF_HOT_TOLERANCE, DEFAULT_HOT_TOLERANCE)): vol.Coerce(float),
             }),
@@ -270,9 +294,30 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
                 vol.Optional(CONF_MIN_TEMP, default=curr.get(CONF_MIN_TEMP, DEFAULT_MIN_TEMP)): vol.Coerce(float),
                 vol.Optional(CONF_MAX_TEMP, default=curr.get(CONF_MAX_TEMP, DEFAULT_MAX_TEMP)): vol.Coerce(float),
                 vol.Optional(CONF_TARGET_TEMP_STEP, default=curr.get(CONF_TARGET_TEMP_STEP, DEFAULT_TARGET_TEMP_STEP)): vol.Coerce(float),
-                vol.Optional(CONF_HEATER_POWER_W, default=curr.get(CONF_HEATER_POWER_W, DEFAULT_HEATER_POWER_W)): vol.Coerce(int),
-                vol.Optional(CONF_HEATER_BASE_POWER_W, default=curr.get(CONF_HEATER_BASE_POWER_W, DEFAULT_HEATER_BASE_POWER_W)): vol.Coerce(int),
-                vol.Optional(CONF_HEATER_AUX_POWER_W, default=curr.get(CONF_HEATER_AUX_POWER_W, DEFAULT_HEATER_AUX_POWER_W)): vol.Coerce(int),
+                vol.Optional(
+                    CONF_HEATER_BASE_POWER_W,
+                    default=curr.get(CONF_HEATER_BASE_POWER_W, DEFAULT_HEATER_BASE_POWER_W),
+                ): selector.NumberSelector(
+                    selector.NumberSelectorConfig(
+                        min=0,
+                        max=20000,
+                        step=50,
+                        mode=selector.NumberSelectorMode.BOX,
+                        unit_of_measurement="W",
+                    )
+                ),
+                vol.Optional(
+                    CONF_HEATER_AUX_POWER_W,
+                    default=curr.get(CONF_HEATER_AUX_POWER_W, DEFAULT_HEATER_AUX_POWER_W),
+                ): selector.NumberSelector(
+                    selector.NumberSelectorConfig(
+                        min=0,
+                        max=20000,
+                        step=50,
+                        mode=selector.NumberSelectorMode.BOX,
+                        unit_of_measurement="W",
+                    )
+                ),
                 vol.Optional(CONF_COLD_TOLERANCE, default=curr.get(CONF_COLD_TOLERANCE, DEFAULT_COLD_TOLERANCE)): vol.Coerce(float),
                 vol.Optional(CONF_HOT_TOLERANCE, default=curr.get(CONF_HOT_TOLERANCE, DEFAULT_HOT_TOLERANCE)): vol.Coerce(float),
             }),
