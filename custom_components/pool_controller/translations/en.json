@@ -46,7 +46,6 @@
           "temp_water_sensor": "Water temperature",
           "ph_sensor": "pH sensor",
           "chlorine_sensor": "Chlorine (redox) sensor",
-          "enable_saltwater": "Saltwater pool",
           "salt_sensor": "Salt sensor",
           "tds_sensor": "Conductivity sensor"
         },
@@ -54,9 +53,30 @@
           "temp_water_sensor": "Pool water temperature sensor (required)",
           "ph_sensor": "pH value sensor (Blueriiot or similar)",
           "chlorine_sensor": "Redox sensor for chlorine measurement in mV",
-          "enable_saltwater": "Enables saltwater-specific features and sensors",
           "salt_sensor": "Salt content sensor for saltwater pools",
           "tds_sensor": "Conductivity sensor (TDS) for water quality"
+        }
+      },
+      "sanitizer": {
+        "title": "Sanitizer",
+        "description": "Choose how the pool is sanitized. For saltwater or mixed operation, you will be asked for a target salt level.",
+        "submit": "Continue",
+        "data": {
+          "sanitizer_mode": "Sanitizer mode"
+        },
+        "data_description": {
+          "sanitizer_mode": "Chlorine = classic dosing, Saltwater = salt chlorinator, Mixed = both"
+        }
+      },
+      "sanitizer_salt": {
+        "title": "Salt target",
+        "description": "Set the target salt level for saltwater (or mixed) operation.",
+        "submit": "Continue",
+        "data": {
+          "target_salt_g_l": "Target salt (g/L)"
+        },
+        "data_description": {
+          "target_salt_g_l": "Used to compute recommendations when salt is too low"
         }
       },
       "climate": {
@@ -212,7 +232,6 @@
           "temp_water_sensor": "Water temperature",
           "ph_sensor": "pH sensor",
           "chlorine_sensor": "Chlorine (redox) sensor",
-          "enable_saltwater": "Saltwater pool",
           "salt_sensor": "Salt sensor",
           "tds_sensor": "Conductivity sensor"
         },
@@ -220,9 +239,30 @@
           "temp_water_sensor": "Pool water temperature sensor (required)",
           "ph_sensor": "pH value sensor (Blueriiot or similar)",
           "chlorine_sensor": "Redox sensor for chlorine measurement in mV",
-          "enable_saltwater": "Enables saltwater-specific features and sensors",
           "salt_sensor": "Salt content sensor for saltwater pools",
           "tds_sensor": "Conductivity sensor (TDS) for water quality"
+        }
+      },
+      "sanitizer": {
+        "title": "Sanitizer",
+        "description": "Choose how the pool is sanitized.",
+        "submit": "Continue",
+        "data": {
+          "sanitizer_mode": "Sanitizer mode"
+        },
+        "data_description": {
+          "sanitizer_mode": "Chlorine = classic dosing, Saltwater = salt chlorinator, Mixed = both"
+        }
+      },
+      "sanitizer_salt": {
+        "title": "Salt target",
+        "description": "Set the target salt level for saltwater (or mixed) operation.",
+        "submit": "Continue",
+        "data": {
+          "target_salt_g_l": "Target salt (g/L)"
+        },
+        "data_description": {
+          "target_salt_g_l": "Used to compute recommendations when salt is too low"
         }
       },
       "climate": {
@@ -348,7 +388,9 @@
     "sensor": {
       "status": { "name": "Status" },
       "run_reason": { "name": "Run reason" },
-      "heat_reason": { "name": "Heating reason" }
+      "heat_reason": { "name": "Heating reason" },
+      "sanitizer_mode": { "name": "Sanitizer" },
+      "tds_effective": { "name": "TDS (excluding salt)" }
     }
   },
   "state": {
@@ -381,6 +423,13 @@
           "bathing": "Bathing",
           "preheat": "Preheating",
           "pv": "PV"
+        }
+      },
+      "sanitizer_mode": {
+        "state": {
+          "chlorine": "Chlorine",
+          "saltwater": "Saltwater",
+          "mixed": "Mixed"
         }
       }
     }

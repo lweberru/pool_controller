@@ -13,6 +13,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolStatusSensor(coordinator),
         PoolRunReasonSensor(coordinator),
         PoolHeatReasonSensor(coordinator),
+        PoolSanitizerModeSensor(coordinator),
         # SensorDeviceClass.PH expects no unit_of_measurement.
         PoolChemSensor(
             coordinator,
@@ -26,6 +27,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolChemSensor(coordinator, "chlor_val", "Chlorgehalt", "mV", "mdi:pool"),
         PoolChemSensor(coordinator, "salt_val", "Salzgehalt", "g/L", "mdi:shaker"),
         PoolChemSensor(coordinator, "tds_val", "TDS", "ppm", "mdi:water-opacity"),
+        PoolChemSensor(coordinator, "tds_effective", "TDS (ohne Salz)", "ppm", "mdi:water-opacity"),
         # Recommendations (not measurements): keep units but do not set state_class.
         PoolChemSensor(coordinator, "tds_water_change_liters", "TDS Wasserwechsel", "L", "mdi:water-sync", device_class=SensorDeviceClass.VOLUME, state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
         PoolChemSensor(coordinator, "tds_water_change_percent", "TDS Wasserwechsel", "%", "mdi:water-percent", state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
@@ -94,6 +96,20 @@ class PoolHeatReasonSensor(PoolBaseSensor):
     @property
     def native_value(self):
         return self.coordinator.data.get("heat_reason") or "off"
+
+
+class PoolSanitizerModeSensor(PoolBaseSensor):
+    _attr_translation_key = "sanitizer_mode"
+    _attr_icon = "mdi:water-check"
+
+    def __init__(self, coordinator):
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.entry.entry_id}_sanitizer_mode"
+
+    @property
+    def native_value(self):
+        mode = (self.coordinator.data.get("sanitizer_mode") or "").strip().lower()
+        return mode if mode in ("chlorine", "saltwater", "mixed") else "chlorine"
 
 class PoolTdsStatusSensor(PoolBaseSensor):
     _attr_translation_key = "tds_status"

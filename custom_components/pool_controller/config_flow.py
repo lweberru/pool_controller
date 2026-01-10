@@ -11,6 +11,37 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
     def __init__(self): self.data = {}
 
+    def _sanitizer_select_options(self):
+        """Localized labels for sanitizer mode options (best effort)."""
+        lang = (getattr(self.hass.config, "language", "en") or "en").split("-")[0]
+        labels = {
+            "de": {
+                "chlorine": "Chlor",
+                "saltwater": "Salzwasser",
+                "mixed": "Mischbetrieb (Salz + Chlor)",
+            },
+            "en": {
+                "chlorine": "Chlorine",
+                "saltwater": "Saltwater",
+                "mixed": "Mixed (salt + chlorine)",
+            },
+            "es": {
+                "chlorine": "Cloro",
+                "saltwater": "Agua salada",
+                "mixed": "Mixto (sal + cloro)",
+            },
+            "fr": {
+                "chlorine": "Chlore",
+                "saltwater": "Eau salée",
+                "mixed": "Mixte (sel + chlore)",
+            },
+        }.get(lang, None)
+        return [
+            {"value": "chlorine", "label": (labels or {}).get("chlorine", "chlorine")},
+            {"value": "saltwater", "label": (labels or {}).get("saltwater", "saltwater")},
+            {"value": "mixed", "label": (labels or {}).get("mixed", "mixed")},
+        ]
+
     async def async_step_user(self, user_input=None):
         errors = {}
         if user_input is not None:
@@ -50,7 +81,7 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_water_quality(self, user_input=None):
         if user_input is not None:
             self.data.update(user_input)
-            return await self.async_step_climate()
+            return await self.async_step_sanitizer()
 
         return self.async_show_form(
             step_id="water_quality",
@@ -58,11 +89,67 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_TEMP_WATER, default=DEFAULT_TEMP_WATER): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="temperature")),
                 vol.Optional(CONF_PH_SENSOR, default=DEFAULT_PH_SENS): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
                 vol.Optional(CONF_CHLORINE_SENSOR, default=DEFAULT_CHLOR_SENS): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
-                vol.Optional(CONF_ENABLE_SALTWATER, default=False): bool,
                 vol.Optional(CONF_SALT_SENSOR, default=DEFAULT_SALT_SENS): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
                 vol.Optional(CONF_TDS_SENSOR, default=DEFAULT_TDS_SENS): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
             }),
             last_step=False
+        )
+
+    async def async_step_sanitizer(self, user_input=None):
+        """Sanitizer selection (chlorine/saltwater/mixed)."""
+        if user_input is not None:
+            mode = (user_input.get(CONF_SANITIZER_MODE) or DEFAULT_SANITIZER_MODE).strip().lower()
+            if mode not in ("chlorine", "saltwater", "mixed"):
+                mode = DEFAULT_SANITIZER_MODE
+            self.data[CONF_SANITIZER_MODE] = mode
+            # Keep legacy flag in sync for backward compatibility.
+            self.data[CONF_ENABLE_SALTWATER] = (mode in ("saltwater", "mixed"))
+            if mode in ("saltwater", "mixed"):
+                return await self.async_step_sanitizer_salt()
+            return await self.async_step_climate()
+
+        curr = {**self.data}
+        default_mode = (curr.get(CONF_SANITIZER_MODE) or ("saltwater" if curr.get(CONF_ENABLE_SALTWATER) else DEFAULT_SANITIZER_MODE))
+        return self.async_show_form(
+            step_id="sanitizer",
+            data_schema=vol.Schema({
+                vol.Required(
+                    CONF_SANITIZER_MODE,
+                    default=default_mode,
+                ): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=self._sanitizer_select_options(),
+                        mode=selector.SelectSelectorMode.DROPDOWN,
+                    )
+                )
+            }),
+            last_step=False,
+        )
+
+    async def async_step_sanitizer_salt(self, user_input=None):
+        """Ask for target salt level when saltwater is enabled."""
+        if user_input is not None:
+            self.data.update(user_input)
+            return await self.async_step_climate()
+
+        curr = {**self.data}
+        return self.async_show_form(
+            step_id="sanitizer_salt",
+            data_schema=vol.Schema({
+                vol.Required(
+                    CONF_TARGET_SALT_G_L,
+                    default=curr.get(CONF_TARGET_SALT_G_L, DEFAULT_TARGET_SALT_G_L),
+                ): selector.NumberSelector(
+                    selector.NumberSelectorConfig(
+                        min=0,
+                        max=10,
+                        step=0.1,
+                        mode=selector.NumberSelectorMode.BOX,
+                        unit_of_measurement="g/L",
+                    )
+                )
+            }),
+            last_step=False,
         )
 
     async def async_step_climate(self, user_input=None):
@@ -264,7 +351,7 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
         """Third step: water quality sensors."""
         if user_input is not None:
             self.options.update(user_input)
-            return await self.async_step_climate()
+            return await self.async_step_sanitizer()
 
         curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
         return self.async_show_form(
@@ -273,11 +360,84 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
                 vol.Required(CONF_TEMP_WATER, default=curr.get(CONF_TEMP_WATER, DEFAULT_TEMP_WATER)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="temperature")),
                 vol.Optional(CONF_PH_SENSOR, default=curr.get(CONF_PH_SENSOR, DEFAULT_PH_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
                 vol.Optional(CONF_CHLORINE_SENSOR, default=curr.get(CONF_CHLORINE_SENSOR, DEFAULT_CHLOR_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
-                vol.Optional(CONF_ENABLE_SALTWATER, default=curr.get(CONF_ENABLE_SALTWATER, False)): bool,
                 vol.Optional(CONF_SALT_SENSOR, default=curr.get(CONF_SALT_SENSOR, DEFAULT_SALT_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
                 vol.Optional(CONF_TDS_SENSOR, default=curr.get(CONF_TDS_SENSOR, DEFAULT_TDS_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
             }),
             last_step=False
+        )
+
+    async def async_step_sanitizer(self, user_input=None):
+        """Sanitizer selection (chlorine/saltwater/mixed)."""
+        if user_input is not None:
+            mode = (user_input.get(CONF_SANITIZER_MODE) or DEFAULT_SANITIZER_MODE).strip().lower()
+            if mode not in ("chlorine", "saltwater", "mixed"):
+                mode = DEFAULT_SANITIZER_MODE
+            self.options[CONF_SANITIZER_MODE] = mode
+            # Keep legacy flag in sync for backward compatibility.
+            self.options[CONF_ENABLE_SALTWATER] = (mode in ("saltwater", "mixed"))
+            if mode in ("saltwater", "mixed"):
+                return await self.async_step_sanitizer_salt()
+            return await self.async_step_climate()
+
+        curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
+        default_mode = (
+            curr.get(CONF_SANITIZER_MODE)
+            or ("saltwater" if curr.get(CONF_ENABLE_SALTWATER) else DEFAULT_SANITIZER_MODE)
+        )
+        # Reuse the same localized option labels as ConfigFlow.
+        lang = (getattr(self.hass.config, "language", "en") or "en").split("-")[0]
+        labels = {
+            "de": {"chlorine": "Chlor", "saltwater": "Salzwasser", "mixed": "Mischbetrieb (Salz + Chlor)"},
+            "en": {"chlorine": "Chlorine", "saltwater": "Saltwater", "mixed": "Mixed (salt + chlorine)"},
+            "es": {"chlorine": "Cloro", "saltwater": "Agua salada", "mixed": "Mixto (sal + cloro)"},
+            "fr": {"chlorine": "Chlore", "saltwater": "Eau salée", "mixed": "Mixte (sel + chlore)"},
+        }.get(lang, None)
+        options = [
+            {"value": "chlorine", "label": (labels or {}).get("chlorine", "chlorine")},
+            {"value": "saltwater", "label": (labels or {}).get("saltwater", "saltwater")},
+            {"value": "mixed", "label": (labels or {}).get("mixed", "mixed")},
+        ]
+
+        return self.async_show_form(
+            step_id="sanitizer",
+            data_schema=vol.Schema({
+                vol.Required(
+                    CONF_SANITIZER_MODE,
+                    default=default_mode,
+                ): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=options,
+                        mode=selector.SelectSelectorMode.DROPDOWN,
+                    )
+                )
+            }),
+            last_step=False,
+        )
+
+    async def async_step_sanitizer_salt(self, user_input=None):
+        """Ask for target salt level when saltwater is enabled."""
+        if user_input is not None:
+            self.options.update(user_input)
+            return await self.async_step_climate()
+
+        curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
+        return self.async_show_form(
+            step_id="sanitizer_salt",
+            data_schema=vol.Schema({
+                vol.Required(
+                    CONF_TARGET_SALT_G_L,
+                    default=curr.get(CONF_TARGET_SALT_G_L, DEFAULT_TARGET_SALT_G_L),
+                ): selector.NumberSelector(
+                    selector.NumberSelectorConfig(
+                        min=0,
+                        max=10,
+                        step=0.1,
+                        mode=selector.NumberSelectorMode.BOX,
+                        unit_of_measurement="g/L",
+                    )
+                )
+            }),
+            last_step=False,
         )
 
     async def async_step_climate(self, user_input=None):

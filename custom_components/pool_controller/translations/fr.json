@@ -47,7 +47,6 @@
           "temp_water_sensor": "Température de l'eau",
           "ph_sensor": "Capteur pH",
           "chlorine_sensor": "Capteur de chlore (redox)",
-          "enable_saltwater": "Piscine au sel",
           "salt_sensor": "Capteur de sel",
           "tds_sensor": "Capteur TDS"
         },
@@ -55,9 +54,30 @@
           "temp_water_sensor": "Capteur de température de l'eau (obligatoire)",
           "ph_sensor": "Capteur pH (ex. Blueriiot)",
           "chlorine_sensor": "Capteur redox pour la mesure du chlore (mV)",
-          "enable_saltwater": "Active les fonctions et capteurs spécifiques aux piscines au sel",
           "salt_sensor": "Capteur du taux de sel",
           "tds_sensor": "Capteur TDS / conductivité"
+        }
+      },
+      "sanitizer": {
+        "title": "Désinfection",
+        "description": "Choisis comment la piscine est désinfectée. En mode sel ou mixte, l'objectif de sel sera demandé.",
+        "submit": "Suivant",
+        "data": {
+          "sanitizer_mode": "Mode de désinfection"
+        },
+        "data_description": {
+          "sanitizer_mode": "Chlore = dosage classique, Eau salée = électrolyseur au sel, Mixte = les deux"
+        }
+      },
+      "sanitizer_salt": {
+        "title": "Objectif de sel",
+        "description": "Définis le niveau de sel cible (g/L) pour eau salée ou mode mixte.",
+        "submit": "Suivant",
+        "data": {
+          "target_salt_g_l": "Sel cible (g/L)"
+        },
+        "data_description": {
+          "target_salt_g_l": "Utilisé pour calculer des recommandations quand il manque du sel"
         }
       },
       "climate": {
@@ -213,7 +233,6 @@
           "temp_water_sensor": "Température de l'eau",
           "ph_sensor": "Capteur pH",
           "chlorine_sensor": "Capteur de chlore (redox)",
-          "enable_saltwater": "Piscine au sel",
           "salt_sensor": "Capteur de sel",
           "tds_sensor": "Capteur TDS"
         },
@@ -221,9 +240,30 @@
           "temp_water_sensor": "Capteur de température de l'eau (obligatoire)",
           "ph_sensor": "Capteur pH (ex. Blueriiot)",
           "chlorine_sensor": "Capteur redox pour la mesure du chlore (mV)",
-          "enable_saltwater": "Active les fonctions et capteurs spécifiques aux piscines au sel",
           "salt_sensor": "Capteur du taux de sel",
           "tds_sensor": "Capteur TDS / conductivité"
+        }
+      },
+      "sanitizer": {
+        "title": "Désinfection",
+        "description": "Choisis comment la piscine est désinfectée.",
+        "submit": "Suivant",
+        "data": {
+          "sanitizer_mode": "Mode de désinfection"
+        },
+        "data_description": {
+          "sanitizer_mode": "Chlore = dosage classique, Eau salée = électrolyseur au sel, Mixte = les deux"
+        }
+      },
+      "sanitizer_salt": {
+        "title": "Objectif de sel",
+        "description": "Définis le niveau de sel cible (g/L) pour eau salée ou mode mixte.",
+        "submit": "Suivant",
+        "data": {
+          "target_salt_g_l": "Sel cible (g/L)"
+        },
+        "data_description": {
+          "target_salt_g_l": "Utilisé pour calculer des recommandations quand il manque du sel"
         }
       },
       "climate": {
@@ -349,7 +389,9 @@
     "sensor": {
       "status": { "name": "Statut" },
       "run_reason": { "name": "Raison de fonctionnement" },
-      "heat_reason": { "name": "Raison de chauffage" }
+      "heat_reason": { "name": "Raison de chauffage" },
+      "sanitizer_mode": { "name": "Désinfection" },
+      "tds_effective": { "name": "TDS (sans sel)" }
     }
   },
   "state": {
@@ -383,6 +425,13 @@
           "bathing": "Bain",
           "preheat": "Préchauffage",
           "pv": "PV"
+        }
+      },
+      "sanitizer_mode": {
+        "state": {
+          "chlorine": "Chlore",
+          "saltwater": "Eau salée",
+          "mixed": "Mixte"
         }
       }
     }

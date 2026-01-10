@@ -376,6 +376,32 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             # TDS-Umrechnung: μS/cm * 0.64 = ppm (Standard-Konversionsfaktor)
             tds_val = round(conductivity_val * 0.64) if conductivity_val else None
 
+            # Sanitizer mode affects how we interpret TDS:
+            # In saltwater/mixed mode, conductivity/TDS is dominated by salt and would otherwise look "too high".
+            # We therefore compute an "effective" TDS (approx. non-salt dissolved solids) by subtracting the
+            # configured target salt baseline (g/L -> ppm). This value is used for status and water-change
+            # recommendations.
+            sanitizer_mode = (conf.get(CONF_SANITIZER_MODE) or "").strip().lower()
+            if sanitizer_mode not in ("chlorine", "saltwater", "mixed"):
+                sanitizer_mode = "saltwater" if bool(conf.get(CONF_ENABLE_SALTWATER, False)) else DEFAULT_SANITIZER_MODE
+            saltwater_mode = sanitizer_mode in ("saltwater", "mixed")
+            try:
+                target_salt_g_l = float(conf.get(CONF_TARGET_SALT_G_L, DEFAULT_TARGET_SALT_G_L))
+            except Exception:
+                target_salt_g_l = DEFAULT_TARGET_SALT_G_L
+            salt_baseline_ppm = None
+            if saltwater_mode and target_salt_g_l and target_salt_g_l > 0:
+                salt_baseline_ppm = float(target_salt_g_l) * 1000.0
+            tds_effective = None
+            if tds_val is not None:
+                if salt_baseline_ppm is not None:
+                    try:
+                        tds_effective = max(0, int(round(float(tds_val) - salt_baseline_ppm)))
+                    except Exception:
+                        tds_effective = tds_val
+                else:
+                    tds_effective = tds_val
+
             # 2. Chemie (Ziel pH 7.2, Toleranzbereich 7.0-7.4)
             vol_f = conf.get(CONF_WATER_VOLUME, DEFAULT_VOL) / 1000
             vol_l = conf.get(CONF_WATER_VOLUME, DEFAULT_VOL)
@@ -385,17 +411,19 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             tds_water_change_liters = 0
             tds_water_change_percent = 0
             tds_high = False
-            
-            if tds_val is not None:
-                target_tds = 1200  # Ziel-TDS in ppm
-                if tds_val < 1500:
+
+            # Use effective TDS for maintenance interpretation (see above).
+            tds_for_maintenance = tds_effective if tds_effective is not None else tds_val
+            if tds_for_maintenance is not None:
+                target_tds = 1200  # Ziel-TDS (nicht-salzige gelöste Stoffe) in ppm
+                if tds_for_maintenance < 1500:
                     tds_status = "optimal"
-                elif tds_val < 2000:
+                elif tds_for_maintenance < 2000:
                     tds_status = "good"
-                elif tds_val < 2500:
+                elif tds_for_maintenance < 2500:
                     tds_status = "high"
                     tds_high = True
-                elif tds_val < 3000:
+                elif tds_for_maintenance < 3000:
                     tds_status = "critical"
                     tds_high = True
                 else:
@@ -403,8 +431,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     tds_high = True
                 
                 # Wasserwechsel-Berechnung: Liter = Volumen × (TDS_aktuell - Ziel) / TDS_aktuell
-                if vol_l and tds_val > target_tds:
-                    tds_water_change_liters = round(vol_l * (tds_val - target_tds) / tds_val)
+                if vol_l and tds_for_maintenance > target_tds:
+                    tds_water_change_liters = round(vol_l * (tds_for_maintenance - target_tds) / tds_for_maintenance)
                     tds_water_change_percent = round((tds_water_change_liters / vol_l) * 100)
             
             main_power = self._get_float(conf.get(CONF_MAIN_POWER_SENSOR))
@@ -861,6 +889,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 heat_reason = "off"
 
             data = {
+                "sanitizer_mode": sanitizer_mode,
                 "maintenance_active": maintenance_active,
                 "run_reason": run_reason,
                 "heat_reason": heat_reason,
@@ -869,6 +898,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "chlor_val": int(chlor_val) if chlor_val is not None else None,
                 "salt_val": round(salt_val, 1) if salt_val is not None else None,
                 "tds_val": tds_val,
+                "tds_effective": tds_effective,
                 "tds_status": tds_status,
                 "tds_high": tds_high,
                 "tds_water_change_liters": tds_water_change_liters,

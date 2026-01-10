@@ -47,7 +47,6 @@
           "temp_water_sensor": "Wassertemperatur",
           "ph_sensor": "pH-Wert Sensor",
           "chlorine_sensor": "Chlor (Redox) Sensor",
-          "enable_saltwater": "Salzwasserpool",
           "salt_sensor": "Salzgehalt Sensor",
           "tds_sensor": "Leitfähigkeit Sensor"
         },
@@ -55,9 +54,30 @@
           "temp_water_sensor": "Sensor für Poolwasser-Temperatur (Pflichtfeld)",
           "ph_sensor": "pH-Wert Sensor (Blueriiot oder ähnlich)",
           "chlorine_sensor": "Redox-Sensor für Chlor-Messung in mV",
-          "enable_saltwater": "Aktiviert salzwasser-spezifische Funktionen und Sensoren",
           "salt_sensor": "Salzgehalt-Sensor für Salzwasserpools",
           "tds_sensor": "Leitfähigkeits-Sensor (TDS) für Wasserqualität"
+        }
+      },
+      "sanitizer": {
+        "title": "Desinfektion",
+        "description": "Wie wird der Pool desinfiziert? Bei Salzwasser oder Mischbetrieb wird anschließend der Ziel-Salzgehalt abgefragt.",
+        "submit": "Weiter",
+        "data": {
+          "sanitizer_mode": "Desinfektionsmodus"
+        },
+        "data_description": {
+          "sanitizer_mode": "Chlor = klassische Dosierung, Salzwasser = Salzelektrolyse, Mischbetrieb = Salz + Chlor"
+        }
+      },
+      "sanitizer_salt": {
+        "title": "Ziel-Salzgehalt",
+        "description": "Zielwert für den Salzgehalt (g/L) im Salzwasser- bzw. Mischbetrieb.",
+        "submit": "Weiter",
+        "data": {
+          "target_salt_g_l": "Ziel Salz (g/L)"
+        },
+        "data_description": {
+          "target_salt_g_l": "Wird genutzt, um Empfehlungen bei zu wenig Salz zu berechnen"
         }
       },
       "climate": {
@@ -213,7 +233,6 @@
           "temp_water_sensor": "Wassertemperatur",
           "ph_sensor": "pH-Wert Sensor",
           "chlorine_sensor": "Chlor (Redox) Sensor",
-          "enable_saltwater": "Salzwasserpool",
           "salt_sensor": "Salzgehalt Sensor",
           "tds_sensor": "Leitfähigkeit Sensor"
         },
@@ -221,9 +240,30 @@
           "temp_water_sensor": "Sensor für Poolwasser-Temperatur (Pflichtfeld)",
           "ph_sensor": "pH-Wert Sensor (Blueriiot oder ähnlich)",
           "chlorine_sensor": "Redox-Sensor für Chlor-Messung in mV",
-          "enable_saltwater": "Aktiviert salzwasser-spezifische Funktionen und Sensoren",
           "salt_sensor": "Salzgehalt-Sensor für Salzwasserpools",
           "tds_sensor": "Leitfähigkeits-Sensor (TDS) für Wasserqualität"
+        }
+      },
+      "sanitizer": {
+        "title": "Desinfektion",
+        "description": "Desinfektionsmodus einstellen.",
+        "submit": "Weiter",
+        "data": {
+          "sanitizer_mode": "Desinfektionsmodus"
+        },
+        "data_description": {
+          "sanitizer_mode": "Chlor = klassische Dosierung, Salzwasser = Salzelektrolyse, Mischbetrieb = Salz + Chlor"
+        }
+      },
+      "sanitizer_salt": {
+        "title": "Ziel-Salzgehalt",
+        "description": "Zielwert für den Salzgehalt (g/L) im Salzwasser- bzw. Mischbetrieb.",
+        "submit": "Weiter",
+        "data": {
+          "target_salt_g_l": "Ziel Salz (g/L)"
+        },
+        "data_description": {
+          "target_salt_g_l": "Wird genutzt, um Empfehlungen bei zu wenig Salz zu berechnen"
         }
       },
       "climate": {
@@ -357,11 +397,13 @@
       "status": { "name": "Status" },
       "run_reason": { "name": "Laufgrund" },
       "heat_reason": { "name": "Heizgrund" },
+      "sanitizer_mode": { "name": "Desinfektion" },
       "tds_status": { "name": "TDS Status" },
       "ph_val": { "name": "pH-Wert" },
       "chlor_val": { "name": "Chlorgehalt" },
       "salt_val": { "name": "Salzgehalt" },
       "tds_val": { "name": "TDS" },
+      "tds_effective": { "name": "TDS (ohne Salz)" },
       "tds_water_change_liters": { "name": "TDS Wasserwechsel (L)" },
       "tds_water_change_percent": { "name": "TDS Wasserwechsel (%)" },
       "ph_minus_g": { "name": "pH- Aktion" },
@@ -421,6 +463,13 @@
           "bathing": "Baden",
           "preheat": "Vorheizen",
           "pv": "PV"
+        }
+      },
+      "sanitizer_mode": {
+        "state": {
+          "chlorine": "Chlor",
+          "saltwater": "Salzwasser",
+          "mixed": "Mischbetrieb"
         }
       },
       "tds_status": {

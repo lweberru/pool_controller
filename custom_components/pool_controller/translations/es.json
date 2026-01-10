@@ -47,7 +47,6 @@
           "temp_water_sensor": "Temperatura del agua",
           "ph_sensor": "Sensor de pH",
           "chlorine_sensor": "Sensor de cloro (redox)",
-          "enable_saltwater": "Piscina de agua salada",
           "salt_sensor": "Sensor de sal",
           "tds_sensor": "Sensor de TDS"
         },
@@ -55,9 +54,30 @@
           "temp_water_sensor": "Sensor de temperatura del agua (obligatorio)",
           "ph_sensor": "Sensor de pH (p. ej. Blueriiot)",
           "chlorine_sensor": "Sensor redox para medición de cloro (mV)",
-          "enable_saltwater": "Activa funciones y sensores para agua salada",
           "salt_sensor": "Sensor de nivel de sal",
           "tds_sensor": "Sensor de TDS / conductividad"
+        }
+      },
+      "sanitizer": {
+        "title": "Desinfección",
+        "description": "Elige cómo se desinfecta la piscina. Para agua salada o modo mixto, se pedirá el objetivo de sal.",
+        "submit": "Siguiente",
+        "data": {
+          "sanitizer_mode": "Modo de desinfección"
+        },
+        "data_description": {
+          "sanitizer_mode": "Cloro = dosificación clásica, Agua salada = clorador salino, Mixto = ambos"
+        }
+      },
+      "sanitizer_salt": {
+        "title": "Objetivo de sal",
+        "description": "Establece el nivel objetivo de sal (g/L) para agua salada o modo mixto.",
+        "submit": "Siguiente",
+        "data": {
+          "target_salt_g_l": "Sal objetivo (g/L)"
+        },
+        "data_description": {
+          "target_salt_g_l": "Se usa para calcular recomendaciones cuando falta sal"
         }
       },
       "climate": {
@@ -213,7 +233,6 @@
           "temp_water_sensor": "Temperatura del agua",
           "ph_sensor": "Sensor de pH",
           "chlorine_sensor": "Sensor de cloro (redox)",
-          "enable_saltwater": "Piscina de agua salada",
           "salt_sensor": "Sensor de sal",
           "tds_sensor": "Sensor de TDS"
         },
@@ -221,9 +240,30 @@
           "temp_water_sensor": "Sensor de temperatura del agua (obligatorio)",
           "ph_sensor": "Sensor de pH (p. ej. Blueriiot)",
           "chlorine_sensor": "Sensor redox para medición de cloro (mV)",
-          "enable_saltwater": "Activa funciones y sensores para agua salada",
           "salt_sensor": "Sensor de nivel de sal",
           "tds_sensor": "Sensor de TDS / conductividad"
+        }
+      },
+      "sanitizer": {
+        "title": "Desinfección",
+        "description": "Elige cómo se desinfecta la piscina.",
+        "submit": "Siguiente",
+        "data": {
+          "sanitizer_mode": "Modo de desinfección"
+        },
+        "data_description": {
+          "sanitizer_mode": "Cloro = dosificación clásica, Agua salada = clorador salino, Mixto = ambos"
+        }
+      },
+      "sanitizer_salt": {
+        "title": "Objetivo de sal",
+        "description": "Establece el nivel objetivo de sal (g/L) para agua salada o modo mixto.",
+        "submit": "Siguiente",
+        "data": {
+          "target_salt_g_l": "Sal objetivo (g/L)"
+        },
+        "data_description": {
+          "target_salt_g_l": "Se usa para calcular recomendaciones cuando falta sal"
         }
       },
       "climate": {
@@ -349,7 +389,9 @@
     "sensor": {
       "status": { "name": "Estado" },
       "run_reason": { "name": "Motivo de funcionamiento" },
-      "heat_reason": { "name": "Motivo de calefacción" }
+      "heat_reason": { "name": "Motivo de calefacción" },
+      "sanitizer_mode": { "name": "Desinfección" },
+      "tds_effective": { "name": "TDS (sin sal)" }
     }
   },
   "state": {
@@ -383,6 +425,13 @@
           "bathing": "Baño",
           "preheat": "Precalentamiento",
           "pv": "FV"
+        }
+      },
+      "sanitizer_mode": {
+        "state": {
+          "chlorine": "Cloro",
+          "saltwater": "Agua salada",
+          "mixed": "Mixto"
         }
       }
     }

@@ -54,6 +54,11 @@ CONF_ENABLE_SALTWATER = "enable_saltwater"
 CONF_ENABLE_AUX_HEATING = "enable_aux_heating"
 CONF_ENABLE_FROST_PROTECTION = "enable_frost_protection"
 
+# Sanitizer / Desinfektion
+# NOTE: `CONF_ENABLE_SALTWATER` is kept for backward compatibility.
+CONF_SANITIZER_MODE = "sanitizer_mode"  # chlorine | saltwater | mixed
+CONF_TARGET_SALT_G_L = "target_salt_g_l"  # target salt level in g/L (only relevant for saltwater/mixed)
+
 # Frost protection (duty-cycle) tuning
 # Below CONF_FROST_START_TEMP the pump may run periodically to prevent freezing.
 # Below CONF_FROST_SEVERE_TEMP the pump runs more often.
@@ -140,6 +145,11 @@ DEFAULT_HEATER_POWER_W = 3000
 # Default split powers (disabled by default -> use DEFAULT_HEATER_POWER_W)
 DEFAULT_HEATER_BASE_POWER_W = 0
 DEFAULT_HEATER_AUX_POWER_W = DEFAULT_HEATER_POWER_W
+
+# Sanitizer defaults
+DEFAULT_SANITIZER_MODE = "chlorine"
+# Typical saltwater chlorinator pools run ~3-5 g/L depending on the system.
+DEFAULT_TARGET_SALT_G_L = 4.0
 
 # Thermostat-like tolerances (hysteresis)
 # Defaults preserve current behavior as close as possible, while allowing proper 'stop at target'.
