@@ -5,12 +5,22 @@ from .const import DOMAIN, MANUFACTURER
 
 
 _AUTO_STATE_CLASS = object()
+_DEVICE_CLASS_PH = getattr(SensorDeviceClass, "PH", None)
 
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
     entities = [
         PoolStatusSensor(coordinator),
-        PoolChemSensor(coordinator, "ph_val", "pH-Wert", "pH", "mdi:ph"),
+        # SensorDeviceClass.PH expects no unit_of_measurement.
+        PoolChemSensor(
+            coordinator,
+            "ph_val",
+            "pH-Wert",
+            None,
+            "mdi:ph",
+            device_class=_DEVICE_CLASS_PH,
+            state_class=SensorStateClass.MEASUREMENT,
+        ),
         PoolChemSensor(coordinator, "chlor_val", "Chlorgehalt", "mV", "mdi:pool"),
         PoolChemSensor(coordinator, "salt_val", "Salzgehalt", "g/L", "mdi:shaker"),
         PoolChemSensor(coordinator, "tds_val", "TDS", "ppm", "mdi:water-opacity"),
