@@ -71,6 +71,19 @@ Development rules and release workflow (HACS via GitHub Releases): see [CONTRIBU
 
 ---
 
+## My personal setup (example)
+
+This is the setup I’m running Pool Controller with (as a concrete reference/example):
+
+- Softub Poseidon X
+- Connected via Zigbee smart plug (ZHA)
+- Blueriiot Blue Connect Go for the measurements
+- ESP32 to read the Blueriiot data
+- 2500 W immersion heater as auxiliary heating
+- Immersion heater connected via Zigbee smart plug
+
+---
+
 ## Installation & Setup
 
 ### Step 1: Install Custom Component via HACS (Recommended)
@@ -217,6 +230,9 @@ Entity IDs depend on your instance name, but the integration uses stable suffix 
 | `binary_sensor.<pool>_pv_allows` | PV surplus available for operation |
 | `binary_sensor.<pool>_should_main_on` | Power supply should be on |
 | `binary_sensor.<pool>_should_pump_on` | Circulation pump should be on |
+| `binary_sensor.<pool>_main_switch_on` | Physical main switch is currently ON (mirrors the configured external switch state) |
+| `binary_sensor.<pool>_pump_switch_on` | Physical pump switch is currently ON (mirrors the configured external switch state) |
+| `binary_sensor.<pool>_aux_heating_switch_on` | Physical auxiliary heater switch is currently ON (mirrors the configured external switch state) |
 | `binary_sensor.<pool>_low_chlor` | Chlorine below recommended level |
 | `binary_sensor.<pool>_ph_alert` | pH outside acceptable range |
 | `binary_sensor.<pool>_tds_high` | TDS too high (water change needed) |
@@ -225,6 +241,8 @@ Entity IDs depend on your instance name, but the integration uses stable suffix 
 | Entity | Type | Description |
 |--------|------|-------------|
 | `sensor.<pool>_status` | Enum | Current state: `normal`, `paused`, `frost_protection` |
+| `sensor.<pool>_run_reason` | Enum | Why the pool is running right now: `idle`, `bathing`, `chlorine`, `filter`, `preheat`, `pv`, `frost`, `pause`, `maintenance` |
+| `sensor.<pool>_heat_reason` | Enum | Why heating is allowed/active: `off`, `disabled`, `bathing`, `preheat`, `pv` |
 | `sensor.<pool>_tds_status` | Enum | Water quality assessment (backend-derived) |
 | `sensor.<pool>_ph_val` | Float | Water pH (0-14) |
 | `sensor.<pool>_chlor_val` | Float | Chlorine/ORP in mV |
@@ -713,8 +731,13 @@ automation:
 ### Useful Diagnostic Sensors
 - `sensor.pool_next_start_mins` - When next operation starts
 - `sensor.pool_next_event` - Next calendar event
+- `sensor.pool_run_reason` - Why the pool is running (idle/bathing/filter/chlorine/preheat/pv/frost/...)
+- `sensor.pool_heat_reason` - Why heating is allowed (off/disabled/bathing/preheat/pv)
 - `binary_sensor.pool_should_main_on` - Power supply requested
 - `binary_sensor.pool_should_pump_on` - Pump requested
+- `binary_sensor.pool_main_switch_on` - Physical main switch ON (mirror)
+- `binary_sensor.pool_pump_switch_on` - Physical pump switch ON (mirror)
+- `binary_sensor.pool_aux_heating_switch_on` - Physical aux heater switch ON (mirror)
 
 Enable debug logging in Home Assistant:
 ```yaml
@@ -746,6 +769,9 @@ All entity names, buttons, and configuration labels are translated automatically
 
 ### Pool not turning on
 - Check `binary_sensor.pool_should_main_on` and `binary_sensor.pool_should_pump_on`
+- For “requested vs physical” debugging, compare:
+  - `binary_sensor.pool_should_main_on` vs `binary_sensor.pool_main_switch_on`
+  - `binary_sensor.pool_should_pump_on` vs `binary_sensor.pool_pump_switch_on`
 - Review quiet hours and calendar events
 - Verify frost protection not active
 - Check `sensor.pool_status` for current state
@@ -798,6 +824,18 @@ For issues, questions, or feature requests:
 See [CHANGELOG.md](CHANGELOG.md) for complete version history.
 
 ### Recent Updates
+
+**v1.6.13** (Jan 2026)
+- Expose physical switch states as binary sensors (`*_main_switch_on`, `*_pump_switch_on`, `*_aux_heating_switch_on`) for transparency in dashboards.
+
+**v1.6.12** (Jan 2026)
+- Split heating power model for preheat estimation (base + auxiliary heater contribution).
+
+**v1.6.11** (Jan 2026)
+- Fix preheat countdown by using configured heater power for estimation (no longer derived from a live power sensor).
+
+**v1.6.10** (Jan 2026)
+- Heating is now gated by explicit reasons (calendar preheat / PV surplus / bathing), plus new observability via `run_reason` / `heat_reason` sensors.
 
 **v1.5.7** (Jan 2026)
 - Updated strings.json with English as default fallback language
