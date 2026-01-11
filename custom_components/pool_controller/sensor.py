@@ -29,6 +29,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolChemSensor(coordinator, "tds_val", "TDS", "ppm", "mdi:water-opacity"),
         PoolChemSensor(coordinator, "tds_effective", "TDS (ohne Salz)", "ppm", "mdi:water-opacity"),
         # Recommendations (not measurements): keep units but do not set state_class.
+        PoolChemSensor(coordinator, "salt_add_g", "Salz nachfüllen", "g", "mdi:shaker", device_class=SensorDeviceClass.WEIGHT, state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
         PoolChemSensor(coordinator, "tds_water_change_liters", "TDS Wasserwechsel", "L", "mdi:water-sync", device_class=SensorDeviceClass.VOLUME, state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
         PoolChemSensor(coordinator, "tds_water_change_percent", "TDS Wasserwechsel", "%", "mdi:water-percent", state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
         PoolChemSensor(coordinator, "ph_minus_g", "Ph- Aktion", "g", "mdi:pill", device_class=SensorDeviceClass.WEIGHT, state_class=None, entity_category=EntityCategory.DIAGNOSTIC),

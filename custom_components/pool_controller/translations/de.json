@@ -402,6 +402,7 @@
       "ph_val": { "name": "pH-Wert" },
       "chlor_val": { "name": "Chlorgehalt" },
       "salt_val": { "name": "Salzgehalt" },
+      "salt_add_g": { "name": "Salz nachfüllen" },
       "tds_val": { "name": "TDS" },
       "tds_effective": { "name": "TDS (ohne Salz)" },
       "tds_water_change_liters": { "name": "TDS Wasserwechsel (L)" },

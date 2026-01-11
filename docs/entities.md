@@ -34,6 +34,7 @@ Entity IDs depend on your instance name, but the integration uses stable suffix 
 | `sensor.<pool>_ph_val` | Float | Water pH (0-14) |
 | `sensor.<pool>_chlor_val` | Float | Chlorine/ORP in mV |
 | `sensor.<pool>_salt_val` | Float | Salt concentration in g/L (optional) |
+| `sensor.<pool>_salt_add_g` | Integer | Recommended salt to add in grams (saltwater/mixed only; 0 when OK/not applicable) |
 | `sensor.<pool>_tds_val` | Integer | Total Dissolved Solids (TDS) in ppm (optional) |
 | `sensor.<pool>_tds_effective` | Integer | Effective TDS in ppm (saltwater/mixed only; salt baseline subtracted) |
 | `sensor.<pool>_tds_water_change_liters` | Integer | Recommended water change volume (liters) |

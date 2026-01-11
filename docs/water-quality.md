@@ -59,6 +59,9 @@ Once configured, the integration automatically:
 - ✅ Flags pH out of range
 - ✅ Displays all metrics in sensors
 
+For a consolidated view of all **maintenance recommendation sensors** and the calculation details, see
+[Maintenance & Recommendations](maintenance.md).
+
 ## pH Adjustment Dosage
 
 **Formulas with Tolerance Range:**

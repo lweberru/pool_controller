@@ -391,6 +391,8 @@
       "run_reason": { "name": "Raison de fonctionnement" },
       "heat_reason": { "name": "Raison de chauffage" },
       "sanitizer_mode": { "name": "Désinfection" },
+      "salt_val": { "name": "Sel" },
+      "salt_add_g": { "name": "Ajouter du sel" },
       "tds_effective": { "name": "TDS (sans sel)" },
       "outdoor_temp": { "name": "Température extérieure" },
       "next_frost_mins": { "name": "Prochain cycle antigel dans" }

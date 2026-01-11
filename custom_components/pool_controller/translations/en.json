@@ -390,6 +390,8 @@
       "run_reason": { "name": "Run reason" },
       "heat_reason": { "name": "Heating reason" },
       "sanitizer_mode": { "name": "Sanitizer" },
+      "salt_val": { "name": "Salt" },
+      "salt_add_g": { "name": "Add salt" },
       "tds_effective": { "name": "TDS (excluding salt)" },
       "outdoor_temp": { "name": "Outdoor temperature" },
       "next_frost_mins": { "name": "Next frost protection run in" }

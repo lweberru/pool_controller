@@ -24,6 +24,7 @@ This repository’s documentation has been split into chapters for easier naviga
 - [Sensors, Entities & Controls](docs/entities.md)
 - [Services (Automations & Advanced)](docs/services.md)
 - [Water Quality Monitoring & Disinfection](docs/water-quality.md)
+- [Maintenance & Recommendations](docs/maintenance.md)
 - [Advanced Features](docs/advanced.md)
 - [Common Automations](docs/automations.md)
 - [Troubleshooting](docs/troubleshooting.md)

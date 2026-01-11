@@ -405,6 +405,16 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             # 2. Chemie (Ziel pH 7.2, Toleranzbereich 7.0-7.4)
             vol_f = conf.get(CONF_WATER_VOLUME, DEFAULT_VOL) / 1000
             vol_l = conf.get(CONF_WATER_VOLUME, DEFAULT_VOL)
+
+            # Salz-Empfehlung (nur in saltwater/mixed): benötigte Salzmenge in Gramm
+            salt_add_g = 0
+            try:
+                if saltwater_mode and vol_l and salt_val is not None and target_salt_g_l and target_salt_g_l > 0:
+                    missing_g_l = max(0.0, float(target_salt_g_l) - float(salt_val))
+                    # g/L * L => g
+                    salt_add_g = int(round(missing_g_l * float(vol_l)))
+            except Exception:
+                salt_add_g = 0
             
             # TDS-Wartung: Status und Wasserwechsel-Empfehlungen
             tds_status = None
@@ -927,6 +937,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "ph_val": round(ph_val, 2) if ph_val is not None else None,
                 "chlor_val": int(chlor_val) if chlor_val is not None else None,
                 "salt_val": round(salt_val, 1) if salt_val is not None else None,
+                "salt_add_g": salt_add_g,
                 "tds_val": tds_val,
                 "tds_effective": tds_effective,
                 "tds_status": tds_status,
