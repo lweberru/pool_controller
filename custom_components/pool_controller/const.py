@@ -110,6 +110,10 @@ OPT_KEY_FILTER_NEXT = "next_filter_start"
 # When active, all automation is suppressed (including frost protection).
 OPT_KEY_MAINTENANCE_ACTIVE = "maintenance_active"
 
+# HVAC enabled state (thermostat behavior when PV optimization is disabled).
+# This is independent from maintenance mode.
+OPT_KEY_HVAC_ENABLED = "hvac_enabled"
+
 # Alle Standardwerte (Defaults)
 DEFAULT_NAME = "Whirlpool Demo"
 DEFAULT_VOL = 1000

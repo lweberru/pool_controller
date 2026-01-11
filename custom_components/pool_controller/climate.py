@@ -72,7 +72,7 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
             name=self.coordinator.entry.data.get("name", "Whirlpool"),
             manufacturer=MANUFACTURER,
             model="Advanced Controller v1",
-            sw_version="1.6.21",
+            sw_version="1.6.22",
         )
 
     @property
@@ -85,16 +85,37 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
 
     @property
     def hvac_mode(self):
-        # hvac_mode is used here as a coarse "enabled/disabled" switch.
-        # In Wartung (maintenance) everything is suppressed.
-        return HVACMode.OFF if bool(getattr(self.coordinator, "maintenance_active", False)) else HVACMode.HEAT
+        # hvac_mode is used as an indicator for active heating:
+        # - OFF during maintenance
+        # - OFF when HVAC is disabled
+        # - HEAT only while we are actually heating
+        if bool(getattr(self.coordinator, "maintenance_active", False)):
+            return HVACMode.OFF
+        if not bool(getattr(self.coordinator, "hvac_enabled", True)):
+            return HVACMode.OFF
+
+        data = getattr(self.coordinator, "data", {}) or {}
+        try:
+            cur = float(self.current_temperature) if self.current_temperature is not None else None
+            tgt = float(self.target_temperature) if self.target_temperature is not None else None
+        except Exception:
+            cur, tgt = None, None
+        heat_reason = str(data.get("heat_reason") or "").lower()
+        wants_heat = heat_reason not in ("", "off", "disabled")
+        temp_below_target = (cur is not None and tgt is not None and cur < tgt)
+
+        # Prefer explicit demand/switch state when available.
+        if bool(data.get("should_aux_on")) or bool(data.get("aux_heating_switch_on")):
+            return HVACMode.HEAT
+        if wants_heat and temp_below_target and bool(data.get("should_pump_on")):
+            return HVACMode.HEAT
+        return HVACMode.OFF
 
     @property
     def hvac_action(self):
-        if self.hvac_mode == HVACMode.OFF: return HVACAction.OFF
-        if self.current_temperature and self.current_temperature < self.target_temperature:
-            return HVACAction.HEATING
-        return HVACAction.IDLE
+        if self.hvac_mode == HVACMode.OFF:
+            return HVACAction.OFF
+        return HVACAction.HEATING
 
     @property
     def preset_mode(self):
@@ -112,11 +133,15 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
 
     async def async_set_hvac_mode(self, hvac_mode):
         # Do not directly toggle switches here; the coordinator is authoritative.
-        # OFF is mapped to Wartung (hard lockout), HEAT disables Wartung.
+        # hvac_mode is *not* maintenance anymore:
+        # - HEAT: user-triggered "heat to target" (start bathing timer with estimated duration)
+        # - OFF: stop manual heating (bathing timer) and disable HVAC
         if hvac_mode == HVACMode.OFF:
-            await self.coordinator.set_maintenance(True)
+            await self.coordinator.stop_manual_heat()
+            await self.coordinator.set_hvac_enabled(False)
         else:
-            await self.coordinator.set_maintenance(False)
+            await self.coordinator.set_hvac_enabled(True)
+            await self.coordinator.start_manual_heat_to_target()
         await self.coordinator.async_request_refresh()
 
     async def async_set_preset_mode(self, preset_mode: str):

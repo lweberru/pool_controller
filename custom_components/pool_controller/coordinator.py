@@ -28,6 +28,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self._last_should_aux_on = None
         self.aux_enabled = True  # Master-Enable für Zusatzheizung (default: aktiviert)
         self.maintenance_active = False
+        # HVAC enabled state (thermostat-style heating when PV optimization is disabled).
+        self.hvac_enabled = True
         # Internal demand states (hysteresis)
         self._aux_heat_demand = False
         self._pv_heat_demand = False
@@ -45,6 +47,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self._did_migrate_timers = False
         if entry and entry.options:
             self.maintenance_active = bool(entry.options.get(OPT_KEY_MAINTENANCE_ACTIVE, False))
+            self.hvac_enabled = bool(entry.options.get(OPT_KEY_HVAC_ENABLED, True))
             # New timers
             mu = entry.options.get(OPT_KEY_MANUAL_UNTIL)
             if mu:
@@ -107,6 +110,68 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             self.filter_interval = DEFAULT_FILTER_INTERVAL
             self.pv_on_threshold = DEFAULT_PV_ON
             self.pv_off_threshold = DEFAULT_PV_OFF
+            self.hvac_enabled = True
+
+    def _estimate_minutes_to_target(self, conf: dict, water_temp: float | None) -> int | None:
+        """Best-effort estimate how long heating to target may take (in minutes)."""
+        try:
+            vol_l = conf.get(CONF_WATER_VOLUME, DEFAULT_VOL)
+            vol_l = float(vol_l) if vol_l is not None else None
+        except Exception:
+            vol_l = None
+
+        try:
+            target_temp = float(getattr(self, "target_temp", DEFAULT_TARGET_TEMP))
+        except Exception:
+            target_temp = DEFAULT_TARGET_TEMP
+
+        measured_temp = water_temp if water_temp is not None else 20.0
+        try:
+            delta_t = max(0.0, float(target_temp) - float(measured_temp))
+        except Exception:
+            delta_t = 0.0
+        if delta_t <= 0:
+            return 0
+
+        # Heating power model (same intent as in _async_update_data): base + (aux if enabled)
+        try:
+            base_w = int(conf.get(CONF_HEATER_BASE_POWER_W, DEFAULT_HEATER_BASE_POWER_W))
+        except Exception:
+            base_w = DEFAULT_HEATER_BASE_POWER_W
+        try:
+            aux_w = int(conf.get(CONF_HEATER_AUX_POWER_W, DEFAULT_HEATER_AUX_POWER_W))
+        except Exception:
+            aux_w = DEFAULT_HEATER_AUX_POWER_W
+        base_w = max(0, int(base_w or 0))
+        aux_w = max(0, int(aux_w or 0))
+
+        try:
+            legacy_present = CONF_HEATER_POWER_W in conf and conf.get(CONF_HEATER_POWER_W) is not None
+            split_effective_raw = base_w + aux_w
+            if legacy_present and split_effective_raw <= 0:
+                base_w = max(0, int(float(conf.get(CONF_HEATER_POWER_W))))
+        except Exception:
+            pass
+
+        enable_aux = bool(conf.get(CONF_ENABLE_AUX_HEATING, False))
+        power_w = base_w + (aux_w if enable_aux else 0)
+        if not power_w or power_w <= 0:
+            try:
+                power_w = int(conf.get(CONF_HEATER_POWER_W, DEFAULT_HEATER_POWER_W))
+            except Exception:
+                power_w = DEFAULT_HEATER_POWER_W
+        if not power_w or power_w <= 0:
+            power_w = DEFAULT_HEATER_POWER_W
+
+        if not vol_l or vol_l <= 0 or power_w <= 0:
+            return None
+
+        # t_min in Minuten: V * 1.16 * deltaT / P * 60
+        t_min = (vol_l * 1.16 * delta_t) / float(power_w) * 60.0
+        try:
+            return max(0, int(round(t_min)))
+        except Exception:
+            return None
 
     async def async_migrate_legacy_timers(self):
         """Best-effort Migration: alte Timer-Optionen auf neue Keys umlegen und alte Keys entfernen."""
@@ -301,6 +366,26 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             new_opts = {**self.entry.options}
             if active:
                 new_opts[OPT_KEY_MAINTENANCE_ACTIVE] = True
+                # Maintenance is a hard lockout: disable HVAC + clear timers so we don't auto-resume.
+                self.hvac_enabled = False
+                new_opts[OPT_KEY_HVAC_ENABLED] = False
+
+                # Clear any running timers (manual, pause, auto-filter) best effort.
+                self.manual_timer_until = None
+                self.manual_timer_type = None
+                self.manual_timer_duration = None
+                self.auto_filter_until = None
+                self.auto_filter_duration = None
+                self.pause_until = None
+                self.pause_duration = None
+
+                new_opts.pop(OPT_KEY_MANUAL_UNTIL, None)
+                new_opts.pop(OPT_KEY_MANUAL_TYPE, None)
+                new_opts.pop(OPT_KEY_MANUAL_DURATION, None)
+                new_opts.pop(OPT_KEY_AUTO_FILTER_UNTIL, None)
+                new_opts.pop(OPT_KEY_AUTO_FILTER_DURATION, None)
+                new_opts.pop(OPT_KEY_PAUSE_UNTIL, None)
+                new_opts.pop(OPT_KEY_PAUSE_DURATION, None)
                 _LOGGER.warning(
                     "Wartung aktiviert (%s): Automatik inkl. Frostschutz ist deaktiviert.",
                     self.entry.entry_id,
@@ -311,6 +396,39 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             await self._async_update_entry_options(new_opts)
         except Exception:
             _LOGGER.exception("Fehler beim Speichern von Wartungsmodus")
+
+    async def set_hvac_enabled(self, enabled: bool):
+        """Enable/disable thermostat behavior (independent from maintenance)."""
+        enabled = bool(enabled)
+        if enabled == bool(getattr(self, "hvac_enabled", True)):
+            return
+        self.hvac_enabled = enabled
+        try:
+            new_opts = {**(self.entry.options or {})}
+            if enabled:
+                new_opts[OPT_KEY_HVAC_ENABLED] = True
+            else:
+                new_opts[OPT_KEY_HVAC_ENABLED] = False
+            await self._async_update_entry_options(new_opts)
+        except Exception:
+            _LOGGER.exception("Fehler beim Speichern von hvac_enabled")
+
+    async def start_manual_heat_to_target(self):
+        """User-triggered heat-to-target: uses the bathing manual timer with an estimated duration."""
+        if not self.entry:
+            return
+        conf = {**(self.entry.data or {}), **(self.entry.options or {})}
+        water_temp = self._get_float(conf.get(CONF_TEMP_WATER))
+        est = self._estimate_minutes_to_target(conf, water_temp)
+        # If we can't estimate, fall back to a sensible default.
+        minutes = 60 if est is None else int(est)
+        # Clamp to avoid ridiculous durations due to wrong config/sensors.
+        minutes = max(1, min(24 * 60, minutes))
+        await self.activate_manual_timer(timer_type="bathing", minutes=minutes)
+
+    async def stop_manual_heat(self):
+        """Stops user-triggered heating (bathing timer only)."""
+        await self.deactivate_manual_timer(only_type="bathing")
 
     async def set_target_temperature(self, temperature: float):
         """Set and persist the target temperature (setpoint)."""
@@ -388,6 +506,9 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             maintenance_active = bool(conf.get(OPT_KEY_MAINTENANCE_ACTIVE, False))
             # Keep attribute in sync so other entities (e.g. climate) can read it.
             self.maintenance_active = maintenance_active
+
+            # HVAC enabled state (independent from maintenance).
+            self.hvac_enabled = bool(conf.get(OPT_KEY_HVAC_ENABLED, True))
 
             # First run: migrate legacy timer options (best effort)
             await self.async_migrate_legacy_timers()
@@ -894,12 +1015,17 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 and now < cal_next["start"]
             )
 
-            # Heizen ist NICHT "immer wenn Solltemp nicht erreicht".
-            # Heizen ist nur erlaubt, wenn ein expliziter Grund vorliegt (Baden/Preheat/PV).
+            # Thermostat behavior: if PV optimization is disabled, allow heating to maintain target temperature
+            # (similar to a normal climate entity), gated by hvac_enabled.
+            thermostat_run = bool((not enable_pv) and getattr(self, "hvac_enabled", True))
+
+            # Heizen ist NICHT "immer wenn Solltemp nicht erreicht" im PV-Modus.
+            # Ohne PV-Optimierung verhält es sich wie ein normales Climate (thermostat_run).
             heat_allowed = (not maintenance_active) and (not pause_active) and (not in_quiet) and (
                 is_bathing
                 or preheat_active
                 or pv_run
+                or thermostat_run
             )
 
             # Demand flags
@@ -952,6 +1078,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     heat_reason = "preheat"
                 elif pv_run:
                     heat_reason = "pv"
+                elif thermostat_run:
+                    heat_reason = "thermostat"
                 else:
                     heat_reason = "off"
             else:
