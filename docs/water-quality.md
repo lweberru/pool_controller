@@ -59,8 +59,47 @@ Once configured, the integration automatically:
 - ✅ Flags pH out of range
 - ✅ Displays all metrics in sensors
 
-For a consolidated view of all **maintenance recommendation sensors** and the calculation details, see
-[Maintenance & Recommendations](maintenance.md).
+This chapter also documents the integration’s **maintenance recommendation sensors** and the (best-effort) calculations
+behind them (pH, chlorine/ORP, salt, TDS/water change).
+
+## Maintenance & Recommendations
+
+The dashboard card
+([pool_controller_dashboard_frontend](https://github.com/lweberru/pool_controller_dashboard_frontend)) renders these
+recommendations in its **Maintenance** section.
+
+Note: All recommendations are heuristics and depend on correct inputs (pool volume, sensor calibration). Use your own
+judgement and chemical product instructions.
+
+### Overview (recommendation sensors)
+
+Typical recommendation sensors (entity IDs depend on your instance name):
+
+- `sensor.<pool>_ph_plus_g` – grams of pH+ to add
+- `sensor.<pool>_ph_minus_g` – grams of pH- to add
+- `sensor.<pool>_chlor_spoons` – chlorine dosage in spoons (based on ORP mV)
+- `sensor.<pool>_salt_add_g` – grams of salt to add (saltwater/mixed)
+- `sensor.<pool>_tds_water_change_liters` – recommended water change volume in liters
+- `sensor.<pool>_tds_water_change_percent` – recommended water change in percent
+
+Related “context” sensors:
+
+- `sensor.<pool>_sanitizer_mode` – `chlorine` | `saltwater` | `mixed`
+- `sensor.<pool>_tds_val` – raw derived TDS (ppm)
+- `sensor.<pool>_tds_effective` – effective TDS (ppm, salt baseline subtracted in saltwater/mixed)
+- `sensor.<pool>_tds_status` – `optimal` | `good` | `high` | `critical` | `urgent`
+- `binary_sensor.<pool>_tds_high` – water change needed (based on thresholds)
+
+For the full entity list, see [Sensors, Entities & Controls](entities.md).
+
+### Inputs used for calculations
+
+- Pool volume in liters: configured via `water_volume`.
+- pH: `sensor` configured as `ph_sensor`.
+- Chlorine/ORP in mV: `sensor` configured as `chlorine_sensor`.
+- Conductivity in µS/cm: `sensor` configured as `tds_sensor` (conductivity).
+- Salt concentration in g/L: `sensor` configured as `salt_sensor`.
+- Target salt level in g/L: option `target_salt_g_l` (saltwater/mixed).
 
 ## pH Adjustment Dosage
 
@@ -98,6 +137,25 @@ The selected mode is exposed as:
 - `sensor.<pool>_sanitizer_mode`
 
 If you upgrade from an older version: the legacy boolean `enable_saltwater` is still recognized for backward compatibility, but the preferred configuration is `sanitizer_mode`.
+
+## Salt recommendation (saltwater / mixed)
+
+Only relevant when `sanitizer_mode` is **saltwater** or **mixed**.
+
+- Current salt concentration: `sensor.<pool>_salt_val` (g/L)
+- Target salt concentration: option `target_salt_g_l` (g/L)
+
+Let `volume_L` be the configured pool volume in liters.
+
+```
+missing_g_l = max(0, target_salt_g_l - salt_g_l)
+salt_add_g = round(missing_g_l * volume_L)
+```
+
+This recommendation is exposed as:
+- `sensor.<pool>_salt_add_g` (g)
+
+The sensor is `0` when OK / not applicable.
 
 ## TDS (Total Dissolved Solids) & Water Change Recommendation
 
