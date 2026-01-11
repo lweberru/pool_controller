@@ -530,12 +530,16 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             
             # Chlor: Zielwert 700 mV, pro 100 mV unter 700 -> 0.25 Löffel (für 1000L)
             # Skalierung mit tatsächlicher Wassermenge
-            if chlor_val and chlor_val < 700:
-                quarter_spoons = round((700 - chlor_val) / 100)  # Viertellöffel
-                base_spoons = quarter_spoons / 4.0  # Zu Löffeln umrechnen
-                chlor_spoons = round(base_spoons * (vol_l / 1000.0), 2)  # Mit Wassermenge skalieren
-            else:
-                chlor_spoons = 0
+                # Chlor/ORP: Zielwert 700 mV, pro 100 mV unter 700 -> 0.25 Löffel (für 1000L)
+                # Skalierung mit tatsächlicher Wassermenge.
+                # WICHTIG: In reinem Salzwasser-Modus wird kein "Chlor hinzufügen" empfohlen,
+                # da die Chlor-Erzeugung über die Salzumwandlung erfolgen soll.
+                if sanitizer_mode in ("chlorine", "mixed") and chlor_val and chlor_val < 700:
+                    quarter_spoons = round((700 - chlor_val) / 100)  # Viertellöffel
+                    base_spoons = quarter_spoons / 4.0  # Zu Löffeln umrechnen
+                    chlor_spoons = round(base_spoons * (vol_l / 1000.0), 2)  # Mit Wassermenge skalieren
+                else:
+                    chlor_spoons = 0
 
             # 3. Kalender & Aufheizzeit
             # Heizleistung ist eine Konstante (W) und darf NICHT aus einem Live-Pumpen-Power-Sensor abgeleitet werden.
