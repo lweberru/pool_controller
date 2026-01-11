@@ -45,6 +45,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolTimerSensor(coordinator, "manual_timer_mins", "mdi:timer", kind="manual"),
         PoolTimerSensor(coordinator, "auto_filter_timer_mins", "mdi:timer-cog", kind="auto_filter"),
         PoolTimerSensor(coordinator, "pause_timer_mins", "mdi:pause-circle", kind="pause"),
+        PoolTimerSensor(coordinator, "frost_timer_mins", "mdi:snowflake-clock", kind="frost"),
         PoolChemSensor(coordinator, "next_filter_mins", "Nächster Filter in", "min", "mdi:clock-start", device_class=SensorDeviceClass.DURATION),
         PoolChemSensor(
             coordinator,
@@ -235,5 +236,11 @@ class PoolTimerSensor(PoolBaseSensor):
             return {
                 "active": bool(self.coordinator.data.get("pause_timer_active")),
                 "duration_minutes": self.coordinator.pause_duration,
+            }
+        if self._kind == "frost":
+            return {
+                "active": bool(self.coordinator.data.get("frost_timer_active")),
+                "duration_minutes": self.coordinator.frost_timer_duration,
+                "type": "frost",
             }
         return {}

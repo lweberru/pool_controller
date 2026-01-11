@@ -44,6 +44,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self.pause_until = None
         self.pause_duration = None
 
+        # Frost-Timer (analog zu manual/auto_filter/pause)
+        self.frost_timer_until = None
+        self.frost_timer_duration = None
+
         self._did_migrate_timers = False
         if entry and entry.options:
             self.maintenance_active = bool(entry.options.get(OPT_KEY_MAINTENANCE_ACTIVE, False))
@@ -104,6 +108,9 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
             self.pause_until = None
             self.pause_duration = None
+
+            self.frost_timer_until = None
+            self.frost_timer_duration = None
 
             self.next_filter_start = None
             self.filter_minutes = DEFAULT_FILTER_DURATION
@@ -660,6 +667,25 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 now_local = dt_util.as_local(now)
                 epoch_minutes = int(now_local.timestamp() // 60)
                 frost_active = (run_mins > 0) and ((epoch_minutes % interval) < run_mins)
+
+            # Frost-Timer: Wenn frost_active, berechne Restlaufzeit und setze Timer-Attribute
+            frost_timer_mins = 0
+            frost_timer_active = False
+            frost_timer_duration = None
+            frost_timer_type = None
+            if frost_active and frost_danger and frost_run_mins > 0:
+                now_local = dt_util.as_local(now)
+                epoch_minutes = int(now_local.timestamp() // 60)
+                rem = frost_run_mins - (epoch_minutes % max(1, interval))
+                frost_timer_mins = max(0, rem)
+                frost_timer_active = True
+                frost_timer_duration = frost_run_mins
+                frost_timer_type = "frost"
+                self.frost_timer_until = now + timedelta(minutes=frost_timer_mins)
+                self.frost_timer_duration = frost_run_mins
+            else:
+                self.frost_timer_until = None
+                self.frost_timer_duration = None
             is_holiday = await self._check_holiday(conf.get(CONF_HOLIDAY_CALENDAR))
             we_or_holiday = is_holiday or (now.weekday() >= 5)
 
@@ -1109,6 +1135,11 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "frost_danger": frost_danger,
                 "frost_active": frost_active,
                 "next_frost_mins": next_frost_mins,
+                # Frost-Timer analog zu manual/auto_filter/pause
+                "frost_timer_mins": frost_timer_mins,
+                "frost_timer_active": frost_timer_active,
+                "frost_timer_duration": frost_timer_duration,
+                "frost_timer_type": frost_timer_type,
                 "next_event": cal_next.get("start"),
                 "next_event_end": cal_next.get("end"),
                 "next_event_summary": cal_next.get("summary"),

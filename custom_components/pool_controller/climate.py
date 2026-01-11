@@ -85,10 +85,10 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
 
     @property
     def hvac_mode(self):
-        # hvac_mode is used as an indicator for active heating:
-        # - OFF during maintenance
-        # - OFF when HVAC is disabled
-        # - HEAT only while we are actually heating
+        # hvac_mode zeigt aktives Heizen an:
+        # - OFF bei Wartung
+        # - OFF wenn HVAC deaktiviert
+        # - HEAT bei Frostlauf, manuellem Heizen, PV, Preheat, Thermostat
         if bool(getattr(self.coordinator, "maintenance_active", False)):
             return HVACMode.OFF
         if not bool(getattr(self.coordinator, "hvac_enabled", True)):
@@ -103,6 +103,10 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
         heat_reason = str(data.get("heat_reason") or "").lower()
         wants_heat = heat_reason not in ("", "off", "disabled")
         temp_below_target = (cur is not None and tgt is not None and cur < tgt)
+
+        # Frostlauf: Wenn frost_timer_active, dann immer HEAT
+        if data.get("frost_timer_active"):
+            return HVACMode.HEAT
 
         # Prefer explicit demand/switch state when available.
         if bool(data.get("should_aux_on")) or bool(data.get("aux_heating_switch_on")):
