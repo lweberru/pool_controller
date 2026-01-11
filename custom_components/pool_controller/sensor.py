@@ -1,5 +1,5 @@
 from homeassistant.components.sensor import SensorEntity, SensorDeviceClass, SensorStateClass
-from homeassistant.const import EntityCategory
+from homeassistant.const import EntityCategory, UnitOfTemperature
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import DOMAIN, MANUFACTURER
 
@@ -35,6 +35,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolChemSensor(coordinator, "ph_plus_g", "Ph+ Aktion", "g", "mdi:pill", device_class=SensorDeviceClass.WEIGHT, state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
         PoolChemSensor(coordinator, "chlor_spoons", "Chlor Aktion", "Löffel", "mdi:spoon-sugar", state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
         PoolChemSensor(coordinator, "next_start_mins", "Nächster Start in", "min", "mdi:clock-start", device_class=SensorDeviceClass.DURATION),
+        PoolChemSensor(coordinator, "next_frost_mins", "Nächster Frost in", "min", "mdi:snowflake-clock", device_class=SensorDeviceClass.DURATION, state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
         PoolTimeSensor(coordinator, "next_event", "Nächster Event Start")
     ]
     # Timer/Status sensors
@@ -44,6 +45,15 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolTimerSensor(coordinator, "auto_filter_timer_mins", "mdi:timer-cog", kind="auto_filter"),
         PoolTimerSensor(coordinator, "pause_timer_mins", "mdi:pause-circle", kind="pause"),
         PoolChemSensor(coordinator, "next_filter_mins", "Nächster Filter in", "min", "mdi:clock-start", device_class=SensorDeviceClass.DURATION),
+        PoolChemSensor(
+            coordinator,
+            "outdoor_temp",
+            "Außentemperatur",
+            UnitOfTemperature.CELSIUS,
+            "mdi:thermometer",
+            device_class=SensorDeviceClass.TEMPERATURE,
+            state_class=SensorStateClass.MEASUREMENT,
+        ),
         PoolTimeSensor(coordinator, "next_event_end", "Nächster Event Ende"),
         PoolTextSensor(coordinator, "next_event_summary", "Nächster Event Name"),
     ])

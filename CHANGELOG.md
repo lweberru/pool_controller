@@ -4,6 +4,10 @@ This project is released via GitHub Releases (HACS). Tags follow `vX.Y.Z`.
 
 ## Recent Updates
 
+### v1.6.17 (Jan 2026)
+- Add `sensor.*_outdoor_temp` and `sensor.*_next_frost_mins` for better frost protection observability (next duty-cycle run countdown).
+- Clarify translations so `next_frost_mins` reads as “next frost protection run”, not “next frost”.
+
 ### v1.6.13 (Jan 2026)
 - Expose physical switch states as binary sensors (`*_main_switch_on`, `*_pump_switch_on`, `*_aux_heating_switch_on`) for transparency in dashboards.
 

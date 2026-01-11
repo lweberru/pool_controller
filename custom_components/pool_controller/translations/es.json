@@ -391,7 +391,9 @@
       "run_reason": { "name": "Motivo de funcionamiento" },
       "heat_reason": { "name": "Motivo de calefacción" },
       "sanitizer_mode": { "name": "Desinfección" },
-      "tds_effective": { "name": "TDS (sin sal)" }
+      "tds_effective": { "name": "TDS (sin sal)" },
+      "outdoor_temp": { "name": "Temperatura exterior" },
+      "next_frost_mins": { "name": "Próximo ciclo antihielo en" }
     }
   },
   "state": {

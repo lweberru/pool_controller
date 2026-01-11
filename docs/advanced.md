@@ -53,6 +53,16 @@ When outdoor temperature drops below the configured frost start temperature:
 - ✅ Pump requests are duty-cycled via `binary_sensor.<pool>_frost_active`
 - ✅ During quiet hours the duty-cycle stays off by default; it only overrides quiet hours if outdoor temperature is below the configured emergency threshold
 
+### Next frost protection run (countdown)
+
+For dashboards, the integration also exposes:
+
+- `sensor.<pool>_next_frost_mins`: minutes until the next **frost protection duty-cycle run starts**.
+
+Notes:
+- This is a best-effort estimate (based on the configured duty-cycle interval and quiet hours).
+- It is **not** a weather forecast (“next frost”); it only appears when frost protection conditions apply.
+
 ## Optional Features
 
 ### Auxiliary Heating

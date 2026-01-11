@@ -42,6 +42,8 @@ Entity IDs depend on your instance name, but the integration uses stable suffix 
 | `sensor.<pool>_ph_plus_g` | Float | Recommended pH+ dosage in grams |
 | `sensor.<pool>_chlor_spoons` | Float | Recommended chlorine dosage in spoons |
 | `sensor.<pool>_next_start_mins` | Integer | Minutes until next operation |
+| `sensor.<pool>_next_frost_mins` | Integer | Minutes until the next **frost protection run starts** (duty-cycle; best-effort) |
+| `sensor.<pool>_outdoor_temp` | Float | Outdoor temperature in °C (used for frost protection logic) |
 | `sensor.<pool>_next_event` | Timestamp | Next calendar event start |
 | `sensor.<pool>_next_event_end` | Timestamp | Next calendar event end |
 | `sensor.<pool>_next_event_summary` | String | Next calendar event name |
@@ -100,9 +102,11 @@ The integration provides four quick-action buttons (one per topic, using the def
 
 ### Useful Diagnostic Sensors
 - `sensor.pool_next_start_mins` - When next operation starts
+- `sensor.pool_next_frost_mins` - When the next frost protection duty-cycle run starts (minutes)
 - `sensor.pool_next_event` - Next calendar event
 - `sensor.pool_run_reason` - Why the pool is running (idle/bathing/filter/chlorine/preheat/pv/frost/...)
 - `sensor.pool_heat_reason` - Why heating is allowed (off/disabled/bathing/preheat/pv)
+- `sensor.pool_outdoor_temp` - Outdoor temperature (input for frost protection)
 - `binary_sensor.pool_should_main_on` - Power supply requested
 - `binary_sensor.pool_should_pump_on` - Pump requested
 - `binary_sensor.pool_main_switch_on` - Physical main switch ON (mirror)

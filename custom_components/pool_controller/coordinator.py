@@ -733,6 +733,35 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
             in_quiet = _in_quiet_period(conf)
 
+            # =========================
+            # Next frost run (best-effort)
+            # =========================
+            next_frost_mins = None
+            try:
+                enable_frost_effective = bool(enable_frost and (ot is not None) and (ot < frost_start_temp) and (not maintenance_active) and (frost_run_mins > 0))
+                if enable_frost_effective:
+                    # If frost is currently suppressed by quiet hours (unless extremely cold), skip to the end of quiet.
+                    if in_quiet and (ot is not None) and (ot > frost_quiet_override_below):
+                        qe = _quiet_end_for(now, conf)
+                        if qe is not None:
+                            mins_to_qe = max(0, int(((qe - now).total_seconds() + 59) // 60))
+                            qe_local = dt_util.as_local(qe)
+                            epoch_minutes_qe = int(qe_local.timestamp() // 60)
+                            rem = epoch_minutes_qe % max(1, int(interval))
+                            if rem < frost_run_mins:
+                                next_frost_mins = mins_to_qe
+                            else:
+                                next_frost_mins = mins_to_qe + (max(1, int(interval)) - rem)
+                    else:
+                        now_local = dt_util.as_local(now)
+                        epoch_minutes = int(now_local.timestamp() // 60)
+                        rem = epoch_minutes % max(1, int(interval))
+                        # We only show the next start when we are currently NOT running.
+                        if not frost_active:
+                            next_frost_mins = max(0, max(1, int(interval)) - rem)
+            except Exception:
+                next_frost_mins = None
+
             # Wartung = Hard-Lockout: keine Automatik-Aktionen (auch kein Frostschutz)
             if maintenance_active:
                 frost_active = False
@@ -894,6 +923,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "run_reason": run_reason,
                 "heat_reason": heat_reason,
                 "water_temp": round(water_temp, 1) if water_temp is not None else None,
+                "outdoor_temp": round(outdoor_temp, 1) if outdoor_temp is not None else None,
                 "ph_val": round(ph_val, 2) if ph_val is not None else None,
                 "chlor_val": int(chlor_val) if chlor_val is not None else None,
                 "salt_val": round(salt_val, 1) if salt_val is not None else None,
@@ -909,6 +939,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "is_we_holiday": we_or_holiday,
                 "frost_danger": frost_danger,
                 "frost_active": frost_active,
+                "next_frost_mins": next_frost_mins,
                 "next_event": cal_next.get("start"),
                 "next_event_end": cal_next.get("end"),
                 "next_event_summary": cal_next.get("summary"),
