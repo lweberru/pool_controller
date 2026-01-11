@@ -1,5 +1,6 @@
 import logging
 import re
+import inspect
 from datetime import timedelta, datetime
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
@@ -173,7 +174,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
         if changed:
             try:
-                await self.hass.config_entries.async_update_entry(self.entry, options=opts)
+                await self._async_update_entry_options(opts)
             except Exception:
                 _LOGGER.exception("Fehler beim Migrieren alter Timer-Optionen")
 
@@ -204,7 +205,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             self.next_filter_start = next_start
             new_opts[OPT_KEY_FILTER_NEXT] = next_start.isoformat()
         try:
-            await self.hass.config_entries.async_update_entry(self.entry, options=new_opts)
+            await self._async_update_entry_options(new_opts)
         except Exception:
             _LOGGER.exception("Fehler beim Speichern von manual timer")
 
@@ -220,7 +221,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             new_opts.pop(OPT_KEY_MANUAL_UNTIL, None)
             new_opts.pop(OPT_KEY_MANUAL_TYPE, None)
             new_opts.pop(OPT_KEY_MANUAL_DURATION, None)
-            await self.hass.config_entries.async_update_entry(self.entry, options=new_opts)
+            await self._async_update_entry_options(new_opts)
         except Exception:
             _LOGGER.exception("Fehler beim Löschen von manual timer")
 
@@ -235,7 +236,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self.pause_duration = minutes
         try:
             new_opts = {**self.entry.options, OPT_KEY_PAUSE_UNTIL: until.isoformat(), OPT_KEY_PAUSE_DURATION: minutes}
-            await self.hass.config_entries.async_update_entry(self.entry, options=new_opts)
+            await self._async_update_entry_options(new_opts)
         except Exception:
             _LOGGER.exception("Fehler beim Speichern von pause timer")
 
@@ -246,7 +247,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             new_opts = {**self.entry.options}
             new_opts.pop(OPT_KEY_PAUSE_UNTIL, None)
             new_opts.pop(OPT_KEY_PAUSE_DURATION, None)
-            await self.hass.config_entries.async_update_entry(self.entry, options=new_opts)
+            await self._async_update_entry_options(new_opts)
         except Exception:
             _LOGGER.exception("Fehler beim Löschen von pause timer")
 
@@ -266,7 +267,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             new_opts[OPT_KEY_AUTO_FILTER_UNTIL] = until.isoformat()
             new_opts[OPT_KEY_AUTO_FILTER_DURATION] = run_minutes
             new_opts[OPT_KEY_FILTER_NEXT] = next_start.isoformat()
-            await self.hass.config_entries.async_update_entry(self.entry, options=new_opts)
+            await self._async_update_entry_options(new_opts)
         except Exception:
             _LOGGER.exception("Fehler beim Speichern von auto filter timer")
 
@@ -285,7 +286,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             new_opts.pop(OPT_KEY_AUTO_FILTER_UNTIL, None)
             new_opts.pop(OPT_KEY_AUTO_FILTER_DURATION, None)
             new_opts[OPT_KEY_FILTER_NEXT] = next_start.isoformat()
-            await self.hass.config_entries.async_update_entry(self.entry, options=new_opts)
+            await self._async_update_entry_options(new_opts)
         except Exception:
             _LOGGER.exception("Fehler beim Stoppen von filter")
 
@@ -307,7 +308,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             else:
                 new_opts.pop(OPT_KEY_MAINTENANCE_ACTIVE, None)
                 _LOGGER.info("Wartung deaktiviert (%s): Automatik läuft wieder.", self.entry.entry_id)
-            await self.hass.config_entries.async_update_entry(self.entry, options=new_opts)
+            await self._async_update_entry_options(new_opts)
         except Exception:
             _LOGGER.exception("Fehler beim Speichern von Wartungsmodus")
 
@@ -321,9 +322,34 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         try:
             new_opts = {**(self.entry.options or {})}
             new_opts[OPT_KEY_TARGET_TEMP] = temperature
-            await self.hass.config_entries.async_update_entry(self.entry, options=new_opts)
+            await self._async_update_entry_options(new_opts)
         except Exception:
             _LOGGER.exception("Fehler beim Speichern von target_temp")
+
+    async def _async_update_entry_options(self, options: dict) -> None:
+        """Compat wrapper for config entry updates.
+
+        Home Assistant's `async_update_entry` has historically been a callback returning bool
+        in some versions, while other versions may return an awaitable.
+        """
+        if not self.entry:
+            return
+        res = self.hass.config_entries.async_update_entry(self.entry, options=options)
+        if inspect.isawaitable(res):
+            await res
+
+    async def _async_turn_entity(self, entity_id: str | None, turn_on: bool) -> None:
+        """Best-effort turn_on/turn_off with service fallback.
+
+        Uses the entity's domain service when available, otherwise falls back to
+        `homeassistant.turn_on/off` to avoid ServiceNotFound for domains that are not loaded.
+        """
+        if not entity_id:
+            return
+        domain = str(entity_id).split(".", 1)[0]
+        service = "turn_on" if turn_on else "turn_off"
+        call_domain = domain if self.hass.services.has_service(domain, service) else "homeassistant"
+        await self.hass.services.async_call(call_domain, service, {"entity_id": entity_id})
 
     def _thermostat_demand(self, current_temp: float | None, target_temp: float, cold_tolerance: float, hot_tolerance: float, prev_on: bool) -> bool:
         """Simple hysteresis: turn ON below (target-cold), turn OFF at/above (target+hot)."""
@@ -527,19 +553,19 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             else:
                 ph_minus = 0
                 ph_plus = 0
-            
-            # Chlor: Zielwert 700 mV, pro 100 mV unter 700 -> 0.25 Löffel (für 1000L)
-            # Skalierung mit tatsächlicher Wassermenge
-                # Chlor/ORP: Zielwert 700 mV, pro 100 mV unter 700 -> 0.25 Löffel (für 1000L)
-                # Skalierung mit tatsächlicher Wassermenge.
-                # WICHTIG: In reinem Salzwasser-Modus wird kein "Chlor hinzufügen" empfohlen,
-                # da die Chlor-Erzeugung über die Salzumwandlung erfolgen soll.
-                if sanitizer_mode in ("chlorine", "mixed") and chlor_val and chlor_val < 700:
-                    quarter_spoons = round((700 - chlor_val) / 100)  # Viertellöffel
+
+            # Chlor/ORP: Zielwert 700 mV, pro 100 mV unter 700 -> 0.25 Löffel (für 1000L)
+            # Skalierung mit tatsächlicher Wassermenge.
+            # WICHTIG: In reinem Salzwasser-Modus wird kein "Chlor hinzufügen" empfohlen,
+            # da die Chlor-Erzeugung über die Salzumwandlung erfolgen soll.
+            chlor_spoons = 0
+            try:
+                if sanitizer_mode in ("chlorine", "mixed") and chlor_val is not None and float(chlor_val) < 700:
+                    quarter_spoons = round((700 - float(chlor_val)) / 100)  # Viertellöffel
                     base_spoons = quarter_spoons / 4.0  # Zu Löffeln umrechnen
-                    chlor_spoons = round(base_spoons * (vol_l / 1000.0), 2)  # Mit Wassermenge skalieren
-                else:
-                    chlor_spoons = 0
+                    chlor_spoons = round(base_spoons * (vol_l / 1000.0), 2) if vol_l else 0
+            except Exception:
+                chlor_spoons = 0
 
             # 3. Kalender & Aufheizzeit
             # Heizleistung ist eine Konstante (W) und darf NICHT aus einem Live-Pumpen-Power-Sensor abgeleitet werden.
@@ -802,7 +828,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     self.next_filter_start = shifted
                     try:
                         new_opts = {**self.entry.options, OPT_KEY_FILTER_NEXT: shifted.isoformat()}
-                        await self.hass.config_entries.async_update_entry(self.entry, options=new_opts)
+                        await self._async_update_entry_options(new_opts)
                     except Exception:
                         _LOGGER.exception("Fehler beim Verschieben von next_filter_start (Ruhezeit)")
 
@@ -830,7 +856,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                         self.next_filter_start = shifted
                         try:
                             new_opts = {**self.entry.options, OPT_KEY_FILTER_NEXT: shifted.isoformat()}
-                            await self.hass.config_entries.async_update_entry(self.entry, options=new_opts)
+                            await self._async_update_entry_options(new_opts)
                         except Exception:
                             _LOGGER.exception("Fehler beim Umplanen von next_filter_start (Ruhezeit, fällig)")
                 elif pv_check:
@@ -1029,11 +1055,11 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 if desired_main != self._last_should_main_on:
                     if desired_main:
                         if not demo and main_switch_id:
-                            await self.hass.services.async_call("switch", "turn_on", {"entity_id": main_switch_id})
+                            await self._async_turn_entity(main_switch_id, True)
                     else:
                         # don't turn off main while bathing
                         if (maintenance_active or not is_bathing) and not demo and main_switch_id:
-                            await self.hass.services.async_call("switch", "turn_off", {"entity_id": main_switch_id})
+                            await self._async_turn_entity(main_switch_id, False)
                     self._last_should_main_on = desired_main
 
                 # Toggle pump switch (may be same as main switch)
@@ -1041,10 +1067,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     if desired_pump != self._last_should_pump_on:
                         if desired_pump:
                             if not demo:
-                                await self.hass.services.async_call("switch", "turn_on", {"entity_id": pump_switch_id})
+                                await self._async_turn_entity(pump_switch_id, True)
                         else:
                             if (maintenance_active or not is_bathing) and not demo:
-                                await self.hass.services.async_call("switch", "turn_off", {"entity_id": pump_switch_id})
+                                await self._async_turn_entity(pump_switch_id, False)
                         self._last_should_pump_on = desired_pump
                 else:
                     # Keep in sync when both are the same underlying entity
@@ -1057,10 +1083,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     if physical_aux_should_be_on != self._last_should_aux_on:
                         if physical_aux_should_be_on:
                             if not demo:
-                                await self.hass.services.async_call("switch", "turn_on", {"entity_id": aux_switch_id})
+                                await self._async_turn_entity(aux_switch_id, True)
                         else:
                             if not demo:
-                                await self.hass.services.async_call("switch", "turn_off", {"entity_id": aux_switch_id})
+                                await self._async_turn_entity(aux_switch_id, False)
                         self._last_should_aux_on = physical_aux_should_be_on
             except Exception:
                 _LOGGER.exception("Fehler beim Anwenden der gewünschten Schaltzustände")
