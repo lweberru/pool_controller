@@ -1013,11 +1013,16 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
             # Convenience booleans for logic
 
-                is_bathing = manual_active and self.manual_timer_type == "bathing"
-                is_chlorinating = manual_active and self.manual_timer_type == "chlorine"
-                is_manual_filter = manual_active and self.manual_timer_type == "filter"
-                # Optimiert: einheitliche Variable für alle manuellen Timer-Typen, die "heat" erzwingen
-                is_manual_heat = manual_active and self.manual_timer_type in ("bathing", "chlorine", "filter")
+            # Initialisierung, um UnboundLocalError zu vermeiden
+            is_bathing = False
+            is_chlorinating = False
+            is_manual_filter = False
+            is_manual_heat = False
+            if manual_active and self.manual_timer_type is not None:
+                is_bathing = self.manual_timer_type == "bathing"
+                is_chlorinating = self.manual_timer_type == "chlorine"
+                is_manual_filter = self.manual_timer_type == "filter"
+                is_manual_heat = self.manual_timer_type in ("bathing", "chlorine", "filter")
 
                 # PV-based run should stop once target is reached (with same hysteresis).
                 try:
