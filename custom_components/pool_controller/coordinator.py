@@ -971,13 +971,22 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             enable_auto_filter = conf.get(CONF_ENABLE_AUTO_FILTER, True)
             if enable_auto_filter and getattr(self, "next_filter_start", None) and _is_in_quiet_at(self.next_filter_start, conf):
                 shifted = _quiet_end_for(self.next_filter_start, conf)
-                if shifted and shifted != self.next_filter_start:
-                    self.next_filter_start = shifted
+                if shifted:
+                    # Make sure the scheduled start is strictly after the quiet period end
+                    # to avoid edge cases where the computed time equals or falls
+                    # marginally before the quiet end (off-by-one minute issues).
                     try:
-                        new_opts = {**self.entry.options, OPT_KEY_FILTER_NEXT: shifted.isoformat()}
-                        await self._async_update_entry_options(new_opts)
+                        shifted = shifted + timedelta(seconds=1)
                     except Exception:
-                        _LOGGER.exception("Fehler beim Verschieben von next_filter_start (Ruhezeit)")
+                        # Best-effort: if timedelta fails for any reason, keep shifted as-is
+                        pass
+                    if shifted != self.next_filter_start:
+                        self.next_filter_start = shifted
+                        try:
+                            new_opts = {**self.entry.options, OPT_KEY_FILTER_NEXT: shifted.isoformat()}
+                            await self._async_update_entry_options(new_opts)
+                        except Exception:
+                            _LOGGER.exception("Fehler beim Verschieben von next_filter_start (Ruhezeit)")
 
             next_filter_mins = None
             if getattr(self, "next_filter_start", None):
