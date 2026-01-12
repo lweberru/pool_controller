@@ -26,7 +26,12 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self._last_should_main_on = None
         self._last_should_pump_on = None
         self._last_should_aux_on = None
-        self.aux_enabled = True  # Master-Enable für Zusatzheizung (default: aktiviert)
+        # Master-Enable für Zusatzheizung: vom gemergten config/options lesen (default: False)
+        try:
+            merged = {**(entry.data or {}), **(entry.options or {})} if entry else {}
+            self.aux_enabled = bool(merged.get(CONF_ENABLE_AUX_HEATING, False))
+        except Exception:
+            self.aux_enabled = False
         self.maintenance_active = False
         # HVAC enabled state (thermostat-style heating when PV optimization is disabled).
         self.hvac_enabled = True
