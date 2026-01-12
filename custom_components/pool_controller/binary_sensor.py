@@ -51,19 +51,11 @@ class PoolBinary(CoordinatorEntity, BinarySensorEntity):
             val = data.get("ph_val")
             return val is not None and (float(val) < 7.1 or float(val) > 7.4)
         if self._key == "aux_present":
-            # Consider aux present if aux heating is enabled or an aux_heating_switch is configured
+            # Presence is determined solely by the enable-flag. If the flag is not set,
+            # an optionally configured entity must NOT be considered as available or usable.
             merged = {**(self.coordinator.entry.data or {}), **(self.coordinator.entry.options or {})}
             try:
-                if bool(merged.get(CONF_ENABLE_AUX_HEATING, False)):
-                    return True
+                return bool(merged.get(CONF_ENABLE_AUX_HEATING, False))
             except Exception:
-                pass
-            # Only count a configured aux switch as present if the referenced entity actually exists in hass.states
-            try:
-                aux_switch = merged.get(CONF_AUX_HEATING_SWITCH)
-                if aux_switch and isinstance(aux_switch, str) and self.hass.states.get(aux_switch):
-                    return True
-            except Exception:
-                pass
-            return False
+                return False
         return False
