@@ -1365,18 +1365,11 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     except Exception:
                         end_utc = end
 
-                parsed.append(
-                        # Read aux-enable flag from merged config (options override data)
-                        try:
-                            self.aux_enabled = bool(merged.get(CONF_ENABLE_AUX_HEATING, False))
-                        except Exception:
-                            self.aux_enabled = True
-                    {
-                        "start": start_utc,
-                        "end": end_utc,
-                        "summary": ev.get("summary", ""),
-                    }
-                )
+                parsed.append({
+                    "start": start_utc,
+                    "end": end_utc,
+                    "summary": ev.get("summary", ""),
+                })
 
             if not parsed:
                 return {}
