@@ -1,5 +1,14 @@
 # Changelog
 
+All notable changes to this integration are documented in this file.
+
+## [1.6.30] - 2026-01-12
+- Add `binary_sensor.<pool>_aux_present` — indicates whether an auxiliary heater is configured (true when `enable_aux_heating` is set or an `aux_heating_switch` is configured).
+- Minor docs update to list the new binary sensor.
+
+For previous changes see release tags on GitHub.
+# Changelog
+
 This project is released via GitHub Releases (HACS). Tags follow `vX.Y.Z`.
 
 ## Recent Updates

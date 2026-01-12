@@ -1,6 +1,6 @@
 from homeassistant.components.binary_sensor import BinarySensorEntity, BinarySensorDeviceClass
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from .const import DOMAIN, MANUFACTURER
+from .const import DOMAIN, MANUFACTURER, CONF_ENABLE_AUX_HEATING, CONF_AUX_HEATING_SWITCH
 
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
@@ -18,6 +18,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolBinary(coordinator, "main_switch_on", "Hauptschalter an", BinarySensorDeviceClass.POWER),
         PoolBinary(coordinator, "pump_switch_on", "Pumpe an", None),
         PoolBinary(coordinator, "aux_heating_switch_on", "Zusatzheizung an", BinarySensorDeviceClass.HEAT),
+        # Indicates whether an auxiliary heater is configured for this controller
+        PoolBinary(coordinator, "aux_present", "Zusatzheizung konfiguriert", None),
         PoolBinary(coordinator, "low_chlor", "Niedriger Chlorwert", None),
         PoolBinary(coordinator, "ph_alert", "pH außerhalb Bereich", None),
         PoolBinary(coordinator, "tds_high", "TDS zu hoch", BinarySensorDeviceClass.PROBLEM),
@@ -48,4 +50,16 @@ class PoolBinary(CoordinatorEntity, BinarySensorEntity):
         if self._key == "ph_alert":
             val = data.get("ph_val")
             return val is not None and (float(val) < 7.1 or float(val) > 7.4)
+        if self._key == "aux_present":
+            # Consider aux present if aux heating is enabled or an aux_heating_switch is configured
+            merged = {**(self.coordinator.entry.data or {}), **(self.coordinator.entry.options or {})}
+            try:
+                if bool(merged.get(CONF_ENABLE_AUX_HEATING, False)):
+                    return True
+            except Exception:
+                pass
+            try:
+                return bool(merged.get(CONF_AUX_HEATING_SWITCH))
+            except Exception:
+                return False
         return False

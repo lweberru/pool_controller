@@ -18,6 +18,7 @@ Entity IDs depend on your instance name, but the integration uses stable suffix 
 | `binary_sensor.<pool>_main_switch_on` | Physical main switch is currently ON (mirrors the configured external switch state) |
 | `binary_sensor.<pool>_pump_switch_on` | Physical pump switch is currently ON (mirrors the configured external switch state) |
 | `binary_sensor.<pool>_aux_heating_switch_on` | Physical auxiliary heater switch is currently ON (mirrors the configured external switch state) |
+| `binary_sensor.<pool>_aux_present` | Auxiliary heater configured (true when `enable_aux_heating` is set or an aux switch is configured) |
 | `binary_sensor.<pool>_low_chlor` | Chlorine below recommended level |
 | `binary_sensor.<pool>_ph_alert` | pH outside acceptable range |
 | `binary_sensor.<pool>_tds_high` | TDS too high (water change needed) |
