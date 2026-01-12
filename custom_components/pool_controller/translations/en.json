@@ -379,6 +379,7 @@
     },
     "binary_sensor": {
       "maintenance_active": { "name": "Maintenance mode" },
+      "aux_present": { "name": "Auxiliary heater configured" },
       "should_main_on": { "name": "Power required" },
       "should_pump_on": { "name": "Pump required" },
       "main_switch_on": { "name": "Main switch on" },

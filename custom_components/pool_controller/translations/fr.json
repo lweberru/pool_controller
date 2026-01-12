@@ -380,6 +380,7 @@
     },
     "binary_sensor": {
       "maintenance_active": { "name": "Mode maintenance" },
+      "aux_present": { "name": "Chauffage auxiliaire configuré" },
       "should_main_on": { "name": "Alimentation requise" },
       "should_pump_on": { "name": "Pompe requise" },
       "main_switch_on": { "name": "Interrupteur principal actif" },

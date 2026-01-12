@@ -389,6 +389,7 @@
       "main_switch_on": { "name": "Hauptschalter an" },
       "pump_switch_on": { "name": "Pumpe an" },
       "aux_heating_switch_on": { "name": "Zusatzheizung an" },
+      "aux_present": { "name": "Zusatzheizung konfiguriert" },
       "low_chlor": { "name": "Niedriger Chlorwert" },
       "ph_alert": { "name": "pH außerhalb Bereich" },
       "tds_high": { "name": "TDS zu hoch" }

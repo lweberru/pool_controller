@@ -407,6 +407,9 @@
       "tds_high": {
         "name": "TDS too high"
       }
+      ,"aux_present": {
+        "name": "Auxiliary heater configured"
+      }
     },
     "sensor": {
       "status": {

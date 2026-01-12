@@ -380,6 +380,7 @@
     },
     "binary_sensor": {
       "maintenance_active": { "name": "Modo de mantenimiento" },
+      "aux_present": { "name": "Calefacción auxiliar configurada" },
       "should_main_on": { "name": "Alimentación requerida" },
       "should_pump_on": { "name": "Bomba requerida" },
       "main_switch_on": { "name": "Interruptor principal encendido" },
