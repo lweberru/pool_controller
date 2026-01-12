@@ -58,8 +58,12 @@ class PoolBinary(CoordinatorEntity, BinarySensorEntity):
                     return True
             except Exception:
                 pass
+            # Only count a configured aux switch as present if the referenced entity actually exists in hass.states
             try:
-                return bool(merged.get(CONF_AUX_HEATING_SWITCH))
+                aux_switch = merged.get(CONF_AUX_HEATING_SWITCH)
+                if aux_switch and isinstance(aux_switch, str) and self.hass.states.get(aux_switch):
+                    return True
             except Exception:
-                return False
+                pass
+            return False
         return False
