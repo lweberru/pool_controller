@@ -1024,25 +1024,25 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 is_manual_filter = self.manual_timer_type == "filter"
                 is_manual_heat = self.manual_timer_type in ("bathing", "chlorine", "filter")
 
-                # PV-based run should stop once target is reached (with same hysteresis).
-                try:
-                    if water_temp is not None and float(water_temp) >= float(self.target_temp):
-                        pv_heat_demand = False
-                    else:
-                        pv_heat_demand = self._thermostat_demand(
-                            current_temp=water_temp,
-                            target_temp=self.target_temp,
-                            cold_tolerance=cold_tol,
-                            hot_tolerance=hot_tol,
-                            prev_on=bool(self._pv_heat_demand),
-                        )
-                except Exception:
-                    pv_heat_demand = bool(self._pv_heat_demand)
-                self._pv_heat_demand = pv_heat_demand
-                pv_run = bool(enable_pv and pv_allows and (not in_quiet) and (not maintenance_active) and (pv_heat_demand))
+            # PV-based run should stop once target is reached (with same hysteresis).
+            try:
+                if water_temp is not None and float(water_temp) >= float(self.target_temp):
+                    pv_heat_demand = False
+                else:
+                    pv_heat_demand = self._thermostat_demand(
+                        current_temp=water_temp,
+                        target_temp=self.target_temp,
+                        cold_tolerance=cold_tol,
+                        hot_tolerance=hot_tol,
+                        prev_on=bool(self._pv_heat_demand),
+                    )
+            except Exception:
+                pv_heat_demand = bool(self._pv_heat_demand)
+            self._pv_heat_demand = pv_heat_demand
+            pv_run = bool(enable_pv and pv_allows and (not in_quiet) and (not maintenance_active) and (pv_heat_demand))
 
-                # Optimiert: manuelle Timer erzwingen "heat"-Modus
-                manual_heat_run = is_manual_heat
+            # Optimiert: manuelle Timer erzwingen "heat"-Modus
+            manual_heat_run = is_manual_heat
 
 
             # "Preheat" ist nur die Phase VOR einem Kalender-Event, in der wir bereits starten dürfen.
