@@ -1086,6 +1086,11 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                         )
                 except Exception:
                     aux_heat_demand = bool(self._aux_heat_demand)
+            # Bei manueller Filterung oder Chlorung darf die Zusatzheizung
+            # nur laufen, wenn gleichzeitig PV-basierter Heizbedarf vorhanden ist.
+            if (is_manual_filter or is_chlorinating) and not pv_run:
+                aux_heat_demand = False
+
             self._aux_heat_demand = aux_heat_demand
 
 
