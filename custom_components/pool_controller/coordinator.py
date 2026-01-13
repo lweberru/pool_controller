@@ -4,6 +4,7 @@ import inspect
 from datetime import timedelta, datetime
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
+from homeassistant.helpers import entity_registry as er
 from .const import *
 
 _LOGGER = logging.getLogger(__name__)
@@ -26,6 +27,9 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self._last_should_main_on = None
         self._last_should_pump_on = None
         self._last_should_aux_on = None
+        # Track last toggle attempts per entity to avoid rapid retry loops
+        # when an entity becomes unavailable after a toggle (prevents oscillation).
+        self._last_toggle_attempts = {}
         # Master-Enable für Zusatzheizung: vom gemergten config/options lesen (default: False)
         try:
             merged = {**(entry.data or {}), **(entry.options or {})} if entry else {}
@@ -497,9 +501,20 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         return ct < (tt - cold)
 
     async def _async_update_data(self):
+        # Safe defaults used if update cannot complete (avoid exposing None/unset keys)
+        _safe_defaults = {
+            "should_pump_on": False,
+            "should_main_on": False,
+            "should_aux_on": False,
+        }
+
         try:
+            _LOGGER.debug("Coordinator update start (%s)", getattr(self.entry, "entry_id", None))
             now = dt_util.now()
             conf = {**self.entry.data, **self.entry.options}
+
+            # Ensure aux_enabled is always a boolean (defensive)
+            self.aux_enabled = bool(getattr(self, "aux_enabled", False))
 
             # Physical switch entity IDs (may be external entities). Used for state mirroring.
             main_switch_id = conf.get(CONF_MAIN_SWITCH)
@@ -1009,6 +1024,36 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                         manual_mins = _mins_left(self.manual_timer_until) if manual_active else 0
 
             # Auto-start filter when next_filter_start reached (in Wartung deaktiviert)
+            # Debug: if the scheduled time is reached but auto-start is skipped, log why.
+            if getattr(self, "next_filter_start", None) and now >= self.next_filter_start:
+                reasons = []
+                if maintenance_active:
+                    reasons.append("maintenance_active")
+                if not enable_auto_filter:
+                    reasons.append("auto_filter_disabled")
+                if auto_filter_active:
+                    reasons.append("auto_filter_already_active")
+                if pause_active:
+                    reasons.append("pause_active")
+                if in_quiet:
+                    reasons.append("in_quiet")
+                if enable_pv and not pv_allows:
+                    reasons.append("pv_not_allowed")
+                if reasons:
+                    _LOGGER.debug(
+                        "Auto-filter time reached but skipped: %s -- flags maintenance=%s enable_auto_filter=%s auto_filter_active=%s pause=%s in_quiet=%s pv_allows=%s pv_enabled=%s next_filter_start=%s now=%s",
+                        ", ".join(reasons),
+                        maintenance_active,
+                        enable_auto_filter,
+                        auto_filter_active,
+                        pause_active,
+                        in_quiet,
+                        pv_allows,
+                        enable_pv,
+                        getattr(self, "next_filter_start", None),
+                        now,
+                    )
+
             if (not maintenance_active) and enable_auto_filter and getattr(self, "next_filter_start", None) and now >= self.next_filter_start and (not auto_filter_active) and (not pause_active):
                 pv_check = pv_allows or not conf.get(CONF_ENABLE_PV_OPTIMIZATION, False)
                 if in_quiet:
@@ -1250,15 +1295,64 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 desired_main = data.get("should_main_on")
                 desired_pump = data.get("should_pump_on")
                 desired_aux = data.get("should_aux_on")
+                # Debounce / retry guard: avoid rapid repeated attempts for the same entity
+                now = dt_util.now()
+                min_retry = timedelta(seconds=120)
+
+                # access entity registry once for source checks
+                try:
+                    ent_reg = er.async_get(self.hass)
+                except Exception:
+                    ent_reg = None
+
+                def _is_available(entity_id: str) -> bool:
+                    if not entity_id:
+                        return False
+                    st = self.hass.states.get(entity_id)
+                    return bool(st and st.state not in ("unknown", "unavailable"))
+
+                def _is_integration_entity(entity_id: str) -> bool:
+                    if not entity_id or not ent_reg:
+                        return False
+                    try:
+                        ent = ent_reg.async_get(entity_id)
+                        return bool(ent and ent.config_entry_id == getattr(self.entry, "entry_id", None))
+                    except Exception:
+                        return False
+
+                def _can_attempt(entity_id: str) -> bool:
+                    # No entity configured -> nothing to attempt (caller should handle)
+                    if not entity_id:
+                        return True
+                    # Avoid toggling entities that were created by this integration (would cause feedback loops)
+                    if _is_integration_entity(entity_id):
+                        _LOGGER.debug("Skipping toggle for %s: entity created by this integration (avoid recursion)", entity_id)
+                        return False
+                    # Do not attempt when entity is unavailable/unknown
+                    if not _is_available(entity_id):
+                        _LOGGER.warning("Skipping toggle for %s: entity not available", entity_id)
+                        return False
+                    last = self._last_toggle_attempts.get(entity_id)
+                    if last and (now - last) < min_retry:
+                        _LOGGER.warning(
+                            "Skipping toggle for %s: last attempt %s seconds ago",
+                            entity_id,
+                            int((now - last).total_seconds()),
+                        )
+                        return False
+                    return True
 
                 # Toggle main switch according to desired state
                 if desired_main != self._last_should_main_on:
                     if desired_main:
-                        if not demo and main_switch_id:
+                        if not demo and main_switch_id and _can_attempt(main_switch_id):
+                            # record attempt timestamp to avoid immediate retries
+                            self._last_toggle_attempts[main_switch_id] = now
                             await self._async_turn_entity(main_switch_id, True)
                     else:
                         # don't turn off main while bathing
-                        if (maintenance_active or not is_bathing) and not demo and main_switch_id:
+                        if (maintenance_active or not is_bathing) and not demo and main_switch_id and _can_attempt(main_switch_id):
+                            self._last_toggle_attempts[main_switch_id] = now
                             await self._async_turn_entity(main_switch_id, False)
                     self._last_should_main_on = desired_main
 
@@ -1266,10 +1360,12 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 if pump_switch_id and pump_switch_id != main_switch_id:
                     if desired_pump != self._last_should_pump_on:
                         if desired_pump:
-                            if not demo:
+                            if not demo and _can_attempt(pump_switch_id):
+                                self._last_toggle_attempts[pump_switch_id] = now
                                 await self._async_turn_entity(pump_switch_id, True)
                         else:
-                            if (maintenance_active or not is_bathing) and not demo:
+                            if (maintenance_active or not is_bathing) and not demo and _can_attempt(pump_switch_id):
+                                self._last_toggle_attempts[pump_switch_id] = now
                                 await self._async_turn_entity(pump_switch_id, False)
                         self._last_should_pump_on = desired_pump
                 else:
@@ -1282,19 +1378,59 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     physical_aux_should_be_on = desired_aux and self.aux_enabled
                     if physical_aux_should_be_on != self._last_should_aux_on:
                         if physical_aux_should_be_on:
-                            if not demo:
+                            if not demo and _can_attempt(aux_switch_id):
+                                self._last_toggle_attempts[aux_switch_id] = now
                                 await self._async_turn_entity(aux_switch_id, True)
                         else:
-                            if not demo:
+                            if not demo and _can_attempt(aux_switch_id):
+                                self._last_toggle_attempts[aux_switch_id] = now
                                 await self._async_turn_entity(aux_switch_id, False)
                         self._last_should_aux_on = physical_aux_should_be_on
             except Exception:
                 _LOGGER.exception("Fehler beim Anwenden der gewünschten Schaltzustände")
 
+            _LOGGER.debug(
+                "Coordinator update success (%s) run_reason=%s should_main=%s should_aux=%s",
+                getattr(self.entry, "entry_id", None),
+                data.get("run_reason"),
+                data.get("should_main_on"),
+                data.get("should_aux_on"),
+            )
+
+            # Defensive: ensure critical boolean keys are present and normalized
+            for _k in ("should_pump_on", "should_main_on", "should_aux_on"):
+                data[_k] = bool(data.get(_k))
+
+            # Cache last good data for fallback
+            self.data = data
+            _LOGGER.debug("Coordinator cached data updated (%s)", getattr(self.entry, "entry_id", None))
             return data
         except Exception as err:
-            _LOGGER.error("Update Error: %s", err)
-            raise UpdateFailed(err)
+            # Prefer to keep last known good data to avoid entities becoming
+            # unavailable on transient errors (reduces UI/sensor flapping).
+            try:
+                _LOGGER.exception("Update Error (using cached data if available): %s", err)
+            except Exception:
+                _LOGGER.error("Update Error: %s", err)
+
+            # If we have previously cached data, return it instead of raising
+            # UpdateFailed so HA doesn't mark entities unavailable.
+            # If we have previously cached data, return it instead of raising
+            if getattr(self, "data", None):
+                _LOGGER.warning(
+                    "Returning cached coordinator.data for %s after transient error",
+                    getattr(self.entry, "entry_id", None),
+                )
+                return self.data
+
+            # No cached data available: return safe defaults to avoid immediate entity unavailability
+            _LOGGER.warning(
+                "No cached coordinator.data available for %s; returning safe defaults",
+                getattr(self.entry, "entry_id", None),
+            )
+            # also persist so subsequent failures return this
+            self.data = _safe_defaults
+            return self.data
 
     def _get_float(self, eid):
         if not eid:

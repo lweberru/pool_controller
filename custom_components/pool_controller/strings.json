@@ -493,7 +493,7 @@
         "name": "Pump"
       },
       "aux": {
-        "name": "Auxiliary heater"
+        "name": "Enable auxiliary heating"
       }
     },
     "button": {

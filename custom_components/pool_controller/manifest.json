@@ -5,5 +5,5 @@
   "config_flow": true,
   "documentation": "https://github.com/lweberru/pool_controller",
   "iot_class": "local_polling",
-  "version": "1.6.34"
+  "version": "1.6.35"
 }
