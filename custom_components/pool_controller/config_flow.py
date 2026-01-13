@@ -159,16 +159,15 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return await self.async_step_frost()
 
         curr = {**self.data}
+        errors = {}
         return self.async_show_form(
             step_id="climate",
+            errors=errors,
             data_schema=vol.Schema({
                 vol.Optional(CONF_TARGET_TEMP, default=curr.get(CONF_TARGET_TEMP, DEFAULT_TARGET_TEMP)): vol.Coerce(float),
                 vol.Optional(CONF_MIN_TEMP, default=curr.get(CONF_MIN_TEMP, DEFAULT_MIN_TEMP)): vol.Coerce(float),
                 vol.Optional(CONF_MAX_TEMP, default=curr.get(CONF_MAX_TEMP, DEFAULT_MAX_TEMP)): vol.Coerce(float),
                 vol.Optional(CONF_TARGET_TEMP_STEP, default=curr.get(CONF_TARGET_TEMP_STEP, DEFAULT_TARGET_TEMP_STEP)): vol.Coerce(float),
-                # Heating power model for preheat estimation:
-                # - base: heat contribution while circulating (e.g. waste heat)
-                # - aux: electric heater rated power (only counted when aux heating is enabled)
                 vol.Optional(
                     CONF_HEATER_BASE_POWER_W,
                     default=curr.get(CONF_HEATER_BASE_POWER_W, DEFAULT_HEATER_BASE_POWER_W),
@@ -260,8 +259,14 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Fifth step: filter interval settings."""
         errors = {}
         if user_input is not None:
+            # Filterdauer darf nicht länger als das Intervall sein
+            interval = int(user_input.get(CONF_FILTER_INTERVAL, DEFAULT_FILTER_INTERVAL))
+            filter_duration = int(user_input.get(CONF_FILTER_DURATION, DEFAULT_FILTER_DURATION))
+            if filter_duration > interval:
+                filter_duration = interval
+                user_input[CONF_FILTER_DURATION] = filter_duration
             self.data.update(user_input)
-            return await self.async_step_pv()
+            return await self.async_step_durations()
 
         return self.async_show_form(
             step_id="filter",
@@ -271,6 +276,10 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_FILTER_INTERVAL, default=DEFAULT_FILTER_INTERVAL): vol.All(
                     vol.Coerce(int),
                     vol.Range(min=60, max=7*24*60)  # 1 Stunde bis 7 Tage
+                ),
+                vol.Required(CONF_FILTER_DURATION, default=DEFAULT_FILTER_DURATION): vol.All(
+                    vol.Coerce(int),
+                    vol.Range(min=5, max=120)  # 5-120 Minuten
                 ),
             }),
             last_step=False
@@ -551,7 +560,7 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
                 filter_duration = interval
                 user_input[CONF_FILTER_DURATION] = filter_duration
             self.options.update(user_input)
-            return await self.async_step_chlorine_duration()
+            return await self.async_step_durations()
 
         curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
         return self.async_show_form(
@@ -570,26 +579,26 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
             last_step=False
         )
 
-    async def async_step_chlorine_duration(self, user_input=None):
-        """Step: Stoßchlorungsdauer einstellen."""
+    async def async_step_durations(self, user_input=None):
+        """Step: Dauer-Einstellungen (Baden & Stoßchlorung)."""
         if user_input is not None:
             self.options.update(user_input)
             return await self.async_step_pv()
 
         curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
         return self.async_show_form(
-            step_id="chlorine_duration",
+            step_id="durations",
             data_schema=vol.Schema({
                 vol.Required(CONF_BATH_DURATION, default=curr.get(CONF_BATH_DURATION, DEFAULT_BATH_MINUTES)): vol.All(
                     vol.Coerce(int),
                     vol.Range(min=1, max=12*60)
                 ),
-                vol.Required("chlorine_duration", default=curr.get("chlorine_duration", 5)): vol.All(
+                vol.Required(CONF_CHLORINE_DURATION, default=curr.get(CONF_CHLORINE_DURATION, DEFAULT_CHLORINE_DURATION)): vol.All(
                     vol.Coerce(int),
-                    vol.Range(min=1, max=60)
+                    vol.Range(min=2, max=30)
                 ),
             }),
-            last_step=False
+            last_step=False,
         )
 
     async def async_step_pv(self, user_input=None):

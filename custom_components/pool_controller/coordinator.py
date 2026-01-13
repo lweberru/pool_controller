@@ -1047,25 +1047,28 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     reasons.append("pause_active")
                 if in_quiet:
                     reasons.append("in_quiet")
-                if enable_pv and not pv_allows:
-                    reasons.append("pv_not_allowed")
+                # Note: PV should not block scheduled filter starts anymore, so we do not
+                # append a pv_not_allowed reason here. Filtering will run regardless of PV
+                # availability unless suppressed by maintenance/pause/quiet.
                 if reasons:
                     _LOGGER.debug(
-                        "Auto-filter time reached but skipped: %s -- flags maintenance=%s enable_auto_filter=%s auto_filter_active=%s pause=%s in_quiet=%s pv_allows=%s pv_enabled=%s next_filter_start=%s now=%s",
+                        "Auto-filter time reached but skipped: %s -- flags maintenance=%s enable_auto_filter=%s auto_filter_active=%s pause=%s in_quiet=%s next_filter_start=%s now=%s",
                         ", ".join(reasons),
                         maintenance_active,
                         enable_auto_filter,
                         auto_filter_active,
                         pause_active,
                         in_quiet,
-                        pv_allows,
-                        enable_pv,
                         getattr(self, "next_filter_start", None),
                         now,
                     )
 
+            # Auto-start filter when next_filter_start reached (in Wartung deaktiviert)
+            # NOTE: Filtering (auto or manual) must run regardless of PV surplus.
+            # Previously this branch could be skipped when PV optimization was enabled
+            # but no PV surplus was present. Adjust logic to always start the auto-filter
+            # when scheduled unless suppressed by quiet hours / maintenance / pause.
             if (not maintenance_active) and enable_auto_filter and getattr(self, "next_filter_start", None) and now >= self.next_filter_start and (not auto_filter_active) and (not pause_active):
-                pv_check = pv_allows or not conf.get(CONF_ENABLE_PV_OPTIMIZATION, False)
                 if in_quiet:
                     shifted = _quiet_end_for(now, conf)
                     if shifted and shifted != self.next_filter_start:
@@ -1075,7 +1078,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                             await self._async_update_entry_options(new_opts)
                         except Exception:
                             _LOGGER.exception("Fehler beim Umplanen von next_filter_start (Ruhezeit, fällig)")
-                elif pv_check:
+                else:
+                    # Always start auto-filter when due (PV should not block filtering)
                     await self._start_auto_filter(minutes=self.filter_minutes)
                     auto_filter_active = self.auto_filter_until is not None and now < self.auto_filter_until
                     auto_filter_mins = _mins_left(self.auto_filter_until) if auto_filter_active else 0

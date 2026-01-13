@@ -1,444 +1,509 @@
 {
-  "config": {
-    "step": {
-      "user": {
-        "title": "Configuración básica",
-        "description": "Ajustes básicos para esta instancia.",
-        "submit": "Siguiente",
-        "data": {
-          "name": "Nombre de la piscina",
-          "water_volume": "Volumen de agua (litros)",
-          "demo_mode": "Modo demo"
-        },
-        "data_description": {
-          "name": "Nombre mostrado para esta instalación",
-          "water_volume": "Volumen de agua en litros (para cálculos de dosificación y calentamiento)",
-          "demo_mode": "Modo demo: no controla dispositivos reales (solo pruebas)"
+    "config": {
+        "step": {
+            "user": {
+                "title": "Configuración básica",
+                "submit": "Siguiente",
+                "data": {
+                    "name": "Pool name",
+                    "water_volume": "Volumen de agua (litros)",
+                    "demo_mode": "Modo demo"
+                },
+                "data_description": {
+                    "name": "Display name for this pool installation",
+                    "water_volume": "Water volume in liters (used for dosing and heating time calculations)",
+                    "demo_mode": "Demo mode: does not switch real devices (for testing only)"
+                }
+            },
+            "switches": {
+                "title": "Switches & power",
+                "description": "Configure which switches and power sensors the controller should use. You can optionally separate the power supply (main) from the circulation pump (pump).",
+                "submit": "Continue",
+                "data": {
+                    "main_switch": "Main switch",
+                    "pump_switch": "Pump switch (optional)",
+                    "filter_switch": "Filter switch (optional)",
+                    "enable_aux_heating": "Enable auxiliary heating",
+                    "aux_heating_switch": "Auxiliary heater switch",
+                    "main_power_sensor": "Main power sensor",
+                    "aux_power_sensor": "Aux heater power sensor"
+                },
+                "data_description": {
+                    "main_switch": "Main power / supply switch for the pool (required)",
+                    "pump_switch": "Optional: dedicated circulation/pump switch (leave empty to use main switch)",
+                    "filter_switch": "Optional: separate switch for filter pump (leave empty to use main switch)",
+                    "enable_aux_heating": "Enables auxiliary heater for faster heating",
+                    "aux_heating_switch": "Switch for electric auxiliary heater",
+                    "main_power_sensor": "Main pump power sensor in watts",
+                    "aux_power_sensor": "Heater power sensor in watts"
+                }
+            },
+            "water_quality": {
+                "title": "Water quality",
+                "description": "Select sensors for water temperature and (optionally) chemistry. Only the water temperature sensor is required.",
+                "submit": "Continue",
+                "data": {
+                    "temp_water_sensor": "Water temperature",
+                    "ph_sensor": "pH sensor",
+                    "chlorine_sensor": "Chlorine (redox) sensor",
+                    "salt_sensor": "Salt sensor",
+                    "tds_sensor": "Conductivity sensor"
+                },
+                "data_description": {
+                    "temp_water_sensor": "Pool water temperature sensor (required)",
+                    "ph_sensor": "pH value sensor (Blueriiot or similar)",
+                    "chlorine_sensor": "Redox sensor for chlorine measurement in mV",
+                    "salt_sensor": "Salt content sensor for saltwater pools",
+                    "tds_sensor": "Conductivity sensor (TDS) for water quality"
+                }
+            },
+            "sanitizer": {
+                "title": "Sanitizer",
+                "description": "Choose how the pool is sanitized. For saltwater or mixed operation, you will be asked for a target salt level.",
+                "submit": "Continue",
+                "data": {
+                    "sanitizer_mode": "Sanitizer mode"
+                },
+                "data_description": {
+                    "sanitizer_mode": "Chlorine = classic dosing, Saltwater = salt chlorinator, Mixed = both"
+                }
+            },
+            "sanitizer_salt": {
+                "title": "Salt target",
+                "description": "Set the target salt level for saltwater (or mixed) operation.",
+                "submit": "Continue",
+                "data": {
+                    "target_salt_g_l": "Target salt (g/L)"
+                },
+                "data_description": {
+                    "target_salt_g_l": "Used to compute recommendations when salt is too low"
+                }
+            },
+            "climate": {
+                "title": "Temperature control",
+                "description": "Thermostat settings for the pool climate entity. The target temperature (setpoint) is persisted in the integration options once you change it.",
+                "submit": "Continue",
+                "data": {
+                    "target_temp": "Initial target temperature",
+                    "min_temp": "Minimum temperature",
+                    "max_temp": "Maximum temperature",
+                    "target_temp_step": "Temperature step",
+                    "heater_base_power_w": "Base heating power (W)",
+                    "heater_aux_power_w": "Aux heater power (W)",
+                    "cold_tolerance": "Cold tolerance",
+                    "hot_tolerance": "Hot tolerance"
+                },
+                "data_description": {
+                    "target_temp": "Initial target temperature (setpoint) used on first start; later the setpoint is persisted",
+                    "min_temp": "Minimum setpoint available",
+                    "max_temp": "Maximum setpoint available",
+                    "target_temp_step": "Step size for setting the target temperature",
+                    "heater_base_power_w": "Base heating contribution while the circulation pump runs (e.g. waste heat). Used for preheat estimation.",
+                    "heater_aux_power_w": "Aux heater rated power (watts). Used for preheat estimation when aux heating is enabled. Total = base + aux.",
+                    "cold_tolerance": "Heater starts when water temperature is below target minus this value",
+                    "hot_tolerance": "Heater stops when water temperature is at or above target plus this value"
+                }
+            },
+            "frost": {
+                "title": "Frost protection",
+                "description": "Protects the pool system in cold weather by running the pump in a duty-cycle based on the outdoor temperature. Quiet hours are respected unless it is extremely cold.",
+                "submit": "Continue",
+                "data": {
+                    "enable_frost_protection": "Enable frost protection",
+                    "temp_outdoor_sensor": "Outdoor temperature",
+                    "frost_start_temp": "Frost protection starts below (°C)",
+                    "frost_severe_temp": "Frost protection severe below (°C)",
+                    "frost_mild_interval_minutes": "Frost (mild) interval (min)",
+                    "frost_mild_run_minutes": "Frost (mild) run time (min)",
+                    "frost_severe_interval_minutes": "Frost (severe) interval (min)",
+                    "frost_severe_run_minutes": "Frost (severe) run time (min)",
+                    "frost_quiet_override_below_temp": "Ignore quiet hours below (°C)"
+                },
+                "data_description": {
+                    "enable_frost_protection": "Enables frost protection (requires outdoor temperature sensor). The pump runs in cycles; quiet hours are only disturbed in extreme cold (configurable).",
+                    "temp_outdoor_sensor": "Outdoor temperature for frost protection and heating control",
+                    "frost_start_temp": "Below this outdoor temperature (or colder) frost protection may run at all (default: 2°C)",
+                    "frost_severe_temp": "Below this temperature the severe cycle is used (default: -2°C)",
+                    "frost_mild_interval_minutes": "Interval for mild frost cycle (default: 240 = 4h)",
+                    "frost_mild_run_minutes": "Run time per interval for mild frost cycle (default: 5 min)",
+                    "frost_severe_interval_minutes": "Interval for severe frost cycle (default: 120 = 2h)",
+                    "frost_severe_run_minutes": "Run time per interval for severe frost cycle (default: 10 min)",
+                    "frost_quiet_override_below_temp": "During quiet hours the pump stays off unless outdoor temp is <= this value (default: -8°C)"
+                }
+            },
+            "calendars": {
+                "title": "Calendars & quiet times",
+                "description": "Optional calendar automation and quiet hours. Quiet hours suppress PV/heating/filter activity; frost protection only overrides quiet hours in extreme cold.",
+                "submit": "Continue",
+                "data": {
+                    "pool_calendar": "Pool calendar",
+                    "holiday_calendar": "Holiday calendar",
+                    "quiet_time_start": "Quiet time start (weekday)",
+                    "quiet_time_end": "Quiet time end (weekday)",
+                    "quiet_time_start_weekend": "Quiet time start (weekend/holiday)",
+                    "quiet_time_end_weekend": "Quiet time end (weekend/holiday)"
+                },
+                "data_description": {
+                    "pool_calendar": "Calendar with pool events (automatically starts bathing mode for appointments)",
+                    "holiday_calendar": "Holiday calendar (uses weekend quiet times on holidays)",
+                    "quiet_time_start": "Start of quiet hours on weekdays (e.g. 22:00)",
+                    "quiet_time_end": "End of quiet hours on weekdays (e.g. 07:00)",
+                    "quiet_time_start_weekend": "Start of quiet hours on weekends/holidays (e.g. 23:00)",
+                    "quiet_time_end_weekend": "End of quiet hours on weekends/holidays (e.g. 08:00)"
+                }
+            },
+            "filter": {
+                "title": "Filter settings",
+                "description": "Automatic filter cycles run at a fixed interval. If the next start would fall into quiet hours, it will be shifted to the end of the quiet period.",
+                "submit": "Continue",
+                "data": {
+                    "enable_auto_filter": "Enable automatic filter cycles",
+                    "filter_interval_minutes": "Filter interval (minutes)",
+                    "filter_minutes": "Filter duration (minutes)"
+                },
+                "data_description": {
+                    "enable_auto_filter": "Automatically start filter cycles based on the interval",
+                    "filter_interval_minutes": "Time between automatic filter cycles (60..10080 min)",
+                    "filter_minutes": "Default duration for a filter run (minutes). Range: 5–120."
+                }
+            },
+            "durations": {
+                "title": "Durations",
+                "description": "Configure default durations for bathing and quick chlorination actions.",
+                "submit": "Continue",
+                "data": {
+                    "bathing_minutes": "Bathing duration (minutes)",
+                    "chlorine_duration": "Quick-chlorination duration (minutes)"
+                },
+                "data_description": {
+                    "bathing_minutes": "Default duration for bathing/manual heat actions (minutes).",
+                    "chlorine_duration": "Default duration for quick chlorination (minutes). Range: 2–30."
+                }
+            },
+            "pv": {
+                "title": "PV surplus",
+                "description": "Optional PV optimization: run pump/heating when PV surplus is available. Use ON/OFF thresholds as hysteresis.",
+                "submit": "Finish",
+                "data": {
+                    "enable_pv_optimization": "Enable PV optimization",
+                    "pv_surplus_sensor": "PV power sensor",
+                    "pv_on_threshold": "PV ON threshold (W)",
+                    "pv_off_threshold": "PV OFF threshold (W)"
+                },
+                "data_description": {
+                    "enable_pv_optimization": "Only run pump/heating when PV surplus is available",
+                    "pv_surplus_sensor": "Sensor reporting PV surplus/production in watts",
+                    "pv_on_threshold": "Turns main pump ON when PV power >= this value (default: 1000)",
+                    "pv_off_threshold": "Turns main pump OFF when PV power <= this value (default: 500)"
+                }
+            }
         }
-      },
-      "switches": {
-        "title": "Interruptores y potencia",
-        "description": "Configura los interruptores y sensores de potencia. Opcionalmente puedes separar alimentación (principal) y bomba de circulación (bomba).",
-        "submit": "Siguiente",
-        "data": {
-          "main_switch": "Interruptor principal",
-          "pump_switch": "Interruptor de la bomba (opcional)",
-          "filter_switch": "Interruptor del filtro (opcional)",
-          "enable_aux_heating": "Activar calefacción auxiliar",
-          "aux_heating_switch": "Interruptor calefacción auxiliar",
-          "main_power_sensor": "Sensor de potencia principal",
-          "aux_power_sensor": "Sensor de potencia auxiliar"
-        },
-        "data_description": {
-          "main_switch": "Interruptor principal / alimentación eléctrica de la piscina (obligatorio)",
-          "pump_switch": "Opcional: interruptor dedicado para la bomba de circulación (dejar vacío para usar el principal)",
-          "filter_switch": "Opcional: interruptor separado para la bomba del filtro (dejar vacío para usar el principal)",
-          "enable_aux_heating": "Activa un calentador adicional",
-          "aux_heating_switch": "Interruptor del calentador auxiliar",
-          "main_power_sensor": "Sensor de potencia de la bomba principal (W)",
-          "aux_power_sensor": "Sensor de potencia del calentador (W)"
-        }
-      },
-      "water_quality": {
-        "title": "Calidad del agua",
-        "description": "Selecciona sensores para temperatura del agua y (opcionalmente) química.",
-        "submit": "Siguiente",
-        "data": {
-          "temp_water_sensor": "Temperatura del agua",
-          "ph_sensor": "Sensor de pH",
-          "chlorine_sensor": "Sensor de cloro (redox)",
-          "salt_sensor": "Sensor de sal",
-          "tds_sensor": "Sensor de TDS"
-        },
-        "data_description": {
-          "temp_water_sensor": "Sensor de temperatura del agua (obligatorio)",
-          "ph_sensor": "Sensor de pH (p. ej. Blueriiot)",
-          "chlorine_sensor": "Sensor redox para medición de cloro (mV)",
-          "salt_sensor": "Sensor de nivel de sal",
-          "tds_sensor": "Sensor de TDS / conductividad"
-        }
-      },
-      "sanitizer": {
-        "title": "Desinfección",
-        "description": "Elige cómo se desinfecta la piscina. Para agua salada o modo mixto, se pedirá el objetivo de sal.",
-        "submit": "Siguiente",
-        "data": {
-          "sanitizer_mode": "Modo de desinfección"
-        },
-        "data_description": {
-          "sanitizer_mode": "Cloro = dosificación clásica, Agua salada = clorador salino, Mixto = ambos"
-        }
-      },
-      "sanitizer_salt": {
-        "title": "Objetivo de sal",
-        "description": "Establece el nivel objetivo de sal (g/L) para agua salada o modo mixto.",
-        "submit": "Siguiente",
-        "data": {
-          "target_salt_g_l": "Sal objetivo (g/L)"
-        },
-        "data_description": {
-          "target_salt_g_l": "Se usa para calcular recomendaciones cuando falta sal"
-        }
-      },
-      "climate": {
-        "title": "Control de temperatura",
-        "description": "Ajustes del termostato. La consigna se guarda después de cambiarla en el panel.",
-        "submit": "Siguiente",
-        "data": {
-          "target_temp": "Temperatura objetivo inicial",
-          "min_temp": "Temperatura mínima",
-          "max_temp": "Temperatura máxima",
-          "target_temp_step": "Paso de temperatura",
-          "heater_base_power_w": "Potencia base de calefacción (W)",
-          "heater_aux_power_w": "Potencia del calentador auxiliar (W)",
-          "cold_tolerance": "Tolerancia fría",
-          "hot_tolerance": "Tolerancia caliente"
-        },
-        "data_description": {
-          "target_temp": "Temperatura objetivo (consigna) inicial; después se guarda automáticamente",
-          "min_temp": "Consigna mínima disponible",
-          "max_temp": "Consigna máxima disponible",
-          "target_temp_step": "Paso para ajustar la temperatura objetivo",
-          "heater_base_power_w": "Contribución base (p. ej. calor residual de la bomba) usada para estimar el precalentamiento.",
-          "heater_aux_power_w": "Potencia nominal del calentador auxiliar (W) usada para estimar el precalentamiento cuando la calefacción auxiliar está activada. Total = base + auxiliar.",
-          "cold_tolerance": "El calentador arranca cuando la temperatura del agua está por debajo de objetivo menos este valor",
-          "hot_tolerance": "El calentador se detiene cuando la temperatura del agua es igual o superior a objetivo más este valor"
-        }
-      },
-      "frost": {
-        "title": "Protección contra heladas",
-        "description": "Protege la piscina en clima frío haciendo funcionar la bomba por ciclos según la temperatura exterior.",
-        "submit": "Siguiente",
-        "data": {
-          "enable_frost_protection": "Activar protección contra heladas",
-          "temp_outdoor_sensor": "Temperatura exterior",
-          "frost_start_temp": "Heladas activo por debajo de (°C)",
-          "frost_severe_temp": "Helada severa por debajo de (°C)",
-          "frost_mild_interval_minutes": "Intervalo helada leve (min)",
-          "frost_mild_run_minutes": "Duración helada leve (min)",
-          "frost_severe_interval_minutes": "Intervalo helada severa (min)",
-          "frost_severe_run_minutes": "Duración helada severa (min)",
-          "frost_quiet_override_below_temp": "Ignorar horas silenciosas por debajo de (°C)"
-        },
-        "data_description": {
-          "enable_frost_protection": "Activa la protección contra heladas (requiere sensor de temperatura exterior). La bomba funciona por ciclos; las horas silenciosas solo se anulan con temperaturas muy bajas (configurable).",
-          "temp_outdoor_sensor": "Sensor de temperatura exterior para heladas y control de calefacción",
-          "frost_start_temp": "Iniciar protección contra heladas a esta temperatura o menos (por defecto: 2°C)",
-          "frost_severe_temp": "Considerar helada severa a esta temperatura o menos (por defecto: -2°C)",
-          "frost_mild_interval_minutes": "Intervalo de ciclos leves (por defecto: 240 = 4h)",
-          "frost_mild_run_minutes": "Duración por ciclo leve (por defecto: 5 min)",
-          "frost_severe_interval_minutes": "Intervalo de ciclos severos (por defecto: 120 = 2h)",
-          "frost_severe_run_minutes": "Duración por ciclo severo (por defecto: 10 min)",
-          "frost_quiet_override_below_temp": "Durante horas silenciosas, la bomba se mantiene apagada salvo que la temperatura exterior sea <= este valor (por defecto: -8°C)."
-        }
-      },
-      "calendars": {
-        "title": "Calendarios y horas silenciosas",
-        "description": "Automatización opcional por calendario y configuración de horas silenciosas.",
-        "submit": "Siguiente",
-        "data": {
-          "pool_calendar": "Calendario de piscina",
-          "holiday_calendar": "Calendario de festivos",
-          "quiet_time_start": "Inicio horas silenciosas (entre semana)",
-          "quiet_time_end": "Fin horas silenciosas (entre semana)",
-          "quiet_time_start_weekend": "Inicio horas silenciosas (fin de semana/festivo)",
-          "quiet_time_end_weekend": "Fin horas silenciosas (fin de semana/festivo)"
-        },
-        "data_description": {
-          "pool_calendar": "Calendario con eventos (puede iniciar modo baño)",
-          "holiday_calendar": "Calendario de festivos (usa horario de fin de semana)",
-          "quiet_time_start": "Inicio entre semana (p. ej. 22:00)",
-          "quiet_time_end": "Fin entre semana (p. ej. 07:00)",
-          "quiet_time_start_weekend": "Inicio fin de semana/festivo (p. ej. 23:00)",
-          "quiet_time_end_weekend": "Fin fin de semana/festivo (p. ej. 08:00)"
-        }
-      },
-      "filter": {
-        "title": "Filtración",
-        "description": "Ciclos automáticos de filtración por intervalo fijo. Si el inicio cae en horas silenciosas, se pospone.",
-        "submit": "Siguiente",
-        "data": {
-          "enable_auto_filter": "Ciclos de filtrado automáticos",
-          "filter_interval_minutes": "Intervalo de filtrado (minutos)"
-        },
-        "data_description": {
-          "enable_auto_filter": "Inicia ciclos automáticamente",
-          "filter_interval_minutes": "Tiempo entre ciclos automáticos (60..10080 min)"
-        }
-      },
-      "pv": {
-        "title": "Excedente FV",
-        "description": "Optimización FV opcional: ejecutar bomba/calefacción cuando haya excedente. Umbrales ON/OFF actúan como histéresis.",
-        "submit": "Finalizar",
-        "data": {
-          "enable_pv_optimization": "Activar optimización FV",
-          "pv_surplus_sensor": "Sensor de excedente FV",
-          "pv_on_threshold": "Umbral FV ENCENDER (W)",
-          "pv_off_threshold": "Umbral FV APAGAR (W)"
-        },
-        "data_description": {
-          "enable_pv_optimization": "Usa excedente FV para un control más inteligente",
-          "pv_surplus_sensor": "Sensor de excedente/exportación en W",
-          "pv_on_threshold": "Encender por encima de este valor (por defecto: 1000W)",
-          "pv_off_threshold": "Apagar por debajo de este valor (por defecto: 500W)"
-        }
-      }
-    }
-  },
-  "options": {
-    "step": {
-      "init": {
-        "title": "Ajustes",
-        "description": "Ajustes generales. Los cambios se guardan en las opciones de la entrada.",
-        "submit": "Siguiente",
-        "data": {
-          "name": "Nombre de la piscina",
-          "water_volume": "Volumen de agua (litros)",
-          "demo_mode": "Modo demo"
-        },
-        "data_description": {
-          "name": "Nombre mostrado para esta instalación",
-          "water_volume": "Volumen de agua en litros (para cálculos de dosificación y calentamiento)",
-          "demo_mode": "Modo demo: no controla dispositivos reales (solo pruebas)"
-        }
-      },
-      "switches": {
-        "title": "Interruptores y potencia",
-        "description": "Actualiza interruptores y sensores. Consejo: configura un interruptor de bomba separado solo si realmente son entidades distintas.",
-        "submit": "Siguiente",
-        "data": {
-          "main_switch": "Interruptor principal",
-          "pump_switch": "Interruptor de la bomba (opcional)",
-          "filter_switch": "Interruptor del filtro (opcional)",
-          "enable_aux_heating": "Activar calefacción auxiliar",
-          "aux_heating_switch": "Interruptor calefacción auxiliar",
-          "main_power_sensor": "Sensor de potencia principal",
-          "aux_power_sensor": "Sensor de potencia auxiliar"
-        },
-        "data_description": {
-          "main_switch": "Interruptor principal / alimentación eléctrica de la piscina (obligatorio)",
-          "pump_switch": "Opcional: interruptor dedicado para la bomba de circulación (dejar vacío para usar el principal)",
-          "filter_switch": "Opcional: interruptor separado para la bomba del filtro (dejar vacío para usar el principal)",
-          "enable_aux_heating": "Activa un calentador adicional",
-          "aux_heating_switch": "Interruptor del calentador auxiliar",
-          "main_power_sensor": "Sensor de potencia de la bomba principal (W)",
-          "aux_power_sensor": "Sensor de potencia del calentador (W)"
-        }
-      },
-      "water_quality": {
-        "title": "Calidad del agua",
-        "description": "Actualiza la asignación de sensores para temperatura y (opcionalmente) química.",
-        "submit": "Siguiente",
-        "data": {
-          "temp_water_sensor": "Temperatura del agua",
-          "ph_sensor": "Sensor de pH",
-          "chlorine_sensor": "Sensor de cloro (redox)",
-          "salt_sensor": "Sensor de sal",
-          "tds_sensor": "Sensor de TDS"
-        },
-        "data_description": {
-          "temp_water_sensor": "Sensor de temperatura del agua (obligatorio)",
-          "ph_sensor": "Sensor de pH (p. ej. Blueriiot)",
-          "chlorine_sensor": "Sensor redox para medición de cloro (mV)",
-          "salt_sensor": "Sensor de nivel de sal",
-          "tds_sensor": "Sensor de TDS / conductividad"
-        }
-      },
-      "sanitizer": {
-        "title": "Desinfección",
-        "description": "Elige cómo se desinfecta la piscina.",
-        "submit": "Siguiente",
-        "data": {
-          "sanitizer_mode": "Modo de desinfección"
-        },
-        "data_description": {
-          "sanitizer_mode": "Cloro = dosificación clásica, Agua salada = clorador salino, Mixto = ambos"
-        }
-      },
-      "sanitizer_salt": {
-        "title": "Objetivo de sal",
-        "description": "Establece el nivel objetivo de sal (g/L) para agua salada o modo mixto.",
-        "submit": "Siguiente",
-        "data": {
-          "target_salt_g_l": "Sal objetivo (g/L)"
-        },
-        "data_description": {
-          "target_salt_g_l": "Se usa para calcular recomendaciones cuando falta sal"
-        }
-      },
-      "climate": {
-        "title": "Control de temperatura",
-        "description": "Ajusta límites del termostato e histéresis.",
-        "submit": "Siguiente",
-        "data": {
-          "target_temp": "Temperatura objetivo inicial",
-          "min_temp": "Temperatura mínima",
-          "max_temp": "Temperatura máxima",
-          "target_temp_step": "Paso de temperatura",
-          "heater_base_power_w": "Potencia base de calefacción (W)",
-          "heater_aux_power_w": "Potencia del calentador auxiliar (W)",
-          "cold_tolerance": "Tolerancia fría",
-          "hot_tolerance": "Tolerancia caliente"
-        },
-        "data_description": {
-          "target_temp": "Temperatura objetivo (consigna) inicial; después se guarda automáticamente",
-          "min_temp": "Consigna mínima disponible",
-          "max_temp": "Consigna máxima disponible",
-          "target_temp_step": "Paso para ajustar la temperatura objetivo",
-          "heater_base_power_w": "Contribución base (p. ej. calor residual de la bomba) usada para estimar el precalentamiento.",
-          "heater_aux_power_w": "Potencia nominal del calentador auxiliar (W) usada para estimar el precalentamiento cuando la calefacción auxiliar está activada. Total = base + auxiliar.",
-          "cold_tolerance": "El calentador arranca cuando la temperatura del agua está por debajo de objetivo menos este valor",
-          "hot_tolerance": "El calentador se detiene cuando la temperatura del agua es igual o superior a objetivo más este valor"
-        }
-      },
-      "frost": {
-        "title": "Protección contra heladas",
-        "description": "Ajusta el ciclo de heladas y el comportamiento durante horas silenciosas.",
-        "submit": "Siguiente",
-        "data": {
-          "enable_frost_protection": "Activar protección contra heladas",
-          "temp_outdoor_sensor": "Temperatura exterior",
-          "frost_start_temp": "Heladas activo por debajo de (°C)",
-          "frost_severe_temp": "Helada severa por debajo de (°C)",
-          "frost_mild_interval_minutes": "Intervalo helada leve (min)",
-          "frost_mild_run_minutes": "Duración helada leve (min)",
-          "frost_severe_interval_minutes": "Intervalo helada severa (min)",
-          "frost_severe_run_minutes": "Duración helada severa (min)",
-          "frost_quiet_override_below_temp": "Ignorar horas silenciosas por debajo de (°C)"
-        },
-        "data_description": {
-          "enable_frost_protection": "Activa la protección contra heladas (requiere sensor de temperatura exterior). La bomba funciona por ciclos; las horas silenciosas solo se anulan con temperaturas muy bajas (configurable).",
-          "temp_outdoor_sensor": "Sensor de temperatura exterior para heladas y control de calefacción",
-          "frost_start_temp": "Iniciar protección contra heladas a esta temperatura o menos (por defecto: 2°C)",
-          "frost_severe_temp": "Considerar helada severa a esta temperatura o menos (por defecto: -2°C)",
-          "frost_mild_interval_minutes": "Intervalo de ciclos leves (por defecto: 240 = 4h)",
-          "frost_mild_run_minutes": "Duración por ciclo leve (por defecto: 5 min)",
-          "frost_severe_interval_minutes": "Intervalo de ciclos severos (por defecto: 120 = 2h)",
-          "frost_severe_run_minutes": "Duración por ciclo severo (por defecto: 10 min)",
-          "frost_quiet_override_below_temp": "Durante horas silenciosas, la bomba se mantiene apagada salvo que la temperatura exterior sea <= este valor (por defecto: -8°C)."
-        }
-      },
-      "calendars": {
-        "title": "Calendarios y horas silenciosas",
-        "description": "Configura automatización por calendario y horas silenciosas.",
-        "submit": "Siguiente",
-        "data": {
-          "pool_calendar": "Calendario de piscina",
-          "holiday_calendar": "Calendario de festivos",
-          "quiet_time_start": "Inicio horas silenciosas (entre semana)",
-          "quiet_time_end": "Fin horas silenciosas (entre semana)",
-          "quiet_time_start_weekend": "Inicio horas silenciosas (fin de semana/festivo)",
-          "quiet_time_end_weekend": "Fin horas silenciosas (fin de semana/festivo)"
-        },
-        "data_description": {
-          "pool_calendar": "Calendario con eventos (puede iniciar modo baño)",
-          "holiday_calendar": "Calendario de festivos (usa horario de fin de semana)",
-          "quiet_time_start": "Inicio entre semana (p. ej. 22:00)",
-          "quiet_time_end": "Fin entre semana (p. ej. 07:00)",
-          "quiet_time_start_weekend": "Inicio fin de semana/festivo (p. ej. 23:00)",
-          "quiet_time_end_weekend": "Fin fin de semana/festivo (p. ej. 08:00)"
-        }
-      },
-      "filter": {
-        "title": "Filtración",
-        "description": "Ciclos automáticos de filtración y su intervalo.",
-        "submit": "Siguiente",
-        "data": {
-          "enable_auto_filter": "Ciclos de filtrado automáticos",
-          "filter_interval_minutes": "Intervalo de filtrado (minutos)"
-        },
-        "data_description": {
-          "enable_auto_filter": "Inicia ciclos de filtración automáticamente según el intervalo",
-          "filter_interval_minutes": "Tiempo entre ciclos automáticos (60..10080 min)"
-        }
-      },
-      "pv": {
-        "title": "Excedente FV",
-        "description": "Configuración de optimización FV.",
-        "submit": "Guardar",
-        "data": {
-          "enable_pv_optimization": "Activar optimización FV",
-          "pv_surplus_sensor": "Sensor de excedente FV",
-          "pv_on_threshold": "Umbral FV ENCENDER (W)",
-          "pv_off_threshold": "Umbral FV APAGAR (W)"
-        },
-        "data_description": {
-          "enable_pv_optimization": "Usa excedente FV para controlar bomba/calefacción",
-          "pv_surplus_sensor": "Sensor de excedente / exportación FV en W",
-          "pv_on_threshold": "Encender por encima de este valor (por defecto: 1000W)",
-          "pv_off_threshold": "Apagar por debajo de este valor (por defecto: 500W)"
-        }
-      }
-    }
-  }
-  ,
-  "entity": {
-    "switch": {
-      "main": { "name": "Alimentación" },
-      "pump": { "name": "Bomba" },
-      "aux": { "name": "Permitir calefacción auxiliar" }
     },
-    "binary_sensor": {
-      "maintenance_active": { "name": "Modo de mantenimiento" },
-      "aux_present": { "name": "Calefacción auxiliar configurada" },
-      "should_main_on": { "name": "Alimentación requerida" },
-      "should_pump_on": { "name": "Bomba requerida" },
-      "main_switch_on": { "name": "Interruptor principal encendido" },
-      "pump_switch_on": { "name": "Bomba encendida" },
-      "aux_heating_switch_on": { "name": "Calentador auxiliar encendido" }
+    "options": {
+        "step": {
+            "init": {
+                "title": "Ajustes",
+                "description": "Ajustes generales. Los cambios se guardan en las opciones de la entrada.",
+                "submit": "Siguiente",
+                "data": {
+                    "name": "Nombre de la piscina",
+                    "water_volume": "Volumen de agua (litros)",
+                    "demo_mode": "Modo demo"
+                },
+                "data_description": {
+                    "name": "Nombre mostrado para esta instalación",
+                    "water_volume": "Volumen de agua en litros (para cálculos de dosificación y calentamiento)",
+                    "demo_mode": "Modo demo: no controla dispositivos reales (solo pruebas)"
+                }
+            },
+            "switches": {
+                "title": "Interruptores y potencia",
+                "description": "Actualiza interruptores y sensores. Consejo: configura un interruptor de bomba separado solo si realmente son entidades distintas.",
+                "submit": "Siguiente",
+                "data": {
+                    "main_switch": "Interruptor principal",
+                    "pump_switch": "Interruptor de la bomba (opcional)",
+                    "filter_switch": "Interruptor del filtro (opcional)",
+                    "enable_aux_heating": "Activar calefacción auxiliar",
+                    "aux_heating_switch": "Interruptor calefacción auxiliar",
+                    "main_power_sensor": "Sensor de potencia principal",
+                    "aux_power_sensor": "Sensor de potencia auxiliar"
+                },
+                "data_description": {
+                    "main_switch": "Interruptor principal / alimentación eléctrica de la piscina (obligatorio)",
+                    "pump_switch": "Opcional: interruptor dedicado para la bomba de circulación (dejar vacío para usar el principal)",
+                    "filter_switch": "Opcional: interruptor separado para la bomba del filtro (dejar vacío para usar el principal)",
+                    "enable_aux_heating": "Activa un calentador adicional",
+                    "aux_heating_switch": "Interruptor del calentador auxiliar",
+                    "main_power_sensor": "Sensor de potencia de la bomba principal (W)",
+                    "aux_power_sensor": "Sensor de potencia del calentador (W)"
+                }
+            },
+            "water_quality": {
+                "title": "Calidad del agua",
+                "description": "Actualiza la asignación de sensores para temperatura y (opcionalmente) química.",
+                "submit": "Siguiente",
+                "data": {
+                    "temp_water_sensor": "Temperatura del agua",
+                    "ph_sensor": "Sensor de pH",
+                    "chlorine_sensor": "Sensor de cloro (redox)",
+                    "salt_sensor": "Sensor de sal",
+                    "tds_sensor": "Sensor de TDS"
+                },
+                "data_description": {
+                    "temp_water_sensor": "Sensor de temperatura del agua (obligatorio)",
+                    "ph_sensor": "Sensor de pH (p. ej. Blueriiot)",
+                    "chlorine_sensor": "Sensor redox para medición de cloro (mV)",
+                    "salt_sensor": "Sensor de nivel de sal",
+                    "tds_sensor": "Sensor de TDS / conductividad"
+                }
+            },
+            "sanitizer": {
+                "title": "Desinfección",
+                "description": "Elige cómo se desinfecta la piscina.",
+                "submit": "Siguiente",
+                "data": {
+                    "sanitizer_mode": "Modo de desinfección"
+                },
+                "data_description": {
+                    "sanitizer_mode": "Cloro = dosificación clásica, Agua salada = clorador salino, Mixto = ambos"
+                }
+            },
+            "sanitizer_salt": {
+                "title": "Objetivo de sal",
+                "description": "Establece el nivel objetivo de sal (g/L) para agua salada o modo mixto.",
+                "submit": "Siguiente",
+                "data": {
+                    "target_salt_g_l": "Sal objetivo (g/L)"
+                },
+                "data_description": {
+                    "target_salt_g_l": "Se usa para calcular recomendaciones cuando falta sal"
+                }
+            },
+            "climate": {
+                "title": "Control de temperatura",
+                "description": "Ajusta límites del termostato e histéresis.",
+                "submit": "Siguiente",
+                "data": {
+                    "target_temp": "Temperatura objetivo inicial",
+                    "min_temp": "Temperatura mínima",
+                    "max_temp": "Temperatura máxima",
+                    "target_temp_step": "Paso de temperatura",
+                    "heater_base_power_w": "Potencia base de calefacción (W)",
+                    "heater_aux_power_w": "Potencia del calentador auxiliar (W)",
+                    "cold_tolerance": "Tolerancia fría",
+                    "hot_tolerance": "Tolerancia caliente"
+                },
+                "data_description": {
+                    "target_temp": "Temperatura objetivo (consigna) inicial; después se guarda automáticamente",
+                    "min_temp": "Consigna mínima disponible",
+                    "max_temp": "Consigna máxima disponible",
+                    "target_temp_step": "Paso para ajustar la temperatura objetivo",
+                    "heater_base_power_w": "Contribución base (p. ej. calor residual de la bomba) usada para estimar el precalentamiento.",
+                    "heater_aux_power_w": "Potencia nominal del calentador auxiliar (W) usada para estimar el precalentamiento cuando la calefacción auxiliar está activada. Total = base + auxiliar.",
+                    "cold_tolerance": "El calentador arranca cuando la temperatura del agua está por debajo de objetivo menos este valor",
+                    "hot_tolerance": "El calentador se detiene cuando la temperatura del agua es igual o superior a objetivo más este valor"
+                }
+            },
+            "frost": {
+                "title": "Protección contra heladas",
+                "description": "Ajusta el ciclo de heladas y el comportamiento durante horas silenciosas.",
+                "submit": "Siguiente",
+                "data": {
+                    "enable_frost_protection": "Activar protección contra heladas",
+                    "temp_outdoor_sensor": "Temperatura exterior",
+                    "frost_start_temp": "Heladas activo por debajo de (°C)",
+                    "frost_severe_temp": "Helada severa por debajo de (°C)",
+                    "frost_mild_interval_minutes": "Intervalo helada leve (min)",
+                    "frost_mild_run_minutes": "Duración helada leve (min)",
+                    "frost_severe_interval_minutes": "Intervalo helada severa (min)",
+                    "frost_severe_run_minutes": "Duración helada severa (min)",
+                    "frost_quiet_override_below_temp": "Ignorar horas silenciosas por debajo de (°C)"
+                },
+                "data_description": {
+                    "enable_frost_protection": "Activa la protección contra heladas (requiere sensor de temperatura exterior). La bomba funciona por ciclos; las horas silenciosas solo se anulan con temperaturas muy bajas (configurable).",
+                    "temp_outdoor_sensor": "Sensor de temperatura exterior para heladas y control de calefacción",
+                    "frost_start_temp": "Iniciar protección contra heladas a esta temperatura o menos (por defecto: 2°C)",
+                    "frost_severe_temp": "Considerar helada severa a esta temperatura o menos (por defecto: -2°C)",
+                    "frost_mild_interval_minutes": "Intervalo de ciclos leves (por defecto: 240 = 4h)",
+                    "frost_mild_run_minutes": "Duración por ciclo leve (por defecto: 5 min)",
+                    "frost_severe_interval_minutes": "Intervalo de ciclos severos (por defecto: 120 = 2h)",
+                    "frost_severe_run_minutes": "Duración por ciclo severo (por defecto: 10 min)",
+                    "frost_quiet_override_below_temp": "Durante horas silenciosas, la bomba se mantiene apagada salvo que la temperatura exterior sea <= este valor (por defecto: -8°C)."
+                }
+            },
+            "calendars": {
+                "title": "Calendarios y horas silenciosas",
+                "description": "Configura automatización por calendario y horas silenciosas.",
+                "submit": "Siguiente",
+                "data": {
+                    "pool_calendar": "Calendario de piscina",
+                    "holiday_calendar": "Calendario de festivos",
+                    "quiet_time_start": "Inicio horas silenciosas (entre semana)",
+                    "quiet_time_end": "Fin horas silenciosas (entre semana)",
+                    "quiet_time_start_weekend": "Inicio horas silenciosas (fin de semana/festivo)",
+                    "quiet_time_end_weekend": "Fin horas silenciosas (fin de semana/festivo)"
+                },
+                "data_description": {
+                    "pool_calendar": "Calendario con eventos (puede iniciar modo baño)",
+                    "holiday_calendar": "Calendario de festivos (usa horario de fin de semana)",
+                    "quiet_time_start": "Inicio entre semana (p. ej. 22:00)",
+                    "quiet_time_end": "Fin entre semana (p. ej. 07:00)",
+                    "quiet_time_start_weekend": "Inicio fin de semana/festivo (p. ej. 23:00)",
+                    "quiet_time_end_weekend": "Fin fin de semana/festivo (p. ej. 08:00)"
+                }
+            },
+            "filter": {
+                "title": "Filtración",
+                "description": "Ciclos automáticos de filtración y su intervalo.",
+                "submit": "Siguiente",
+                "data": {
+                    "enable_auto_filter": "Ciclos de filtrado automáticos",
+                    "filter_interval_minutes": "Intervalo de filtrado (minutos)",
+                    "filter_minutes": "Filter duration (minutes)"
+                },
+                "data_description": {
+                    "enable_auto_filter": "Inicia ciclos de filtración automáticamente según el intervalo",
+                    "filter_interval_minutes": "Tiempo entre ciclos automáticos (60..10080 min)",
+                    "filter_minutes": "Default duration for a filter run (minutes). Range: 5–120."
+                }
+            },
+            "durations": {
+                "title": "Durations",
+                "description": "Configure default durations for bathing and quick chlorination actions.",
+                "submit": "Continue",
+                "data": {
+                    "bathing_minutes": "Bathing duration (minutes)",
+                    "chlorine_duration": "Quick-chlorination duration (minutes)"
+                },
+                "data_description": {
+                    "bathing_minutes": "Default duration for bathing/manual heat actions (minutes).",
+                    "chlorine_duration": "Default duration for quick chlorination (minutes). Range: 2–30."
+                }
+            },
+            "pv": {
+                "title": "Excedente FV",
+                "description": "Configuración de optimización FV.",
+                "submit": "Guardar",
+                "data": {
+                    "enable_pv_optimization": "Activar optimización FV",
+                    "pv_surplus_sensor": "Sensor de excedente FV",
+                    "pv_on_threshold": "Umbral FV ENCENDER (W)",
+                    "pv_off_threshold": "Umbral FV APAGAR (W)"
+                },
+                "data_description": {
+                    "enable_pv_optimization": "Usa excedente FV para controlar bomba/calefacción",
+                    "pv_surplus_sensor": "Sensor de excedente / exportación FV en W",
+                    "pv_on_threshold": "Encender por encima de este valor (por defecto: 1000W)",
+                    "pv_off_threshold": "Apagar por debajo de este valor (por defecto: 500W)"
+                }
+            }
+        }
     },
-    "sensor": {
-      "status": { "name": "Estado" },
-      "run_reason": { "name": "Motivo de funcionamiento" },
-      "heat_reason": { "name": "Motivo de calefacción" },
-      "sanitizer_mode": { "name": "Desinfección" },
-      "salt_val": { "name": "Sal" },
-      "salt_add_g": { "name": "Añadir sal" },
-      "tds_effective": { "name": "TDS (sin sal)" },
-      "outdoor_temp": { "name": "Temperatura exterior" },
-      "next_frost_mins": { "name": "Próximo ciclo antihielo en" }
+    "entity": {
+        "switch": {
+            "main": {
+                "name": "Alimentación"
+            },
+            "pump": {
+                "name": "Bomba"
+            },
+            "aux": {
+                "name": "Permitir calefacción auxiliar"
+            }
+        },
+        "binary_sensor": {
+            "maintenance_active": {
+                "name": "Modo de mantenimiento"
+            },
+            "aux_present": {
+                "name": "Calefacción auxiliar configurada"
+            },
+            "should_main_on": {
+                "name": "Alimentación requerida"
+            },
+            "should_pump_on": {
+                "name": "Bomba requerida"
+            },
+            "main_switch_on": {
+                "name": "Interruptor principal encendido"
+            },
+            "pump_switch_on": {
+                "name": "Bomba encendida"
+            },
+            "aux_heating_switch_on": {
+                "name": "Calentador auxiliar encendido"
+            }
+        },
+        "sensor": {
+            "status": {
+                "name": "Estado"
+            },
+            "run_reason": {
+                "name": "Motivo de funcionamiento"
+            },
+            "heat_reason": {
+                "name": "Motivo de calefacción"
+            },
+            "sanitizer_mode": {
+                "name": "Desinfección"
+            },
+            "salt_val": {
+                "name": "Sal"
+            },
+            "salt_add_g": {
+                "name": "Añadir sal"
+            },
+            "tds_effective": {
+                "name": "TDS (sin sal)"
+            },
+            "outdoor_temp": {
+                "name": "Temperatura exterior"
+            },
+            "next_frost_mins": {
+                "name": "Próximo ciclo antihielo en"
+            }
+        }
+    },
+    "state": {
+        "sensor": {
+            "status": {
+                "state": {
+                    "normal": "Normal",
+                    "paused": "Pausa",
+                    "frost_protection": "Protección contra heladas",
+                    "maintenance": "Mantenimiento"
+                }
+            },
+            "run_reason": {
+                "state": {
+                    "idle": "Inactivo",
+                    "bathing": "Baño",
+                    "chlorine": "Cloro",
+                    "filter": "Filtrando",
+                    "preheat": "Precalentamiento",
+                    "pv": "FV",
+                    "frost": "Protección contra heladas",
+                    "pause": "Pausa",
+                    "maintenance": "Mantenimiento"
+                }
+            },
+            "heat_reason": {
+                "state": {
+                    "off": "Apagado",
+                    "disabled": "Desactivado",
+                    "bathing": "Baño",
+                    "preheat": "Precalentamiento",
+                    "pv": "FV"
+                }
+            },
+            "sanitizer_mode": {
+                "state": {
+                    "chlorine": "Cloro",
+                    "saltwater": "Agua salada",
+                    "mixed": "Mixto"
+                }
+            }
+        }
     }
-  },
-  "state": {
-    "sensor": {
-      "status": {
-        "state": {
-          "normal": "Normal",
-          "paused": "Pausa",
-          "frost_protection": "Protección contra heladas",
-          "maintenance": "Mantenimiento"
-        }
-      }
-      ,
-      "run_reason": {
-        "state": {
-          "idle": "Inactivo",
-          "bathing": "Baño",
-          "chlorine": "Cloro",
-          "filter": "Filtrando",
-          "preheat": "Precalentamiento",
-          "pv": "FV",
-          "frost": "Protección contra heladas",
-          "pause": "Pausa",
-          "maintenance": "Mantenimiento"
-        }
-      },
-      "heat_reason": {
-        "state": {
-          "off": "Apagado",
-          "disabled": "Desactivado",
-          "bathing": "Baño",
-          "preheat": "Precalentamiento",
-          "pv": "FV"
-        }
-      },
-      "sanitizer_mode": {
-        "state": {
-          "chlorine": "Cloro",
-          "saltwater": "Agua salada",
-          "mixed": "Mixto"
-        }
-      }
-    }
-  }
 }

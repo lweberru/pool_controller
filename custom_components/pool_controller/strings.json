@@ -351,6 +351,32 @@
           "filter_interval_minutes": "Time between automatic filter cycles (60..10080 min)"
         }
       },
+      "durations": {
+        "title": "Durations",
+        "description": "Default durations for bathing and quick chlorine actions.",
+        "submit": "Continue",
+        "data": {
+          "bathing_minutes": "Bathing duration (minutes)",
+          "chlorine_duration": "Quick chlorine duration (minutes)"
+        },
+        "data_description": {
+          "bathing_minutes": "Default bathing duration in minutes (used when starting bathing from UI or calendar)",
+          "chlorine_duration": "Default quick chlorine duration in minutes"
+        }
+      },
+      "durations": {
+        "title": "Durations",
+        "description": "Default durations for bathing and quick chlorine actions.",
+        "submit": "Continue",
+        "data": {
+          "bathing_minutes": "Bathing duration (minutes)",
+          "chlorine_duration": "Quick chlorine duration (minutes)"
+        },
+        "data_description": {
+          "bathing_minutes": "Default bathing duration in minutes (used when starting bathing from UI or calendar)",
+          "chlorine_duration": "Default quick chlorine duration in minutes"
+        }
+      },
       "pv": {
         "title": "PV surplus",
         "description": "PV optimization settings.",

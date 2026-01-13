@@ -158,11 +158,26 @@
         "submit": "Continue",
         "data": {
           "enable_auto_filter": "Enable automatic filter cycles",
-          "filter_interval_minutes": "Filter interval (minutes)"
+          "filter_interval_minutes": "Filter interval (minutes)",
+          "filter_minutes": "Filter duration (minutes)"
         },
         "data_description": {
           "enable_auto_filter": "Automatically start filter cycles based on the interval",
-          "filter_interval_minutes": "Time between automatic filter cycles (60..10080 min)"
+          "filter_interval_minutes": "Time between automatic filter cycles (60..10080 min)",
+          "filter_minutes": "Default duration for a filter run (minutes). Range: 5–120."
+        }
+      },
+      "durations": {
+        "title": "Durations",
+        "description": "Configure default durations for bathing and quick chlorination actions.",
+        "submit": "Continue",
+        "data": {
+          "bathing_minutes": "Bathing duration (minutes)",
+          "chlorine_duration": "Quick-chlorination duration (minutes)"
+        },
+        "data_description": {
+          "bathing_minutes": "Default duration for bathing/manual heat actions (minutes).",
+          "chlorine_duration": "Default duration for quick chlorination (minutes). Range: 2–30."
         }
       },
       "pv": {
@@ -344,11 +359,26 @@
         "submit": "Continue",
         "data": {
           "enable_auto_filter": "Enable automatic filter cycles",
-          "filter_interval_minutes": "Filter interval (minutes)"
+          "filter_interval_minutes": "Filter interval (minutes)",
+          "filter_minutes": "Filter duration (minutes)"
         },
         "data_description": {
           "enable_auto_filter": "Automatically start filter cycles based on the interval",
-          "filter_interval_minutes": "Time between automatic filter cycles (60..10080 min)"
+          "filter_interval_minutes": "Time between automatic filter cycles (60..10080 min)",
+          "filter_minutes": "Default duration for a filter run (minutes). Range: 5–120."
+        }
+      },
+      "durations": {
+        "title": "Durations",
+        "description": "Configure default durations for bathing and quick chlorination actions.",
+        "submit": "Continue",
+        "data": {
+          "bathing_minutes": "Bathing duration (minutes)",
+          "chlorine_duration": "Quick-chlorination duration (minutes)"
+        },
+        "data_description": {
+          "bathing_minutes": "Default duration for bathing/manual heat actions (minutes).",
+          "chlorine_duration": "Default duration for quick chlorination (minutes). Range: 2–30."
         }
       },
       "pv": {
