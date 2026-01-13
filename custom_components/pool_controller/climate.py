@@ -42,7 +42,8 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
         super().__init__(coordinator)
         self.coordinator = coordinator
         self._attr_unique_id = f"{coordinator.entry.entry_id}_climate"
-        self._attr_name = None # Name kommt vom Device
+        # Name/translation is provided via translation keys and strings.json
+        self._attr_name = None
 
         merged = {**(coordinator.entry.data or {}), **(coordinator.entry.options or {})}
         try:

@@ -24,6 +24,7 @@ class PoolMainSwitch(PoolBaseSwitch):
     def __init__(self, coordinator):
         super().__init__(coordinator)
         self._attr_unique_id = f"{coordinator.entry.entry_id}_main"
+        # Fallback readable name while translations load
     @property
     def is_on(self):
         return self.coordinator.data.get("should_main_on")

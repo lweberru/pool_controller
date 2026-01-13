@@ -15,29 +15,21 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolHeatReasonSensor(coordinator),
         PoolSanitizerModeSensor(coordinator),
         # SensorDeviceClass.PH expects no unit_of_measurement.
-        PoolChemSensor(
-            coordinator,
-            "ph_val",
-            "pH-Wert",
-            None,
-            "mdi:ph",
-            device_class=_DEVICE_CLASS_PH,
-            state_class=SensorStateClass.MEASUREMENT,
-        ),
-        PoolChemSensor(coordinator, "chlor_val", "Chlorgehalt", "mV", "mdi:pool"),
-        PoolChemSensor(coordinator, "salt_val", "Salzgehalt", "g/L", "mdi:shaker"),
-        PoolChemSensor(coordinator, "tds_val", "TDS", "ppm", "mdi:water-opacity"),
-        PoolChemSensor(coordinator, "tds_effective", "TDS (ohne Salz)", "ppm", "mdi:water-opacity"),
+            PoolChemSensor(coordinator, "ph_val", None, None, "mdi:ph", device_class=_DEVICE_CLASS_PH, state_class=SensorStateClass.MEASUREMENT),
+        PoolChemSensor(coordinator, "chlor_val", None, "mV", "mdi:pool"),
+        PoolChemSensor(coordinator, "salt_val", None, "g/L", "mdi:shaker"),
+        PoolChemSensor(coordinator, "tds_val", None, "ppm", "mdi:water-opacity"),
+        PoolChemSensor(coordinator, "tds_effective", None, "ppm", "mdi:water-opacity"),
         # Recommendations (not measurements): keep units but do not set state_class.
-        PoolChemSensor(coordinator, "salt_add_g", "Salz nachfüllen", "g", "mdi:shaker", device_class=SensorDeviceClass.WEIGHT, state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
-        PoolChemSensor(coordinator, "tds_water_change_liters", "TDS Wasserwechsel", "L", "mdi:water-sync", device_class=SensorDeviceClass.VOLUME, state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
-        PoolChemSensor(coordinator, "tds_water_change_percent", "TDS Wasserwechsel", "%", "mdi:water-percent", state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
-        PoolChemSensor(coordinator, "ph_minus_g", "Ph- Aktion", "g", "mdi:pill", device_class=SensorDeviceClass.WEIGHT, state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
-        PoolChemSensor(coordinator, "ph_plus_g", "Ph+ Aktion", "g", "mdi:pill", device_class=SensorDeviceClass.WEIGHT, state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
-        PoolChemSensor(coordinator, "chlor_spoons", "Chlor Aktion", "Löffel", "mdi:spoon-sugar", state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
-        PoolChemSensor(coordinator, "next_start_mins", "Nächster Start in", "min", "mdi:clock-start", device_class=SensorDeviceClass.DURATION),
-        PoolChemSensor(coordinator, "next_frost_mins", "Nächster Frost in", "min", "mdi:snowflake-clock", device_class=SensorDeviceClass.DURATION, state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
-        PoolTimeSensor(coordinator, "next_event", "Nächster Event Start")
+        PoolChemSensor(coordinator, "salt_add_g", None, "g", "mdi:shaker", device_class=SensorDeviceClass.WEIGHT, state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
+        PoolChemSensor(coordinator, "tds_water_change_liters", None, "L", "mdi:water-sync", device_class=SensorDeviceClass.VOLUME, state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
+        PoolChemSensor(coordinator, "tds_water_change_percent", None, "%", "mdi:water-percent", state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
+        PoolChemSensor(coordinator, "ph_minus_g", None, "g", "mdi:pill", device_class=SensorDeviceClass.WEIGHT, state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
+        PoolChemSensor(coordinator, "ph_plus_g", None, "g", "mdi:pill", device_class=SensorDeviceClass.WEIGHT, state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
+        PoolChemSensor(coordinator, "chlor_spoons", None, "Löffel", "mdi:spoon-sugar", state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
+        PoolChemSensor(coordinator, "next_start_mins", None, "min", "mdi:clock-start", device_class=SensorDeviceClass.DURATION),
+        PoolChemSensor(coordinator, "next_frost_mins", None, "min", "mdi:snowflake-clock", device_class=SensorDeviceClass.DURATION, state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
+        PoolTimeSensor(coordinator, "next_event", None)
     ]
     # Timer/Status sensors
     entities.extend([
@@ -46,33 +38,33 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolTimerSensor(coordinator, "auto_filter_timer_mins", "mdi:timer-cog", kind="auto_filter"),
         PoolTimerSensor(coordinator, "pause_timer_mins", "mdi:pause-circle", kind="pause"),
         PoolTimerSensor(coordinator, "frost_timer_mins", "mdi:snowflake-clock", kind="frost"),
-        PoolChemSensor(coordinator, "next_filter_mins", "Nächster Filter in", "min", "mdi:clock-start", device_class=SensorDeviceClass.DURATION),
+            PoolChemSensor(coordinator, "next_filter_mins", None, "min", "mdi:clock-start", device_class=SensorDeviceClass.DURATION),
         PoolChemSensor(
             coordinator,
             "outdoor_temp",
-            "Außentemperatur",
+            None,
             UnitOfTemperature.CELSIUS,
             "mdi:thermometer",
             device_class=SensorDeviceClass.TEMPERATURE,
             state_class=SensorStateClass.MEASUREMENT,
         ),
-        PoolTimeSensor(coordinator, "next_event_end", "Nächster Event Ende"),
-        PoolTextSensor(coordinator, "next_event_summary", "Nächster Event Name"),
+        PoolTimeSensor(coordinator, "next_event_end", None),
+        PoolTextSensor(coordinator, "next_event_summary", None),
     ])
     # Power sensors
     entities.extend([
-        PoolPowerSensor(coordinator, "pv_power", "PV Power"),
-        PoolPowerSensor(coordinator, "main_power", "Hauptpumpe Leistung"),
-        PoolPowerSensor(coordinator, "aux_power", "Heizung Leistung"),
+        PoolPowerSensor(coordinator, "pv_power", None),
+        PoolPowerSensor(coordinator, "main_power", None),
+        PoolPowerSensor(coordinator, "aux_power", None),
     ])
     async_add_entities(entities)
 
     # Config value sensors: expose configured durations so the frontend can read them
     try:
         cfg_sensors = [
-            PoolConfigSensor(coordinator, CONF_FILTER_DURATION, DEFAULT_FILTER_DURATION, "Filterdauer (konfiguriert)"),
-            PoolConfigSensor(coordinator, CONF_CHLORINE_DURATION, DEFAULT_CHLORINE_DURATION, "Stoßchlorung Dauer (konfiguriert)"),
-            PoolConfigSensor(coordinator, CONF_BATH_DURATION, DEFAULT_BATH_MINUTES, "Bade-Dauer (konfiguriert)"),
+                PoolConfigSensor(coordinator, CONF_FILTER_DURATION, DEFAULT_FILTER_DURATION, None),
+                PoolConfigSensor(coordinator, CONF_CHLORINE_DURATION, DEFAULT_CHLORINE_DURATION, None),
+                PoolConfigSensor(coordinator, CONF_BATH_DURATION, DEFAULT_BATH_MINUTES, None),
         ]
         async_add_entities(cfg_sensors)
     except Exception:
@@ -162,6 +154,7 @@ class PoolChemSensor(PoolBaseSensor):
         super().__init__(coordinator)
         self._key = key
         self._attr_translation_key = key
+        # Names are provided via translation keys in strings.json; do not hardcode here
         self._attr_native_unit_of_measurement = unit
         self._attr_icon = icon
         self._attr_device_class = device_class
@@ -274,8 +267,7 @@ class PoolConfigSensor(PoolBaseSensor):
         self._attr_unique_id = f"{coordinator.entry.entry_id}_{option_key}"
         self._attr_translation_key = option_key
         self._attr_icon = "mdi:timer"
-        if name:
-            self._attr_name = name
+        # Do not set _attr_name here; translations in strings.json provide names
 
     @property
     def native_value(self):
