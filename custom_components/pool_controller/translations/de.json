@@ -463,6 +463,13 @@
             "next_frost_mins": {
                 "name": "Nächster Frostschutzlauf in"
             }
+            ,
+            "tds_water_change_liters": {
+                "name": "Empfohlener Wasserwechsel (L)"
+            },
+            "tds_water_change_percent": {
+                "name": "Empfohlener Wasserwechsel (%)"
+            }
         }
     },
     "state": {
