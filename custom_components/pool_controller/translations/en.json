@@ -375,7 +375,7 @@
     "switch": {
       "main": { "name": "Power" },
       "pump": { "name": "Pump" },
-      "aux": { "name": "Aux heater" }
+      "aux": { "name": "Enable auxiliary heating" }
     },
     "binary_sensor": {
       "maintenance_active": { "name": "Maintenance mode" },

@@ -376,7 +376,7 @@
     "switch": {
       "main": { "name": "Alimentación" },
       "pump": { "name": "Bomba" },
-      "aux": { "name": "Calentador auxiliar" }
+      "aux": { "name": "Permitir calefacción auxiliar" }
     },
     "binary_sensor": {
       "maintenance_active": { "name": "Modo de mantenimiento" },

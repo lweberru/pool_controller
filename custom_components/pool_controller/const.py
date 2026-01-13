@@ -76,15 +76,23 @@ CONF_BATH_DURATION = "bathing_minutes"
 DEFAULT_BATH_MINUTES = 60
 # Filter cycle defaults
 CONF_FILTER_DURATION = "filter_minutes"
-CONF_FILTER_INTERVAL = "filter_interval_minutes"
 DEFAULT_FILTER_DURATION = 30
+CONF_FILTER_INTERVAL = "filter_interval_minutes"
 DEFAULT_FILTER_INTERVAL = 12 * 60  # 12 hours = 720 minutes
+# Stoßchlorungsdauer
+CONF_CHLORINE_DURATION = "chlorine_duration"
+DEFAULT_CHLORINE_DURATION = 5
 
 # PV thresholds (in Watts or sensor units)
 CONF_PV_ON_THRESHOLD = "pv_on_threshold"
 CONF_PV_OFF_THRESHOLD = "pv_off_threshold"
 DEFAULT_PV_ON = 1000
 DEFAULT_PV_OFF = 500
+
+# Toggle debounce (seconds): minimaler Abstand zwischen Schaltversuchen für externe Entities
+# Verhindert schnelle Retry-Loops wenn eine Entity nach dem Schalten kurzzeitig unavailable ist.
+CONF_TOGGLE_DEBOUNCE_SECONDS = "toggle_debounce_seconds"
+DEFAULT_TOGGLE_DEBOUNCE_SECONDS = 120
 
 # Persisted option keys for timers
 # Manual timer (shared for bathing/chlorine/filter)

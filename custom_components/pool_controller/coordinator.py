@@ -36,6 +36,12 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             self.aux_enabled = bool(merged.get(CONF_ENABLE_AUX_HEATING, False))
         except Exception:
             self.aux_enabled = False
+        # Toggle debounce seconds (configurable via entry.options or defaults)
+        try:
+            merged_td = {**(entry.data or {}), **(entry.options or {})} if entry else {}
+            self.toggle_debounce_seconds = int(merged_td.get(CONF_TOGGLE_DEBOUNCE_SECONDS, DEFAULT_TOGGLE_DEBOUNCE_SECONDS))
+        except Exception:
+            self.toggle_debounce_seconds = DEFAULT_TOGGLE_DEBOUNCE_SECONDS
         self.maintenance_active = False
         # HVAC enabled state (thermostat-style heating when PV optimization is disabled).
         self.hvac_enabled = True
@@ -105,6 +111,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             # PV thresholds and filter config
             self.filter_minutes = int(entry.options.get(CONF_FILTER_DURATION, entry.data.get(CONF_FILTER_DURATION, DEFAULT_FILTER_DURATION)))
             self.filter_interval = int(entry.options.get(CONF_FILTER_INTERVAL, entry.data.get(CONF_FILTER_INTERVAL, DEFAULT_FILTER_INTERVAL)))
+            # Filterlauf darf nie länger als das Intervall sein
+            if self.filter_minutes > self.filter_interval:
+                self.filter_minutes = self.filter_interval
+            self.chlorine_duration = int(entry.options.get(CONF_CHLORINE_DURATION, entry.data.get(CONF_CHLORINE_DURATION, DEFAULT_CHLORINE_DURATION)))
             self.pv_on_threshold = int(entry.options.get(CONF_PV_ON_THRESHOLD, entry.data.get(CONF_PV_ON_THRESHOLD, DEFAULT_PV_ON)))
             self.pv_off_threshold = int(entry.options.get(CONF_PV_OFF_THRESHOLD, entry.data.get(CONF_PV_OFF_THRESHOLD, DEFAULT_PV_OFF)))
         else:
@@ -1297,7 +1307,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 desired_aux = data.get("should_aux_on")
                 # Debounce / retry guard: avoid rapid repeated attempts for the same entity
                 now = dt_util.now()
-                min_retry = timedelta(seconds=120)
+                min_retry = timedelta(seconds=getattr(self, "toggle_debounce_seconds", DEFAULT_TOGGLE_DEBOUNCE_SECONDS))
 
                 # access entity registry once for source checks
                 try:

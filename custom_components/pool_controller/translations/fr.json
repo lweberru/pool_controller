@@ -376,7 +376,7 @@
     "switch": {
       "main": { "name": "Alimentation" },
       "pump": { "name": "Pompe" },
-      "aux": { "name": "Chauffage auxiliaire" }
+      "aux": { "name": "Activer chauffage auxiliaire" }
     },
     "binary_sensor": {
       "maintenance_active": { "name": "Mode maintenance" },

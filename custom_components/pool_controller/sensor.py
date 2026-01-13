@@ -1,7 +1,7 @@
 from homeassistant.components.sensor import SensorEntity, SensorDeviceClass, SensorStateClass
 from homeassistant.const import EntityCategory, UnitOfTemperature
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from .const import DOMAIN, MANUFACTURER
+from .const import DOMAIN, MANUFACTURER, CONF_FILTER_DURATION, DEFAULT_FILTER_DURATION, CONF_CHLORINE_DURATION, DEFAULT_CHLORINE_DURATION, CONF_BATH_DURATION, DEFAULT_BATH_MINUTES
 
 
 _AUTO_STATE_CLASS = object()
@@ -66,6 +66,18 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolPowerSensor(coordinator, "aux_power", "Heizung Leistung"),
     ])
     async_add_entities(entities)
+
+    # Config value sensors: expose configured durations so the frontend can read them
+    try:
+        cfg_sensors = [
+            PoolConfigSensor(coordinator, CONF_FILTER_DURATION, DEFAULT_FILTER_DURATION, "Filterdauer (konfiguriert)"),
+            PoolConfigSensor(coordinator, CONF_CHLORINE_DURATION, DEFAULT_CHLORINE_DURATION, "Stoßchlorung Dauer (konfiguriert)"),
+            PoolConfigSensor(coordinator, CONF_BATH_DURATION, DEFAULT_BATH_MINUTES, "Bade-Dauer (konfiguriert)"),
+        ]
+        async_add_entities(cfg_sensors)
+    except Exception:
+        # Best-effort: don't crash setup if config sensors fail
+        pass
 
 class PoolBaseSensor(CoordinatorEntity, SensorEntity):
     _attr_has_entity_name = True
@@ -244,3 +256,38 @@ class PoolTimerSensor(PoolBaseSensor):
                 "type": "frost",
             }
         return {}
+
+
+class PoolConfigSensor(PoolBaseSensor):
+    """Expose a configured option value as a simple sensor.
+
+    This reads from the config entry data/options with a sensible default.
+    """
+    _attr_native_unit_of_measurement = "min"
+    _attr_device_class = None
+
+    def __init__(self, coordinator, option_key, default_value, name=None):
+        super().__init__(coordinator)
+        self._option_key = option_key
+        self._default = default_value
+        # unique id mirrors other sensors: <entry_id>_<key>
+        self._attr_unique_id = f"{coordinator.entry.entry_id}_{option_key}"
+        self._attr_translation_key = option_key
+        self._attr_icon = "mdi:timer"
+        if name:
+            self._attr_name = name
+
+    @property
+    def native_value(self):
+        try:
+            # Prefer persisted options, then entry.data, then default
+            val = None
+            if getattr(self.coordinator, "entry", None):
+                val = (self.coordinator.entry.options or {}).get(self._option_key)
+                if val is None:
+                    val = (self.coordinator.entry.data or {}).get(self._option_key)
+            if val is None:
+                return int(self._default)
+            return int(val)
+        except Exception:
+            return int(self._default)

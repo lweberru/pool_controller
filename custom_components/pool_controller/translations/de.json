@@ -428,7 +428,7 @@
     "switch": {
       "main": { "name": "Stromversorgung" },
       "pump": { "name": "Pumpe" },
-      "aux": { "name": "Zusatzheizung" }
+      "aux": { "name": "Zusatzheizung erlauben" }
     },
     "button": {
       "pause_60": { "name": "Pause (60 min)" },

@@ -544,8 +544,14 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_filter(self, user_input=None):
         """Fifth step: filter interval settings."""
         if user_input is not None:
+            # Filterdauer darf nicht länger als das Intervall sein
+            interval = int(user_input.get(CONF_FILTER_INTERVAL, DEFAULT_FILTER_INTERVAL))
+            filter_duration = int(user_input.get(CONF_FILTER_DURATION, DEFAULT_FILTER_DURATION))
+            if filter_duration > interval:
+                filter_duration = interval
+                user_input[CONF_FILTER_DURATION] = filter_duration
             self.options.update(user_input)
-            return await self.async_step_pv()
+            return await self.async_step_chlorine_duration()
 
         curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
         return self.async_show_form(
@@ -555,6 +561,32 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
                 vol.Required(CONF_FILTER_INTERVAL, default=curr.get(CONF_FILTER_INTERVAL, DEFAULT_FILTER_INTERVAL)): vol.All(
                     vol.Coerce(int),
                     vol.Range(min=60, max=7*24*60)
+                ),
+                vol.Required(CONF_FILTER_DURATION, default=curr.get(CONF_FILTER_DURATION, DEFAULT_FILTER_DURATION)): vol.All(
+                    vol.Coerce(int),
+                    vol.Range(min=1, max=curr.get(CONF_FILTER_INTERVAL, DEFAULT_FILTER_INTERVAL))
+                ),
+            }),
+            last_step=False
+        )
+
+    async def async_step_chlorine_duration(self, user_input=None):
+        """Step: Stoßchlorungsdauer einstellen."""
+        if user_input is not None:
+            self.options.update(user_input)
+            return await self.async_step_pv()
+
+        curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
+        return self.async_show_form(
+            step_id="chlorine_duration",
+            data_schema=vol.Schema({
+                vol.Required(CONF_BATH_DURATION, default=curr.get(CONF_BATH_DURATION, DEFAULT_BATH_MINUTES)): vol.All(
+                    vol.Coerce(int),
+                    vol.Range(min=1, max=12*60)
+                ),
+                vol.Required("chlorine_duration", default=curr.get("chlorine_duration", 5)): vol.All(
+                    vol.Coerce(int),
+                    vol.Range(min=1, max=60)
                 ),
             }),
             last_step=False
