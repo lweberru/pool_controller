@@ -322,11 +322,23 @@ async def _ensure_registry_translation_keys(hass: HomeAssistant, entry: ConfigEn
             if getattr(e, "platform", None) != DOMAIN:
                 continue
 
-            # Derive sensible suffix from unique_id
+            # Derive sensible suffix from unique_id. The unique_id format is
+            # "{entry_id}_{suffix}", but the suffix itself may contain underscores
+            # (e.g. "bath_60"), so prefer extracting the part after the entry_id.
             suffix = None
             if getattr(e, "unique_id", None):
                 try:
-                    suffix = str(e.unique_id).split("_")[-1]
+                    uid = str(e.unique_id)
+                    eid = getattr(entry, "entry_id", None)
+                    if eid and uid.startswith(f"{eid}_"):
+                        suffix = uid[len(eid) + 1 :]
+                    else:
+                        # fallback: if there are multiple parts, use everything after the first token
+                        parts = uid.split("_")
+                        if len(parts) > 1:
+                            suffix = "_".join(parts[1:])
+                        else:
+                            suffix = parts[-1]
                 except Exception:
                     suffix = None
 
