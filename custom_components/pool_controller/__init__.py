@@ -283,6 +283,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # Plattformen laden
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    # Ensure entity registry entries for this config entry have a translation_key
+    # and an original name when missing. This helps new installs get sensible
+    # friendly names immediately (prevents "Whirlpool None").
+    try:
+        await _ensure_registry_translation_keys(hass, entry)
+    except Exception:
+        _LOGGER.debug("Could not ensure registry translation keys for %s", entry.entry_id)
     
     # Listener für Optionen-Updates (Zahnrad-Änderungen)
     entry.async_on_unload(entry.add_update_listener(update_listener))
@@ -292,6 +299,64 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def update_listener(hass: HomeAssistant, entry: ConfigEntry):
     """Wird aufgerufen, wenn Optionen im Zahnrad geändert wurden."""
     await hass.config_entries.async_reload(entry.entry_id)
+
+
+async def _ensure_registry_translation_keys(hass: HomeAssistant, entry: ConfigEntry):
+    """Best-effort: setze `translation_key` und `original_name` in entity registry, wenn fehlen.
+
+    This fixes cases where older installs or import paths created entities without
+    a translation_key/original_name, resulting in UI names like "Whirlpool None".
+    """
+    try:
+        ent_reg = er.async_get(hass)
+        # Prefer helper that lists entries for this config entry if available.
+        try:
+            entries = er.async_entries_for_config_entry(ent_reg, entry.entry_id)
+        except Exception:
+            # Fallback: iterate all entries and filter by config_entry_id
+            entries = [e for e in ent_reg.entities.values() if getattr(e, "config_entry_id", None) == entry.entry_id]
+
+        changed_any = False
+        for e in entries:
+            # Only touch our platform's entries
+            if getattr(e, "platform", None) != DOMAIN:
+                continue
+
+            # Derive sensible suffix from unique_id
+            suffix = None
+            if getattr(e, "unique_id", None):
+                try:
+                    suffix = str(e.unique_id).split("_")[-1]
+                except Exception:
+                    suffix = None
+
+            # If translation_key missing, set it to suffix (many translation keys match suffix)
+            if not getattr(e, "translation_key", None) and suffix:
+                try:
+                    ent_reg.async_update_entity(e.entity_id, translation_key=suffix)
+                    changed_any = True
+                    _LOGGER.debug("Set translation_key=%s for %s", suffix, e.entity_id)
+                except Exception:
+                    _LOGGER.debug("Failed to set translation_key for %s", e.entity_id)
+
+            # If original_name missing, set a human-friendly fallback based on suffix
+            if getattr(e, "original_name", None) is None:
+                suggestion = None
+                if suffix:
+                    suggestion = suffix.replace("_", " ").replace("  ", " ").strip().title()
+                if not suggestion:
+                    suggestion = e.entity_id.split(".", 1)[-1].replace("_", " ").title()
+                try:
+                    ent_reg.async_update_entity(e.entity_id, name=suggestion)
+                    changed_any = True
+                    _LOGGER.debug("Set original_name='%s' for %s", suggestion, e.entity_id)
+                except Exception:
+                    _LOGGER.debug("Failed to set original_name for %s", e.entity_id)
+
+        if changed_any:
+            _LOGGER.info("Updated entity registry names/translation_keys for config entry %s", entry.entry_id)
+    except Exception:
+        _LOGGER.exception("Error while ensuring registry translation keys for %s", entry.entry_id)
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Entladen der Integration."""
