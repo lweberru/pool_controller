@@ -285,6 +285,28 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             last_step=False
         )
 
+    async def async_step_durations(self, user_input=None):
+        """Step: Dauer-Einstellungen (Baden & Stoßchlorung)."""
+        if user_input is not None:
+            self.data.update(user_input)
+            return await self.async_step_pv()
+
+        curr = {**self.data}
+        return self.async_show_form(
+            step_id="durations",
+            data_schema=vol.Schema({
+                vol.Required(CONF_BATH_DURATION, default=curr.get(CONF_BATH_DURATION, DEFAULT_BATH_MINUTES)): vol.All(
+                    vol.Coerce(int),
+                    vol.Range(min=1, max=12*60)
+                ),
+                vol.Required(CONF_CHLORINE_DURATION, default=curr.get(CONF_CHLORINE_DURATION, DEFAULT_CHLORINE_DURATION)): vol.All(
+                    vol.Coerce(int),
+                    vol.Range(min=2, max=30)
+                ),
+            }),
+            last_step=False,
+        )
+
     async def async_step_pv(self, user_input=None):
         """Sixth step: PV sensor and thresholds."""
         errors = {}
@@ -553,12 +575,45 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_filter(self, user_input=None):
         """Fifth step: filter interval settings."""
         if user_input is not None:
-            # Filterdauer darf nicht länger als das Intervall sein
-            interval = int(user_input.get(CONF_FILTER_INTERVAL, DEFAULT_FILTER_INTERVAL))
-            filter_duration = int(user_input.get(CONF_FILTER_DURATION, DEFAULT_FILTER_DURATION))
+            # Defensive: best-effort validate numeric inputs and return form errors
+            errors = {}
+            try:
+                interval = int(user_input.get(CONF_FILTER_INTERVAL, DEFAULT_FILTER_INTERVAL))
+            except Exception:
+                interval = DEFAULT_FILTER_INTERVAL
+                errors[CONF_FILTER_INTERVAL] = "invalid_value"
+            try:
+                filter_duration = int(user_input.get(CONF_FILTER_DURATION, DEFAULT_FILTER_DURATION))
+            except Exception:
+                filter_duration = DEFAULT_FILTER_DURATION
+                errors[CONF_FILTER_DURATION] = "invalid_value"
+
             if filter_duration > interval:
                 filter_duration = interval
                 user_input[CONF_FILTER_DURATION] = filter_duration
+
+            # If there were validation errors, re-show the form with error hints
+            if errors:
+                return self.async_show_form(
+                    step_id="filter",
+                    errors=errors,
+                    data_schema=vol.Schema({
+                        vol.Optional(CONF_ENABLE_AUTO_FILTER, default=curr.get(CONF_ENABLE_AUTO_FILTER, True)): bool,
+                        vol.Required(CONF_FILTER_INTERVAL, default=curr.get(CONF_FILTER_INTERVAL, DEFAULT_FILTER_INTERVAL)): vol.All(
+                            vol.Coerce(int),
+                            vol.Range(min=60, max=7*24*60)
+                        ),
+                        vol.Required(CONF_FILTER_DURATION, default=curr.get(CONF_FILTER_DURATION, DEFAULT_FILTER_DURATION)): vol.All(
+                            vol.Coerce(int),
+                            vol.Range(min=1, max=curr.get(CONF_FILTER_INTERVAL, DEFAULT_FILTER_INTERVAL))
+                        ),
+                    }),
+                    last_step=False
+                )
+
+            # Persist normalized values and continue
+            user_input[CONF_FILTER_INTERVAL] = interval
+            user_input[CONF_FILTER_DURATION] = filter_duration
             self.options.update(user_input)
             return await self.async_step_durations()
 

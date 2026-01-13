@@ -15,7 +15,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolHeatReasonSensor(coordinator),
         PoolSanitizerModeSensor(coordinator),
         # SensorDeviceClass.PH expects no unit_of_measurement.
-            PoolChemSensor(coordinator, "ph_val", None, None, "mdi:ph", device_class=_DEVICE_CLASS_PH, state_class=SensorStateClass.MEASUREMENT),
+        PoolChemSensor(coordinator, "ph_val", None, None, "mdi:ph", device_class=_DEVICE_CLASS_PH, state_class=SensorStateClass.MEASUREMENT),
         PoolChemSensor(coordinator, "chlor_val", None, "mV", "mdi:pool"),
         PoolChemSensor(coordinator, "salt_val", None, "g/L", "mdi:shaker"),
         PoolChemSensor(coordinator, "tds_val", None, "ppm", "mdi:water-opacity"),
