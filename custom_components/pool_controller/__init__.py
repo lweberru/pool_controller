@@ -353,6 +353,31 @@ async def _ensure_registry_translation_keys(hass: HomeAssistant, entry: ConfigEn
                 except Exception:
                     _LOGGER.debug("Failed to set original_name for %s", e.entity_id)
 
+                    # If the registry produced a placeholder object_id like 'none' (entity_id contains '_none'),
+                    # attempt to rename the entity_id to a sensible one based on the suffix.
+                    try:
+                        obj = str(e.entity_id).split('.', 1)[1]
+                        if obj.startswith('whirlpool_none') or obj == 'none' or '_none' in obj:
+                            # build candidate object_id: prefer suffix, else fallback to sanitized suggestion
+                            cand_base = suffix or suggestion or obj
+                            # simple slugify: keep a-z0-9 and underscore
+                            import re
+                            cand = re.sub(r'[^a-z0-9_]', '', str(cand_base).lower().replace(' ', '_'))
+                            if not cand:
+                                cand = f"{e.unique_id.split('_')[-1]}"
+                            new_eid = f"{e.entity_id.split('.')[0]}.{cand}"
+                            # only attempt if different
+                            if new_eid != e.entity_id:
+                                try:
+                                    ent_reg.async_update_entity(e.entity_id, new_entity_id=new_eid)
+                                    _LOGGER.info("Renamed %s -> %s to avoid placeholder 'none' object id", e.entity_id, new_eid)
+                                    changed_any = True
+                                except Exception as ex:
+                                    _LOGGER.debug("Could not rename %s -> %s: %s", e.entity_id, new_eid, ex)
+                    except Exception:
+                        # best-effort: ignore
+                        pass
+
         if changed_any:
             _LOGGER.info("Updated entity registry names/translation_keys for config entry %s", entry.entry_id)
     except Exception:
