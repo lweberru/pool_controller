@@ -416,15 +416,23 @@
             "maintenance_active": {
                 "name": "Modo de mantenimiento"
             },
+            "is_we_holiday": { "name": "Fin de semana/feriado" },
+            "frost_danger": { "name": "Peligro de helada" },
+            "frost_active": { "name": "Protección contra heladas activa" },
             "aux_present": {
                 "name": "Calefacción auxiliar configurada"
             },
+            "in_quiet": { "name": "Horas de silencio activas" },
+            "pv_allows": { "name": "Excedente FV disponible" },
             "should_main_on": {
                 "name": "Alimentación requerida"
             },
             "should_pump_on": {
                 "name": "Bomba requerida"
             },
+            "low_chlor": { "name": "Cloro bajo" },
+            "ph_alert": { "name": "pH fuera de rango" },
+            "tds_high": { "name": "TDS alto" },
             "main_switch_on": {
                 "name": "Interruptor principal encendido"
             },
@@ -435,34 +443,46 @@
                 "name": "Calentador auxiliar encendido"
             }
         },
+        "button": {
+            "pause_60": { "name": "Pausa 60 min" },
+            "bath_60": { "name": "Baño 60 min" },
+            "filter_30": { "name": "Filtrar 30 min" },
+            "chlorine_5": { "name": "Cloro rápido 5 min" }
+        },
         "sensor": {
-            "status": {
-                "name": "Estado"
-            },
-            "run_reason": {
-                "name": "Motivo de funcionamiento"
-            },
-            "heat_reason": {
-                "name": "Motivo de calefacción"
-            },
-            "sanitizer_mode": {
-                "name": "Desinfección"
-            },
-            "salt_val": {
-                "name": "Sal"
-            },
-            "salt_add_g": {
-                "name": "Añadir sal"
-            },
-            "tds_effective": {
-                "name": "TDS (sin sal)"
-            },
-            "outdoor_temp": {
-                "name": "Temperatura exterior"
-            },
-            "next_frost_mins": {
-                "name": "Próximo ciclo antihielo en"
-            }
+            "status": { "name": "Estado" },
+            "run_reason": { "name": "Motivo de funcionamiento" },
+            "heat_reason": { "name": "Motivo de calefacción" },
+            "sanitizer_mode": { "name": "Desinfección" },
+            "ph_val": { "name": "pH" },
+            "chlor_val": { "name": "Cloro (mV)" },
+            "salt_val": { "name": "Sal" },
+            "salt_add_g": { "name": "Añadir sal (g)" },
+            "tds_val": { "name": "TDS" },
+            "tds_effective": { "name": "TDS (sin sal)" },
+            "tds_status": { "name": "Estado TDS" },
+            "tds_water_change_liters": { "name": "Cambio de agua recomendado (L)" },
+            "tds_water_change_percent": { "name": "Cambio de agua recomendado (%)" },
+            "ph_minus_g": { "name": "Añadir pH- (g)" },
+            "ph_plus_g": { "name": "Añadir pH+ (g)" },
+            "chlor_spoons": { "name": "Dosificación de cloro (cucharas)" },
+            "next_start_mins": { "name": "Próximo inicio en" },
+            "next_filter_mins": { "name": "Próximo filtrado en" },
+            "next_frost_mins": { "name": "Próximo ciclo antihielo en" },
+            "next_event": { "name": "Próximo evento" },
+            "next_event_end": { "name": "Fin del próximo evento" },
+            "next_event_summary": { "name": "Resumen del próximo evento" },
+            "manual_timer_mins": { "name": "Temporizador manual (min)" },
+            "auto_filter_timer_mins": { "name": "Temporizador auto-filtrado (min)" },
+            "pause_timer_mins": { "name": "Temporizador pausa (min)" },
+            "frost_timer_mins": { "name": "Temporizador frost (min)" },
+            "outdoor_temp": { "name": "Temperatura exterior" },
+            "pv_power": { "name": "Potencia PV" },
+            "main_power": { "name": "Potencia principal" },
+            "aux_power": { "name": "Potencia auxiliar" },
+            "filter_minutes": { "name": "Duración de filtro configurada (min)" },
+            "chlorine_duration": { "name": "Duración de cloro configurada (min)" },
+            "bathing_minutes": { "name": "Duración de baño configurada (min)" }
         }
     },
     "state": {
