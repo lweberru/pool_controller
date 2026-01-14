@@ -1,18 +1,18 @@
 {
     "config": {
         "step": {
-            "user": {
+            "init": {
                 "title": "Configuration de base",
                 "submit": "Suivant",
                 "data": {
-                    "name": "Pool name",
+                    "name": "Nom de la piscine",
                     "water_volume": "Volume d'eau (litres)",
                     "demo_mode": "Mode démo"
                 },
                 "data_description": {
-                    "name": "Display name for this pool installation",
-                    "water_volume": "Water volume in liters (used for dosing and heating time calculations)",
-                    "demo_mode": "Demo mode: does not switch real devices (for testing only)"
+                    "name": "Nom affiché pour cette installation",
+                    "water_volume": "Volume d'eau en litres (utilisé pour le dosage et le calcul du temps de chauffe)",
+                    "demo_mode": "Mode démo : ne commande pas d'appareils réels (tests uniquement)"
                 }
             },
             "switches": {
@@ -168,16 +168,16 @@
                 }
             },
             "durations": {
-                "title": "Durations",
-                "description": "Configure default durations for bathing and quick chlorination actions.",
-                "submit": "Continue",
+                "title": "Durées",
+                "description": "Configurez les durées par défaut pour les actions de baignade et de chloration rapide.",
+                "submit": "Suivant",
                 "data": {
-                    "bathing_minutes": "Bathing duration (minutes)",
-                    "chlorine_duration": "Quick-chlorination duration (minutes)"
+                    "bathing_minutes": "Durée de baignade (minutes)",
+                    "chlorine_duration": "Durée de chloration rapide (minutes)"
                 },
                 "data_description": {
-                    "bathing_minutes": "Default duration for bathing/manual heat actions (minutes).",
-                    "chlorine_duration": "Default duration for quick chlorination (minutes). Range: 2–30."
+                    "bathing_minutes": "Durée par défaut pour les actions de baignade / chauffe manuelle (minutes).",
+                    "chlorine_duration": "Durée par défaut pour la chloration rapide (minutes). Plage : 2–30."
                 }
             },
             "pv": {
@@ -369,16 +369,16 @@
                 }
             },
             "durations": {
-                "title": "Durations",
-                "description": "Configure default durations for bathing and quick chlorination actions.",
-                "submit": "Continue",
+                "title": "Durées",
+                "description": "Configurez les durées par défaut pour la baignade et la chloration rapide.",
+                "submit": "Suivant",
                 "data": {
-                    "bathing_minutes": "Bathing duration (minutes)",
-                    "chlorine_duration": "Quick-chlorination duration (minutes)"
+                    "bathing_minutes": "Durée de baignade (minutes)",
+                    "chlorine_duration": "Durée de chloration rapide (minutes)"
                 },
                 "data_description": {
-                    "bathing_minutes": "Default duration for bathing/manual heat actions (minutes).",
-                    "chlorine_duration": "Default duration for quick chlorination (minutes). Range: 2–30."
+                    "bathing_minutes": "Durée par défaut pour la baignade / le chauffage manuel (minutes).",
+                    "chlorine_duration": "Durée par défaut pour la chloration rapide (minutes). Plage : 2–30."
                 }
             },
             "pv": {

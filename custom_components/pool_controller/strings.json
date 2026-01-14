@@ -1,7 +1,7 @@
 {
   "config": {
     "step": {
-      "user": {
+      "init": {
         "title": "Basic setup",
         "submit": "Continue",
         "data": {
@@ -419,8 +419,8 @@
       },
       "tds_high": {
         "name": "TDS too high"
-      }
-      ,"aux_present": {
+      },
+      "aux_present": {
         "name": "Auxiliary heater configured"
       },
       "main_switch_on": {
@@ -517,8 +517,7 @@
       },
       "aux_power": {
         "name": "Heater power"
-      }
-      ,
+      },
       "next_frost_mins": {
         "name": "Next frost run in"
       },

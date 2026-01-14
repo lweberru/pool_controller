@@ -1,18 +1,18 @@
 {
     "config": {
         "step": {
-            "user": {
+            "init": {
                 "title": "Basis-Setup",
                 "submit": "Weiter",
                 "data": {
-                    "name": "Pool name",
+                    "name": "Pool-Name",
                     "water_volume": "Wassermenge (Liter)",
                     "demo_mode": "Demo-Modus"
                 },
                 "data_description": {
-                    "name": "Display name for this pool installation",
-                    "water_volume": "Water volume in liters (used for dosing and heating time calculations)",
-                    "demo_mode": "Demo mode: does not switch real devices (for testing only)"
+                    "name": "Anzeigename für diese Pool-Installation",
+                    "water_volume": "Wassermenge in Litern (für Dosierung und Heizzeit-Berechnung)",
+                    "demo_mode": "Demo-Modus: schaltet keine echten Geräte (nur zum Testen)"
                 }
             },
             "switches": {
@@ -168,16 +168,16 @@
                 }
             },
             "durations": {
-                "title": "Durations",
-                "description": "Configure default durations for bathing and quick chlorination actions.",
-                "submit": "Continue",
+                "title": "Dauern",
+                "description": "Standard-Dauern für Baden und Stoßchlorung festlegen.",
+                "submit": "Weiter",
                 "data": {
-                    "bathing_minutes": "Bathing duration (minutes)",
-                    "chlorine_duration": "Quick-chlorination duration (minutes)"
+                    "bathing_minutes": "Bade-Dauer (Minuten)",
+                    "chlorine_duration": "Stoßchlorungsdauer (Minuten)"
                 },
                 "data_description": {
-                    "bathing_minutes": "Default duration for bathing/manual heat actions (minutes).",
-                    "chlorine_duration": "Default duration for quick chlorination (minutes). Range: 2–30."
+                    "bathing_minutes": "Standard-Dauer für Bade-/manuelles Heizen (Minuten).",
+                    "chlorine_duration": "Standard-Dauer für Stoßchlorung (Minuten). Bereich: 2–30."
                 }
             },
             "pv": {
@@ -369,16 +369,16 @@
                 }
             },
             "durations": {
-                "title": "Durations",
-                "description": "Configure default durations for bathing and quick chlorination actions.",
-                "submit": "Continue",
+                "title": "Dauern",
+                "description": "Standard-Dauern für Baden und Stoßchlorung festlegen.",
+                "submit": "Weiter",
                 "data": {
-                    "bathing_minutes": "Bathing duration (minutes)",
-                    "chlorine_duration": "Quick-chlorination duration (minutes)"
+                    "bathing_minutes": "Bade-Dauer (Minuten)",
+                    "chlorine_duration": "Stoßchlorungsdauer (Minuten)"
                 },
                 "data_description": {
-                    "bathing_minutes": "Default duration for bathing/manual heat actions (minutes).",
-                    "chlorine_duration": "Default duration for quick chlorination (minutes). Range: 2–30."
+                    "bathing_minutes": "Standard-Dauer für Bade-/manuelles Heizen (Minuten).",
+                    "chlorine_duration": "Standard-Dauer für Stoßchlorung (Minuten). Bereich: 2–30."
                 }
             },
             "pv": {
