@@ -40,15 +40,17 @@ def _water_quality_schema(curr: dict | None = None):
     })
 
 def _sanitizer_schema(default_mode):
-    # returns a single-field schema for sanitizer selection; labels localized by caller
-    return vol.Schema({
-        vol.Required(CONF_SANITIZER_MODE, default=default_mode): selector.SelectSelector(
-            selector.SelectSelectorConfig(
-                options=[],
-                mode=selector.SelectSelectorMode.DROPDOWN,
+    # returns a single-field schema for sanitizer selection; caller should pass localized `options`
+    def _inner(options=None):
+        return vol.Schema({
+            vol.Required(CONF_SANITIZER_MODE, default=default_mode): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=(options or []),
+                    mode=selector.SelectSelectorMode.DROPDOWN,
+                )
             )
-        )
-    })
+        })
+    return _inner
 
 def _sanitizer_salt_schema(curr: dict | None = None):
     c = curr or {}
@@ -211,9 +213,10 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         curr = {**self.data}
         default_mode = (curr.get(CONF_SANITIZER_MODE) or ("saltwater" if curr.get(CONF_ENABLE_SALTWATER) else DEFAULT_SANITIZER_MODE))
+        # Provide localized option labels to the selector
         return self.async_show_form(
             step_id="sanitizer",
-            data_schema=_sanitizer_schema(default_mode),
+            data_schema=_sanitizer_schema(default_mode)(self._sanitizer_select_options()),
             last_step=False,
         )
 
@@ -396,7 +399,7 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
 
         return self.async_show_form(
             step_id="sanitizer",
-            data_schema=_sanitizer_schema(default_mode),
+            data_schema=_sanitizer_schema(default_mode)(options),
             last_step=False,
         )
 
