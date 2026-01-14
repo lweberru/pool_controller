@@ -422,6 +422,27 @@
       }
       ,"aux_present": {
         "name": "Auxiliary heater configured"
+      },
+      "main_switch_on": {
+        "name": "Main switch required"
+      },
+      "pump_switch_on": {
+        "name": "Pump switch required"
+      },
+      "aux_heating_switch_on": {
+        "name": "Auxiliary heater is on"
+      },
+      "is_paused": {
+        "name": "Paused"
+      },
+      "is_bathing": {
+        "name": "Bathing active"
+      },
+      "filter_active": {
+        "name": "Filter running"
+      },
+      "is_quick_chlor": {
+        "name": "Quick chlorine active"
       }
     },
     "sensor": {
@@ -496,6 +517,13 @@
       },
       "aux_power": {
         "name": "Heater power"
+      }
+      ,
+      "next_frost_mins": {
+        "name": "Next frost run in"
+      },
+      "frost_timer_mins": {
+        "name": "Frost timer"
       }
     },
     "switch": {

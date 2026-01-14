@@ -152,10 +152,10 @@ DEFAULT_MAX_TEMP = 40.0
 DEFAULT_TARGET_TEMP_STEP = 0.5
 
 # Default heater power used for preheat estimation
-DEFAULT_HEATER_POWER_W = 3000
+DEFAULT_HEATER_POWER_W = 2750
 
 # Default split powers (disabled by default -> use DEFAULT_HEATER_POWER_W)
-DEFAULT_HEATER_BASE_POWER_W = 0
+DEFAULT_HEATER_BASE_POWER_W = 850
 DEFAULT_HEATER_AUX_POWER_W = DEFAULT_HEATER_POWER_W
 
 # Sanitizer defaults
@@ -165,14 +165,14 @@ DEFAULT_TARGET_SALT_G_L = 4.0
 
 # Thermostat-like tolerances (hysteresis)
 # Defaults preserve current behavior as close as possible, while allowing proper 'stop at target'.
-DEFAULT_COLD_TOLERANCE = 1.0
-DEFAULT_HOT_TOLERANCE = 0.0
+DEFAULT_COLD_TOLERANCE = 0.5
+DEFAULT_HOT_TOLERANCE = 0.5
 
 # Frost duty-cycle defaults (intentionally conservative / neighbor-friendly)
-DEFAULT_FROST_START_TEMP = 2.0
-DEFAULT_FROST_SEVERE_TEMP = -2.0
+DEFAULT_FROST_START_TEMP = 1.0
+DEFAULT_FROST_SEVERE_TEMP = -5.0
 DEFAULT_FROST_MILD_INTERVAL = 240  # every 4 hours
-DEFAULT_FROST_MILD_RUN = 5  # minutes
+DEFAULT_FROST_MILD_RUN = 10  # minutes
 DEFAULT_FROST_SEVERE_INTERVAL = 120  # every 2 hours
-DEFAULT_FROST_SEVERE_RUN = 10  # minutes
+DEFAULT_FROST_SEVERE_RUN = 20  # minutes
 DEFAULT_FROST_QUIET_OVERRIDE_BELOW_TEMP = -8.0
