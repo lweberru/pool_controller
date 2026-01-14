@@ -27,13 +27,17 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
 class PoolBinary(CoordinatorEntity, BinarySensorEntity):
     _attr_has_entity_name = True
-    def __init__(self, coordinator, key, name, d_class):
+    def __init__(self, coordinator, key, name=None, d_class=None):
         super().__init__(coordinator)
         self.coordinator = coordinator
         self._key = key
         self._attr_translation_key = key
         self._attr_device_class = d_class
         self._attr_unique_id = f"{coordinator.entry.entry_id}_{key}"
+        # Optional human-friendly fallback name when translations/registry
+        # do not yet provide a translation_key/original_name.
+        if name:
+            self._attr_name = name
     @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, self.coordinator.entry.entry_id)}, "name": self.coordinator.entry.data.get("name"), "manufacturer": MANUFACTURER}

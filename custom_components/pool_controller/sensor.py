@@ -73,9 +73,13 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
 class PoolBaseSensor(CoordinatorEntity, SensorEntity):
     _attr_has_entity_name = True
-    def __init__(self, coordinator):
+    def __init__(self, coordinator, name=None):
         super().__init__(coordinator)
         self.coordinator = coordinator
+        # Optional human-friendly fallback name when translations/registry
+        # do not provide a translation_key/original_name yet.
+        if name:
+            self._attr_name = name
     @property
     def device_info(self): return {"identifiers": {(DOMAIN, self.coordinator.entry.entry_id)}, "name": self.coordinator.entry.data.get("name"), "manufacturer": MANUFACTURER}
 
@@ -151,7 +155,7 @@ class PoolChemSensor(PoolBaseSensor):
         state_class=_AUTO_STATE_CLASS,
         entity_category=None,
     ):
-        super().__init__(coordinator)
+        super().__init__(coordinator, name)
         self._key = key
         self._attr_translation_key = key
         # Names are provided via translation keys in strings.json; do not hardcode here
@@ -170,7 +174,7 @@ class PoolChemSensor(PoolBaseSensor):
 class PoolTimeSensor(PoolBaseSensor):
     _attr_device_class = SensorDeviceClass.TIMESTAMP
     def __init__(self, coordinator, key, name):
-        super().__init__(coordinator)
+        super().__init__(coordinator, name)
         self._key = key
         self._attr_translation_key = key
         self._attr_unique_id = f"{coordinator.entry.entry_id}_{key}"
@@ -182,7 +186,7 @@ class PoolPowerSensor(PoolBaseSensor):
     _attr_native_unit_of_measurement = "W"
     _attr_state_class = SensorStateClass.MEASUREMENT
     def __init__(self, coordinator, key, name):
-        super().__init__(coordinator)
+        super().__init__(coordinator, name)
         self._key = key
         self._attr_translation_key = key
         self._attr_icon = "mdi:lightning-bolt"
@@ -194,7 +198,7 @@ class PoolPowerSensor(PoolBaseSensor):
 
 class PoolTextSensor(PoolBaseSensor):
     def __init__(self, coordinator, key, name):
-        super().__init__(coordinator)
+        super().__init__(coordinator, name)
         self._key = key
         self._attr_translation_key = key
         self._attr_icon = "mdi:calendar-text"
@@ -267,7 +271,9 @@ class PoolConfigSensor(PoolBaseSensor):
         self._attr_unique_id = f"{coordinator.entry.entry_id}_{option_key}"
         self._attr_translation_key = option_key
         self._attr_icon = "mdi:timer"
-        # Do not set _attr_name here; translations in strings.json provide names
+        # Keep the option to pass a human-friendly fallback name; translations in
+        # strings.json still provide canonical names when available.
+        super().__init__(coordinator, name)
 
     @property
     def native_value(self):

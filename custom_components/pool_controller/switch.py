@@ -12,9 +12,13 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
 class PoolBaseSwitch(CoordinatorEntity, SwitchEntity):
     _attr_has_entity_name = True
-    def __init__(self, coordinator):
+    def __init__(self, coordinator, name=None):
         super().__init__(coordinator)
         self.coordinator = coordinator
+        # Optional human-friendly fallback name when translations/registry
+        # do not provide a translation_key/original_name yet.
+        if name:
+            self._attr_name = name
     @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, self.coordinator.entry.entry_id)}, "name": self.coordinator.entry.data.get("name"), "manufacturer": MANUFACTURER}
