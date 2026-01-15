@@ -395,13 +395,19 @@
                     "enable_pv_optimization": "PV-Optimierung aktivieren",
                     "pv_surplus_sensor": "PV-Leistungssensor",
                     "pv_on_threshold": "PV EIN-Schwelle (W)",
-                    "pv_off_threshold": "PV AUS-Schwelle (W)"
+                    "pv_off_threshold": "PV AUS-Schwelle (W)",
+                    "pv_smooth_window_seconds": "PV-Glättungsfenster (s)",
+                    "pv_stability_seconds": "PV-Stabilitätsfenster (s)",
+                    "pv_min_run_minutes": "PV Mindestlaufzeit (min)"
                 },
                 "data_description": {
                     "enable_pv_optimization": "Nutzt PV-Überschuss für intelligente Pumpen-/Heizungssteuerung (nur bei ausreichend Solarproduktion)",
                     "pv_surplus_sensor": "Sensor für PV-Überschuss bzw. Einspeisung in Watt (negativ = Bezug, positiv = Einspeisung)",
                     "pv_on_threshold": "Pumpe einschalten bei Überschuss über diesem Wert (Standard: 1000W)",
-                    "pv_off_threshold": "Pumpe ausschalten bei Überschuss unter diesem Wert (Standard: 500W, Hysterese)"
+                    "pv_off_threshold": "Pumpe ausschalten bei Überschuss unter diesem Wert (Standard: 500W, Hysterese)",
+                    "pv_smooth_window_seconds": "Zeitfenster in Sekunden, das für die exponentielle Glättung des PV-Werts verwendet wird. 0 deaktiviert die Glättung.",
+                    "pv_stability_seconds": "Wie lange ein geänderter, geglätteter PV-Wert bestehen muss, bevor die Änderung übernommen wird (Sekunden).",
+                    "pv_min_run_minutes": "Minimale automatische Laufzeit in Minuten, bevor ein automatisches Abschalten erlaubt ist. Verhindert sofortiges Stoppen nach kurzem Einschalten."
                 }
             }
         }
