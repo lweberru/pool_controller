@@ -188,13 +188,19 @@
                     "enable_pv_optimization": "Enable PV optimization",
                     "pv_surplus_sensor": "PV power sensor",
                     "pv_on_threshold": "PV ON threshold (W)",
-                    "pv_off_threshold": "PV OFF threshold (W)"
+                    "pv_off_threshold": "PV OFF threshold (W)",
+                    "pv_smooth_window_seconds": "PV-Glättungsfenster (s)",
+                    "pv_stability_seconds": "PV-Stabilitätsfenster (s)",
+                    "pv_min_run_minutes": "PV Mindestlaufzeit (min)"
                 },
                 "data_description": {
                     "enable_pv_optimization": "Only run pump/heating when PV surplus is available",
                     "pv_surplus_sensor": "Sensor reporting PV surplus/production in watts",
                     "pv_on_threshold": "Turns main pump ON when PV power >= this value (default: 1000)",
-                    "pv_off_threshold": "Turns main pump OFF when PV power <= this value (default: 500)"
+                    "pv_off_threshold": "Turns main pump OFF when PV power <= this value (default: 500)",
+                    "pv_smooth_window_seconds": "Zeitfenster in Sekunden, das für die exponentielle Glättung des PV-Werts verwendet wird. 0 deaktiviert die Glättung.",
+                    "pv_stability_seconds": "Wie lange ein geänderter, geglätteter PV-Wert bestehen muss, bevor die Änderung übernommen wird (Sekunden).",
+                    "pv_min_run_minutes": "Minimale automatische Laufzeit in Minuten, bevor ein automatisches Abschalten erlaubt ist. Verhindert sofortiges Stoppen nach kurzem Einschalten."
                 }
             }
         }
@@ -494,6 +500,7 @@
             "frost_timer_mins": { "name": "Frost Timer (min)" },
             "outdoor_temp": { "name": "Außentemperatur" },
             "pv_power": { "name": "PV-Leistung" },
+            "pv_smoothed": { "name": "PV (geglättet)" },
             "main_power": { "name": "Netz-Leistung" },
             "aux_power": { "name": "Zusatzheizung Leistung" },
             "filter_minutes": { "name": "Konfigurierte Filterdauer (min)" },

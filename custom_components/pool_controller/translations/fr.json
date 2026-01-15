@@ -389,13 +389,20 @@
                     "enable_pv_optimization": "Activer l'optimisation PV",
                     "pv_surplus_sensor": "Capteur de surplus PV",
                     "pv_on_threshold": "Seuil PV ON (W)",
-                    "pv_off_threshold": "Seuil PV OFF (W)"
+                    "pv_off_threshold": "Seuil PV OFF (W)",
+                    "pv_smooth_window_seconds": "Fenêtre de lissage PV (s)",
+                    "pv_stability_seconds": "Fenêtre de stabilité PV (s)",
+                    "pv_min_run_minutes": "Durée minimale PV (min)"
                 },
                 "data_description": {
                     "enable_pv_optimization": "Utilise le surplus PV pour contrôler pompe/chauffage",
                     "pv_surplus_sensor": "Capteur du surplus / injection réseau en W",
                     "pv_on_threshold": "Allumer au-dessus de cette valeur (par défaut : 1000W)",
                     "pv_off_threshold": "Éteindre en dessous de cette valeur (par défaut : 500W)"
+                    ,
+                    "pv_smooth_window_seconds": "Fenêtre en secondes utilisée pour lisser le signal PV (exponentiel). 0 désactive le lissage.",
+                    "pv_stability_seconds": "Durée minimale (en secondes) pendant laquelle un état candidat PV doit persister avant d'être appliqué.",
+                    "pv_min_run_minutes": "Durée minimale d'exécution automatique (en minutes) avant de permettre un arrêt automatique ; évite les arrêts immédiats après un démarrage court."
                 }
             }
         }
@@ -464,6 +471,7 @@
             "frost_timer_mins": { "name": "Minuteur antigel (min)" },
             "outdoor_temp": { "name": "Température extérieure" },
             "pv_power": { "name": "Puissance PV" },
+            "pv_smoothed": { "name": "PV (lissé)" },
             "main_power": { "name": "Puissance principale" },
             "aux_power": { "name": "Puissance auxiliaire" },
             "filter_minutes": { "name": "Durée de filtre configurée (min)" },

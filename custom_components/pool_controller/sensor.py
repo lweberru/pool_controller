@@ -54,6 +54,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     # Power sensors
     entities.extend([
         PoolPowerSensor(coordinator, "pv_power", None),
+        PoolPowerSensor(coordinator, "pv_smoothed", None),
         PoolPowerSensor(coordinator, "main_power", None),
         PoolPowerSensor(coordinator, "aux_power", None),
     ])

@@ -188,13 +188,20 @@
           "enable_pv_optimization": "Enable PV optimization",
           "pv_surplus_sensor": "PV power sensor",
           "pv_on_threshold": "PV ON threshold (W)",
-          "pv_off_threshold": "PV OFF threshold (W)"
+          "pv_off_threshold": "PV OFF threshold (W)",
+          "pv_smooth_window_seconds": "PV smoothing window (s)",
+          "pv_stability_seconds": "PV stability window (s)",
+          "pv_min_run_minutes": "PV minimum run (min)"
         },
         "data_description": {
           "enable_pv_optimization": "Only run pump/heating when PV surplus is available",
           "pv_surplus_sensor": "Sensor reporting PV surplus/production in watts",
           "pv_on_threshold": "Turns main pump ON when PV power >= this value (default: 1000)",
           "pv_off_threshold": "Turns main pump OFF when PV power <= this value (default: 500)"
+          ,
+          "pv_smooth_window_seconds": "Window in seconds used for exponential smoothing of the PV value. Set 0 to disable smoothing.",
+          "pv_stability_seconds": "How long a changed, smoothed PV value must persist before the change is committed (seconds).",
+          "pv_min_run_minutes": "Minimum automatic run time in minutes before an automatic OFF is allowed. Prevents immediate stop after a short ON period."
         }
       }
     }
@@ -459,6 +466,7 @@
       "frost_timer_mins": { "name": "Frost timer (min)" },
       "outdoor_temp": { "name": "Outdoor temperature" },
       "pv_power": { "name": "PV power" },
+      "pv_smoothed": { "name": "PV (smoothed)" },
       "main_power": { "name": "Main power" },
       "aux_power": { "name": "Aux power" },
       "filter_minutes": { "name": "Configured filter duration (min)" },

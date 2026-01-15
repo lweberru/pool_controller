@@ -139,6 +139,13 @@ def _pv_schema(curr: dict | None = None):
         vol.Optional(CONF_PV_SURPLUS_SENSOR, default=c.get(CONF_PV_SURPLUS_SENSOR, DEFAULT_PV_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
         vol.Optional(CONF_PV_ON_THRESHOLD, default=c.get(CONF_PV_ON_THRESHOLD, DEFAULT_PV_ON)): vol.Coerce(int),
         vol.Optional(CONF_PV_OFF_THRESHOLD, default=c.get(CONF_PV_OFF_THRESHOLD, DEFAULT_PV_OFF)): vol.Coerce(int),
+        # PV smoothing/stability/min-run tuning (user-exposed)
+        vol.Optional(CONF_PV_SMOOTH_WINDOW_SECONDS, default=c.get(CONF_PV_SMOOTH_WINDOW_SECONDS, DEFAULT_PV_SMOOTH_WINDOW_SECONDS)):
+            selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=3600, step=1, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="s")),
+        vol.Optional(CONF_PV_STABILITY_SECONDS, default=c.get(CONF_PV_STABILITY_SECONDS, DEFAULT_PV_STABILITY_SECONDS)):
+            selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=86400, step=1, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="s")),
+        vol.Optional(CONF_PV_MIN_RUN_MINUTES, default=c.get(CONF_PV_MIN_RUN_MINUTES, DEFAULT_PV_MIN_RUN_MINUTES)):
+            selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=24 * 60, step=1, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="min")),
     })
 
 

@@ -89,6 +89,14 @@ CONF_PV_OFF_THRESHOLD = "pv_off_threshold"
 DEFAULT_PV_ON = 1000
 DEFAULT_PV_OFF = 500
 
+# PV smoothing / stability options
+CONF_PV_SMOOTH_WINDOW_SECONDS = "pv_smooth_window_seconds"
+CONF_PV_STABILITY_SECONDS = "pv_stability_seconds"
+CONF_PV_MIN_RUN_MINUTES = "pv_min_run_minutes"
+DEFAULT_PV_SMOOTH_WINDOW_SECONDS = 60
+DEFAULT_PV_STABILITY_SECONDS = 120
+DEFAULT_PV_MIN_RUN_MINUTES = 10
+
 # Toggle debounce (seconds): minimaler Abstand zwischen Schaltversuchen für externe Entities
 # Verhindert schnelle Retry-Loops wenn eine Entity nach dem Schalten kurzzeitig unavailable ist.
 CONF_TOGGLE_DEBOUNCE_SECONDS = "toggle_debounce_seconds"

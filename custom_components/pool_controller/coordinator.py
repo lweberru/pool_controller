@@ -48,6 +48,11 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         # Internal demand states (hysteresis)
         self._aux_heat_demand = False
         self._pv_heat_demand = False
+        # PV smoothing / stability internal state
+        self._pv_smoothed = None
+        self._pv_allows_effective = False
+        self._pv_candidate_since = None
+        self._pv_last_start = None
         # Wiederherstellung von Timern aus entry.options (falls vorhanden)
         self.manual_timer_until = None
         self.manual_timer_type = None
@@ -117,6 +122,19 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             self.chlorine_duration = int(entry.options.get(CONF_CHLORINE_DURATION, entry.data.get(CONF_CHLORINE_DURATION, DEFAULT_CHLORINE_DURATION)))
             self.pv_on_threshold = int(entry.options.get(CONF_PV_ON_THRESHOLD, entry.data.get(CONF_PV_ON_THRESHOLD, DEFAULT_PV_ON)))
             self.pv_off_threshold = int(entry.options.get(CONF_PV_OFF_THRESHOLD, entry.data.get(CONF_PV_OFF_THRESHOLD, DEFAULT_PV_OFF)))
+            # PV smoothing / stability defaults from options or data
+            try:
+                self.pv_smooth_window = int(entry.options.get(CONF_PV_SMOOTH_WINDOW_SECONDS, entry.data.get(CONF_PV_SMOOTH_WINDOW_SECONDS, DEFAULT_PV_SMOOTH_WINDOW_SECONDS)))
+            except Exception:
+                self.pv_smooth_window = DEFAULT_PV_SMOOTH_WINDOW_SECONDS
+            try:
+                self.pv_stability_seconds = int(entry.options.get(CONF_PV_STABILITY_SECONDS, entry.data.get(CONF_PV_STABILITY_SECONDS, DEFAULT_PV_STABILITY_SECONDS)))
+            except Exception:
+                self.pv_stability_seconds = DEFAULT_PV_STABILITY_SECONDS
+            try:
+                self.pv_min_run_minutes = int(entry.options.get(CONF_PV_MIN_RUN_MINUTES, entry.data.get(CONF_PV_MIN_RUN_MINUTES, DEFAULT_PV_MIN_RUN_MINUTES)))
+            except Exception:
+                self.pv_min_run_minutes = DEFAULT_PV_MIN_RUN_MINUTES
         else:
             self.manual_timer_until = None
             self.manual_timer_type = None
@@ -136,6 +154,9 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             self.filter_interval = DEFAULT_FILTER_INTERVAL
             self.pv_on_threshold = DEFAULT_PV_ON
             self.pv_off_threshold = DEFAULT_PV_OFF
+            self.pv_smooth_window = DEFAULT_PV_SMOOTH_WINDOW_SECONDS
+            self.pv_stability_seconds = DEFAULT_PV_STABILITY_SECONDS
+            self.pv_min_run_minutes = DEFAULT_PV_MIN_RUN_MINUTES
             self.hvac_enabled = True
 
     def _estimate_minutes_to_target(self, conf: dict, water_temp: float | None) -> int | None:
@@ -842,12 +863,87 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             enable_pv = conf.get(CONF_ENABLE_PV_OPTIMIZATION, False)
             pv_raw = self._get_float(conf.get(CONF_PV_SURPLUS_SENSOR))
             pv_val = pv_raw if enable_pv else None
-            pv_allows = False
-            if enable_pv and pv_val is not None:
-                if pv_val >= getattr(self, "pv_on_threshold", DEFAULT_PV_ON):
-                    pv_allows = True
-                elif pv_val <= getattr(self, "pv_off_threshold", DEFAULT_PV_OFF):
-                    pv_allows = False
+
+            # Compute smoothed PV (exponential moving average) using configured window (seconds).
+            try:
+                window = int(conf.get(CONF_PV_SMOOTH_WINDOW_SECONDS, getattr(self, 'pv_smooth_window', DEFAULT_PV_SMOOTH_WINDOW_SECONDS)))
+            except Exception:
+                window = DEFAULT_PV_SMOOTH_WINDOW_SECONDS
+            if pv_val is None:
+                # No input -> keep previous smoothed value
+                pv_smoothed = getattr(self, '_pv_smoothed', None)
+            else:
+                if getattr(self, '_pv_smoothed', None) is None or not window or window <= 0:
+                    pv_smoothed = pv_val
+                else:
+                    # alpha = min(1, dt / window)
+                    try:
+                        dt_s = self.update_interval.total_seconds() if getattr(self, 'update_interval', None) else 30
+                    except Exception:
+                        dt_s = 30
+                    alpha = float(min(1.0, float(dt_s) / float(window)))
+                    pv_smoothed = float(self._pv_smoothed + alpha * (pv_val - float(self._pv_smoothed)))
+            # persist
+            self._pv_smoothed = pv_smoothed
+
+            # Stability logic: only flip pv_allows after the smoothed value crosses thresholds
+            pv_allows = bool(getattr(self, '_pv_allows_effective', False))
+            try:
+                on_th = int(conf.get(CONF_PV_ON_THRESHOLD, getattr(self, 'pv_on_threshold', DEFAULT_PV_ON)))
+            except Exception:
+                on_th = DEFAULT_PV_ON
+            try:
+                off_th = int(conf.get(CONF_PV_OFF_THRESHOLD, getattr(self, 'pv_off_threshold', DEFAULT_PV_OFF)))
+            except Exception:
+                off_th = DEFAULT_PV_OFF
+
+            desired = None
+            if pv_smoothed is not None:
+                if pv_smoothed >= on_th:
+                    desired = True
+                elif pv_smoothed <= off_th:
+                    desired = False
+            # Stability window (seconds)
+            try:
+                stability = int(conf.get(CONF_PV_STABILITY_SECONDS, getattr(self, 'pv_stability_seconds', DEFAULT_PV_STABILITY_SECONDS)))
+            except Exception:
+                stability = DEFAULT_PV_STABILITY_SECONDS
+            now_dt = now
+            # Candidate handling
+            if desired is None:
+                # no definitive crossing -> do not change candidate timer
+                pass
+            else:
+                if desired != pv_allows:
+                    # Start candidate timer if not set
+                    if not getattr(self, '_pv_candidate_since', None):
+                        self._pv_candidate_since = now_dt
+                    else:
+                        # If candidate lasted long enough, commit change
+                        if (now_dt - self._pv_candidate_since).total_seconds() >= stability:
+                            # If turning ON -> commit and record start time
+                            if desired:
+                                pv_allows = True
+                                self._pv_last_start = now_dt
+                                self._pv_allows_effective = True
+                                self._pv_candidate_since = None
+                            else:
+                                # Turning OFF: respect minimum run minutes if set
+                                try:
+                                    min_run = int(conf.get(CONF_PV_MIN_RUN_MINUTES, getattr(self, 'pv_min_run_minutes', DEFAULT_PV_MIN_RUN_MINUTES)))
+                                except Exception:
+                                    min_run = DEFAULT_PV_MIN_RUN_MINUTES
+                                if self._pv_last_start and (now_dt - self._pv_last_start).total_seconds() < (min_run * 60):
+                                    # not enough run time yet; keep pv_allows True and continue waiting
+                                    pv_allows = True
+                                    # keep candidate_since to re-evaluate later
+                                else:
+                                    pv_allows = False
+                                    self._pv_allows_effective = False
+                                    self._pv_candidate_since = None
+                else:
+                    # desired == pv_allows -> clear candidate if any
+                    self._pv_candidate_since = None
             # quiet time check: C and E should not activate during quiet; A/B/D always allowed
             def _in_quiet_period(cfg):
                 try:
@@ -1255,6 +1351,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "next_filter_mins": next_filter_mins,
                 # PV power reading (W) - used for UI display/more-info in the dashboard card
                 "pv_power": pv_raw,
+                "pv_smoothed": round(pv_smoothed, 1) if pv_smoothed is not None else None,
                 "pv_allows": pv_allows,
                 "in_quiet": in_quiet,
                 "main_power": round(main_power, 1) if main_power is not None else None,
