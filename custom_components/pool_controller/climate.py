@@ -42,8 +42,13 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
         super().__init__(coordinator)
         self.coordinator = coordinator
         self._attr_unique_id = f"{coordinator.entry.entry_id}_climate"
-        # Name/translation is provided via translation keys and strings.json
-        self._attr_name = None
+        # Name aus Config übernehmen (Pool-Name aus config_flow)
+        pool_name = None
+        try:
+            pool_name = coordinator.entry.data.get("name")
+        except Exception:
+            pool_name = None
+        self._attr_name = pool_name or "Whirlpool"
 
         merged = {**(coordinator.entry.data or {}), **(coordinator.entry.options or {})}
         try:
