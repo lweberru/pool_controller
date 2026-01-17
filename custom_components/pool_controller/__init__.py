@@ -29,18 +29,34 @@ SERVICE_STOP_MAINTENANCE = "stop_maintenance"
 
 
 # Korrektes Schema: target wird von HA automatisch hinzugefügt, nicht im Schema definieren!
-START_PAUSE_SCHEMA = vol.Schema({
-    vol.Optional("duration_minutes", default=60): cv.positive_int,
-})
-START_BATHING_SCHEMA = vol.Schema({
-    vol.Optional("duration_minutes", default=60): cv.positive_int,
-})
-START_FILTER_SCHEMA = vol.Schema({
-    vol.Optional("duration_minutes", default=30): cv.positive_int,
-})
-START_CHLORINE_SCHEMA = vol.Schema({
-    vol.Optional("duration_minutes", default=5): cv.positive_int,
-})
+START_PAUSE_SCHEMA = vol.Schema(
+    {
+        vol.Optional("duration_minutes", default=60): cv.positive_int,
+    },
+    extra=vol.ALLOW_EXTRA,
+)
+
+START_BATHING_SCHEMA = vol.Schema(
+    {
+        vol.Optional("duration_minutes", default=60): cv.positive_int,
+    },
+    extra=vol.ALLOW_EXTRA,
+)
+
+START_FILTER_SCHEMA = vol.Schema(
+    {
+        vol.Optional("duration_minutes", default=30): cv.positive_int,
+    },
+    extra=vol.ALLOW_EXTRA,
+)
+
+START_CHLORINE_SCHEMA = vol.Schema(
+    {
+        vol.Optional("duration_minutes", default=5): cv.positive_int,
+    },
+    extra=vol.ALLOW_EXTRA,
+)
+
 STOP_SCHEMA = vol.Schema({}, extra=vol.ALLOW_EXTRA)
 
 
