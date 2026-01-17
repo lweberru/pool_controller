@@ -53,18 +53,30 @@ def _iter_coordinators(hass: HomeAssistant):
             yield value
 
 
+
 def _resolve_coordinator(hass: HomeAssistant, call) -> PoolControllerDataCoordinator | None:
-
-
-
-    # Neues Target-Schema: entity_id aus call.data["target"]
+    # Neues Target-Schema: entity_id oder device_id aus call.data["target"]
     entity_id = None
-    if "target" in call.data and isinstance(call.data["target"], dict):
-        entity_id = call.data["target"].get("entity_id")
+    device_id = None
+    target = call.data.get("target")
+    if isinstance(target, dict):
+        entity_id = target.get("entity_id")
+        device_id = target.get("device_id")
     elif "entity_id" in call.data:
         entity_id = call.data["entity_id"]
+    elif "device_id" in call.data:
+        device_id = call.data["device_id"]
+
+    ent_reg = er.async_get(hass)
+    # Falls device_id gesetzt ist, suche die zugehörige climate-Entity
+    if device_id:
+        # device_id kann mehrere Entities haben, wir nehmen die erste climate-Entity
+        for ent in ent_reg.entities.values():
+            if getattr(ent, "device_id", None) == device_id and getattr(ent, "platform", None) == "pool_controller":
+                entity_id = ent.entity_id
+                break
+
     if entity_id:
-        ent_reg = er.async_get(hass)
         ent = ent_reg.async_get(entity_id)
         if ent and ent.config_entry_id:
             return hass.data.get(DOMAIN, {}).get(ent.config_entry_id)
