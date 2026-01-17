@@ -27,34 +27,24 @@ SERVICE_STOP_CHLORINE = "stop_chlorine"
 SERVICE_START_MAINTENANCE = "start_maintenance"
 SERVICE_STOP_MAINTENANCE = "stop_maintenance"
 
-TARGET_SCHEMA = {
-    vol.Optional("climate_entity"): cv.entity_id,
-    vol.Optional("controller_entity"): cv.entity_id,
-    vol.Optional("config_entry_id"): cv.string,
-}
-
 START_PAUSE_SCHEMA = vol.Schema({
-    **TARGET_SCHEMA,
+    vol.Required("target"): dict,
     vol.Optional("duration_minutes", default=60): cv.positive_int,
 })
-
 START_BATHING_SCHEMA = vol.Schema({
-    **TARGET_SCHEMA,
+    vol.Required("target"): dict,
     vol.Optional("duration_minutes", default=60): cv.positive_int,
 })
-
 START_FILTER_SCHEMA = vol.Schema({
-    **TARGET_SCHEMA,
+    vol.Required("target"): dict,
     vol.Optional("duration_minutes", default=30): cv.positive_int,
 })
-
 START_CHLORINE_SCHEMA = vol.Schema({
-    **TARGET_SCHEMA,
+    vol.Required("target"): dict,
     vol.Optional("duration_minutes", default=5): cv.positive_int,
 })
-
 STOP_SCHEMA = vol.Schema({
-    **TARGET_SCHEMA,
+    vol.Required("target"): dict,
 })
 
 
@@ -67,39 +57,22 @@ def _iter_coordinators(hass: HomeAssistant):
             yield value
 
 
-def _get_coordinator_by_entry_id(hass: HomeAssistant, config_entry_id: str | None):
-    if not config_entry_id:
-        return None
-    return hass.data.get(DOMAIN, {}).get(config_entry_id)
-
-
-def _get_coordinator_by_climate_entity(hass: HomeAssistant, climate_entity: str | None):
-    if not climate_entity:
-        return None
-    ent_reg = er.async_get(hass)
-    ent = ent_reg.async_get(climate_entity)
-    if not ent or not ent.config_entry_id:
-        return None
-    return _get_coordinator_by_entry_id(hass, ent.config_entry_id)
-
-
 def _resolve_coordinator(hass: HomeAssistant, call) -> PoolControllerDataCoordinator | None:
-    # 1) Explicit config_entry_id
-    coord = _get_coordinator_by_entry_id(hass, call.data.get("config_entry_id"))
-    if coord:
-        return coord
 
-    # 2) Resolve via entity registry from climate_entity
-    coord = _get_coordinator_by_climate_entity(hass, call.data.get("climate_entity"))
-    if coord:
-        return coord
 
-    # 2b) Backward/alias: controller_entity
-    coord = _get_coordinator_by_climate_entity(hass, call.data.get("controller_entity"))
-    if coord:
-        return coord
 
-    # 3) Fallback only if there is exactly one instance
+    # Neues Target-Schema: entity_id aus call.data["target"]
+    entity_id = None
+    if "target" in call.data and isinstance(call.data["target"], dict):
+        entity_id = call.data["target"].get("entity_id")
+    elif "entity_id" in call.data:
+        entity_id = call.data["entity_id"]
+    if entity_id:
+        ent_reg = er.async_get(hass)
+        ent = ent_reg.async_get(entity_id)
+        if ent and ent.config_entry_id:
+            return hass.data.get(DOMAIN, {}).get(ent.config_entry_id)
+    # Fallback: nur wenn genau eine Instanz existiert
     coords = list(_iter_coordinators(hass))
     if len(coords) == 1:
         return coords[0]
@@ -114,7 +87,7 @@ def _ensure_services_registered(hass: HomeAssistant):
     def _warn_no_target(service_name: str, call):
         coords = list(_iter_coordinators(hass))
         _LOGGER.warning(
-            "pool_controller.%s: no target instance resolved (provide climate_entity/controller_entity or config_entry_id). instances=%s payload_keys=%s",
+            "pool_controller.%s: no target instance resolved (provide target.entity_id). instances=%s payload_keys=%s",
             service_name,
             len(coords),
             sorted(list((call.data or {}).keys())) if call else [],
