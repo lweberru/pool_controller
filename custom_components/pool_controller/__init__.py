@@ -41,7 +41,7 @@ START_FILTER_SCHEMA = vol.Schema({
 START_CHLORINE_SCHEMA = vol.Schema({
     vol.Optional("duration_minutes", default=5): cv.positive_int,
 })
-STOP_SCHEMA = vol.Schema({})
+STOP_SCHEMA = vol.Schema({}, extra=vol.ALLOW_EXTRA)
 
 
 def _iter_coordinators(hass: HomeAssistant):
