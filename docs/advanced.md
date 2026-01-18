@@ -32,6 +32,30 @@ Where:
 - ✅ Not in frost protection mode
 - ✅ Calendar preheat / bathing / PV surplus allows heating
 
+## Calendar Events & Weather Guard
+
+The integration can **preheat** before calendar events and start a **bathing session** while the event is ongoing.
+If the **Weather Guard** is enabled, it checks the hourly forecast and **skips both preheat and event start** when rain is likely during the event.
+
+**How it works:**
+- The system reads the next/ongoing calendar event window.
+- It fetches hourly forecast data via `weather.get_forecasts`.
+- It calculates the **maximum rain probability** during the event.
+- If that probability is **>= the configured threshold**, the event is blocked.
+
+**Relevant entities:**
+- `sensor.<pool>_event_rain_probability`
+- `binary_sensor.<pool>_event_rain_blocked`
+
+**Example:**
+
+```yaml
+# Settings (Options → Calendar step)
+enable_event_weather_guard: true
+event_weather_entity: weather.home
+event_rain_probability: 60
+```
+
 ## PV Solar Optimization
 
 When connected to solar:
