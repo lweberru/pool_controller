@@ -133,11 +133,14 @@
             },
             "calendars": {
                 "title": "Calendars & quiet times",
-                "description": "Optional calendar automation and quiet hours. Quiet hours suppress PV/heating/filter activity; frost protection only overrides quiet hours in extreme cold.",
+                "description": "Automatización de calendario, horas de silencio y control meteorológico para eventos.",
                 "submit": "Continue",
                 "data": {
                     "pool_calendar": "Pool calendar",
                     "holiday_calendar": "Holiday calendar",
+                    "enable_event_weather_guard": "Activar control meteorológico para eventos",
+                    "event_weather_entity": "Entidad meteorológica",
+                    "event_rain_probability": "Umbral de probabilidad de lluvia (%)",
                     "quiet_time_start": "Quiet time start (weekday)",
                     "quiet_time_end": "Quiet time end (weekday)",
                     "quiet_time_start_weekend": "Quiet time start (weekend/holiday)",
@@ -146,6 +149,9 @@
                 "data_description": {
                     "pool_calendar": "Calendar with pool events (automatically starts bathing mode for appointments)",
                     "holiday_calendar": "Holiday calendar (uses weekend quiet times on holidays)",
+                    "enable_event_weather_guard": "Si está activado, se consulta la previsión y se omite el precalentamiento e inicio del evento cuando es probable lluvia",
+                    "event_weather_entity": "Entidad weather compatible con weather.get_forecasts (horario)",
+                    "event_rain_probability": "Si la probabilidad de lluvia durante el evento es >= este valor, se bloquea el evento",
                     "quiet_time_start": "Start of quiet hours on weekdays (e.g. 22:00)",
                     "quiet_time_end": "End of quiet hours on weekdays (e.g. 07:00)",
                     "quiet_time_start_weekend": "Start of quiet hours on weekends/holidays (e.g. 23:00)",
@@ -340,11 +346,14 @@
             },
             "calendars": {
                 "title": "Calendarios y horas silenciosas",
-                "description": "Configura automatización por calendario y horas silenciosas.",
+                "description": "Configura la automatización por calendario, horas silenciosas y control meteorológico para eventos.",
                 "submit": "Siguiente",
                 "data": {
                     "pool_calendar": "Calendario de piscina",
                     "holiday_calendar": "Calendario de festivos",
+                    "enable_event_weather_guard": "Activar control meteorológico para eventos",
+                    "event_weather_entity": "Entidad meteorológica",
+                    "event_rain_probability": "Umbral de probabilidad de lluvia (%)",
                     "quiet_time_start": "Inicio horas silenciosas (entre semana)",
                     "quiet_time_end": "Fin horas silenciosas (entre semana)",
                     "quiet_time_start_weekend": "Inicio horas silenciosas (fin de semana/festivo)",
@@ -353,6 +362,9 @@
                 "data_description": {
                     "pool_calendar": "Calendario con eventos (puede iniciar modo baño)",
                     "holiday_calendar": "Calendario de festivos (usa horario de fin de semana)",
+                    "enable_event_weather_guard": "Si está activado, se consulta la previsión y se omite el precalentamiento e inicio del evento cuando es probable lluvia",
+                    "event_weather_entity": "Entidad weather compatible con weather.get_forecasts (horario)",
+                    "event_rain_probability": "Si la probabilidad de lluvia durante el evento es >= este valor, se bloquea el evento",
                     "quiet_time_start": "Inicio entre semana (p. ej. 22:00)",
                     "quiet_time_end": "Fin entre semana (p. ej. 07:00)",
                     "quiet_time_start_weekend": "Inicio fin de semana/festivo (p. ej. 23:00)",
@@ -445,6 +457,7 @@
             "low_chlor": { "name": "Cloro bajo" },
             "ph_alert": { "name": "pH fuera de rango" },
             "tds_high": { "name": "TDS alto" },
+            "event_rain_blocked": { "name": "Evento bloqueado por lluvia" },
             "main_switch_on": {
                 "name": "Interruptor principal encendido"
             },
@@ -484,6 +497,7 @@
             "next_event": { "name": "Próximo evento" },
             "next_event_end": { "name": "Fin del próximo evento" },
             "next_event_summary": { "name": "Resumen del próximo evento" },
+            "event_rain_probability": { "name": "Probabilidad de lluvia del evento" },
             "manual_timer_mins": { "name": "Temporizador manual (min)" },
             "auto_filter_timer_mins": { "name": "Temporizador auto-filtrado (min)" },
             "pause_timer_mins": { "name": "Temporizador pausa (min)" },

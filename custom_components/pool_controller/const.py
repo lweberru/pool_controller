@@ -23,6 +23,10 @@ CONF_TDS_SENSOR = "tds_sensor"
 CONF_PV_SURPLUS_SENSOR = "pv_surplus_sensor"
 CONF_POOL_CALENDAR = "pool_calendar"
 CONF_HOLIDAY_CALENDAR = "holiday_calendar"
+# Weather guard for calendar events
+CONF_ENABLE_EVENT_WEATHER_GUARD = "enable_event_weather_guard"
+CONF_EVENT_WEATHER_ENTITY = "event_weather_entity"
+CONF_EVENT_RAIN_PROBABILITY = "event_rain_probability"
 CONF_QUIET_START = "quiet_time_start"
 CONF_QUIET_END = "quiet_time_end"
 CONF_QUIET_START_WEEKEND = "quiet_time_start_weekend"
@@ -152,6 +156,9 @@ DEFAULT_Q_START = "22:00"
 DEFAULT_Q_END = "08:00"
 DEFAULT_Q_START_WE = "22:00"
 DEFAULT_Q_END_WE = "10:00"
+
+# Weather guard defaults
+DEFAULT_EVENT_RAIN_PROBABILITY = 50
 
 # Climate defaults
 DEFAULT_TARGET_TEMP = 38.0

@@ -53,6 +53,12 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self._pv_allows_effective = False
         self._pv_candidate_since = None
         self._pv_last_start = None
+        # Weather forecast cache (for calendar weather guard)
+        self._weather_forecast_cache = {
+            "entity_id": None,
+            "fetched_at": None,
+            "forecast": None,
+        }
         # Wiederherstellung von Timern aus entry.options (falls vorhanden)
         self.manual_timer_until = None
         self.manual_timer_type = None
@@ -832,6 +838,31 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             cal_next = (cal or {}).get("next") or {}
             cal_ongoing = (cal or {}).get("ongoing") or {}
 
+            # Weather guard for calendar events (optional)
+            enable_event_weather_guard = bool(conf.get(CONF_ENABLE_EVENT_WEATHER_GUARD, False))
+            weather_entity = conf.get(CONF_EVENT_WEATHER_ENTITY)
+            try:
+                rain_threshold = int(conf.get(CONF_EVENT_RAIN_PROBABILITY, DEFAULT_EVENT_RAIN_PROBABILITY))
+            except Exception:
+                rain_threshold = DEFAULT_EVENT_RAIN_PROBABILITY
+
+            event_rain_probability = None
+            event_rain_blocked = False
+            if enable_event_weather_guard and weather_entity and (cal_next.get("start") or cal_ongoing.get("start")):
+                forecast = await self._get_hourly_forecast(weather_entity)
+                if cal_next.get("start"):
+                    prob, blocked = self._event_rain_check(cal_next.get("start"), cal_next.get("end"), forecast, rain_threshold)
+                    if prob is not None:
+                        event_rain_probability = prob
+                    if blocked:
+                        event_rain_blocked = True
+                if cal_ongoing.get("start"):
+                    prob_now, blocked_now = self._event_rain_check(cal_ongoing.get("start"), cal_ongoing.get("end"), forecast, rain_threshold)
+                    if event_rain_probability is None and prob_now is not None:
+                        event_rain_probability = prob_now
+                    if blocked_now:
+                        event_rain_blocked = True
+
             # Next start (preheat start): if we can't compute a heat_time (e.g. delta_t == 0 because
             # water is already at/above target), still expose a meaningful countdown to the event.
             # In that case, we treat heat_time as 0 minutes => next_start_mins == minutes until event start.
@@ -1123,7 +1154,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             if (not maintenance_active) and cal_ongoing.get("start") and cal_ongoing.get("end"):
                 if now >= cal_ongoing["start"] and now < cal_ongoing["end"]:
                     remaining_min = max(1, int((cal_ongoing["end"] - now).total_seconds() / 60))
-                    if (not pause_active) and (not manual_active):
+                    if (not pause_active) and (not manual_active) and (not event_rain_blocked):
                         await self.activate_manual_timer(timer_type="bathing", minutes=remaining_min)
                         # recompute
                         manual_active = self.manual_timer_until is not None and now < self.manual_timer_until and self.manual_timer_type in ("bathing", "chlorine", "filter")
@@ -1220,6 +1251,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 (next_start_mins is not None and next_start_mins == 0)
                 and cal_next.get("start")
                 and now < cal_next["start"]
+                and (not event_rain_blocked)
             )
 
 
@@ -1339,6 +1371,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "next_event": cal_next.get("start"),
                 "next_event_end": cal_next.get("end"),
                 "next_event_summary": cal_next.get("summary"),
+                "event_rain_probability": event_rain_probability,
+                "event_rain_blocked": event_rain_blocked,
                 "next_start_mins": next_start_mins,
                 # Timers: states are remaining minutes
                 "manual_timer_mins": manual_mins,
@@ -1568,6 +1602,115 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             return float(s) if s else None
         except Exception:
             return None
+
+    async def _get_hourly_forecast(self, entity_id: str | None):
+        """Best-effort fetch hourly forecast for the given weather entity with caching."""
+        if not entity_id:
+            return None
+        try:
+            # Cache for 10 minutes to avoid spamming the service.
+            cache = getattr(self, "_weather_forecast_cache", None) or {}
+            now = dt_util.now()
+            fetched_at = cache.get("fetched_at")
+            if (
+                cache.get("entity_id") == entity_id
+                and fetched_at
+                and (now - fetched_at) < timedelta(minutes=10)
+                and cache.get("forecast") is not None
+            ):
+                return cache.get("forecast")
+        except Exception:
+            # ignore cache errors
+            pass
+
+        # Ensure the service exists
+        if not self.hass.services.has_service("weather", "get_forecasts"):
+            return None
+
+        try:
+            res = await self.hass.services.async_call(
+                "weather",
+                "get_forecasts",
+                {"entity_id": entity_id, "type": "hourly"},
+                blocking=True,
+                return_response=True,
+            )
+        except Exception:
+            _LOGGER.debug("Weather forecast fetch failed for %s", entity_id)
+            return None
+
+        forecast = None
+        try:
+            block = res.get(entity_id) if isinstance(res, dict) else None
+            if isinstance(block, dict):
+                forecast = block.get("forecast") or block.get("forecasts")
+            if forecast is None and isinstance(res, dict):
+                forecast = res.get("forecast") or res.get("forecasts")
+        except Exception:
+            forecast = None
+
+        if not isinstance(forecast, list):
+            forecast = None
+
+        try:
+            self._weather_forecast_cache = {
+                "entity_id": entity_id,
+                "fetched_at": dt_util.now(),
+                "forecast": forecast,
+            }
+        except Exception:
+            pass
+
+        return forecast
+
+    def _event_rain_check(self, start_dt: datetime | None, end_dt: datetime | None, forecast: list | None, threshold: int):
+        """Return (max_probability, blocked) for the event time window."""
+        if not start_dt or not forecast:
+            return None, False
+
+        try:
+            start_utc = dt_util.as_utc(start_dt)
+        except Exception:
+            start_utc = start_dt
+
+        if end_dt:
+            try:
+                end_utc = dt_util.as_utc(end_dt)
+            except Exception:
+                end_utc = end_dt
+        else:
+            end_utc = start_utc + timedelta(hours=2)
+
+        max_prob = None
+        for item in forecast:
+            if not isinstance(item, dict):
+                continue
+            dt_raw = item.get("datetime") or item.get("time") or item.get("forecast_time")
+            if not dt_raw:
+                continue
+            try:
+                dt_obj = dt_util.parse_datetime(dt_raw) if isinstance(dt_raw, str) else dt_raw
+            except Exception:
+                dt_obj = None
+            if not dt_obj:
+                continue
+            try:
+                dt_obj = dt_util.as_utc(dt_obj)
+            except Exception:
+                pass
+            if dt_obj < start_utc or dt_obj > end_utc:
+                continue
+            prob_raw = item.get("precipitation_probability")
+            if prob_raw is None:
+                continue
+            try:
+                prob = float(prob_raw)
+            except Exception:
+                continue
+            max_prob = prob if max_prob is None else max(max_prob, prob)
+
+        blocked = (max_prob is not None) and (float(max_prob) >= float(threshold))
+        return max_prob, blocked
 
     async def _check_holiday(self, cal_id):
         if not cal_id: return False

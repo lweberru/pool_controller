@@ -45,8 +45,23 @@ Pool Controller supports different disinfection styles and adapts some water-qua
 ### Step 7: Calendar & Quiet Hours
 - **Pool Calendar**: Calendar entity for operation schedule
 - **Holiday Calendar**: Calendar used to treat local holidays like weekends (weekend quiet hours apply)
+- **Weather Guard (Optional)**:
+  - **Enable Weather Guard**: Skip preheat and event start if rain is likely
+  - **Weather Entity**: `weather.*` entity that supports `weather.get_forecasts` (hourly)
+  - **Rain Probability Threshold**: If the forecasted probability during the event is >= this value, the event is blocked
 - **Quiet Hours (Weekdays)**: Start/end times (e.g., 22:00 - 07:00)
 - **Quiet Hours (Weekends)**: Start/end times
+
+**Example (Weather Guard):**
+
+```yaml
+# Example: block pool events if rain probability >= 60%
+pool_controller:
+  # ... your existing setup ...
+  enable_event_weather_guard: true
+  event_weather_entity: weather.home
+  event_rain_probability: 60
+```
 
 ### Step 8: Filter Settings
 - **Automatic filtering**: Enable/disable automatic filter cycles

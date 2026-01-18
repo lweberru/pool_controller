@@ -133,11 +133,14 @@
             },
             "calendars": {
                 "title": "Calendars & quiet times",
-                "description": "Optional calendar automation and quiet hours. Quiet hours suppress PV/heating/filter activity; frost protection only overrides quiet hours in extreme cold.",
+                "description": "Automatisation par calendrier, heures de silence et garde météo pour les événements.",
                 "submit": "Continue",
                 "data": {
                     "pool_calendar": "Pool calendar",
                     "holiday_calendar": "Holiday calendar",
+                    "enable_event_weather_guard": "Activer la garde météo des événements",
+                    "event_weather_entity": "Entité météo",
+                    "event_rain_probability": "Seuil de probabilité de pluie (%)",
                     "quiet_time_start": "Quiet time start (weekday)",
                     "quiet_time_end": "Quiet time end (weekday)",
                     "quiet_time_start_weekend": "Quiet time start (weekend/holiday)",
@@ -146,6 +149,9 @@
                 "data_description": {
                     "pool_calendar": "Calendar with pool events (automatically starts bathing mode for appointments)",
                     "holiday_calendar": "Holiday calendar (uses weekend quiet times on holidays)",
+                    "enable_event_weather_guard": "Si activé, la prévision météo est vérifiée et le préchauffage/démarrage est ignoré en cas de pluie probable",
+                    "event_weather_entity": "Entité météo compatible avec weather.get_forecasts (horaire)",
+                    "event_rain_probability": "Si la probabilité de pluie pendant l'événement est >= à cette valeur, l'événement est bloqué",
                     "quiet_time_start": "Start of quiet hours on weekdays (e.g. 22:00)",
                     "quiet_time_end": "End of quiet hours on weekdays (e.g. 07:00)",
                     "quiet_time_start_weekend": "Start of quiet hours on weekends/holidays (e.g. 23:00)",
@@ -334,11 +340,14 @@
             },
             "calendars": {
                 "title": "Calendriers & heures de silence",
-                "description": "Configure l'automatisation par calendrier et les heures de silence.",
+                "description": "Configure l'automatisation par calendrier, les heures de silence et la garde météo des événements.",
                 "submit": "Suivant",
                 "data": {
                     "pool_calendar": "Calendrier de la piscine",
                     "holiday_calendar": "Calendrier des jours fériés",
+                    "enable_event_weather_guard": "Activer la garde météo des événements",
+                    "event_weather_entity": "Entité météo",
+                    "event_rain_probability": "Seuil de probabilité de pluie (%)",
                     "quiet_time_start": "Début des heures de silence (semaine)",
                     "quiet_time_end": "Fin des heures de silence (semaine)",
                     "quiet_time_start_weekend": "Début des heures de silence (week-end/férié)",
@@ -347,6 +356,9 @@
                 "data_description": {
                     "pool_calendar": "Calendrier avec les événements piscine (peut démarrer le mode baignade)",
                     "holiday_calendar": "Calendrier des jours fériés (utilise les horaires week-end pendant les jours fériés)",
+                    "enable_event_weather_guard": "Si activé, la prévision météo est vérifiée et le préchauffage/démarrage est ignoré en cas de pluie probable",
+                    "event_weather_entity": "Entité météo compatible avec weather.get_forecasts (horaire)",
+                    "event_rain_probability": "Si la probabilité de pluie pendant l'événement est >= à cette valeur, l'événement est bloqué",
                     "quiet_time_start": "Début des heures de silence en semaine (ex. 22:00)",
                     "quiet_time_end": "Fin des heures de silence en semaine (ex. 07:00)",
                     "quiet_time_start_weekend": "Début des heures de silence le week-end/jours fériés (ex. 23:00)",
@@ -431,6 +443,7 @@
             "low_chlor": { "name": "Chlore bas" },
             "ph_alert": { "name": "pH hors plage" },
             "tds_high": { "name": "TDS élevé" },
+            "event_rain_blocked": { "name": "Événement bloqué par la pluie" },
             "main_switch_on": { "name": "Interrupteur principal actif" },
             "pump_switch_on": { "name": "Pompe active" },
             "aux_heating_switch_on": { "name": "Chauffage auxiliaire actif" }
@@ -464,6 +477,7 @@
             "next_event": { "name": "Événement suivant" },
             "next_event_end": { "name": "Fin de l'événement suivant" },
             "next_event_summary": { "name": "Résumé de l'événement suivant" },
+            "event_rain_probability": { "name": "Probabilité de pluie (événement)" },
             "manual_timer_mins": { "name": "Minuteur manuel (min)" },
             "auto_filter_timer_mins": { "name": "Minuteur auto-filtre (min)" },
             "pause_timer_mins": { "name": "Minuteur pause (min)" },

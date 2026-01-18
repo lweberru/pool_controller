@@ -29,6 +29,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolChemSensor(coordinator, "chlor_spoons", None, "Löffel", "mdi:spoon-sugar", state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
         PoolChemSensor(coordinator, "next_start_mins", None, "min", "mdi:clock-start", device_class=SensorDeviceClass.DURATION),
         PoolChemSensor(coordinator, "next_frost_mins", None, "min", "mdi:snowflake-clock", device_class=SensorDeviceClass.DURATION, state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
+        PoolChemSensor(coordinator, "event_rain_probability", None, "%", "mdi:weather-rainy", state_class=SensorStateClass.MEASUREMENT, entity_category=EntityCategory.DIAGNOSTIC),
         PoolTimeSensor(coordinator, "next_event", None)
     ]
     # Timer/Status sensors

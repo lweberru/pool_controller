@@ -22,6 +22,7 @@ Entity IDs depend on your instance name, but the integration uses stable suffix 
 | `binary_sensor.<pool>_low_chlor` | Chlorine below recommended level |
 | `binary_sensor.<pool>_ph_alert` | pH outside acceptable range |
 | `binary_sensor.<pool>_tds_high` | TDS too high (water change needed) |
+| `binary_sensor.<pool>_event_rain_blocked` | True when the next/ongoing calendar event is blocked due to rain probability |
 
 ## Sensors (Numeric & Status)
 
@@ -49,6 +50,7 @@ Entity IDs depend on your instance name, but the integration uses stable suffix 
 | `sensor.<pool>_next_event` | Timestamp | Next calendar event start |
 | `sensor.<pool>_next_event_end` | Timestamp | Next calendar event end |
 | `sensor.<pool>_next_event_summary` | String | Next calendar event name |
+| `sensor.<pool>_event_rain_probability` | Float | Max rain probability during the next/ongoing event (0–100) |
 | `sensor.<pool>_next_filter_mins` | Integer | Minutes until next filter cycle |
 | `sensor.<pool>_manual_timer_mins` | Integer | Remaining minutes of the active manual timer (bathing/filter/chlorine). Attributes: `active`, `duration_minutes`, `type` |
 | `sensor.<pool>_auto_filter_timer_mins` | Integer | Remaining minutes of the automatic filter cycle timer. Attributes: `active`, `duration_minutes` |

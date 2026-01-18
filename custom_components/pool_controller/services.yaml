@@ -109,3 +109,21 @@ stop_chlorine:
       integration: pool_controller
     entity:
       domain: climate
+
+start_maintenance:
+  name: Start Maintenance
+  description: Enable maintenance mode (hard lockout)
+  target:
+    device:
+      integration: pool_controller
+    entity:
+      domain: climate
+
+stop_maintenance:
+  name: Stop Maintenance
+  description: Disable maintenance mode
+  target:
+    device:
+      integration: pool_controller
+    entity:
+      domain: climate

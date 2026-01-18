@@ -133,11 +133,14 @@
       },
       "calendars": {
         "title": "Calendars & quiet times",
-        "description": "Optional calendar automation and quiet hours. Quiet hours suppress PV/heating/filter activity; frost protection only overrides quiet hours in extreme cold.",
+        "description": "Optional calendar automation, quiet hours, and weather guard for events.",
         "submit": "Continue",
         "data": {
           "pool_calendar": "Pool calendar",
           "holiday_calendar": "Holiday calendar",
+          "enable_event_weather_guard": "Enable weather guard for events",
+          "event_weather_entity": "Weather entity",
+          "event_rain_probability": "Rain probability threshold (%)",
           "quiet_time_start": "Quiet time start (weekday)",
           "quiet_time_end": "Quiet time end (weekday)",
           "quiet_time_start_weekend": "Quiet time start (weekend/holiday)",
@@ -146,6 +149,9 @@
         "data_description": {
           "pool_calendar": "Calendar with pool events (automatically starts bathing mode for appointments)",
           "holiday_calendar": "Holiday calendar (uses weekend quiet times on holidays)",
+          "enable_event_weather_guard": "If enabled, the controller checks the weather forecast and skips preheat and event start when rain is likely",
+          "event_weather_entity": "Weather entity that supports the weather.get_forecasts service (hourly)",
+          "event_rain_probability": "If forecasted rain probability during the event is >= this value, the event is blocked",
           "quiet_time_start": "Start of quiet hours on weekdays (e.g. 22:00)",
           "quiet_time_end": "End of quiet hours on weekdays (e.g. 07:00)",
           "quiet_time_start_weekend": "Start of quiet hours on weekends/holidays (e.g. 23:00)",
@@ -197,8 +203,7 @@
           "enable_pv_optimization": "Only run pump/heating when PV surplus is available",
           "pv_surplus_sensor": "Sensor reporting PV surplus/production in watts",
           "pv_on_threshold": "Turns main pump ON when PV power >= this value (default: 1000)",
-          "pv_off_threshold": "Turns main pump OFF when PV power <= this value (default: 500)"
-          ,
+          "pv_off_threshold": "Turns main pump OFF when PV power <= this value (default: 500)",
           "pv_smooth_window_seconds": "Window in seconds used for exponential smoothing of the PV value. Set 0 to disable smoothing.",
           "pv_stability_seconds": "How long a changed, smoothed PV value must persist before the change is committed (seconds).",
           "pv_min_run_minutes": "Minimum automatic run time in minutes before an automatic OFF is allowed. Prevents immediate stop after a short ON period."
@@ -341,11 +346,14 @@
       },
       "calendars": {
         "title": "Calendars & quiet times",
-        "description": "Configure calendar-based automation and quiet hours.",
+        "description": "Configure calendar-based automation, quiet hours, and weather guard for events.",
         "submit": "Continue",
         "data": {
           "pool_calendar": "Pool calendar",
           "holiday_calendar": "Holiday calendar",
+          "enable_event_weather_guard": "Enable weather guard for events",
+          "event_weather_entity": "Weather entity",
+          "event_rain_probability": "Rain probability threshold (%)",
           "quiet_time_start": "Quiet time start (weekday)",
           "quiet_time_end": "Quiet time end (weekday)",
           "quiet_time_start_weekend": "Quiet time start (weekend/holiday)",
@@ -354,6 +362,9 @@
         "data_description": {
           "pool_calendar": "Calendar with pool events (automatically starts bathing mode for appointments)",
           "holiday_calendar": "Holiday calendar (uses weekend quiet times on holidays)",
+          "enable_event_weather_guard": "If enabled, the controller checks the weather forecast and skips preheat and event start when rain is likely",
+          "event_weather_entity": "Weather entity that supports the weather.get_forecasts service (hourly)",
+          "event_rain_probability": "If forecasted rain probability during the event is >= this value, the event is blocked",
           "quiet_time_start": "Start of quiet hours on weekdays (e.g. 22:00)",
           "quiet_time_end": "End of quiet hours on weekdays (e.g. 07:00)",
           "quiet_time_start_weekend": "Start of quiet hours on weekends/holidays (e.g. 23:00)",
@@ -427,6 +438,7 @@
       "low_chlor": { "name": "Low chlorine" },
       "ph_alert": { "name": "pH out of range" },
       "tds_high": { "name": "TDS too high" },
+      "event_rain_blocked": { "name": "Event blocked due to rain" },
       "main_switch_on": { "name": "Main switch on" },
       "pump_switch_on": { "name": "Pump on" },
       "aux_heating_switch_on": { "name": "Aux heater on" }
@@ -460,6 +472,7 @@
       "next_event": { "name": "Next event" },
       "next_event_end": { "name": "Next event end" },
       "next_event_summary": { "name": "Next event summary" },
+      "event_rain_probability": { "name": "Event rain probability" },
       "manual_timer_mins": { "name": "Manual timer (min)" },
       "auto_filter_timer_mins": { "name": "Auto filter timer (min)" },
       "pause_timer_mins": { "name": "Pause timer (min)" },

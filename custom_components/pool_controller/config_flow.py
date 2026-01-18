@@ -107,6 +107,10 @@ def _calendars_schema(curr: dict | None = None):
     return vol.Schema({
         vol.Optional(CONF_POOL_CALENDAR, default=c.get(CONF_POOL_CALENDAR, DEFAULT_CAL_POOL)): selector.EntitySelector(selector.EntitySelectorConfig(domain="calendar")),
         vol.Optional(CONF_HOLIDAY_CALENDAR, default=c.get(CONF_HOLIDAY_CALENDAR, DEFAULT_CAL_HOLIDAY)): selector.EntitySelector(selector.EntitySelectorConfig(domain="calendar")),
+        vol.Optional(CONF_ENABLE_EVENT_WEATHER_GUARD, default=c.get(CONF_ENABLE_EVENT_WEATHER_GUARD, False)): bool,
+        vol.Optional(CONF_EVENT_WEATHER_ENTITY, default=c.get(CONF_EVENT_WEATHER_ENTITY, "")): selector.EntitySelector(selector.EntitySelectorConfig(domain="weather")),
+        vol.Optional(CONF_EVENT_RAIN_PROBABILITY, default=c.get(CONF_EVENT_RAIN_PROBABILITY, DEFAULT_EVENT_RAIN_PROBABILITY)):
+            selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=100, step=5, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="%")),
         vol.Required(CONF_QUIET_START, default=c.get(CONF_QUIET_START, DEFAULT_Q_START)): str,
         vol.Required(CONF_QUIET_END, default=c.get(CONF_QUIET_END, DEFAULT_Q_END)): str,
         vol.Required(CONF_QUIET_START_WEEKEND, default=c.get(CONF_QUIET_START_WEEKEND, DEFAULT_Q_START_WE)): str,
