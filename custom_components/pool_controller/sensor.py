@@ -81,11 +81,11 @@ async def async_setup_entry(hass, entry, async_add_entities):
     # Config value sensors: expose configured durations so the frontend can read them
     try:
         cfg_sensors = [
-                PoolConfigSensor(coordinator, CONF_FILTER_DURATION, DEFAULT_FILTER_DURATION, None),
-                PoolConfigSensor(coordinator, CONF_CHLORINE_DURATION, DEFAULT_CHLORINE_DURATION, None),
-                PoolConfigSensor(coordinator, CONF_BATH_DURATION, DEFAULT_BATH_MINUTES, None),
-            PoolConfigSensor(coordinator, CONF_PV_ON_THRESHOLD, DEFAULT_PV_ON, None),
-            PoolConfigSensor(coordinator, CONF_PV_OFF_THRESHOLD, DEFAULT_PV_OFF, None),
+            PoolConfigSensor(coordinator, CONF_FILTER_DURATION, DEFAULT_FILTER_DURATION, None),
+            PoolConfigSensor(coordinator, CONF_CHLORINE_DURATION, DEFAULT_CHLORINE_DURATION, None),
+            PoolConfigSensor(coordinator, CONF_BATH_DURATION, DEFAULT_BATH_MINUTES, None),
+            PoolConfigSensor(coordinator, CONF_PV_ON_THRESHOLD, DEFAULT_PV_ON, None, unit="W", icon="mdi:flash"),
+            PoolConfigSensor(coordinator, CONF_PV_OFF_THRESHOLD, DEFAULT_PV_OFF, None, unit="W", icon="mdi:flash"),
         ]
         async_add_entities(cfg_sensors)
     except Exception:
@@ -281,17 +281,18 @@ class PoolConfigSensor(PoolBaseSensor):
 
     This reads from the config entry data/options with a sensible default.
     """
-    _attr_native_unit_of_measurement = "min"
-    _attr_device_class = None
+    _attr_state_class = None
 
-    def __init__(self, coordinator, option_key, default_value, name=None):
+    def __init__(self, coordinator, option_key, default_value, name=None, *, unit="min", icon="mdi:timer", device_class=None):
         super().__init__(coordinator)
         self._option_key = option_key
         self._default = default_value
         # unique id mirrors other sensors: <entry_id>_<key>
         self._attr_unique_id = f"{coordinator.entry.entry_id}_{option_key}"
         self._attr_translation_key = option_key
-        self._attr_icon = "mdi:timer"
+        self._attr_icon = icon
+        self._attr_native_unit_of_measurement = unit
+        self._attr_device_class = device_class
         # Keep the option to pass a human-friendly fallback name; translations in
         # strings.json still provide canonical names when available.
         super().__init__(coordinator, name)
