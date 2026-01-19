@@ -975,6 +975,33 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 else:
                     # desired == pv_allows -> clear candidate if any
                     self._pv_candidate_since = None
+
+            # PV band sensors for chart coloring (low/mid/high based on thresholds + pv_allows hysteresis)
+            pv_band_low = None
+            pv_band_mid_on = None
+            pv_band_mid_off = None
+            pv_band_high = None
+            try:
+                pv_for_band = pv_raw if pv_raw is not None else pv_smoothed
+                pv_num = float(pv_for_band) if pv_for_band is not None else None
+            except Exception:
+                pv_num = None
+            if pv_num is not None:
+                try:
+                    if pv_num <= float(off_th):
+                        pv_band_low = round(pv_num, 1)
+                    elif pv_num >= float(on_th):
+                        pv_band_high = round(pv_num, 1)
+                    else:
+                        if pv_allows:
+                            pv_band_mid_on = round(pv_num, 1)
+                        else:
+                            pv_band_mid_off = round(pv_num, 1)
+                except Exception:
+                    pv_band_low = None
+                    pv_band_mid_on = None
+                    pv_band_mid_off = None
+                    pv_band_high = None
             # quiet time check: C and E should not activate during quiet; A/B/D always allowed
             def _in_quiet_period(cfg):
                 try:
@@ -1386,6 +1413,11 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 # PV power reading (W) - used for UI display/more-info in the dashboard card
                 "pv_power": pv_raw,
                 "pv_smoothed": round(pv_smoothed, 1) if pv_smoothed is not None else None,
+                # PV band sensors for chart coloring (low/mid/high)
+                "pv_band_low": pv_band_low,
+                "pv_band_mid_on": pv_band_mid_on,
+                "pv_band_mid_off": pv_band_mid_off,
+                "pv_band_high": pv_band_high,
                 "pv_allows": pv_allows,
                 "in_quiet": in_quiet,
                 "main_power": round(main_power, 1) if main_power is not None else None,

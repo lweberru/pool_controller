@@ -547,11 +547,29 @@
       "pv_power": {
         "name": "PV power"
       },
+      "pv_band_low": {
+        "name": "PV band low"
+      },
+      "pv_band_mid_on": {
+        "name": "PV band mid (on)"
+      },
+      "pv_band_mid_off": {
+        "name": "PV band mid (off)"
+      },
+      "pv_band_high": {
+        "name": "PV band high"
+      },
       "main_power": {
         "name": "Main pump power"
       },
       "aux_power": {
         "name": "Heater power"
+      },
+      "pv_on_threshold": {
+        "name": "PV ON threshold"
+      },
+      "pv_off_threshold": {
+        "name": "PV OFF threshold"
       },
       "next_frost_mins": {
         "name": "Next frost run in"

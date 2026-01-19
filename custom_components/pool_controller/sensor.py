@@ -1,7 +1,20 @@
 from homeassistant.components.sensor import SensorEntity, SensorDeviceClass, SensorStateClass
 from homeassistant.const import EntityCategory, UnitOfTemperature
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from .const import DOMAIN, MANUFACTURER, CONF_FILTER_DURATION, DEFAULT_FILTER_DURATION, CONF_CHLORINE_DURATION, DEFAULT_CHLORINE_DURATION, CONF_BATH_DURATION, DEFAULT_BATH_MINUTES
+from .const import (
+    DOMAIN,
+    MANUFACTURER,
+    CONF_FILTER_DURATION,
+    DEFAULT_FILTER_DURATION,
+    CONF_CHLORINE_DURATION,
+    DEFAULT_CHLORINE_DURATION,
+    CONF_BATH_DURATION,
+    DEFAULT_BATH_MINUTES,
+    CONF_PV_ON_THRESHOLD,
+    CONF_PV_OFF_THRESHOLD,
+    DEFAULT_PV_ON,
+    DEFAULT_PV_OFF,
+)
 
 
 _AUTO_STATE_CLASS = object()
@@ -56,6 +69,10 @@ async def async_setup_entry(hass, entry, async_add_entities):
     entities.extend([
         PoolPowerSensor(coordinator, "pv_power", None),
         PoolPowerSensor(coordinator, "pv_smoothed", None),
+        PoolPowerSensor(coordinator, "pv_band_low", None),
+        PoolPowerSensor(coordinator, "pv_band_mid_on", None),
+        PoolPowerSensor(coordinator, "pv_band_mid_off", None),
+        PoolPowerSensor(coordinator, "pv_band_high", None),
         PoolPowerSensor(coordinator, "main_power", None),
         PoolPowerSensor(coordinator, "aux_power", None),
     ])
@@ -67,6 +84,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
                 PoolConfigSensor(coordinator, CONF_FILTER_DURATION, DEFAULT_FILTER_DURATION, None),
                 PoolConfigSensor(coordinator, CONF_CHLORINE_DURATION, DEFAULT_CHLORINE_DURATION, None),
                 PoolConfigSensor(coordinator, CONF_BATH_DURATION, DEFAULT_BATH_MINUTES, None),
+            PoolConfigSensor(coordinator, CONF_PV_ON_THRESHOLD, DEFAULT_PV_ON, None),
+            PoolConfigSensor(coordinator, CONF_PV_OFF_THRESHOLD, DEFAULT_PV_OFF, None),
         ]
         async_add_entities(cfg_sensors)
     except Exception:
