@@ -1667,8 +1667,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 blocking=True,
                 return_response=True,
             )
-        except Exception:
-            _LOGGER.debug("Weather forecast fetch failed for %s", entity_id)
+        except Exception as err:
+            _LOGGER.warning("Weather forecast fetch failed for %s: %s", entity_id, err)
             return None
 
         forecast = None
@@ -1749,7 +1749,9 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         try:
             res = await self.hass.services.async_call("calendar", "get_events", {"entity_id": cal_id, "start_date_time": dt_util.now().replace(hour=0, minute=0), "end_date_time": dt_util.now().replace(hour=23, minute=59)}, blocking=True, return_response=True)
             return len(res.get(cal_id, {}).get("events", [])) > 0
-        except: return False
+        except Exception as err:
+            _LOGGER.warning("Holiday calendar fetch failed for %s: %s", cal_id, err)
+            return False
 
     async def _get_next_event(self, cal_id):
         if not cal_id:
@@ -1822,5 +1824,6 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 return out
 
             return {"next": _compact(next_ev), "ongoing": _compact(ongoing_ev)}
-        except Exception:
+        except Exception as err:
+            _LOGGER.warning("Calendar fetch failed for %s: %s", cal_id, err)
             return {}
