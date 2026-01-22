@@ -244,10 +244,14 @@ class PoolTimerSensor(PoolBaseSensor):
     @property
     def native_value(self):
         val = self.coordinator.data.get(self._key)
+        # For frost timer, return None when inactive to avoid showing "0 min"
+        if self._kind == "frost":
+            if not bool(self.coordinator.data.get("frost_timer_active")):
+                return None
         try:
             return int(val) if val is not None else 0
         except Exception:
-            return 0
+            return None if self._kind == "frost" else 0
 
     @property
     def extra_state_attributes(self):

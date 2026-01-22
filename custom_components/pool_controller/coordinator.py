@@ -727,7 +727,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 frost_active = (run_mins > 0) and ((epoch_minutes % interval) < run_mins)
 
             # Frost-Timer: Wenn frost_active, berechne Restlaufzeit und setze Timer-Attribute
-            frost_timer_mins = 0
+            frost_timer_mins = None
             frost_timer_active = False
             frost_timer_duration = None
             frost_timer_type = None

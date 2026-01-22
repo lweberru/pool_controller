@@ -6,12 +6,35 @@ import voluptuous as vol
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import entity_registry as er
 
-from .const import DOMAIN
+from .const import (
+    DOMAIN,
+    OPT_KEY_MANUAL_UNTIL,
+    OPT_KEY_MANUAL_TYPE,
+    OPT_KEY_MANUAL_DURATION,
+    OPT_KEY_AUTO_FILTER_UNTIL,
+    OPT_KEY_AUTO_FILTER_DURATION,
+    OPT_KEY_PAUSE_UNTIL,
+    OPT_KEY_PAUSE_DURATION,
+    OPT_KEY_FILTER_NEXT,
+)
 from .coordinator import PoolControllerDataCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
 _SERVICES_REGISTERED_KEY = "__services_registered"
+_LAST_OPTIONS_KEY = "__last_options"
+
+# Option keys that are updated frequently by the coordinator (timers).
+_TRANSIENT_OPTION_KEYS = {
+    OPT_KEY_MANUAL_UNTIL,
+    OPT_KEY_MANUAL_TYPE,
+    OPT_KEY_MANUAL_DURATION,
+    OPT_KEY_AUTO_FILTER_UNTIL,
+    OPT_KEY_AUTO_FILTER_DURATION,
+    OPT_KEY_PAUSE_UNTIL,
+    OPT_KEY_PAUSE_DURATION,
+    OPT_KEY_FILTER_NEXT,
+}
 
 # "button" wurde hier hinzugefügt (timer ist keine Entity-Plattform)
 PLATFORMS = ["sensor", "switch", "climate", "binary_sensor", "button"]
@@ -274,6 +297,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = coordinator
+    # Track last options to detect transient timer-only updates
+    hass.data[DOMAIN][f"{entry.entry_id}{_LAST_OPTIONS_KEY}"] = dict(entry.options or {})
 
     # Services werden global (einmalig) registriert und routen dann auf die richtige Instanz.
     _ensure_services_registered(hass)
@@ -295,6 +320,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def update_listener(hass: HomeAssistant, entry: ConfigEntry):
     """Wird aufgerufen, wenn Optionen im Zahnrad geändert wurden."""
+    # Skip reload if only transient timer options changed (avoids brief unavailable states)
+    try:
+        last_key = f"{entry.entry_id}{_LAST_OPTIONS_KEY}"
+        last_opts = hass.data.get(DOMAIN, {}).get(last_key, {}) or {}
+        new_opts = dict(entry.options or {})
+
+        changed_keys = {k for k in set(last_opts) | set(new_opts) if last_opts.get(k) != new_opts.get(k)}
+        hass.data.get(DOMAIN, {})[last_key] = new_opts
+
+        if changed_keys and changed_keys.issubset(_TRANSIENT_OPTION_KEYS):
+            _LOGGER.debug("Skip config reload for transient option update: %s", sorted(changed_keys))
+            return
+    except Exception:
+        # Fall back to reload if we cannot safely compare
+        pass
+
     await hass.config_entries.async_reload(entry.entry_id)
 
 
