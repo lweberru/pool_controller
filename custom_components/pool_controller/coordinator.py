@@ -1,6 +1,7 @@
 import logging
 import re
 import inspect
+import asyncio
 from datetime import timedelta, datetime
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
@@ -838,6 +839,25 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             cal_next = (cal or {}).get("next") or {}
             cal_ongoing = (cal or {}).get("ongoing") or {}
 
+            _LOGGER.debug(
+                "Calendar snapshot (%s) next=%s ongoing=%s",
+                getattr(self.entry, "entry_id", None),
+                {
+                    "start": cal_next.get("start"),
+                    "end": cal_next.get("end"),
+                    "summary": cal_next.get("summary"),
+                }
+                if cal_next
+                else None,
+                {
+                    "start": cal_ongoing.get("start"),
+                    "end": cal_ongoing.get("end"),
+                    "summary": cal_ongoing.get("summary"),
+                }
+                if cal_ongoing
+                else None,
+            )
+
             # Weather guard for calendar events (optional)
             enable_event_weather_guard = bool(conf.get(CONF_ENABLE_EVENT_WEATHER_GUARD, False))
             weather_entity = conf.get(CONF_EVENT_WEATHER_ENTITY)
@@ -1183,6 +1203,11 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     remaining_min = max(1, int((cal_ongoing["end"] - now).total_seconds() / 60))
                     if (not pause_active) and (not manual_active) and (not event_rain_blocked):
                         await self.activate_manual_timer(timer_type="bathing", minutes=remaining_min)
+                        _LOGGER.debug(
+                            "Calendar event started -> activate bathing timer (%s) remaining=%smin",
+                            getattr(self.entry, "entry_id", None),
+                            remaining_min,
+                        )
                         # recompute
                         manual_active = self.manual_timer_until is not None and now < self.manual_timer_until and self.manual_timer_type in ("bathing", "chlorine", "filter")
                         manual_mins = _mins_left(self.manual_timer_until) if manual_active else 0
@@ -1582,6 +1607,17 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             self.data = data
             _LOGGER.debug("Coordinator cached data updated (%s)", getattr(self.entry, "entry_id", None))
             return data
+        except asyncio.CancelledError:
+            # Update was cancelled (e.g., overlapping refresh). Keep cached data to
+            # avoid entities flipping to unavailable without a useful log trail.
+            _LOGGER.warning(
+                "Coordinator update cancelled for %s; returning cached data",
+                getattr(self.entry, "entry_id", None),
+            )
+            if getattr(self, "data", None):
+                return self.data
+            self.data = _safe_defaults
+            return self.data
         except Exception as err:
             # Prefer to keep last known good data to avoid entities becoming
             # unavailable on transient errors (reduces UI/sensor flapping).
@@ -1757,6 +1793,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         if not cal_id:
             return {}
 
+        _LOGGER.debug("Calendar fetch start for %s", cal_id)
+
         try:
             now = dt_util.now()
             res = await self.hass.services.async_call(
@@ -1772,6 +1810,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             )
             raw_events = res.get(cal_id, {}).get("events", [])
             if not raw_events:
+                _LOGGER.debug("Calendar fetch: no events for %s", cal_id)
                 return {}
 
             parsed = []
