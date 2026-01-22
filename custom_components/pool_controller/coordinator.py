@@ -1171,6 +1171,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             if in_quiet and ot is not None and ot > frost_quiet_override_below:
                 frost_active = False
 
+            # If there is no frost danger, do not expose a "next frost" countdown.
+            if (not enable_frost) or (not frost_danger):
+                next_frost_mins = None
+
             # Wenn der geplante Filter-Start in eine Ruhezeit fällt: vorab auf das Ruhezeit-Ende verschieben.
             enable_auto_filter = conf.get(CONF_ENABLE_AUTO_FILTER, True)
             if enable_auto_filter and getattr(self, "next_filter_start", None) and _is_in_quiet_at(self.next_filter_start, conf):
