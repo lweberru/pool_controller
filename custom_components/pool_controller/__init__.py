@@ -16,6 +16,13 @@ from .const import (
     OPT_KEY_PAUSE_UNTIL,
     OPT_KEY_PAUSE_DURATION,
     OPT_KEY_FILTER_NEXT,
+    CONF_ENABLE_PV_OPTIMIZATION,
+    CONF_PV_SURPLUS_SENSOR,
+    CONF_PV_ON_THRESHOLD,
+    CONF_PV_OFF_THRESHOLD,
+    CONF_PV_SMOOTH_WINDOW_SECONDS,
+    CONF_PV_STABILITY_SECONDS,
+    CONF_PV_MIN_RUN_MINUTES,
 )
 from .coordinator import PoolControllerDataCoordinator
 
@@ -34,6 +41,17 @@ _TRANSIENT_OPTION_KEYS = {
     OPT_KEY_PAUSE_UNTIL,
     OPT_KEY_PAUSE_DURATION,
     OPT_KEY_FILTER_NEXT,
+}
+
+# Options that can be applied without reloading platforms (avoid brief unavailable states).
+_NO_RELOAD_OPTION_KEYS = {
+    CONF_ENABLE_PV_OPTIMIZATION,
+    CONF_PV_SURPLUS_SENSOR,
+    CONF_PV_ON_THRESHOLD,
+    CONF_PV_OFF_THRESHOLD,
+    CONF_PV_SMOOTH_WINDOW_SECONDS,
+    CONF_PV_STABILITY_SECONDS,
+    CONF_PV_MIN_RUN_MINUTES,
 }
 
 # "button" wurde hier hinzugefügt (timer ist keine Entity-Plattform)
@@ -290,6 +308,7 @@ def _ensure_services_registered(hass: HomeAssistant):
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Setup der Integration."""
+    _LOGGER.info("Setting up pool_controller entry %s", entry.entry_id)
     coordinator = PoolControllerDataCoordinator(hass, entry)
     
     # Den ersten Datenabruf triggern
@@ -329,13 +348,31 @@ async def update_listener(hass: HomeAssistant, entry: ConfigEntry):
         changed_keys = {k for k in set(last_opts) | set(new_opts) if last_opts.get(k) != new_opts.get(k)}
         hass.data.get(DOMAIN, {})[last_key] = new_opts
 
+        if changed_keys:
+            _LOGGER.info(
+                "Options updated for %s (changed=%s)",
+                entry.entry_id,
+                sorted(changed_keys),
+            )
+
         if changed_keys and changed_keys.issubset(_TRANSIENT_OPTION_KEYS):
             _LOGGER.debug("Skip config reload for transient option update: %s", sorted(changed_keys))
+            coord = hass.data.get(DOMAIN, {}).get(entry.entry_id)
+            if coord:
+                await coord.async_request_refresh()
+            return
+
+        if changed_keys and changed_keys.issubset(_NO_RELOAD_OPTION_KEYS):
+            _LOGGER.info("Skip config reload for PV-related option update: %s", sorted(changed_keys))
+            coord = hass.data.get(DOMAIN, {}).get(entry.entry_id)
+            if coord:
+                await coord.async_request_refresh()
             return
     except Exception:
         # Fall back to reload if we cannot safely compare
         pass
 
+    _LOGGER.warning("Reloading config entry %s due to options change", entry.entry_id)
     await hass.config_entries.async_reload(entry.entry_id)
 
 
@@ -435,4 +472,5 @@ async def _ensure_registry_translation_keys(hass: HomeAssistant, entry: ConfigEn
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Entladen der Integration."""
+    _LOGGER.warning("Unloading pool_controller entry %s", entry.entry_id)
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
