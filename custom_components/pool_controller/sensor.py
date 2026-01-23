@@ -41,7 +41,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolChemSensor(coordinator, "ph_plus_g", None, "g", "mdi:pill", device_class=SensorDeviceClass.WEIGHT, state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
         PoolChemSensor(coordinator, "chlor_spoons", None, "Löffel", "mdi:spoon-sugar", state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
         PoolChemSensor(coordinator, "next_start_mins", None, "min", "mdi:clock-start", device_class=SensorDeviceClass.DURATION),
-        PoolChemSensor(coordinator, "next_frost_mins", None, "min", "mdi:snowflake-clock", device_class=SensorDeviceClass.DURATION, state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
+        PoolChemSensor(coordinator, "next_frost_mins", None, "min", "mdi:clock-start", device_class=SensorDeviceClass.DURATION, state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
         PoolChemSensor(coordinator, "event_rain_probability", None, "%", "mdi:weather-rainy", state_class=SensorStateClass.MEASUREMENT, entity_category=EntityCategory.DIAGNOSTIC),
         PoolTimeSensor(coordinator, "next_event", None)
     ]
@@ -125,6 +125,11 @@ class PoolRunReasonSensor(PoolBaseSensor):
     def native_value(self):
         return self.coordinator.data.get("run_reason") or "idle"
 
+    @property
+    def available(self) -> bool:
+        # Prefer cached coordinator data to avoid brief "unavailable" spikes.
+        return self.coordinator.data is not None or self.coordinator.last_update_success
+
 
 class PoolHeatReasonSensor(PoolBaseSensor):
     _attr_translation_key = "heat_reason"
@@ -137,6 +142,11 @@ class PoolHeatReasonSensor(PoolBaseSensor):
     @property
     def native_value(self):
         return self.coordinator.data.get("heat_reason") or "off"
+
+    @property
+    def available(self) -> bool:
+        # Prefer cached coordinator data to avoid brief "unavailable" spikes.
+        return self.coordinator.data is not None or self.coordinator.last_update_success
 
 
 class PoolSanitizerModeSensor(PoolBaseSensor):
