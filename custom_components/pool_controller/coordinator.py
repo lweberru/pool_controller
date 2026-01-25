@@ -1290,6 +1290,14 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
             in_quiet = _in_quiet_period(conf)
 
+            # Enforce minimum gap between runs (unless severe frost)
+            min_gap_remaining = 0
+            try:
+                if self._last_run_end and min_gap_minutes and min_gap_minutes > 0:
+                    min_gap_remaining = max(0, int(((self._last_run_end + timedelta(minutes=min_gap_minutes)) - now).total_seconds() / 60))
+            except Exception:
+                min_gap_remaining = 0
+
             # =========================
             # Next frost run (best-effort)
             # =========================
@@ -1413,13 +1421,6 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 frost_credit_effective += float(self._credit_streak_minutes or 0.0)
             filter_missing_minutes = max(0, int(round(float(getattr(self, "filter_minutes", DEFAULT_FILTER_DURATION)) - filter_credit_effective)))
 
-            # Enforce minimum gap between runs (unless severe frost)
-            min_gap_remaining = 0
-            try:
-                if self._last_run_end and min_gap_minutes and min_gap_minutes > 0:
-                    min_gap_remaining = max(0, int(((self._last_run_end + timedelta(minutes=min_gap_minutes)) - now).total_seconds() / 60))
-            except Exception:
-                min_gap_remaining = 0
 
             # Start calendar-driven bathing: if event is ongoing, ensure manual timer active
             # (in Wartung deaktiviert)
