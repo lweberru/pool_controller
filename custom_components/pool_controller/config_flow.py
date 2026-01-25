@@ -415,6 +415,11 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
         self._menu_mode = True
         return self._show_options_menu()
 
+    async def async_step_menu(self, user_input=None):
+        """Menu step: render the options menu."""
+        self._menu_mode = True
+        return self._show_options_menu()
+
     def _show_options_menu(self):
         return self.async_show_menu(
             step_id="menu",
