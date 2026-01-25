@@ -7,6 +7,20 @@
 - **Smart scheduling**: Respects quiet hours and frost danger
 - **Manual override**: Start/stop via buttons or services
 - **Duration control**: Adjustable per cycle
+- **Run credit**: Minutes already run can reduce or shift future runs
+- **Merge window**: When a frost run is close, filter + frost can merge into a single run
+- **Minimum gap**: Enforces a rest period between runs (except severe frost)
+
+### Run Credit (Filter + Frost)
+
+The controller tracks **eligible run minutes** (credit). If a recent run already covered part of the needed filter or frost time, the next run can be shortened or shifted.
+
+- **Credit Sources** decide which run reasons count (e.g., `filter`, `bathing`, `chlorine`, `preheat`, `pv`, `frost`, `thermostat`).
+- **Minimum Credit** ignores very short runs (noise).
+- **Filter credit** reduces the *next* auto-filter duration (or skips it if fully covered).
+- **Frost credit** can shift mild frost cycles later to reduce noise.
+
+This improves efficiency by avoiding redundant runs while keeping protection targets intact.
 
 ## Temperature Control & Water Volume Calculations
 

@@ -31,6 +31,12 @@ Entity IDs depend on your instance name, but the integration uses stable suffix 
 | `sensor.<pool>_status` | Enum | Current state: `normal`, `paused`, `frost_protection` |
 | `sensor.<pool>_run_reason` | Enum | Why the pool is running right now: `idle`, `bathing`, `chlorine`, `filter`, `preheat`, `pv`, `frost`, `pause`, `maintenance` |
 | `sensor.<pool>_heat_reason` | Enum | Why heating is allowed/active: `off`, `disabled`, `bathing`, `preheat`, `pv` |
+| `sensor.<pool>_run_credit_source` | Enum | Current credit source (if a streak is active) |
+| `sensor.<pool>_run_credit_minutes` | Integer | Minutes credited from the current streak |
+| `sensor.<pool>_filter_credit_minutes` | Integer | Effective filter credit minutes |
+| `sensor.<pool>_filter_missing_minutes` | Integer | Remaining filter minutes needed for the next cycle |
+| `sensor.<pool>_frost_credit_minutes` | Integer | Effective frost credit minutes |
+| `sensor.<pool>_frost_credit_shift_minutes` | Integer | Minutes the frost cycle is shifted due to credit |
 | `sensor.<pool>_sanitizer_mode` | Enum | Disinfection style: `chlorine`, `saltwater`, `mixed` |
 | `sensor.<pool>_tds_status` | Enum | Water quality assessment (backend-derived) |
 | `sensor.<pool>_ph_val` | Float | Water pH (0-14) |
@@ -55,6 +61,7 @@ Entity IDs depend on your instance name, but the integration uses stable suffix 
 | `sensor.<pool>_manual_timer_mins` | Integer | Remaining minutes of the active manual timer (bathing/filter/chlorine). Attributes: `active`, `duration_minutes`, `type` |
 | `sensor.<pool>_auto_filter_timer_mins` | Integer | Remaining minutes of the automatic filter cycle timer. Attributes: `active`, `duration_minutes` |
 | `sensor.<pool>_pause_timer_mins` | Integer | Remaining minutes of the pause timer. Attributes: `active`, `duration_minutes` |
+| `sensor.<pool>_frost_timer_mins` | Integer | Remaining minutes of the active frost cycle (if any). Attributes: `active`, `duration_minutes` |
 | `sensor.<pool>_pv_power` | Float | PV power (W) derived from the configured PV sensor |
 | `sensor.<pool>_pv_smoothed` | Float | Smoothed PV power (W) used for PV hysteresis |
 | `sensor.<pool>_pv_band_low` | Float | PV power in low band (≤ OFF threshold) |
@@ -85,6 +92,9 @@ All three timer sensors use **minutes remaining** as their state (unit: `min`).
 
 **Pause timer (`sensor.<pool>_pause_timer_mins`) attributes:**
 - `duration_minutes` (int | null): the requested pause duration.
+
+**Frost timer (`sensor.<pool>_frost_timer_mins`) attributes:**
+- `duration_minutes` (int | null): the configured run duration for the current frost cycle.
 
 ## Switches
 
@@ -117,6 +127,12 @@ The integration provides four quick-action buttons (one per topic, using the def
 - `sensor.pool_next_event` - Next calendar event
 - `sensor.pool_run_reason` - Why the pool is running (idle/bathing/filter/chlorine/preheat/pv/frost/...)
 - `sensor.pool_heat_reason` - Why heating is allowed (off/disabled/bathing/preheat/pv)
+- `sensor.pool_run_credit_source` - Current credit source (if any)
+- `sensor.pool_run_credit_minutes` - Current credited minutes
+- `sensor.pool_filter_credit_minutes` - Effective filter credit
+- `sensor.pool_filter_missing_minutes` - Remaining minutes needed for filter
+- `sensor.pool_frost_credit_minutes` - Effective frost credit
+- `sensor.pool_frost_credit_shift_minutes` - Frost shift minutes
 - `sensor.pool_outdoor_temp` - Outdoor temperature (input for frost protection)
 - `binary_sensor.pool_should_main_on` - Power supply requested
 - `binary_sensor.pool_should_pump_on` - Pump requested

@@ -66,6 +66,12 @@ pool_controller:
 ### Step 8: Filter Settings
 - **Automatic filtering**: Enable/disable automatic filter cycles
 - **Filter Interval**: Minutes between automatic filter cycles (default: 720 = 12 hours)
+- **Filter Duration**: Default run length for one cycle (minutes)
+- **Merge Window**: If a frost run is close, filter + frost can merge into one run
+- **Minimum Gap**: Enforces a rest period between runs (except severe frost)
+- **Max Merged Run**: Upper limit for merged runs
+- **Minimum Credit**: Runs shorter than this do **not** count as credit
+- **Credit Sources**: Which run reasons count as credit (filter/bathing/chlorine/preheat/pv/frost/thermostat)
 
 ### Step 9: PV Solar Integration
 - **PV Surplus Sensor**: Entity measuring excess solar production (W)
@@ -81,6 +87,11 @@ pool_controller:
 | Target Salt (g/L) | 4.0 | 0-10 g/L | Only used for saltwater/mixed; baseline for effective TDS |
 | Filter Interval | 720 | 60-10080 min | Time between automatic filter cycles |
 | Filter Duration | 30 | 5-480 min | How long each filter cycle runs |
+| Merge Window | 90 | 0-720 min | If a frost run is within this window, runs may be merged |
+| Minimum Gap | 45 | 0-360 min | Rest time between runs (except severe frost) |
+| Max Merged Run | 40 | 5-360 min | Upper limit for a merged run |
+| Minimum Credit | 5 | 0-60 min | Runs shorter than this do not count as credit |
+| Credit Sources | bathing, filter, frost, preheat, pv, thermostat, chlorine | list | Which run reasons contribute credit |
 | Bathing Duration | 60 | 5-480 min | Default bathing session length |
 | Pause Duration | 60 | 5-480 min | Default pause duration |
 | Frost Start Temp | 2°C | -20 to 10°C | Below this outdoor temperature `frost_danger` can become active |
