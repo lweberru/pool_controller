@@ -3,204 +3,220 @@
         "step": {
             "init": {
                 "title": "Configuration de base",
-                "submit": "Suivant",
+                "submit": "Continuer",
                 "data": {
                     "name": "Nom de la piscine",
-                    "water_volume": "Volume d'eau (litres)",
+                    "water_volume": "Volume d’eau (litres)",
                     "demo_mode": "Mode démo"
                 },
                 "data_description": {
                     "name": "Nom affiché pour cette installation",
-                    "water_volume": "Volume d'eau en litres (utilisé pour le dosage et le calcul du temps de chauffe)",
-                    "demo_mode": "Mode démo : ne commande pas d'appareils réels (tests uniquement)"
+                    "water_volume": "Volume d’eau en litres (pour dosages et calculs de chauffage)",
+                    "demo_mode": "Mode démo : ne pilote pas de vrais appareils (tests uniquement)"
                 }
             },
             "switches": {
-                "title": "Switches & power",
-                "description": "Configure which switches and power sensors the controller should use. You can optionally separate the power supply (main) from the circulation pump (pump).",
-                "submit": "Continue",
+                "title": "Interrupteurs et puissance",
+                "description": "Configurez les interrupteurs et capteurs de puissance. Vous pouvez séparer l’alimentation (principal) de la pompe de circulation.",
+                "submit": "Continuer",
                 "data": {
-                    "main_switch": "Main switch",
-                    "pump_switch": "Pump switch (optional)",
-                    "filter_switch": "Filter switch (optional)",
-                    "enable_aux_heating": "Enable auxiliary heating",
-                    "aux_heating_switch": "Auxiliary heater switch",
-                    "main_power_sensor": "Main power sensor",
-                    "aux_power_sensor": "Aux heater power sensor"
+                    "main_switch": "Interrupteur principal",
+                    "pump_switch": "Interrupteur de pompe (optionnel)",
+                    "filter_switch": "Interrupteur de filtre (optionnel)",
+                    "enable_aux_heating": "Activer chauffage auxiliaire",
+                    "aux_heating_switch": "Interrupteur du chauffage auxiliaire",
+                    "main_power_sensor": "Capteur de puissance principal",
+                    "aux_power_sensor": "Capteur de puissance du chauffage auxiliaire"
                 },
                 "data_description": {
-                    "main_switch": "Main power / supply switch for the pool (required)",
-                    "pump_switch": "Optional: dedicated circulation/pump switch (leave empty to use main switch)",
-                    "filter_switch": "Optional: separate switch for filter pump (leave empty to use main switch)",
-                    "enable_aux_heating": "Enables auxiliary heater for faster heating",
-                    "aux_heating_switch": "Switch for electric auxiliary heater",
-                    "main_power_sensor": "Main pump power sensor in watts",
-                    "aux_power_sensor": "Heater power sensor in watts"
+                    "main_switch": "Interrupteur principal / alimentation du pool (obligatoire)",
+                    "pump_switch": "Optionnel : interrupteur dédié pour la pompe de circulation (laisser vide pour utiliser l'interrupteur principal)",
+                    "filter_switch": "Optionnel : interrupteur séparé pour la pompe de filtration (laisser vide pour utiliser l'interrupteur principal)",
+                    "enable_aux_heating": "Active le chauffage auxiliaire pour un chauffage plus rapide",
+                    "aux_heating_switch": "Interrupteur du chauffage auxiliaire électrique",
+                    "main_power_sensor": "Capteur de puissance de la pompe principale en watts",
+                    "aux_power_sensor": "Capteur de puissance du chauffage en watts"
                 }
             },
             "water_quality": {
-                "title": "Water quality",
-                "description": "Select sensors for water temperature and (optionally) chemistry. Only the water temperature sensor is required.",
-                "submit": "Continue",
+                "title": "Qualité de l’eau",
+                "description": "Sélectionnez les capteurs de température et (optionnellement) de chimie.",
+                "submit": "Continuer",
                 "data": {
-                    "temp_water_sensor": "Water temperature",
-                    "ph_sensor": "pH sensor",
-                    "chlorine_sensor": "Chlorine (redox) sensor",
-                    "salt_sensor": "Salt sensor",
-                    "tds_sensor": "Conductivity sensor"
+                    "temp_water_sensor": "Température de l’eau",
+                    "ph_sensor": "Capteur de pH",
+                    "chlorine_sensor": "Capteur de chlore (redox)",
+                    "salt_sensor": "Capteur de sel",
+                    "tds_sensor": "Capteur de conductivité"
                 },
                 "data_description": {
-                    "temp_water_sensor": "Pool water temperature sensor (required)",
-                    "ph_sensor": "pH value sensor (Blueriiot or similar)",
-                    "chlorine_sensor": "Redox sensor for chlorine measurement in mV",
-                    "salt_sensor": "Salt content sensor for saltwater pools",
-                    "tds_sensor": "Conductivity sensor (TDS) for water quality"
+                    "temp_water_sensor": "Capteur de température de l’eau (obligatoire)",
+                    "ph_sensor": "Capteur de pH (Blueriiot ou similaire)",
+                    "chlorine_sensor": "Capteur redox pour mesure du chlore en mV",
+                    "salt_sensor": "Capteur de sel pour piscines salées",
+                    "tds_sensor": "Capteur de conductivité (TDS) pour la qualité de l’eau"
                 }
             },
             "sanitizer": {
-                "title": "Sanitizer",
-                "description": "Choose how the pool is sanitized. For saltwater or mixed operation, you will be asked for a target salt level.",
-                "submit": "Continue",
+                "title": "Désinfection",
+                "description": "Choisissez le mode de désinfection.",
+                "submit": "Continuer",
                 "data": {
-                    "sanitizer_mode": "Sanitizer mode"
+                    "sanitizer_mode": "Mode de désinfection"
                 },
                 "data_description": {
-                    "sanitizer_mode": "Chlorine = classic dosing, Saltwater = salt chlorinator, Mixed = both"
+                    "sanitizer_mode": "Chlore = dosage classique, Eau salée = électrolyseur, Mixte = les deux"
                 }
             },
             "sanitizer_salt": {
-                "title": "Salt target",
-                "description": "Set the target salt level for saltwater (or mixed) operation.",
-                "submit": "Continue",
+                "title": "Sel cible",
+                "description": "Définissez le niveau de sel cible pour le mode eau salée ou mixte.",
+                "submit": "Continuer",
                 "data": {
-                    "target_salt_g_l": "Target salt (g/L)"
+                    "target_salt_g_l": "Sel cible (g/L)"
                 },
                 "data_description": {
-                    "target_salt_g_l": "Used to compute recommendations when salt is too low"
+                    "target_salt_g_l": "Utilisé pour calculer les recommandations lorsque le sel est trop bas"
                 }
             },
             "climate": {
-                "title": "Temperature control",
-                "description": "Thermostat settings for the pool climate entity. The target temperature (setpoint) is persisted in the integration options once you change it.",
-                "submit": "Continue",
+                "title": "Contrôle de température",
+                "description": "Réglages thermostat/hystérésis. La consigne est enregistrée dans les options après modification.",
+                "submit": "Continuer",
                 "data": {
-                    "target_temp": "Initial target temperature",
-                    "min_temp": "Minimum temperature",
-                    "max_temp": "Maximum temperature",
-                    "target_temp_step": "Temperature step",
-                    "heater_base_power_w": "Base heating power (W)",
-                    "heater_aux_power_w": "Aux heater power (W)",
-                    "cold_tolerance": "Cold tolerance",
-                    "hot_tolerance": "Hot tolerance"
+                    "target_temp": "Température cible initiale",
+                    "min_temp": "Température minimale",
+                    "max_temp": "Température maximale",
+                    "target_temp_step": "Pas de température",
+                    "heater_base_power_w": "Puissance de base (W)",
+                    "heater_aux_power_w": "Puissance auxiliaire (W)",
+                    "cold_tolerance": "Tolérance froide",
+                    "hot_tolerance": "Tolérance chaude"
                 },
                 "data_description": {
-                    "target_temp": "Initial target temperature (setpoint) used on first start; later the setpoint is persisted",
-                    "min_temp": "Minimum setpoint available",
-                    "max_temp": "Maximum setpoint available",
-                    "target_temp_step": "Step size for setting the target temperature",
-                    "heater_base_power_w": "Base heating contribution while the circulation pump runs (e.g. waste heat). Used for preheat estimation.",
-                    "heater_aux_power_w": "Aux heater rated power (watts). Used for preheat estimation when aux heating is enabled. Total = base + aux.",
-                    "cold_tolerance": "Heater starts when water temperature is below target minus this value",
-                    "hot_tolerance": "Heater stops when water temperature is at or above target plus this value"
+                    "target_temp": "Température cible initiale (consigne) au premier démarrage ; ensuite la consigne est enregistrée",
+                    "min_temp": "Consigne minimale disponible",
+                    "max_temp": "Consigne maximale disponible",
+                    "target_temp_step": "Pas pour régler la consigne",
+                    "heater_base_power_w": "Apport de base pendant la circulation (p. ex. chaleur résiduelle). Utilisé pour la pré‑chauffe.",
+                    "heater_aux_power_w": "Puissance nominale du chauffage auxiliaire (W). Utilisée pour la pré‑chauffe lorsque l’auxiliaire est activé. Total = base + aux.",
+                    "cold_tolerance": "Le chauffage démarre lorsque la température de l’eau est en dessous de la consigne moins cette valeur",
+                    "hot_tolerance": "Le chauffage s’arrête lorsque la température de l’eau est à ou au‑dessus de la consigne plus cette valeur"
                 }
             },
             "frost": {
-                "title": "Frost protection",
-                "description": "Protects the pool system in cold weather by running the pump in a duty-cycle based on the outdoor temperature. Quiet hours are respected unless it is extremely cold.",
-                "submit": "Continue",
+                "title": "Protection antigel",
+                "description": "Protège le système par cycles de pompe ; respecte les heures calmes sauf froid extrême.",
+                "submit": "Continuer",
                 "data": {
-                    "enable_frost_protection": "Enable frost protection",
-                    "temp_outdoor_sensor": "Outdoor temperature",
-                    "frost_start_temp": "Frost protection starts below (°C)",
-                    "frost_severe_temp": "Frost protection severe below (°C)",
-                    "frost_mild_interval_minutes": "Frost (mild) interval (min)",
-                    "frost_mild_run_minutes": "Frost (mild) run time (min)",
-                    "frost_severe_interval_minutes": "Frost (severe) interval (min)",
-                    "frost_severe_run_minutes": "Frost (severe) run time (min)",
-                    "frost_quiet_override_below_temp": "Ignore quiet hours below (°C)"
+                    "enable_frost_protection": "Activer la protection antigel",
+                    "temp_outdoor_sensor": "Température extérieure",
+                    "frost_start_temp": "Protection antigel active en dessous de (°C)",
+                    "frost_severe_temp": "Protection antigel forte en dessous de (°C)",
+                    "frost_mild_interval_minutes": "Antigel (léger) intervalle (min)",
+                    "frost_mild_run_minutes": "Antigel (léger) durée (min)",
+                    "frost_severe_interval_minutes": "Antigel (fort) intervalle (min)",
+                    "frost_severe_run_minutes": "Antigel (fort) durée (min)",
+                    "frost_quiet_override_below_temp": "Ignorer heures calmes en dessous de (°C)"
                 },
                 "data_description": {
-                    "enable_frost_protection": "Enables frost protection (requires outdoor temperature sensor). The pump runs in cycles; quiet hours are only disturbed in extreme cold (configurable).",
-                    "temp_outdoor_sensor": "Outdoor temperature for frost protection and heating control",
-                    "frost_start_temp": "Below this outdoor temperature (or colder) frost protection may run at all (default: 2°C)",
-                    "frost_severe_temp": "Below this temperature the severe cycle is used (default: -2°C)",
-                    "frost_mild_interval_minutes": "Interval for mild frost cycle (default: 240 = 4h)",
-                    "frost_mild_run_minutes": "Run time per interval for mild frost cycle (default: 5 min)",
-                    "frost_severe_interval_minutes": "Interval for severe frost cycle (default: 120 = 2h)",
-                    "frost_severe_run_minutes": "Run time per interval for severe frost cycle (default: 10 min)",
-                    "frost_quiet_override_below_temp": "During quiet hours the pump stays off unless outdoor temp is <= this value (default: -8°C)"
+                    "enable_frost_protection": "Active la protection antigel (nécessite un capteur extérieur). La pompe fonctionne par cycles ; les heures calmes ne sont perturbées qu’en cas de froid extrême (configurable).",
+                    "temp_outdoor_sensor": "Température extérieure pour la protection antigel et le contrôle de chauffage",
+                    "frost_start_temp": "En dessous de cette température extérieure (ou plus froid), la protection peut fonctionner (défaut : 2°C)",
+                    "frost_severe_temp": "En dessous de cette température, le cycle fort est utilisé (défaut : -2°C)",
+                    "frost_mild_interval_minutes": "Intervalle pour l’antigel léger (défaut : 240 = 4h)",
+                    "frost_mild_run_minutes": "Durée par intervalle pour l’antigel léger (défaut : 5 min)",
+                    "frost_severe_interval_minutes": "Intervalle pour l’antigel fort (défaut : 120 = 2h)",
+                    "frost_severe_run_minutes": "Durée par intervalle pour l’antigel fort (défaut : 10 min)",
+                    "frost_quiet_override_below_temp": "Pendant les heures calmes, la pompe reste arrêtée sauf si la température extérieure est <= cette valeur (défaut : -8°C)"
                 }
             },
             "calendars": {
-                "title": "Calendars & quiet times",
-                "description": "Automatisation par calendrier, heures de silence et garde météo pour les événements.",
-                "submit": "Continue",
+                "title": "Calendriers et heures calmes",
+                "description": "Configurer calendrier, heures calmes et garde météo pour les événements.",
+                "submit": "Continuer",
                 "data": {
-                    "pool_calendar": "Pool calendar",
-                    "holiday_calendar": "Holiday calendar",
-                    "enable_event_weather_guard": "Activer la garde météo des événements",
+                    "pool_calendar": "Calendrier de piscine",
+                    "holiday_calendar": "Calendrier des jours fériés",
+                    "enable_event_weather_guard": "Activer le contrôle météo des événements",
                     "event_weather_entity": "Entité météo",
                     "event_rain_probability": "Seuil de probabilité de pluie (%)",
-                    "quiet_time_start": "Quiet time start (weekday)",
-                    "quiet_time_end": "Quiet time end (weekday)",
-                    "quiet_time_start_weekend": "Quiet time start (weekend/holiday)",
-                    "quiet_time_end_weekend": "Quiet time end (weekend/holiday)"
+                    "quiet_time_start": "Début heures calmes (semaine)",
+                    "quiet_time_end": "Fin heures calmes (semaine)",
+                    "quiet_time_start_weekend": "Début heures calmes (week‑end/jour férié)",
+                    "quiet_time_end_weekend": "Fin heures calmes (week‑end/jour férié)"
                 },
                 "data_description": {
-                    "pool_calendar": "Calendar with pool events (automatically starts bathing mode for appointments)",
-                    "holiday_calendar": "Holiday calendar (uses weekend quiet times on holidays)",
-                    "enable_event_weather_guard": "Si activé, la prévision météo est vérifiée et le préchauffage/démarrage est ignoré en cas de pluie probable",
+                    "pool_calendar": "Calendrier avec événements piscine (démarre automatiquement le mode baignade)",
+                    "holiday_calendar": "Calendrier des jours fériés (utilise les heures calmes du week‑end les jours fériés)",
+                    "enable_event_weather_guard": "Si activé, la prévision est vérifiée et le préchauffage/démarrage est ignoré en cas de pluie",
                     "event_weather_entity": "Entité météo compatible avec weather.get_forecasts (horaire)",
-                    "event_rain_probability": "Si la probabilité de pluie pendant l'événement est >= à cette valeur, l'événement est bloqué",
-                    "quiet_time_start": "Start of quiet hours on weekdays (e.g. 22:00)",
-                    "quiet_time_end": "End of quiet hours on weekdays (e.g. 07:00)",
-                    "quiet_time_start_weekend": "Start of quiet hours on weekends/holidays (e.g. 23:00)",
-                    "quiet_time_end_weekend": "End of quiet hours on weekends/holidays (e.g. 08:00)"
+                    "event_rain_probability": "Si la probabilité de pluie pendant l’événement >= cette valeur, l’événement est bloqué",
+                    "quiet_time_start": "Début des heures calmes en semaine (ex. 22:00)",
+                    "quiet_time_end": "Fin des heures calmes en semaine (ex. 07:00)",
+                    "quiet_time_start_weekend": "Début des heures calmes week‑end/jour férié (ex. 23:00)",
+                    "quiet_time_end_weekend": "Fin des heures calmes week‑end/jour férié (ex. 08:00)"
                 }
             },
             "filter": {
-                "title": "Filter settings",
-                "description": "Automatic filter cycles run at a fixed interval. If the next start would fall into quiet hours, it will be shifted to the end of the quiet period.",
-                "submit": "Continue",
+                "title": "Réglages du filtre",
+                "description": "Les cycles automatiques s’exécutent à intervalle fixe. Si le prochain départ tombe en heures calmes, il est décalé à la fin.",
+                "submit": "Continuer",
                 "data": {
-                    "enable_auto_filter": "Enable automatic filter cycles",
-                    "filter_interval_minutes": "Filter interval (minutes)",
-                    "filter_minutes": "Filter duration (minutes)"
+                    "enable_auto_filter": "Activer les cycles automatiques de filtrage",
+                    "filter_interval_minutes": "Intervalle de filtrage (minutes)",
+                    "filter_minutes": "Durée de filtrage (minutes)",
+                    "merge_window_minutes": "Fenêtre de fusion (minutes)",
+                    "min_gap_minutes": "Écart minimal entre cycles (minutes)",
+                    "max_merge_run_minutes": "Durée max fusionnée (minutes)",
+                    "min_credit_minutes": "Crédit minimum (minutes)",
+                    "credit_sources": "Sources de crédit"
                 },
                 "data_description": {
-                    "enable_auto_filter": "Automatically start filter cycles based on the interval",
-                    "filter_interval_minutes": "Time between automatic filter cycles (60..10080 min)",
-                    "filter_minutes": "Default duration for a filter run (minutes). Range: 5–120."
+                    "enable_auto_filter": "Démarre automatiquement les cycles de filtrage selon l’intervalle",
+                    "filter_interval_minutes": "Temps entre les cycles automatiques de filtrage (60..10080 min)",
+                    "filter_minutes": "Durée par défaut d’un cycle de filtration (minutes). Plage : 5–120.",
+                    "merge_window_minutes": "Si un cycle antigel tombe dans cette fenêtre d’un cycle de filtrage, ils sont fusionnés.",
+                    "min_gap_minutes": "Temps de repos minimal entre deux cycles (sauf gel sévère).",
+                    "max_merge_run_minutes": "Limite supérieure pour un cycle fusionné.",
+                    "min_credit_minutes": "Les cycles plus courts que cette durée ne génèrent pas de crédit.",
+                    "credit_sources": "Quels motifs de fonctionnement génèrent du crédit pour réduire/décaler les cycles futurs."
                 }
             },
             "durations": {
                 "title": "Durées",
-                "description": "Configurez les durées par défaut pour les actions de baignade et de chloration rapide.",
-                "submit": "Suivant",
+                "description": "Configurer les durées par défaut pour la baignade et la chloration rapide.",
+                "submit": "Continuer",
                 "data": {
                     "bathing_minutes": "Durée de baignade (minutes)",
                     "chlorine_duration": "Durée de chloration rapide (minutes)"
                 },
                 "data_description": {
-                    "bathing_minutes": "Durée par défaut pour les actions de baignade / chauffe manuelle (minutes).",
+                    "bathing_minutes": "Durée par défaut pour les actions de baignade/chauffage manuel (minutes).",
                     "chlorine_duration": "Durée par défaut pour la chloration rapide (minutes). Plage : 2–30."
                 }
             },
             "pv": {
-                "title": "PV surplus",
-                "description": "Optional PV optimization: run pump/heating when PV surplus is available. Use ON/OFF thresholds as hysteresis.",
-                "submit": "Finish",
+                "title": "Surplus PV",
+                "description": "Configurer l’optimisation PV.",
+                "submit": "Terminer",
                 "data": {
-                    "enable_pv_optimization": "Enable PV optimization",
-                    "pv_surplus_sensor": "PV power sensor",
-                    "pv_on_threshold": "PV ON threshold (W)",
-                    "pv_off_threshold": "PV OFF threshold (W)"
+                    "enable_pv_optimization": "Activer l’optimisation PV",
+                    "pv_surplus_sensor": "Capteur de puissance PV",
+                    "pv_on_threshold": "Seuil PV ON (W)",
+                    "pv_off_threshold": "Seuil PV OFF (W)",
+                    "pv_smooth_window_seconds": "Fenêtre de lissage PV (s)",
+                    "pv_stability_seconds": "Fenêtre de stabilité PV (s)",
+                    "pv_min_run_minutes": "Durée minimale PV (min)"
                 },
                 "data_description": {
-                    "enable_pv_optimization": "Only run pump/heating when PV surplus is available",
-                    "pv_surplus_sensor": "Sensor reporting PV surplus/production in watts",
-                    "pv_on_threshold": "Turns main pump ON when PV power >= this value (default: 1000)",
-                    "pv_off_threshold": "Turns main pump OFF when PV power <= this value (default: 500)"
+                    "enable_pv_optimization": "N’exécuter pompe/chauffage que lorsque le surplus PV est disponible",
+                    "pv_surplus_sensor": "Capteur indiquant le surplus/production PV en watts",
+                    "pv_on_threshold": "Allume la pompe principale quand PV >= cette valeur (défaut : 1000)",
+                    "pv_off_threshold": "Éteint la pompe principale quand PV <= cette valeur (défaut : 500)",
+                    "pv_smooth_window_seconds": "Fenêtre en secondes utilisée pour le lissage exponentiel de la valeur PV. 0 désactive le lissage.",
+                    "pv_stability_seconds": "Durée pendant laquelle une valeur PV modifiée et lissée doit persister avant d’être appliquée (secondes).",
+                    "pv_min_run_minutes": "Durée minimale automatique en minutes avant d’autoriser l’arrêt. Évite un arrêt immédiat après démarrage."
                 }
             }
         }
@@ -372,12 +388,22 @@
                 "data": {
                     "enable_auto_filter": "Cycles de filtration automatiques",
                     "filter_interval_minutes": "Intervalle de filtration (minutes)",
-                    "filter_minutes": "Filter duration (minutes)"
+                    "filter_minutes": "Durée de filtration (minutes)",
+                    "merge_window_minutes": "Fenêtre de fusion (minutes)",
+                    "min_gap_minutes": "Écart minimum entre cycles (minutes)",
+                    "max_merge_run_minutes": "Durée max fusionnée (minutes)",
+                    "min_credit_minutes": "Crédit minimum (minutes)",
+                    "credit_sources": "Sources de crédit"
                 },
                 "data_description": {
                     "enable_auto_filter": "Démarre automatiquement des cycles de filtration selon l'intervalle",
                     "filter_interval_minutes": "Temps entre deux cycles automatiques (60..10080 min)",
-                    "filter_minutes": "Default duration for a filter run (minutes). Range: 5–120."
+                    "filter_minutes": "Durée par défaut d’un cycle de filtration (minutes). Plage : 5–120.",
+                    "merge_window_minutes": "Si un cycle antigel se trouve dans cette fenêtre, les cycles sont fusionnés.",
+                    "min_gap_minutes": "Temps de repos minimum entre deux cycles (sauf gel sévère).",
+                    "max_merge_run_minutes": "Limite supérieure d’un cycle fusionné.",
+                    "min_credit_minutes": "Les cycles plus courts ne comptent pas comme crédit.",
+                    "credit_sources": "Quels motifs génèrent un crédit pour réduire/décaler les cycles."
                 }
             },
             "durations": {
@@ -423,32 +449,12 @@
             "main": {
                 "name": "Alimentation"
             },
-                    "filter_minutes": "Durée de filtration (minutes)",
-                    "merge_window_minutes": "Fenêtre de fusion (minutes)",
-                    "min_gap_minutes": "Écart minimum entre cycles (minutes)",
-                    "max_merge_run_minutes": "Durée max fusionnée (minutes)",
-                    "min_credit_minutes": "Crédit minimum (minutes)",
-                    "credit_sources": "Sources de crédit"
-                    "merge_window_minutes": "Fenêtre de fusion (minutes)",
-                    "min_gap_minutes": "Écart minimum entre cycles (minutes)",
-                    "max_merge_run_minutes": "Durée max fusionnée (minutes)",
-                    "min_credit_minutes": "Crédit minimum (minutes)",
-                    "filter_minutes": "Durée par défaut d’un cycle de filtration (minutes). Plage : 5–120.",
-                    "merge_window_minutes": "Si un cycle antigel se trouve dans cette fenêtre, les cycles sont fusionnés.",
-                    "min_gap_minutes": "Temps de repos minimum entre deux cycles (sauf gel sévère).",
-                    "max_merge_run_minutes": "Limite supérieure d’un cycle fusionné.",
-                    "min_credit_minutes": "Les cycles plus courts ne comptent pas comme crédit.",
-                    "credit_sources": "Quels motifs génèrent un crédit pour réduire/décaler les cycles."
+            "pump": {
                 "name": "Pompe"
             },
             "aux": {
                 "name": "Activer chauffage auxiliaire"
-                    "filter_minutes": "Durée par défaut d’un cycle de filtration (minutes). Plage : 5–120.",
-                    "merge_window_minutes": "Si un cycle antigel se trouve dans cette fenêtre, les cycles sont fusionnés.",
-                    "min_gap_minutes": "Temps de repos minimum entre deux cycles (sauf gel sévère).",
-                    "max_merge_run_minutes": "Limite supérieure d’un cycle fusionné.",
-                    "min_credit_minutes": "Les cycles plus courts ne comptent pas comme crédit.",
-                    "credit_sources": "Quels motifs génèrent un crédit pour réduire/décaler les cycles."
+            }
         },
         "binary_sensor": {
             "maintenance_active": { "name": "Mode maintenance" },

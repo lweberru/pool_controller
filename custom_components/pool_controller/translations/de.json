@@ -16,161 +16,171 @@
                 }
             },
             "switches": {
-                "title": "Switches & power",
-                "description": "Configure which switches and power sensors the controller should use. You can optionally separate the power supply (main) from the circulation pump (pump).",
-                "submit": "Continue",
+                "title": "Schalter & Leistung",
+                "description": "Konfiguriere die Schalter und Leistungssensoren. Optional kannst du Stromversorgung (Hauptschalter) und Umwälzpumpe trennen.",
+                "submit": "Weiter",
                 "data": {
-                    "main_switch": "Main switch",
-                    "pump_switch": "Pump switch (optional)",
-                    "filter_switch": "Filter switch (optional)",
-                    "enable_aux_heating": "Enable auxiliary heating",
-                    "aux_heating_switch": "Auxiliary heater switch",
-                    "main_power_sensor": "Main power sensor",
-                    "aux_power_sensor": "Aux heater power sensor"
+                    "main_switch": "Hauptschalter",
+                    "pump_switch": "Pumpen-Schalter (optional)",
+                    "filter_switch": "Filter-Schalter (optional)",
+                    "enable_aux_heating": "Zusatzheizung aktivieren",
+                    "aux_heating_switch": "Zusatzheizung Schalter",
+                    "main_power_sensor": "Haupt-Leistungssensor",
+                    "aux_power_sensor": "Zusatzheizung Leistungssensor"
                 },
                 "data_description": {
-                    "main_switch": "Main power / supply switch for the pool (required)",
-                    "pump_switch": "Optional: dedicated circulation/pump switch (leave empty to use main switch)",
-                    "filter_switch": "Optional: separate switch for filter pump (leave empty to use main switch)",
-                    "enable_aux_heating": "Enables auxiliary heater for faster heating",
-                    "aux_heating_switch": "Switch for electric auxiliary heater",
-                    "main_power_sensor": "Main pump power sensor in watts",
-                    "aux_power_sensor": "Heater power sensor in watts"
+                    "main_switch": "Hauptschalter / Stromversorgung für den Pool (Pflichtfeld)",
+                    "pump_switch": "Optional: separater Schalter für Umwälzpumpe (leer lassen, um Hauptschalter zu nutzen)",
+                    "filter_switch": "Optional: separater Schalter für Filterpumpe (leer lassen, um Hauptschalter zu nutzen)",
+                    "enable_aux_heating": "Aktiviert zusätzliche Heizung für schnelleres Aufheizen",
+                    "aux_heating_switch": "Schalter für elektrische Zusatzheizung",
+                    "main_power_sensor": "Leistungssensor der Hauptpumpe in Watt",
+                    "aux_power_sensor": "Leistungssensor der Heizung in Watt"
                 }
             },
             "water_quality": {
-                "title": "Water quality",
-                "description": "Select sensors for water temperature and (optionally) chemistry. Only the water temperature sensor is required.",
-                "submit": "Continue",
+                "title": "Wasserqualität",
+                "description": "Sensor-Zuordnung für Temperatur und (optional) Wasserwerte.",
+                "submit": "Weiter",
                 "data": {
-                    "temp_water_sensor": "Water temperature",
-                    "ph_sensor": "pH sensor",
-                    "chlorine_sensor": "Chlorine (redox) sensor",
-                    "salt_sensor": "Salt sensor",
-                    "tds_sensor": "Conductivity sensor"
+                    "temp_water_sensor": "Wassertemperatur",
+                    "ph_sensor": "pH-Wert Sensor",
+                    "chlorine_sensor": "Chlor (Redox) Sensor",
+                    "salt_sensor": "Salzgehalt Sensor",
+                    "tds_sensor": "Leitfähigkeit Sensor"
                 },
                 "data_description": {
-                    "temp_water_sensor": "Pool water temperature sensor (required)",
-                    "ph_sensor": "pH value sensor (Blueriiot or similar)",
-                    "chlorine_sensor": "Redox sensor for chlorine measurement in mV",
-                    "salt_sensor": "Salt content sensor for saltwater pools",
-                    "tds_sensor": "Conductivity sensor (TDS) for water quality"
+                    "temp_water_sensor": "Sensor für Poolwasser-Temperatur (Pflichtfeld)",
+                    "ph_sensor": "pH-Wert Sensor (Blueriiot oder ähnlich)",
+                    "chlorine_sensor": "Redox-Sensor für Chlor-Messung in mV",
+                    "salt_sensor": "Salzgehalt-Sensor für Salzwasserpools",
+                    "tds_sensor": "Leitfähigkeits-Sensor (TDS) für Wasserqualität"
                 }
             },
             "sanitizer": {
-                "title": "Sanitizer",
-                "description": "Choose how the pool is sanitized. For saltwater or mixed operation, you will be asked for a target salt level.",
-                "submit": "Continue",
+                "title": "Desinfektion",
+                "description": "Desinfektionsmodus auswählen.",
+                "submit": "Weiter",
                 "data": {
-                    "sanitizer_mode": "Sanitizer mode"
+                    "sanitizer_mode": "Desinfektionsmodus"
                 },
                 "data_description": {
-                    "sanitizer_mode": "Chlorine = classic dosing, Saltwater = salt chlorinator, Mixed = both"
+                    "sanitizer_mode": "Chlor = klassische Dosierung, Salzwasser = Salzelektrolyse, Mischbetrieb = Salz + Chlor"
                 }
             },
             "sanitizer_salt": {
-                "title": "Salt target",
-                "description": "Set the target salt level for saltwater (or mixed) operation.",
-                "submit": "Continue",
+                "title": "Ziel-Salzgehalt",
+                "description": "Zielwert für den Salzgehalt (g/L) im Salzwasser- bzw. Mischbetrieb.",
+                "submit": "Weiter",
                 "data": {
-                    "target_salt_g_l": "Target salt (g/L)"
+                    "target_salt_g_l": "Ziel Salz (g/L)"
                 },
                 "data_description": {
-                    "target_salt_g_l": "Used to compute recommendations when salt is too low"
+                    "target_salt_g_l": "Wird genutzt, um Empfehlungen bei zu wenig Salz zu berechnen"
                 }
             },
             "climate": {
-                "title": "Temperature control",
-                "description": "Thermostat settings for the pool climate entity. The target temperature (setpoint) is persisted in the integration options once you change it.",
-                "submit": "Continue",
+                "title": "Temperaturregelung",
+                "description": "Thermostat-Grenzen und Hysterese einstellen. Der Sollwert wird nach Änderung in den Optionen gespeichert.",
+                "submit": "Weiter",
                 "data": {
-                    "target_temp": "Initial target temperature",
-                    "min_temp": "Minimum temperature",
-                    "max_temp": "Maximum temperature",
-                    "target_temp_step": "Temperature step",
-                    "heater_base_power_w": "Base heating power (W)",
-                    "heater_aux_power_w": "Aux heater power (W)",
-                    "cold_tolerance": "Cold tolerance",
-                    "hot_tolerance": "Hot tolerance"
+                    "target_temp": "Initiale Zieltemperatur",
+                    "min_temp": "Minimum-Temperatur",
+                    "max_temp": "Maximum-Temperatur",
+                    "target_temp_step": "Schrittweite",
+                    "heater_base_power_w": "Basis-Heizleistung (W)",
+                    "heater_aux_power_w": "Zusatzheizung-Leistung (W)",
+                    "cold_tolerance": "Kalt-Toleranz",
+                    "hot_tolerance": "Warm-Toleranz"
                 },
                 "data_description": {
-                    "target_temp": "Initial target temperature (setpoint) used on first start; later the setpoint is persisted",
-                    "min_temp": "Minimum setpoint available",
-                    "max_temp": "Maximum setpoint available",
-                    "target_temp_step": "Step size for setting the target temperature",
-                    "heater_base_power_w": "Base heating contribution while the circulation pump runs (e.g. waste heat). Used for preheat estimation.",
-                    "heater_aux_power_w": "Aux heater rated power (watts). Used for preheat estimation when aux heating is enabled. Total = base + aux.",
-                    "cold_tolerance": "Heater starts when water temperature is below target minus this value",
-                    "hot_tolerance": "Heater stops when water temperature is at or above target plus this value"
+                    "target_temp": "Initiale Zieltemperatur (Sollwert) beim ersten Start; danach wird der Sollwert gespeichert",
+                    "min_temp": "Minimaler einstellbarer Sollwert",
+                    "max_temp": "Maximaler einstellbarer Sollwert",
+                    "target_temp_step": "Schrittweite für das Setzen der Zieltemperatur",
+                    "heater_base_power_w": "Basis-Heizanteil (z.B. Pumpen-Abwärme) für die Vorheiz-Zeitberechnung.",
+                    "heater_aux_power_w": "Nennleistung der Zusatzheizung (W) für die Vorheiz-Zeitberechnung (wenn Zusatzheizung aktiviert ist). Gesamt = Basis + Zusatz.",
+                    "cold_tolerance": "Heizung startet, wenn Wassertemperatur unter Ziel minus diesem Wert liegt",
+                    "hot_tolerance": "Heizung stoppt, wenn Wassertemperatur bei/über Ziel plus diesem Wert liegt"
                 }
             },
             "frost": {
-                "title": "Frost protection",
-                "description": "Protects the pool system in cold weather by running the pump in a duty-cycle based on the outdoor temperature. Quiet hours are respected unless it is extremely cold.",
-                "submit": "Continue",
+                "title": "Frostschutz",
+                "description": "Schützt den Pool bei Kälte durch Pumpenzyklen; Ruhezeiten werden nur bei starkem Frost ignoriert.",
+                "submit": "Weiter",
                 "data": {
-                    "enable_frost_protection": "Enable frost protection",
-                    "temp_outdoor_sensor": "Outdoor temperature",
-                    "frost_start_temp": "Frost protection starts below (°C)",
-                    "frost_severe_temp": "Frost protection severe below (°C)",
-                    "frost_mild_interval_minutes": "Frost (mild) interval (min)",
-                    "frost_mild_run_minutes": "Frost (mild) run time (min)",
-                    "frost_severe_interval_minutes": "Frost (severe) interval (min)",
-                    "frost_severe_run_minutes": "Frost (severe) run time (min)",
-                    "frost_quiet_override_below_temp": "Ignore quiet hours below (°C)"
+                    "enable_frost_protection": "Frostschutz aktivieren",
+                    "temp_outdoor_sensor": "Außentemperatur",
+                    "frost_start_temp": "Frostschutz aktiv ab (°C)",
+                    "frost_severe_temp": "Frostschutz stark ab (°C)",
+                    "frost_mild_interval_minutes": "Frost (mild) Intervall (min)",
+                    "frost_mild_run_minutes": "Frost (mild) Laufzeit (min)",
+                    "frost_severe_interval_minutes": "Frost (stark) Intervall (min)",
+                    "frost_severe_run_minutes": "Frost (stark) Laufzeit (min)",
+                    "frost_quiet_override_below_temp": "Ruhezeit ignorieren unter (°C)"
                 },
                 "data_description": {
-                    "enable_frost_protection": "Enables frost protection (requires outdoor temperature sensor). The pump runs in cycles; quiet hours are only disturbed in extreme cold (configurable).",
-                    "temp_outdoor_sensor": "Outdoor temperature for frost protection and heating control",
-                    "frost_start_temp": "Below this outdoor temperature (or colder) frost protection may run at all (default: 2°C)",
-                    "frost_severe_temp": "Below this temperature the severe cycle is used (default: -2°C)",
-                    "frost_mild_interval_minutes": "Interval for mild frost cycle (default: 240 = 4h)",
-                    "frost_mild_run_minutes": "Run time per interval for mild frost cycle (default: 5 min)",
-                    "frost_severe_interval_minutes": "Interval for severe frost cycle (default: 120 = 2h)",
-                    "frost_severe_run_minutes": "Run time per interval for severe frost cycle (default: 10 min)",
-                    "frost_quiet_override_below_temp": "During quiet hours the pump stays off unless outdoor temp is <= this value (default: -8°C)"
+                    "enable_frost_protection": "Aktiviert Frostschutz (benötigt Außentemperatur-Sensor). Die Pumpe läuft bei Kälte zyklisch; die Ruhezeit wird nur bei sehr tiefen Temperaturen gestört (einstellbar).",
+                    "temp_outdoor_sensor": "Außentemperatur für Frostschutz und Heizungssteuerung",
+                    "frost_start_temp": "Ab dieser Außentemperatur (oder kälter) darf der Frostschutz überhaupt laufen (Standard: 2°C)",
+                    "frost_severe_temp": "Ab dieser Außentemperatur (oder kälter) gilt 'stark' und der Frostschutz läuft häufiger (Standard: -2°C)",
+                    "frost_mild_interval_minutes": "Intervall für Frost (mild) (Standard: 240 = 4h)",
+                    "frost_mild_run_minutes": "Laufzeit pro Intervall für Frost (mild) (Standard: 5 min)",
+                    "frost_severe_interval_minutes": "Intervall für Frost (stark) (Standard: 120 = 2h)",
+                    "frost_severe_run_minutes": "Laufzeit pro Intervall für Frost (stark) (Standard: 10 min)",
+                    "frost_quiet_override_below_temp": "In der Ruhezeit bleibt die Pumpe aus, außer die Außentemperatur ist <= diesem Wert (Standard: -8°C)."
                 }
             },
             "calendars": {
-                "title": "Calendars & quiet times",
-                "description": "Optional calendar automation, quiet hours, and weather guard for events.",
-                "submit": "Continue",
+                "title": "Kalender & Ruhezeiten",
+                "description": "Kalender-Automation, Ruhezeiten und Wetterprüfung für Events konfigurieren.",
+                "submit": "Weiter",
                 "data": {
-                    "pool_calendar": "Pool calendar",
-                    "holiday_calendar": "Holiday calendar",
+                    "pool_calendar": "Pool Kalender",
+                    "holiday_calendar": "Feiertags Kalender",
                     "enable_event_weather_guard": "Wetterprüfung für Events aktivieren",
                     "event_weather_entity": "Wetter-Entity",
                     "event_rain_probability": "Schwellwert Regenwahrscheinlichkeit (%)",
-                    "quiet_time_start": "Quiet time start (weekday)",
-                    "quiet_time_end": "Quiet time end (weekday)",
-                    "quiet_time_start_weekend": "Quiet time start (weekend/holiday)",
-                    "quiet_time_end_weekend": "Quiet time end (weekend/holiday)"
+                    "quiet_time_start": "Ruhezeit Start (Wochentag)",
+                    "quiet_time_end": "Ruhezeit Ende (Wochentag)",
+                    "quiet_time_start_weekend": "Ruhezeit Start (Wochenende/Feiertag)",
+                    "quiet_time_end_weekend": "Ruhezeit Ende (Wochenende/Feiertag)"
                 },
                 "data_description": {
-                    "pool_calendar": "Calendar with pool events (automatically starts bathing mode for appointments)",
-                    "holiday_calendar": "Holiday calendar (uses weekend quiet times on holidays)",
+                    "pool_calendar": "Kalender mit Pool-Events (startet automatisch Baden-Modus bei Terminen)",
+                    "holiday_calendar": "Feiertagskalender (nutzt Wochenend-Ruhezeiten an Feiertagen)",
                     "enable_event_weather_guard": "Wenn aktiv, wird die Wetterprognose geprüft und Vorheizen/Start bei Regenwahrscheinlichkeit übersprungen",
                     "event_weather_entity": "Wetter-Entity, die weather.get_forecasts (stündlich) unterstützt",
                     "event_rain_probability": "Wenn die Regenwahrscheinlichkeit während des Events >= diesem Wert ist, wird das Event blockiert",
-                    "quiet_time_start": "Start of quiet hours on weekdays (e.g. 22:00)",
-                    "quiet_time_end": "End of quiet hours on weekdays (e.g. 07:00)",
-                    "quiet_time_start_weekend": "Start of quiet hours on weekends/holidays (e.g. 23:00)",
-                    "quiet_time_end_weekend": "End of quiet hours on weekends/holidays (e.g. 08:00)"
+                    "quiet_time_start": "Beginn der Ruhezeit an Wochentagen (z.B. 22:00)",
+                    "quiet_time_end": "Ende der Ruhezeit an Wochentagen (z.B. 07:00)",
+                    "quiet_time_start_weekend": "Beginn der Ruhezeit am Wochenende/Feiertag (z.B. 23:00)",
+                    "quiet_time_end_weekend": "Ende der Ruhezeit am Wochenende/Feiertag (z.B. 08:00)"
                 }
             },
             "filter": {
-                "title": "Filter settings",
-                "description": "Automatic filter cycles run at a fixed interval. If the next start would fall into quiet hours, it will be shifted to the end of the quiet period.",
-                "submit": "Continue",
+                "title": "Filter-Einstellungen",
+                "description": "Automatische Filterzyklen laufen in festen Intervallen. Wenn der nächste Start in die Ruhezeit fällt, wird er ans Ende der Ruhezeit verschoben.",
+                "submit": "Weiter",
                 "data": {
-                    "enable_auto_filter": "Enable automatic filter cycles",
-                    "filter_interval_minutes": "Filter interval (minutes)",
-                    "filter_minutes": "Filter duration (minutes)"
+                    "enable_auto_filter": "Automatische Filterzyklen",
+                    "filter_interval_minutes": "Filter-Intervall (Minuten)",
+                    "filter_minutes": "Filterdauer (Minuten)",
+                    "merge_window_minutes": "Merge-Fenster (Minuten)",
+                    "min_gap_minutes": "Mindestabstand zwischen Läufen (Minuten)",
+                    "max_merge_run_minutes": "Max. Merge-Lauf (Minuten)",
+                    "min_credit_minutes": "Mindest-Gutschrift (Minuten)",
+                    "credit_sources": "Gutschrift-Quellen"
                 },
                 "data_description": {
-                    "enable_auto_filter": "Automatically start filter cycles based on the interval",
-                    "filter_interval_minutes": "Time between automatic filter cycles (60..10080 min)",
-                    "filter_minutes": "Default duration for a filter run (minutes). Range: 5–120."
+                    "enable_auto_filter": "Startet automatisch Filterzyklen basierend auf dem Intervall",
+                    "filter_interval_minutes": "Zeit zwischen automatischen Filterzyklen (60..10080 min)",
+                    "filter_minutes": "Standarddauer für einen Filterlauf (Minuten). Bereich: 5–120.",
+                    "merge_window_minutes": "Wenn ein Frostlauf innerhalb dieses Fensters liegt, werden beide Läufe zusammengelegt.",
+                    "min_gap_minutes": "Mindest-Ruhezeit zwischen zwei Läufen (außer bei starkem Frost).",
+                    "max_merge_run_minutes": "Obergrenze für einen zusammengelegten Lauf.",
+                    "min_credit_minutes": "Läufe unterhalb dieser Dauer zählen nicht als Gutschrift.",
+                    "credit_sources": "Welche Laufgründe Gutschrift erzeugen und spätere Läufe reduzieren/verschieben."
                 }
             },
             "durations": {
@@ -187,23 +197,23 @@
                 }
             },
             "pv": {
-                "title": "PV surplus",
-                "description": "Optional PV optimization: run pump/heating when PV surplus is available. Use ON/OFF thresholds as hysteresis.",
-                "submit": "Finish",
+                "title": "PV-Überschuss",
+                "description": "PV-Optimierung konfigurieren.",
+                "submit": "Speichern",
                 "data": {
-                    "enable_pv_optimization": "Enable PV optimization",
-                    "pv_surplus_sensor": "PV power sensor",
-                    "pv_on_threshold": "PV ON threshold (W)",
-                    "pv_off_threshold": "PV OFF threshold (W)",
+                    "enable_pv_optimization": "PV-Optimierung aktivieren",
+                    "pv_surplus_sensor": "PV-Leistungssensor",
+                    "pv_on_threshold": "PV EIN-Schwelle (W)",
+                    "pv_off_threshold": "PV AUS-Schwelle (W)",
                     "pv_smooth_window_seconds": "PV-Glättungsfenster (s)",
                     "pv_stability_seconds": "PV-Stabilitätsfenster (s)",
                     "pv_min_run_minutes": "PV Mindestlaufzeit (min)"
                 },
                 "data_description": {
-                    "enable_pv_optimization": "Only run pump/heating when PV surplus is available",
-                    "pv_surplus_sensor": "Sensor reporting PV surplus/production in watts",
-                    "pv_on_threshold": "Turns main pump ON when PV power >= this value (default: 1000)",
-                    "pv_off_threshold": "Turns main pump OFF when PV power <= this value (default: 500)",
+                    "enable_pv_optimization": "Nutzt PV-Überschuss für intelligente Pumpen-/Heizungssteuerung (nur bei ausreichend Solarproduktion)",
+                    "pv_surplus_sensor": "Sensor für PV-Überschuss bzw. Einspeisung in Watt (negativ = Bezug, positiv = Einspeisung)",
+                    "pv_on_threshold": "Pumpe einschalten bei Überschuss über diesem Wert (Standard: 1000W)",
+                    "pv_off_threshold": "Pumpe ausschalten bei Überschuss unter diesem Wert (Standard: 500W, Hysterese)",
                     "pv_smooth_window_seconds": "Zeitfenster in Sekunden, das für die exponentielle Glättung des PV-Werts verwendet wird. 0 deaktiviert die Glättung.",
                     "pv_stability_seconds": "Wie lange ein geänderter, geglätteter PV-Wert bestehen muss, bevor die Änderung übernommen wird (Sekunden).",
                     "pv_min_run_minutes": "Minimale automatische Laufzeit in Minuten, bevor ein automatisches Abschalten erlaubt ist. Verhindert sofortiges Stoppen nach kurzem Einschalten."
@@ -378,12 +388,22 @@
                 "data": {
                     "enable_auto_filter": "Automatische Filterzyklen",
                     "filter_interval_minutes": "Filter-Intervall (Minuten)",
-                    "filter_minutes": "Filter duration (minutes)"
+                    "filter_minutes": "Filterdauer (Minuten)",
+                    "merge_window_minutes": "Merge-Fenster (Minuten)",
+                    "min_gap_minutes": "Mindestabstand zwischen Läufen (Minuten)",
+                    "max_merge_run_minutes": "Max. Merge-Lauf (Minuten)",
+                    "min_credit_minutes": "Mindest-Gutschrift (Minuten)",
+                    "credit_sources": "Gutschrift-Quellen"
                 },
                 "data_description": {
                     "enable_auto_filter": "Startet automatisch Filterzyklen basierend auf dem Intervall",
                     "filter_interval_minutes": "Zeit zwischen automatischen Filterzyklen (60..10080 min)",
-                    "filter_minutes": "Default duration for a filter run (minutes). Range: 5–120."
+                    "filter_minutes": "Standarddauer für einen Filterlauf (Minuten). Bereich: 5–120.",
+                    "merge_window_minutes": "Wenn ein Frostlauf innerhalb dieses Fensters liegt, werden beide Läufe zusammengelegt.",
+                    "min_gap_minutes": "Mindest-Ruhezeit zwischen zwei Läufen (außer bei starkem Frost).",
+                    "max_merge_run_minutes": "Obergrenze für einen zusammengelegten Lauf.",
+                    "min_credit_minutes": "Läufe unterhalb dieser Dauer zählen nicht als Gutschrift.",
+                    "credit_sources": "Welche Laufgründe Gutschrift erzeugen und spätere Läufe reduzieren/verschieben."
                 }
             },
             "durations": {
@@ -429,32 +449,12 @@
             "main": {
                 "name": "Stromversorgung"
             },
-                    "filter_minutes": "Filterdauer (Minuten)",
-                    "merge_window_minutes": "Merge-Fenster (Minuten)",
-                    "min_gap_minutes": "Mindestabstand zwischen Läufen (Minuten)",
-                    "max_merge_run_minutes": "Max. Merge-Lauf (Minuten)",
-                    "min_credit_minutes": "Mindest-Gutschrift (Minuten)",
-                    "credit_sources": "Gutschrift-Quellen",
-                    "merge_window_minutes": "Merge-Fenster (Minuten)",
-                    "min_gap_minutes": "Mindestabstand zwischen Läufen (Minuten)",
-                    "max_merge_run_minutes": "Max. Merge-Lauf (Minuten)",
-                    "min_credit_minutes": "Mindest-Gutschrift (Minuten)",
-                    "filter_minutes": "Standarddauer für einen Filterlauf (Minuten). Bereich: 5–120.",
-                    "merge_window_minutes": "Wenn ein Frostlauf innerhalb dieses Fensters liegt, werden beide Läufe zusammengelegt.",
-                    "min_gap_minutes": "Mindest-Ruhezeit zwischen zwei Läufen (außer bei starkem Frost).",
-                    "max_merge_run_minutes": "Obergrenze für einen zusammengelegten Lauf.",
-                    "min_credit_minutes": "Läufe unterhalb dieser Dauer zählen nicht als Gutschrift.",
-                    "credit_sources": "Welche Laufgründe Gutschrift erzeugen und spätere Läufe reduzieren/verschieben."
+            "pump": {
                 "name": "Pumpe"
             },
             "aux": {
                 "name": "Zusatzheizung erlauben"
-                    "filter_minutes": "Standarddauer für einen Filterlauf (Minuten). Bereich: 5–120.",
-                    "merge_window_minutes": "Wenn ein Frostlauf innerhalb dieses Fensters liegt, werden beide Läufe zusammengelegt.",
-                    "min_gap_minutes": "Mindest-Ruhezeit zwischen zwei Läufen (außer bei starkem Frost).",
-                    "max_merge_run_minutes": "Obergrenze für einen zusammengelegten Lauf.",
-                    "min_credit_minutes": "Läufe unterhalb dieser Dauer zählen nicht als Gutschrift.",
-                    "credit_sources": "Welche Laufgründe Gutschrift erzeugen und spätere Läufe reduzieren/verschieben."
+            }
         },
         "binary_sensor": {
             "maintenance_active": {
