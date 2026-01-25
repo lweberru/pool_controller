@@ -117,7 +117,7 @@ def _calendars_schema(curr: dict | None = None):
         vol.Required(CONF_QUIET_END_WEEKEND, default=c.get(CONF_QUIET_END_WEEKEND, DEFAULT_Q_END_WE)): str,
     })
 
-def _filter_schema(curr: dict | None = None):
+def _filter_schema(curr: dict | None = None, lang: str | None = None):
     c = curr or {}
     return vol.Schema({
         vol.Optional(CONF_ENABLE_AUTO_FILTER, default=c.get(CONF_ENABLE_AUTO_FILTER, True)): bool,
@@ -125,6 +125,16 @@ def _filter_schema(curr: dict | None = None):
             vol.All(vol.Coerce(int), vol.Range(min=60, max=7 * 24 * 60)),
         vol.Required(CONF_FILTER_DURATION, default=c.get(CONF_FILTER_DURATION, DEFAULT_FILTER_DURATION)):
             vol.All(vol.Coerce(int), vol.Range(min=1, max=c.get(CONF_FILTER_INTERVAL, DEFAULT_FILTER_INTERVAL))),
+        vol.Optional(CONF_MERGE_WINDOW_MINUTES, default=c.get(CONF_MERGE_WINDOW_MINUTES, DEFAULT_MERGE_WINDOW_MINUTES)):
+            selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=12 * 60, step=5, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="min")),
+        vol.Optional(CONF_MIN_GAP_MINUTES, default=c.get(CONF_MIN_GAP_MINUTES, DEFAULT_MIN_GAP_MINUTES)):
+            selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=6 * 60, step=5, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="min")),
+        vol.Optional(CONF_MAX_MERGE_RUN_MINUTES, default=c.get(CONF_MAX_MERGE_RUN_MINUTES, DEFAULT_MAX_MERGE_RUN_MINUTES)):
+            selector.NumberSelector(selector.NumberSelectorConfig(min=5, max=6 * 60, step=5, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="min")),
+        vol.Optional(CONF_MIN_CREDIT_MINUTES, default=c.get(CONF_MIN_CREDIT_MINUTES, DEFAULT_MIN_CREDIT_MINUTES)):
+            selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=60, step=1, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="min")),
+        vol.Optional(CONF_CREDIT_SOURCES, default=c.get(CONF_CREDIT_SOURCES, DEFAULT_CREDIT_SOURCES)):
+            selector.SelectSelector(selector.SelectSelectorConfig(options=_credit_source_options(lang), multiple=True, mode=selector.SelectSelectorMode.LIST)),
     })
 
 def _durations_schema(curr: dict | None = None):
@@ -164,6 +174,59 @@ def _sanitizer_options(lang: str):
         {"value": "chlorine", "label": (labels or {}).get("chlorine", "chlorine")},
         {"value": "saltwater", "label": (labels or {}).get("saltwater", "saltwater")},
         {"value": "mixed", "label": (labels or {}).get("mixed", "mixed")},
+    ]
+
+def _credit_source_options(lang: str | None = None):
+    labels = {
+        "de": {
+            "bathing": "Baden",
+            "filter": "Filtern",
+            "frost": "Frostschutz",
+            "preheat": "Vorheizen",
+            "pv": "PV-Überschuss",
+            "thermostat": "Thermostat",
+            "chlorine": "Chloren",
+        },
+        "en": {
+            "bathing": "Bathing",
+            "filter": "Filter",
+            "frost": "Frost protection",
+            "preheat": "Preheat",
+            "pv": "PV surplus",
+            "thermostat": "Thermostat",
+            "chlorine": "Chlorine",
+        },
+        "es": {
+            "bathing": "Baño",
+            "filter": "Filtrar",
+            "frost": "Protección contra heladas",
+            "preheat": "Precalentar",
+            "pv": "Excedente FV",
+            "thermostat": "Termostato",
+            "chlorine": "Cloro",
+        },
+        "fr": {
+            "bathing": "Bain",
+            "filter": "Filtrer",
+            "frost": "Protection antigel",
+            "preheat": "Préchauffage",
+            "pv": "Surplus PV",
+            "thermostat": "Thermostat",
+            "chlorine": "Chlore",
+        },
+    }.get((lang or "").split("-")[0], None)
+
+    def _label(key, fallback):
+        return (labels or {}).get(key, fallback)
+
+    return [
+        {"value": "bathing", "label": _label("bathing", "bathing")},
+        {"value": "filter", "label": _label("filter", "filter")},
+        {"value": "frost", "label": _label("frost", "frost")},
+        {"value": "preheat", "label": _label("preheat", "preheat")},
+        {"value": "pv", "label": _label("pv", "pv")},
+        {"value": "thermostat", "label": _label("thermostat", "thermostat")},
+        {"value": "chlorine", "label": _label("chlorine", "chlorine")},
     ]
 
 class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -301,7 +364,7 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="filter",
             errors=errors,
-            data_schema=_filter_schema({}),
+            data_schema=_filter_schema({}, (getattr(self.hass.config, "language", "en") or "en")),
             last_step=False
         )
 
@@ -493,7 +556,7 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
                 return self.async_show_form(
                     step_id="filter",
                     errors=errors,
-                    data_schema=_filter_schema(curr),
+                    data_schema=_filter_schema(curr, (getattr(self.hass.config, "language", "en") or "en")),
                     last_step=False
                 )
 
@@ -506,7 +569,7 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
         curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
         return self.async_show_form(
             step_id="filter",
-            data_schema=_filter_schema(curr),
+            data_schema=_filter_schema(curr, (getattr(self.hass.config, "language", "en") or "en")),
             last_step=False
         )
 

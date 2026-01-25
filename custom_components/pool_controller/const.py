@@ -75,6 +75,13 @@ CONF_FROST_SEVERE_INTERVAL = "frost_severe_interval_minutes"
 CONF_FROST_SEVERE_RUN = "frost_severe_run_minutes"
 CONF_FROST_QUIET_OVERRIDE_BELOW_TEMP = "frost_quiet_override_below_temp"
 
+# Run credit / optimization (filter + frost + heating)
+CONF_MERGE_WINDOW_MINUTES = "merge_window_minutes"
+CONF_MIN_GAP_MINUTES = "min_gap_minutes"
+CONF_MAX_MERGE_RUN_MINUTES = "max_merge_run_minutes"
+CONF_MIN_CREDIT_MINUTES = "min_credit_minutes"
+CONF_CREDIT_SOURCES = "credit_sources"
+
 # Bathing timer
 CONF_BATH_DURATION = "bathing_minutes"
 DEFAULT_BATH_MINUTES = 60
@@ -191,3 +198,10 @@ DEFAULT_FROST_MILD_RUN = 10  # minutes
 DEFAULT_FROST_SEVERE_INTERVAL = 120  # every 2 hours
 DEFAULT_FROST_SEVERE_RUN = 20  # minutes
 DEFAULT_FROST_QUIET_OVERRIDE_BELOW_TEMP = -8.0
+
+# Run credit / optimization defaults
+DEFAULT_MERGE_WINDOW_MINUTES = 90
+DEFAULT_MIN_GAP_MINUTES = 45
+DEFAULT_MAX_MERGE_RUN_MINUTES = 40
+DEFAULT_MIN_CREDIT_MINUTES = 5
+DEFAULT_CREDIT_SOURCES = ["bathing", "filter", "frost", "preheat", "pv", "thermostat", "chlorine"]

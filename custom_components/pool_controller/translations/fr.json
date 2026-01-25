@@ -423,12 +423,32 @@
             "main": {
                 "name": "Alimentation"
             },
-            "pump": {
+                    "filter_minutes": "Durée de filtration (minutes)",
+                    "merge_window_minutes": "Fenêtre de fusion (minutes)",
+                    "min_gap_minutes": "Écart minimum entre cycles (minutes)",
+                    "max_merge_run_minutes": "Durée max fusionnée (minutes)",
+                    "min_credit_minutes": "Crédit minimum (minutes)",
+                    "credit_sources": "Sources de crédit"
+                    "merge_window_minutes": "Fenêtre de fusion (minutes)",
+                    "min_gap_minutes": "Écart minimum entre cycles (minutes)",
+                    "max_merge_run_minutes": "Durée max fusionnée (minutes)",
+                    "min_credit_minutes": "Crédit minimum (minutes)",
+                    "filter_minutes": "Durée par défaut d’un cycle de filtration (minutes). Plage : 5–120.",
+                    "merge_window_minutes": "Si un cycle antigel se trouve dans cette fenêtre, les cycles sont fusionnés.",
+                    "min_gap_minutes": "Temps de repos minimum entre deux cycles (sauf gel sévère).",
+                    "max_merge_run_minutes": "Limite supérieure d’un cycle fusionné.",
+                    "min_credit_minutes": "Les cycles plus courts ne comptent pas comme crédit.",
+                    "credit_sources": "Quels motifs génèrent un crédit pour réduire/décaler les cycles."
                 "name": "Pompe"
             },
             "aux": {
                 "name": "Activer chauffage auxiliaire"
-            }
+                    "filter_minutes": "Durée par défaut d’un cycle de filtration (minutes). Plage : 5–120.",
+                    "merge_window_minutes": "Si un cycle antigel se trouve dans cette fenêtre, les cycles sont fusionnés.",
+                    "min_gap_minutes": "Temps de repos minimum entre deux cycles (sauf gel sévère).",
+                    "max_merge_run_minutes": "Limite supérieure d’un cycle fusionné.",
+                    "min_credit_minutes": "Les cycles plus courts ne comptent pas comme crédit.",
+                    "credit_sources": "Quels motifs génèrent un crédit pour réduire/décaler les cycles."
         },
         "binary_sensor": {
             "maintenance_active": { "name": "Mode maintenance" },
@@ -458,6 +478,12 @@
             "status": { "name": "Statut" },
             "run_reason": { "name": "Raison de fonctionnement" },
             "heat_reason": { "name": "Raison de chauffage" },
+            "run_credit_source": { "name": "Source de crédit" },
+            "run_credit_minutes": { "name": "Crédit (min)" },
+            "filter_credit_minutes": { "name": "Crédit filtration (min)" },
+            "filter_missing_minutes": { "name": "Filtration restante (min)" },
+            "frost_credit_minutes": { "name": "Crédit antigel (min)" },
+            "frost_credit_shift_minutes": { "name": "Décalage antigel (min)" },
             "sanitizer_mode": { "name": "Désinfection" },
             "ph_val": { "name": "pH" },
             "chlor_val": { "name": "Chlore (mV)" },

@@ -165,12 +165,22 @@
         "data": {
           "enable_auto_filter": "Enable automatic filter cycles",
           "filter_interval_minutes": "Filter interval (minutes)",
-          "filter_minutes": "Filter duration (minutes)"
+          "filter_minutes": "Filter duration (minutes)",
+          "merge_window_minutes": "Merge window (minutes)",
+          "min_gap_minutes": "Minimum gap between runs (minutes)",
+          "max_merge_run_minutes": "Max merged run (minutes)",
+          "min_credit_minutes": "Minimum credit (minutes)",
+          "credit_sources": "Credit sources"
         },
         "data_description": {
           "enable_auto_filter": "Automatically start filter cycles based on the interval",
           "filter_interval_minutes": "Time between automatic filter cycles (60..10080 min)",
-          "filter_minutes": "Default duration for a filter run (minutes). Range: 5–120."
+          "filter_minutes": "Default duration for a filter run (minutes). Range: 5–120.",
+          "merge_window_minutes": "If a frost run is within this window of a filter run, they are merged into one block.",
+          "min_gap_minutes": "Minimum rest time between two runs (except severe frost).",
+          "max_merge_run_minutes": "Upper limit for a merged run block.",
+          "min_credit_minutes": "Runs shorter than this do not count towards credit.",
+          "credit_sources": "Which run reasons contribute credit to reduce/shift future runs."
         }
       },
       "durations": {
@@ -378,12 +388,22 @@
         "data": {
           "enable_auto_filter": "Enable automatic filter cycles",
           "filter_interval_minutes": "Filter interval (minutes)",
-          "filter_minutes": "Filter duration (minutes)"
+          "filter_minutes": "Filter duration (minutes)",
+          "merge_window_minutes": "Merge window (minutes)",
+          "min_gap_minutes": "Minimum gap between runs (minutes)",
+          "max_merge_run_minutes": "Max merged run (minutes)",
+          "min_credit_minutes": "Minimum credit (minutes)",
+          "credit_sources": "Credit sources"
         },
         "data_description": {
           "enable_auto_filter": "Automatically start filter cycles based on the interval",
           "filter_interval_minutes": "Time between automatic filter cycles (60..10080 min)",
-          "filter_minutes": "Default duration for a filter run (minutes). Range: 5–120."
+          "filter_minutes": "Default duration for a filter run (minutes). Range: 5–120.",
+          "merge_window_minutes": "If a frost run is within this window of a filter run, they are merged into one block.",
+          "min_gap_minutes": "Minimum rest time between two runs (except severe frost).",
+          "max_merge_run_minutes": "Upper limit for a merged run block.",
+          "min_credit_minutes": "Runs shorter than this do not count towards credit.",
+          "credit_sources": "Which run reasons contribute credit to reduce/shift future runs."
         }
       },
       "durations": {
@@ -453,6 +473,12 @@
       "status": { "name": "Status" },
       "run_reason": { "name": "Run reason" },
       "heat_reason": { "name": "Heating reason" },
+      "run_credit_source": { "name": "Run credit source" },
+      "run_credit_minutes": { "name": "Run credit (min)" },
+      "filter_credit_minutes": { "name": "Filter credit (min)" },
+      "filter_missing_minutes": { "name": "Filter remaining (min)" },
+      "frost_credit_minutes": { "name": "Frost credit (min)" },
+      "frost_credit_shift_minutes": { "name": "Frost shift (min)" },
       "sanitizer_mode": { "name": "Sanitizer" },
       "ph_val": { "name": "pH" },
       "chlor_val": { "name": "Chlorine (mV)" },

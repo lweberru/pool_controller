@@ -429,12 +429,32 @@
             "main": {
                 "name": "Stromversorgung"
             },
-            "pump": {
+                    "filter_minutes": "Filterdauer (Minuten)",
+                    "merge_window_minutes": "Merge-Fenster (Minuten)",
+                    "min_gap_minutes": "Mindestabstand zwischen Läufen (Minuten)",
+                    "max_merge_run_minutes": "Max. Merge-Lauf (Minuten)",
+                    "min_credit_minutes": "Mindest-Gutschrift (Minuten)",
+                    "credit_sources": "Gutschrift-Quellen",
+                    "merge_window_minutes": "Merge-Fenster (Minuten)",
+                    "min_gap_minutes": "Mindestabstand zwischen Läufen (Minuten)",
+                    "max_merge_run_minutes": "Max. Merge-Lauf (Minuten)",
+                    "min_credit_minutes": "Mindest-Gutschrift (Minuten)",
+                    "filter_minutes": "Standarddauer für einen Filterlauf (Minuten). Bereich: 5–120.",
+                    "merge_window_minutes": "Wenn ein Frostlauf innerhalb dieses Fensters liegt, werden beide Läufe zusammengelegt.",
+                    "min_gap_minutes": "Mindest-Ruhezeit zwischen zwei Läufen (außer bei starkem Frost).",
+                    "max_merge_run_minutes": "Obergrenze für einen zusammengelegten Lauf.",
+                    "min_credit_minutes": "Läufe unterhalb dieser Dauer zählen nicht als Gutschrift.",
+                    "credit_sources": "Welche Laufgründe Gutschrift erzeugen und spätere Läufe reduzieren/verschieben."
                 "name": "Pumpe"
             },
             "aux": {
                 "name": "Zusatzheizung erlauben"
-            }
+                    "filter_minutes": "Standarddauer für einen Filterlauf (Minuten). Bereich: 5–120.",
+                    "merge_window_minutes": "Wenn ein Frostlauf innerhalb dieses Fensters liegt, werden beide Läufe zusammengelegt.",
+                    "min_gap_minutes": "Mindest-Ruhezeit zwischen zwei Läufen (außer bei starkem Frost).",
+                    "max_merge_run_minutes": "Obergrenze für einen zusammengelegten Lauf.",
+                    "min_credit_minutes": "Läufe unterhalb dieser Dauer zählen nicht als Gutschrift.",
+                    "credit_sources": "Welche Laufgründe Gutschrift erzeugen und spätere Läufe reduzieren/verschieben."
         },
         "binary_sensor": {
             "maintenance_active": {
@@ -496,6 +516,12 @@
             "status": { "name": "Status" },
             "run_reason": { "name": "Laufgrund" },
             "heat_reason": { "name": "Heizgrund" },
+            "run_credit_source": { "name": "Gutschrift-Quelle" },
+            "run_credit_minutes": { "name": "Gutschrift (min)" },
+            "filter_credit_minutes": { "name": "Filter-Gutschrift (min)" },
+            "filter_missing_minutes": { "name": "Filter-Rest (min)" },
+            "frost_credit_minutes": { "name": "Frost-Gutschrift (min)" },
+            "frost_credit_shift_minutes": { "name": "Frost-Verschiebung (min)" },
             "sanitizer_mode": { "name": "Desinfektion" },
             "ph_val": { "name": "pH" },
             "chlor_val": { "name": "Chlor (mV)" },

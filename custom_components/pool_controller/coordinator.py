@@ -75,6 +75,20 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self.frost_timer_until = None
         self.frost_timer_duration = None
 
+        # Run credit / merge optimization tracking
+        self._credit_last_update = None
+        self._credit_streak_source = None
+        self._credit_streak_minutes = 0.0
+        self._filter_credit_minutes = 0.0
+        self._filter_credit_expires_at = None
+        self._frost_credit_minutes = 0.0
+        self._frost_credit_expires_at = None
+        self._last_credit_source = None
+        self._last_credit_minutes = 0.0
+        self._last_run_active = False
+        self._last_run_source = None
+        self._last_run_end = None
+
         self._did_migrate_timers = False
         if entry and entry.options:
             self.maintenance_active = bool(entry.options.get(OPT_KEY_MAINTENANCE_ACTIVE, False))
@@ -538,6 +552,116 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             return ct < (tt + hot)
         return ct < (tt - cold)
 
+    def _normalize_credit_sources(self, raw) -> list[str]:
+        if raw is None:
+            return list(DEFAULT_CREDIT_SOURCES)
+        if isinstance(raw, (list, tuple, set)):
+            return [str(x).strip().lower() for x in raw if str(x).strip()]
+        if isinstance(raw, str):
+            return [s.strip().lower() for s in raw.split(",") if s.strip()]
+        return list(DEFAULT_CREDIT_SOURCES)
+
+    def _credit_source_from_reasons(self, run_reason: str | None, heat_reason: str | None) -> str | None:
+        rr = (run_reason or "").strip().lower()
+        hr = (heat_reason or "").strip().lower()
+        if rr in ("bathing", "filter", "chlorine", "frost", "preheat", "pv"):
+            return rr
+        if hr in ("bathing", "filter", "chlorine", "preheat", "pv", "thermostat"):
+            return hr
+        return None
+
+    def _flush_credit_streak(
+        self,
+        now: datetime,
+        min_credit: float,
+        credit_sources: list[str],
+        filter_interval: int | None,
+        frost_interval: int | None,
+        frost_run_mins: int | None,
+        frost_danger: bool,
+        frost_is_severe: bool,
+    ) -> None:
+        if not self._credit_streak_source or self._credit_streak_minutes <= 0:
+            return
+        if self._credit_streak_source not in credit_sources:
+            self._credit_streak_minutes = 0.0
+            self._credit_streak_source = None
+            return
+        if self._credit_streak_minutes < float(min_credit or 0):
+            return
+
+        minutes = float(self._credit_streak_minutes)
+        self._last_credit_source = self._credit_streak_source
+        self._last_credit_minutes = minutes
+
+        # Filter credit window
+        if filter_interval and getattr(self, "filter_minutes", None):
+            if (self._filter_credit_expires_at is None) or (now > self._filter_credit_expires_at):
+                self._filter_credit_minutes = 0.0
+                self._filter_credit_expires_at = now + timedelta(minutes=int(filter_interval))
+            self._filter_credit_minutes = min(float(self.filter_minutes), float(self._filter_credit_minutes) + minutes)
+
+        # Frost credit window (only for mild frost)
+        if frost_danger and (not frost_is_severe) and frost_interval and frost_run_mins:
+            if (self._frost_credit_expires_at is None) or (now > self._frost_credit_expires_at):
+                self._frost_credit_minutes = 0.0
+                self._frost_credit_expires_at = now + timedelta(minutes=int(frost_interval))
+            cap = max(float(frost_interval), float(frost_run_mins))
+            self._frost_credit_minutes = min(cap, float(self._frost_credit_minutes) + minutes)
+
+        # Reset streak after flushing
+        self._credit_streak_minutes = 0.0
+        self._credit_streak_source = None
+
+    def _update_run_credit(
+        self,
+        now: datetime,
+        min_credit: float,
+        credit_sources: list[str],
+        filter_interval: int | None,
+        frost_interval: int | None,
+        frost_run_mins: int | None,
+        frost_danger: bool,
+        frost_is_severe: bool,
+    ) -> None:
+        last_ts = self._credit_last_update or now
+        try:
+            dt_min = max(0.0, (now - last_ts).total_seconds() / 60.0)
+        except Exception:
+            dt_min = 0.0
+        self._credit_last_update = now
+
+        if dt_min <= 0:
+            return
+
+        # Use previous cycle's run source/activity to credit elapsed time
+        if self._last_run_active and self._last_run_source in credit_sources:
+            if self._credit_streak_source and self._credit_streak_source != self._last_run_source:
+                self._flush_credit_streak(
+                    now,
+                    min_credit,
+                    credit_sources,
+                    filter_interval,
+                    frost_interval,
+                    frost_run_mins,
+                    frost_danger,
+                    frost_is_severe,
+                )
+            self._credit_streak_source = self._last_run_source
+            self._credit_streak_minutes = float(self._credit_streak_minutes or 0.0) + float(dt_min)
+        else:
+            # Run ended or source not eligible: flush any streak
+            self._flush_credit_streak(
+                now,
+                min_credit,
+                credit_sources,
+                filter_interval,
+                frost_interval,
+                frost_run_mins,
+                frost_danger,
+                frost_is_severe,
+            )
+
     async def _async_update_data(self):
         # Safe defaults used if update cannot complete (avoid exposing None/unset keys)
         _safe_defaults = {
@@ -671,6 +795,25 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             frost_severe_run = conf.get(CONF_FROST_SEVERE_RUN, DEFAULT_FROST_SEVERE_RUN)
             frost_quiet_override_below = conf.get(CONF_FROST_QUIET_OVERRIDE_BELOW_TEMP, DEFAULT_FROST_QUIET_OVERRIDE_BELOW_TEMP)
 
+            # Run credit / merge optimization options
+            try:
+                merge_window_minutes = int(conf.get(CONF_MERGE_WINDOW_MINUTES, DEFAULT_MERGE_WINDOW_MINUTES))
+            except Exception:
+                merge_window_minutes = DEFAULT_MERGE_WINDOW_MINUTES
+            try:
+                min_gap_minutes = int(conf.get(CONF_MIN_GAP_MINUTES, DEFAULT_MIN_GAP_MINUTES))
+            except Exception:
+                min_gap_minutes = DEFAULT_MIN_GAP_MINUTES
+            try:
+                max_merge_run_minutes = int(conf.get(CONF_MAX_MERGE_RUN_MINUTES, DEFAULT_MAX_MERGE_RUN_MINUTES))
+            except Exception:
+                max_merge_run_minutes = DEFAULT_MAX_MERGE_RUN_MINUTES
+            try:
+                min_credit_minutes = float(conf.get(CONF_MIN_CREDIT_MINUTES, DEFAULT_MIN_CREDIT_MINUTES))
+            except Exception:
+                min_credit_minutes = DEFAULT_MIN_CREDIT_MINUTES
+            credit_sources = self._normalize_credit_sources(conf.get(CONF_CREDIT_SOURCES, DEFAULT_CREDIT_SOURCES))
+
             try:
                 frost_start_temp = float(frost_start_temp)
             except Exception:
@@ -705,6 +848,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             frost_active = False
             frost_is_severe = False
             frost_run_mins = 0
+            frost_credit_shift = 0
+            interval = max(1, frost_mild_interval)
             ot = None
             if outdoor_temp is not None:
                 try:
@@ -724,7 +869,27 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 # duty-cycle uses epoch minutes to avoid daily "reset" artifacts
                 now_local = dt_util.as_local(now)
                 epoch_minutes = int(now_local.timestamp() // 60)
-                frost_active = (run_mins > 0) and ((epoch_minutes % interval) < run_mins)
+                # Apply credit shift (mild frost only): shift the cycle later
+                frost_credit_effective = float(self._frost_credit_minutes or 0.0)
+                if self._credit_streak_source in credit_sources and float(self._credit_streak_minutes or 0.0) >= float(min_credit_minutes or 0):
+                    frost_credit_effective += float(self._credit_streak_minutes or 0.0)
+                frost_credit_shift = 0
+                if frost_danger and (not frost_is_severe) and interval > 0:
+                    frost_credit_shift = int(min(float(interval - 1), max(0.0, frost_credit_effective))) if interval > 1 else 0
+                epoch_minutes_eff = epoch_minutes - frost_credit_shift
+                frost_active = (run_mins > 0) and ((epoch_minutes_eff % interval) < run_mins)
+
+            # Update credit based on previous run (affects frost/filter scheduling)
+            self._update_run_credit(
+                now=now,
+                min_credit=min_credit_minutes,
+                credit_sources=credit_sources,
+                filter_interval=getattr(self, "filter_interval", DEFAULT_FILTER_INTERVAL),
+                frost_interval=interval if frost_danger else None,
+                frost_run_mins=frost_run_mins if frost_danger else None,
+                frost_danger=frost_danger,
+                frost_is_severe=frost_is_severe,
+            )
 
             # Frost-Timer: Wenn frost_active, berechne Restlaufzeit und setze Timer-Attribute
             frost_timer_mins = None
@@ -734,7 +899,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             if frost_active and frost_danger and frost_run_mins > 0:
                 now_local = dt_util.as_local(now)
                 epoch_minutes = int(now_local.timestamp() // 60)
-                rem = frost_run_mins - (epoch_minutes % max(1, interval))
+                epoch_minutes_eff = epoch_minutes - (frost_credit_shift if frost_danger and (not frost_is_severe) else 0)
+                rem = frost_run_mins - (epoch_minutes_eff % max(1, interval))
                 frost_timer_mins = max(0, rem)
                 frost_timer_active = True
                 frost_timer_duration = frost_run_mins
@@ -1146,7 +1312,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     else:
                         now_local = dt_util.as_local(now)
                         epoch_minutes = int(now_local.timestamp() // 60)
-                        rem = epoch_minutes % max(1, int(interval))
+                        epoch_minutes_eff = epoch_minutes - (frost_credit_shift if frost_danger and (not frost_is_severe) else 0)
+                        rem = epoch_minutes_eff % max(1, int(interval))
                         # We only show the next start when we are currently NOT running.
                         if not frost_active:
                             next_frost_mins = max(0, max(1, int(interval)) - rem)
@@ -1170,6 +1337,12 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             # => Während Ruhezeit nur aktiv, wenn Außentemp <= frost_quiet_override_below
             if in_quiet and ot is not None and ot > frost_quiet_override_below:
                 frost_active = False
+
+            # Minimum gap between runs (skip mild frost if we just ran recently)
+            if frost_danger and (not frost_is_severe) and min_gap_remaining > 0:
+                frost_active = False
+                if next_frost_mins is None or next_frost_mins < min_gap_remaining:
+                    next_frost_mins = min_gap_remaining
 
             # If there is no frost danger, do not expose a "next frost" countdown.
             if (not enable_frost) or (not frost_danger):
@@ -1196,9 +1369,57 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                         except Exception:
                             _LOGGER.exception("Fehler beim Verschieben von next_filter_start (Ruhezeit)")
 
+            # Credit-aware merge: if next filter start is close to next frost run, shift filter to end at frost start
+            try:
+                if (
+                    enable_auto_filter
+                    and getattr(self, "next_filter_start", None)
+                    and next_frost_mins is not None
+                    and frost_danger
+                    and (not frost_is_severe)
+                ):
+                    next_frost_dt = now + timedelta(minutes=int(max(0, next_frost_mins)))
+                    delta_min = (next_frost_dt - self.next_filter_start).total_seconds() / 60.0
+                    if delta_min >= 0 and delta_min <= max(0, int(merge_window_minutes)):
+                        # Determine combined run length (cap by max_merge_run_minutes)
+                        filter_credit_effective = float(self._filter_credit_minutes or 0.0)
+                        if self._credit_streak_source in credit_sources and float(self._credit_streak_minutes or 0.0) >= float(min_credit_minutes or 0):
+                            filter_credit_effective += float(self._credit_streak_minutes or 0.0)
+                        filter_missing = max(0.0, float(getattr(self, "filter_minutes", DEFAULT_FILTER_DURATION)) - filter_credit_effective)
+                        merge_run = max(float(filter_missing), float(frost_run_mins or 0))
+                        if max_merge_run_minutes and max_merge_run_minutes > 0:
+                            merge_run = min(float(max_merge_run_minutes), merge_run)
+                        if merge_run > 0:
+                            merged_start = next_frost_dt - timedelta(minutes=merge_run)
+                            if merged_start > now and merged_start != self.next_filter_start:
+                                self.next_filter_start = merged_start
+                                try:
+                                    new_opts = {**self.entry.options, OPT_KEY_FILTER_NEXT: merged_start.isoformat()}
+                                    await self._async_update_entry_options(new_opts)
+                                except Exception:
+                                    _LOGGER.exception("Fehler beim Verschieben von next_filter_start (Merge-Frost)")
+            except Exception:
+                pass
+
             next_filter_mins = None
             if getattr(self, "next_filter_start", None):
                 next_filter_mins = max(0, round((self.next_filter_start - now).total_seconds() / 60))
+
+            # Effective credit (including current streak) for transparency and scheduling
+            filter_credit_effective = float(self._filter_credit_minutes or 0.0)
+            frost_credit_effective = float(self._frost_credit_minutes or 0.0)
+            if self._credit_streak_source in credit_sources and float(self._credit_streak_minutes or 0.0) >= float(min_credit_minutes or 0):
+                filter_credit_effective += float(self._credit_streak_minutes or 0.0)
+                frost_credit_effective += float(self._credit_streak_minutes or 0.0)
+            filter_missing_minutes = max(0, int(round(float(getattr(self, "filter_minutes", DEFAULT_FILTER_DURATION)) - filter_credit_effective)))
+
+            # Enforce minimum gap between runs (unless severe frost)
+            min_gap_remaining = 0
+            try:
+                if self._last_run_end and min_gap_minutes and min_gap_minutes > 0:
+                    min_gap_remaining = max(0, int(((self._last_run_end + timedelta(minutes=min_gap_minutes)) - now).total_seconds() / 60))
+            except Exception:
+                min_gap_remaining = 0
 
             # Start calendar-driven bathing: if event is ongoing, ensure manual timer active
             # (in Wartung deaktiviert)
@@ -1261,11 +1482,32 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                             await self._async_update_entry_options(new_opts)
                         except Exception:
                             _LOGGER.exception("Fehler beim Umplanen von next_filter_start (Ruhezeit, fällig)")
+                elif min_gap_remaining > 0:
+                    shifted = now + timedelta(minutes=int(min_gap_remaining))
+                    if shifted != self.next_filter_start:
+                        self.next_filter_start = shifted
+                        try:
+                            new_opts = {**self.entry.options, OPT_KEY_FILTER_NEXT: shifted.isoformat()}
+                            await self._async_update_entry_options(new_opts)
+                        except Exception:
+                            _LOGGER.exception("Fehler beim Umplanen von next_filter_start (min gap)")
                 else:
                     # Always start auto-filter when due (PV should not block filtering)
-                    await self._start_auto_filter(minutes=self.filter_minutes)
-                    auto_filter_active = self.auto_filter_until is not None and now < self.auto_filter_until
-                    auto_filter_mins = _mins_left(self.auto_filter_until) if auto_filter_active else 0
+                    # Apply credit: only run missing minutes; if none missing, skip cycle.
+                    if filter_missing_minutes <= 0:
+                        try:
+                            next_start = now + timedelta(minutes=self.filter_interval)
+                            self.next_filter_start = next_start
+                            self._filter_credit_minutes = 0.0
+                            self._filter_credit_expires_at = next_start
+                            new_opts = {**self.entry.options, OPT_KEY_FILTER_NEXT: next_start.isoformat()}
+                            await self._async_update_entry_options(new_opts)
+                        except Exception:
+                            _LOGGER.exception("Fehler beim Überspringen von Filterlauf (Credit)")
+                    else:
+                        await self._start_auto_filter(minutes=filter_missing_minutes)
+                        auto_filter_active = self.auto_filter_until is not None and now < self.auto_filter_until
+                        auto_filter_mins = _mins_left(self.auto_filter_until) if auto_filter_active else 0
 
             # Convenience booleans for logic
 
@@ -1400,6 +1642,12 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "maintenance_active": maintenance_active,
                 "run_reason": run_reason,
                 "heat_reason": heat_reason,
+                "run_credit_source": self._credit_streak_source if self._credit_streak_source else None,
+                "run_credit_minutes": int(round(float(self._credit_streak_minutes or 0.0))),
+                "filter_credit_minutes": int(round(float(filter_credit_effective or 0.0))),
+                "filter_missing_minutes": int(round(float(filter_missing_minutes or 0))),
+                "frost_credit_minutes": int(round(float(frost_credit_effective or 0.0))),
+                "frost_credit_shift_minutes": int(round(float(frost_credit_shift or 0))),
                 "water_temp": round(water_temp, 1) if water_temp is not None else None,
                 "outdoor_temp": round(outdoor_temp, 1) if outdoor_temp is not None else None,
                 "ph_val": round(ph_val, 2) if ph_val is not None else None,
@@ -1594,6 +1842,17 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                         self._last_should_aux_on = physical_aux_should_be_on
             except Exception:
                 _LOGGER.exception("Fehler beim Anwenden der gewünschten Schaltzustände")
+
+            # Track run state for credit accounting (next cycle)
+            try:
+                current_run_active = bool(data.get("should_pump_on"))
+                current_run_source = self._credit_source_from_reasons(run_reason, heat_reason)
+                if self._last_run_active and (not current_run_active):
+                    self._last_run_end = now
+                self._last_run_active = current_run_active
+                self._last_run_source = current_run_source
+            except Exception:
+                pass
 
             _LOGGER.debug(
                 "Coordinator update success (%s) run_reason=%s should_main=%s should_aux=%s",

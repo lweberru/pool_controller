@@ -429,12 +429,32 @@
             "main": {
                 "name": "Alimentación"
             },
-            "pump": {
+                    "filter_minutes": "Duración del filtrado (minutos)",
+                    "merge_window_minutes": "Ventana de combinación (minutos)",
+                    "min_gap_minutes": "Separación mínima entre ciclos (minutos)",
+                    "max_merge_run_minutes": "Máximo ciclo combinado (minutos)",
+                    "min_credit_minutes": "Crédito mínimo (minutos)",
+                    "credit_sources": "Fuentes de crédito"
+                    "merge_window_minutes": "Ventana de combinación (minutos)",
+                    "min_gap_minutes": "Separación mínima entre ciclos (minutos)",
+                    "max_merge_run_minutes": "Máximo ciclo combinado (minutos)",
+                    "min_credit_minutes": "Crédito mínimo (minutos)",
+                    "filter_minutes": "Duración predeterminada de un ciclo de filtrado (minutos). Rango: 5–120.",
+                    "merge_window_minutes": "Si una ejecución de antiheladas cae dentro de esta ventana, se combinan en un solo bloque.",
+                    "min_gap_minutes": "Tiempo mínimo de descanso entre ciclos (excepto heladas severas).",
+                    "max_merge_run_minutes": "Límite superior para un ciclo combinado.",
+                    "min_credit_minutes": "Ciclos más cortos que este valor no generan crédito.",
+                    "credit_sources": "Qué motivos de funcionamiento generan crédito para reducir/posponer ciclos."
                 "name": "Bomba"
             },
             "aux": {
                 "name": "Permitir calefacción auxiliar"
-            }
+                    "filter_minutes": "Duración predeterminada de un ciclo de filtrado (minutos). Rango: 5–120.",
+                    "merge_window_minutes": "Si una ejecución de antiheladas cae dentro de esta ventana, se combinan en un solo bloque.",
+                    "min_gap_minutes": "Tiempo mínimo de descanso entre ciclos (excepto heladas severas).",
+                    "max_merge_run_minutes": "Límite superior para un ciclo combinado.",
+                    "min_credit_minutes": "Ciclos más cortos que este valor no generan crédito.",
+                    "credit_sources": "Qué motivos de funcionamiento generan crédito para reducir/posponer ciclos."
         },
         "binary_sensor": {
             "maintenance_active": {
@@ -478,6 +498,12 @@
             "status": { "name": "Estado" },
             "run_reason": { "name": "Motivo de funcionamiento" },
             "heat_reason": { "name": "Motivo de calefacción" },
+            "run_credit_source": { "name": "Fuente de crédito" },
+            "run_credit_minutes": { "name": "Crédito (min)" },
+            "filter_credit_minutes": { "name": "Crédito de filtrado (min)" },
+            "filter_missing_minutes": { "name": "Filtrado restante (min)" },
+            "frost_credit_minutes": { "name": "Crédito de antiheladas (min)" },
+            "frost_credit_shift_minutes": { "name": "Desplazamiento antiheladas (min)" },
             "sanitizer_mode": { "name": "Desinfección" },
             "ph_val": { "name": "pH" },
             "chlor_val": { "name": "Cloro (mV)" },
