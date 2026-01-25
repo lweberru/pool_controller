@@ -223,6 +223,38 @@
     },
     "options": {
         "step": {
+            "menu": {
+                "title": "Vue d’ensemble des chapitres",
+                "description": "Choisissez le chapitre que vous souhaitez modifier.",
+                "menu_options": {
+                    "basic": "Base",
+                    "switches": "Interrupteurs & puissance",
+                    "water_quality": "Qualité de l’eau",
+                    "sanitizer": "Désinfection",
+                    "climate": "Contrôle de température",
+                    "frost": "Protection antigel",
+                    "calendars": "Calendriers & heures calmes",
+                    "filter": "Filtration",
+                    "durations": "Durées",
+                    "pv": "Surplus PV",
+                    "all": "Configuration guidée (toutes les étapes)"
+                }
+            },
+            "basic": {
+                "title": "Paramètres",
+                "description": "Paramètres généraux. Les modifications sont enregistrées dans les options de l'entrée.",
+                "submit": "Suivant",
+                "data": {
+                    "name": "Nom de la piscine",
+                    "water_volume": "Volume d'eau (litres)",
+                    "demo_mode": "Mode démo"
+                },
+                "data_description": {
+                    "name": "Nom affiché pour cette installation",
+                    "water_volume": "Volume d'eau en litres (utilisé pour le dosage et le calcul du temps de chauffe)",
+                    "demo_mode": "Mode démo : ne commande pas d'appareils réels (tests uniquement)"
+                }
+            },
             "init": {
                 "title": "Paramètres",
                 "description": "Paramètres généraux. Les modifications sont enregistrées dans les options de l'entrée.",

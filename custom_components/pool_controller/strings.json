@@ -249,6 +249,38 @@
           "aux_power_sensor": "Heater power sensor in watts"
         }
       },
+        "menu": {
+          "title": "Options menu",
+          "description": "Select the section you want to edit.",
+          "menu_options": {
+            "basic": "Basic settings",
+            "switches": "Switches & power",
+            "water_quality": "Water quality",
+            "sanitizer": "Sanitizer",
+            "climate": "Temperature control",
+            "frost": "Frost protection",
+            "calendars": "Calendars & quiet times",
+            "filter": "Filter settings",
+            "durations": "Durations",
+            "pv": "PV surplus",
+            "all": "Guided setup (all steps)"
+          }
+        },
+        "basic": {
+          "title": "Settings",
+          "description": "General settings. Changes are stored in the config entry options.",
+          "submit": "Continue",
+          "data": {
+            "name": "Pool name",
+            "water_volume": "Water volume (liters)",
+            "demo_mode": "Demo mode"
+          },
+          "data_description": {
+            "name": "Display name for this pool installation",
+            "water_volume": "Water volume in liters (used for dosing and heating time calculations)",
+            "demo_mode": "Demo mode: does not switch real devices (for testing only)"
+          }
+        },
       "water_quality": {
         "title": "Water quality",
         "description": "Update sensor mapping for temperature and (optionally) chemistry.",

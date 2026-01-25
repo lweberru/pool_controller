@@ -223,6 +223,38 @@
     },
     "options": {
         "step": {
+            "menu": {
+                "title": "Resumen de capítulos",
+                "description": "Elige el capítulo que quieres editar.",
+                "menu_options": {
+                    "basic": "Básico",
+                    "switches": "Interruptores y potencia",
+                    "water_quality": "Calidad del agua",
+                    "sanitizer": "Desinfección",
+                    "climate": "Control de temperatura",
+                    "frost": "Protección contra heladas",
+                    "calendars": "Calendarios y horas de silencio",
+                    "filter": "Filtrado",
+                    "durations": "Duraciones",
+                    "pv": "Excedente FV",
+                    "all": "Configuración guiada (todos los pasos)"
+                }
+            },
+            "basic": {
+                "title": "Ajustes",
+                "description": "Ajustes generales. Los cambios se guardan en las opciones de la entrada.",
+                "submit": "Siguiente",
+                "data": {
+                    "name": "Nombre de la piscina",
+                    "water_volume": "Volumen de agua (litros)",
+                    "demo_mode": "Modo demo"
+                },
+                "data_description": {
+                    "name": "Nombre mostrado para esta instalación",
+                    "water_volume": "Volumen de agua en litros (para cálculos de dosificación y calentamiento)",
+                    "demo_mode": "Modo demo: no controla dispositivos reales (solo pruebas)"
+                }
+            },
             "init": {
                 "title": "Ajustes",
                 "description": "Ajustes generales. Los cambios se guardan en las opciones de la entrada.",

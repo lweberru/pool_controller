@@ -223,6 +223,38 @@
     },
     "options": {
         "step": {
+            "menu": {
+                "title": "Kapitelübersicht",
+                "description": "Wähle das Kapitel, das du bearbeiten möchtest.",
+                "menu_options": {
+                    "basic": "Basis",
+                    "switches": "Schalter & Leistung",
+                    "water_quality": "Wasserqualität",
+                    "sanitizer": "Desinfektion",
+                    "climate": "Temperaturregelung",
+                    "frost": "Frostschutz",
+                    "calendars": "Kalender & Ruhezeiten",
+                    "filter": "Filter",
+                    "durations": "Dauern",
+                    "pv": "PV-Überschuss",
+                    "all": "Geführtes Setup (alle Schritte)"
+                }
+            },
+            "basic": {
+                "title": "Einstellungen",
+                "description": "Allgemeine Einstellungen. Änderungen werden in den Optionen der Config-Entry gespeichert.",
+                "submit": "Weiter",
+                "data": {
+                    "name": "Pool-Name",
+                    "water_volume": "Wassermenge (Liter)",
+                    "demo_mode": "Demo-Modus"
+                },
+                "data_description": {
+                    "name": "Anzeigenname für diese Pool-Installation",
+                    "water_volume": "Wassermenge in Litern (für Dosierung und Heizzeit-Berechnung)",
+                    "demo_mode": "Demo-Modus: schaltet keine echten Geräte (nur zum Testen)"
+                }
+            },
             "init": {
                 "title": "Einstellungen",
                 "description": "Allgemeine Einstellungen. Änderungen werden in den Optionen der Config-Entry gespeichert.",

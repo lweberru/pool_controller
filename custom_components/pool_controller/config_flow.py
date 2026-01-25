@@ -408,16 +408,47 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
     def __init__(self, config_entry):
         self._config_entry = config_entry
         self.options = {}
+        self._menu_mode = True
 
     async def async_step_init(self, user_input=None):
-        """First step: pool settings."""
+        """Entry point: show a chapter menu for quick edits."""
+        self._menu_mode = True
+        return self._show_options_menu()
+
+    def _show_options_menu(self):
+        return self.async_show_menu(
+            step_id="menu",
+            menu_options=[
+                "basic",
+                "switches",
+                "water_quality",
+                "sanitizer",
+                "climate",
+                "frost",
+                "calendars",
+                "filter",
+                "durations",
+                "pv",
+                "all",
+            ],
+        )
+
+    async def async_step_all(self, user_input=None):
+        """Guided full flow (same as before)."""
+        self._menu_mode = False
+        return await self.async_step_basic(user_input)
+
+    async def async_step_basic(self, user_input=None):
+        """Basic pool settings."""
         if user_input is not None:
             self.options.update(user_input)
+            if self._menu_mode:
+                return self.async_create_entry(title="", data=self.options)
             return await self.async_step_switches()
 
         curr = {**self._config_entry.data, **self._config_entry.options}
         return self.async_show_form(
-            step_id="init",
+            step_id="basic",
             data_schema=_init_schema(curr),
             last_step=False
         )
@@ -426,6 +457,8 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
         """Second step: switches and power sensors."""
         if user_input is not None:
             self.options.update(user_input)
+            if self._menu_mode:
+                return self.async_create_entry(title="", data=self.options)
             return await self.async_step_water_quality()
 
         curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
@@ -439,6 +472,8 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
         """Third step: water quality sensors."""
         if user_input is not None:
             self.options.update(user_input)
+            if self._menu_mode:
+                return self.async_create_entry(title="", data=self.options)
             return await self.async_step_sanitizer()
 
         curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
@@ -459,6 +494,8 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
             self.options[CONF_ENABLE_SALTWATER] = (mode in ("saltwater", "mixed"))
             if mode in ("saltwater", "mixed"):
                 return await self.async_step_sanitizer_salt()
+            if self._menu_mode:
+                return self.async_create_entry(title="", data=self.options)
             return await self.async_step_climate()
 
         curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
@@ -481,6 +518,8 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
         """Ask for target salt level when saltwater is enabled."""
         if user_input is not None:
             self.options.update(user_input)
+            if self._menu_mode:
+                return self.async_create_entry(title="", data=self.options)
             return await self.async_step_climate()
 
         curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
@@ -494,6 +533,8 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
         """Thermostat-like settings for temperature control."""
         if user_input is not None:
             self.options.update(user_input)
+            if self._menu_mode:
+                return self.async_create_entry(title="", data=self.options)
             return await self.async_step_frost()
 
         curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
@@ -507,6 +548,8 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
         """Fourth step: frost protection tuning."""
         if user_input is not None:
             self.options.update(user_input)
+            if self._menu_mode:
+                return self.async_create_entry(title="", data=self.options)
             return await self.async_step_calendars()
 
         curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
@@ -520,6 +563,8 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
         """Fourth step: calendars and quiet times."""
         if user_input is not None:
             self.options.update(user_input)
+            if self._menu_mode:
+                return self.async_create_entry(title="", data=self.options)
             return await self.async_step_filter()
 
         curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
@@ -564,6 +609,8 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
             user_input[CONF_FILTER_INTERVAL] = interval
             user_input[CONF_FILTER_DURATION] = filter_duration
             self.options.update(user_input)
+            if self._menu_mode:
+                return self.async_create_entry(title="", data=self.options)
             return await self.async_step_durations()
 
         curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
@@ -577,6 +624,8 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
         """Step: Dauer-Einstellungen (Baden & Stoßchlorung)."""
         if user_input is not None:
             self.options.update(user_input)
+            if self._menu_mode:
+                return self.async_create_entry(title="", data=self.options)
             return await self.async_step_pv()
 
         curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
