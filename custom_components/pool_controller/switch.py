@@ -88,7 +88,8 @@ class PoolAuxSwitch(PoolBaseSwitch):
         aux_switch_id = self.coordinator.entry.data.get(CONF_AUX_HEATING_SWITCH)
         if not aux_switch_id:
             return False
-        return self.coordinator.hass.states.get(aux_switch_id, None) is not None and self.coordinator.hass.states.get(aux_switch_id).state == "on"
+        st = self.coordinator.hass.states.get(aux_switch_id)
+        return bool(st and st.state == "on")
 
     async def async_turn_on(self, **kwargs):
         demo = self.coordinator.entry.data.get(CONF_DEMO_MODE, False)
