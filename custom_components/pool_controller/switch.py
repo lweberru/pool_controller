@@ -8,19 +8,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
     entities = [PoolMainSwitch(coordinator), PoolPumpSwitch(coordinator)]
     if entry.data.get(CONF_AUX_HEATING_SWITCH):
-        # Always add the feature-enable switch
+        entities.append(PoolAuxSwitch(coordinator))
         entities.append(PoolAuxAllowedSwitch(coordinator))
-        # Only add the physical aux power switch if the legacy aux unique_id
-        # is not already occupied by the old aux-allowed switch.
-        try:
-            ent_reg = er.async_get(hass)
-            legacy_aux_entity = ent_reg.async_get_entity_id("switch", DOMAIN, f"{entry.entry_id}_aux")
-            aux_allowed_entity = ent_reg.async_get_entity_id("switch", DOMAIN, f"{entry.entry_id}_aux_allowed")
-        except Exception:
-            legacy_aux_entity = None
-            aux_allowed_entity = None
-        if (not legacy_aux_entity) or aux_allowed_entity:
-            entities.append(PoolAuxSwitch(coordinator))
     async_add_entities(entities)
 
 class PoolBaseSwitch(CoordinatorEntity, SwitchEntity):
@@ -121,19 +110,7 @@ class PoolAuxAllowedSwitch(PoolBaseSwitch):
     _attr_translation_key = "aux_allowed"
     def __init__(self, coordinator):
         super().__init__(coordinator)
-        entry_id = coordinator.entry.entry_id
-        new_uid = f"{entry_id}_aux_allowed"
-        old_uid = f"{entry_id}_aux"
-        try:
-            ent_reg = er.async_get(coordinator.hass)
-            old_entity_id = ent_reg.async_get_entity_id("switch", DOMAIN, old_uid)
-            new_entity_id = ent_reg.async_get_entity_id("switch", DOMAIN, new_uid)
-        except Exception:
-            old_entity_id = None
-            new_entity_id = None
-        # Prefer the new unique_id, but keep the old one if it's the only existing registry entry
-        # to avoid creating duplicate entities during migration.
-        self._attr_unique_id = old_uid if (old_entity_id and not new_entity_id) else new_uid
+        self._attr_unique_id = f"{coordinator.entry.entry_id}_aux_allowed"
     @property
     def is_on(self):
         # Zeigt Master-Enable-Status, nicht den physischen Schalter

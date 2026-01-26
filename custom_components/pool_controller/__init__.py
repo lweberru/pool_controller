@@ -352,9 +352,17 @@ async def _migrate_aux_allowed_switch_unique_id(hass: HomeAssistant, entry: Conf
                 _LOGGER.info("Migrated aux switch unique_id to %s for %s", new_uid, e.entity_id)
                 return
             except TypeError:
-                # Older HA might not support new_unique_id; at least update translation_key.
-                ent_reg.async_update_entity(e.entity_id, translation_key="aux_allowed")
-                _LOGGER.info("Updated aux switch translation_key for %s", e.entity_id)
+                # Older HA might not support new_unique_id; remove the legacy entry so
+                # we can recreate it with the new unique_id and also add the physical aux switch.
+                try:
+                    ent_reg.async_update_entity(e.entity_id, translation_key="aux_allowed")
+                except Exception:
+                    pass
+                try:
+                    ent_reg.async_remove(e.entity_id)
+                    _LOGGER.info("Removed legacy aux switch %s to re-create with %s", e.entity_id, new_uid)
+                except Exception:
+                    _LOGGER.exception("Failed to remove legacy aux switch %s", e.entity_id)
                 return
             except Exception:
                 _LOGGER.exception("Failed to migrate aux switch unique_id for %s", e.entity_id)
