@@ -75,17 +75,80 @@ flowchart TD
 
 The **water volume** setting is critical for automated calculations.
 
-### Heating Time Calculation
+### Heating Time Calculation (Adaptive)
 
-**Formula:**
+The preheat calculation now uses an **effective heating power** that subtracts estimated heat loss and adds a learned startup offset.
+
+**Effective heating power:**
 
 ```
-Time (minutes) = (Water Volume (L) × 1.16 × ΔT (°C)) / Power (W) × 60
+P_eff (W) = max(1, P_base + P_aux*aux_enabled - heat_loss_w_per_c * ΔT_out)
+
+Where:
+- P_base = configured base power (e.g., pump waste heat)
+- P_aux = configured auxiliary heater power
+- aux_enabled = 1 if aux heating is enabled, else 0
+- ΔT_out = max(0, water_temp - outdoor_temp)
+```
+
+**Heating time estimate:**
+
+```
+t_min (minutes) = (Water Volume (L) × 1.16 × ΔT (°C)) / P_eff (W) × 60
+t_est (minutes) = round(t_min) + heat_startup_offset_minutes
 
 Where:
 - 1.16 = Specific heat capacity of water (Wh/L/°C)
-- ΔT = Target temperature - Current water temperature
-- Power = Heater power consumption (from configured model)
+- ΔT = Target temperature - Current water temperature (min 0)
+```
+
+### Adaptive Heating Tuning (Auto‑Learned)
+
+Two diagnostic sensors expose the learned values:
+
+- `sensor.<pool>_heat_loss_w_per_c` (W/°C)
+- `sensor.<pool>_heat_startup_offset_minutes` (min)
+
+**Heat loss coefficient (`heat_loss_w_per_c`)**
+- Updated only while the pool is **off** (pump OFF, aux heater OFF).
+- Uses at least **60 minutes** between samples to avoid zero‑delta from sparse sensor updates.
+- Based on cooling rate and outdoor temperature delta.
+- Smoothed with EMA (α = 0.2).
+
+**Startup offset (`heat_startup_offset_minutes`)**
+- Starts when heating becomes active.
+- First measurable warming = water temp rises by **≥ 0.1 °C** over the start temperature.
+- The measured delay (max 30 min) is smoothed with EMA (α = 0.2).
+
+### Example (Concrete Numbers)
+
+Assume:
+- Water volume: **1100 L**
+- Cooling rate: **0.1 °C/hour**
+- Heating power: **850 W (base) + 2750 W (aux) = 3600 W**
+- Outdoor delta: **ΔT_out = 10 °C** (example)
+- Target delta: **ΔT = 5 °C** (example)
+- Startup offset: **8 min** (example learned value)
+
+**Loss power from cooling:**
+
+```
+loss_W = 1100 × 1.16 × 0.1 = 127.6 W
+heat_loss_w_per_c = 127.6 / 10 = 12.76 W/°C
+```
+
+**Old formula (no loss, no offset):**
+
+```
+t_old = (1100 × 1.16 × 5) / 3600 × 60 ≈ 106.3 min
+```
+
+**New formula:**
+
+```
+P_eff = 3600 - (12.76 × 10) = 3472.4 W
+t_new = (1100 × 1.16 × 5) / 3472.4 × 60 ≈ 110.2 min
+t_est = 110.2 + 8 ≈ 118.2 min
 ```
 
 ### Temperature Control (Extended)

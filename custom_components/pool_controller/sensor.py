@@ -32,6 +32,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolChemSensor(coordinator, "filter_missing_minutes", None, "min", "mdi:timer-alert", state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
         PoolChemSensor(coordinator, "frost_credit_minutes", None, "min", "mdi:timer-sand", state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
         PoolChemSensor(coordinator, "frost_credit_shift_minutes", None, "min", "mdi:timer-sync", state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
+        PoolChemSensor(coordinator, "heat_loss_w_per_c", None, "W/°C", "mdi:thermometer-lines", state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
+        PoolChemSensor(coordinator, "heat_startup_offset_minutes", None, "min", "mdi:timer-outline", state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
         PoolSanitizerModeSensor(coordinator),
         # SensorDeviceClass.PH expects no unit_of_measurement.
         PoolChemSensor(coordinator, "ph_val", None, None, "mdi:ph", device_class=_DEVICE_CLASS_PH, state_class=SensorStateClass.MEASUREMENT),

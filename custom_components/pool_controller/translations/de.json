@@ -557,6 +557,8 @@
             "filter_missing_minutes": { "name": "Filter-Rest (min)" },
             "frost_credit_minutes": { "name": "Frost-Gutschrift (min)" },
             "frost_credit_shift_minutes": { "name": "Frost-Verschiebung (min)" },
+            "heat_loss_w_per_c": { "name": "Wärmeverlust-Koeffizient (W/°C)" },
+            "heat_startup_offset_minutes": { "name": "Heiz-Anlauf-Offset (min)" },
             "sanitizer_mode": { "name": "Desinfektion" },
             "ph_val": { "name": "pH" },
             "chlor_val": { "name": "Chlor (mV)" },

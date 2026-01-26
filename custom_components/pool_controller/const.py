@@ -122,6 +122,10 @@ OPT_KEY_MANUAL_DURATION = "manual_timer_duration"  # minutes
 # Persisted target temperature (so HA restarts keep the setpoint)
 OPT_KEY_TARGET_TEMP = "target_temp"
 
+# Adaptive heating tuning (stored in options)
+OPT_KEY_HEAT_LOSS_W_PER_C = "heat_loss_w_per_c"
+OPT_KEY_HEAT_STARTUP_OFFSET_MINUTES = "heat_startup_offset_minutes"
+
 # Auto filter cycle timer (interval-based)
 OPT_KEY_AUTO_FILTER_UNTIL = "auto_filter_until"
 OPT_KEY_AUTO_FILTER_DURATION = "auto_filter_duration"  # minutes
@@ -175,6 +179,12 @@ DEFAULT_TARGET_TEMP_STEP = 0.5
 
 # Default heater power used for preheat estimation
 DEFAULT_HEATER_POWER_W = 2750
+
+# Adaptive heating defaults
+# Heat loss coefficient in W/°C (initial estimate, auto-tuned over time).
+DEFAULT_HEAT_LOSS_W_PER_C = 30.0
+# Startup delay in minutes to account for pump/loop warmup.
+DEFAULT_HEAT_STARTUP_OFFSET_MINUTES = 5.0
 
 # Default split powers (disabled by default -> use DEFAULT_HEATER_POWER_W)
 DEFAULT_HEATER_BASE_POWER_W = 850

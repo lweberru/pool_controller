@@ -92,10 +92,32 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self._last_run_source = None
         self._last_run_end = None
 
+        # Adaptive heating tuning
+        self.heat_loss_w_per_c = DEFAULT_HEAT_LOSS_W_PER_C
+        self.heat_startup_offset_minutes = DEFAULT_HEAT_STARTUP_OFFSET_MINUTES
+        self._last_temp_ts = None
+        self._last_temp_value = None
+        self._heat_start_ts = None
+        self._heat_start_temp = None
+        self._heat_start_reached = False
+        self._last_heat_active = False
+        self._heat_tuning_last_saved = None
+
         self._did_migrate_timers = False
         if entry and entry.options:
             self.maintenance_active = bool(entry.options.get(OPT_KEY_MAINTENANCE_ACTIVE, False))
             self.hvac_enabled = bool(entry.options.get(OPT_KEY_HVAC_ENABLED, True))
+            # Adaptive tuning persisted values (best effort)
+            try:
+                if entry.options.get(OPT_KEY_HEAT_LOSS_W_PER_C) is not None:
+                    self.heat_loss_w_per_c = float(entry.options.get(OPT_KEY_HEAT_LOSS_W_PER_C))
+            except Exception:
+                self.heat_loss_w_per_c = DEFAULT_HEAT_LOSS_W_PER_C
+            try:
+                if entry.options.get(OPT_KEY_HEAT_STARTUP_OFFSET_MINUTES) is not None:
+                    self.heat_startup_offset_minutes = float(entry.options.get(OPT_KEY_HEAT_STARTUP_OFFSET_MINUTES))
+            except Exception:
+                self.heat_startup_offset_minutes = DEFAULT_HEAT_STARTUP_OFFSET_MINUTES
             # New timers
             mu = entry.options.get(OPT_KEY_MANUAL_UNTIL)
             if mu:
@@ -182,29 +204,12 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             self.pv_stability_seconds = DEFAULT_PV_STABILITY_SECONDS
             self.pv_min_run_minutes = DEFAULT_PV_MIN_RUN_MINUTES
             self.hvac_enabled = True
+            self.heat_loss_w_per_c = DEFAULT_HEAT_LOSS_W_PER_C
+            self.heat_startup_offset_minutes = DEFAULT_HEAT_STARTUP_OFFSET_MINUTES
 
-    def _estimate_minutes_to_target(self, conf: dict, water_temp: float | None) -> int | None:
-        """Best-effort estimate how long heating to target may take (in minutes)."""
-        try:
-            vol_l = conf.get(CONF_WATER_VOLUME, DEFAULT_VOL)
-            vol_l = float(vol_l) if vol_l is not None else None
-        except Exception:
-            vol_l = None
-
-        try:
-            target_temp = float(getattr(self, "target_temp", DEFAULT_TARGET_TEMP))
-        except Exception:
-            target_temp = DEFAULT_TARGET_TEMP
-
-        measured_temp = water_temp if water_temp is not None else 20.0
-        try:
-            delta_t = max(0.0, float(target_temp) - float(measured_temp))
-        except Exception:
-            delta_t = 0.0
-        if delta_t <= 0:
-            return 0
-
-        # Heating power model (same intent as in _async_update_data): base + (aux if enabled)
+    def _effective_heating_power(self, conf: dict, water_temp: float | None, outdoor_temp: float | None) -> float:
+        """Return effective heating power in W after subtracting estimated heat loss."""
+        power_w = None
         try:
             base_w = int(conf.get(CONF_HEATER_BASE_POWER_W, DEFAULT_HEATER_BASE_POWER_W))
         except Exception:
@@ -234,13 +239,49 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         if not power_w or power_w <= 0:
             power_w = DEFAULT_HEATER_POWER_W
 
+        # Subtract estimated heat loss (W) based on ΔT to outdoor temperature.
+        loss_w = 0.0
+        try:
+            if water_temp is not None and outdoor_temp is not None:
+                delta = max(0.0, float(water_temp) - float(outdoor_temp))
+                loss_w = max(0.0, float(self.heat_loss_w_per_c or 0.0) * float(delta))
+        except Exception:
+            loss_w = 0.0
+        effective = max(1.0, float(power_w) - float(loss_w))
+        return effective
+
+    def _estimate_minutes_to_target(self, conf: dict, water_temp: float | None) -> int | None:
+        """Best-effort estimate how long heating to target may take (in minutes)."""
+        try:
+            vol_l = conf.get(CONF_WATER_VOLUME, DEFAULT_VOL)
+            vol_l = float(vol_l) if vol_l is not None else None
+        except Exception:
+            vol_l = None
+
+        try:
+            target_temp = float(getattr(self, "target_temp", DEFAULT_TARGET_TEMP))
+        except Exception:
+            target_temp = DEFAULT_TARGET_TEMP
+
+        measured_temp = water_temp if water_temp is not None else 20.0
+        try:
+            delta_t = max(0.0, float(target_temp) - float(measured_temp))
+        except Exception:
+            delta_t = 0.0
+        if delta_t <= 0:
+            return 0
+
+        power_w = self._effective_heating_power(conf, water_temp, self._get_float(conf.get(CONF_TEMP_OUTDOOR)))
+
         if not vol_l or vol_l <= 0 or power_w <= 0:
             return None
 
         # t_min in Minuten: V * 1.16 * deltaT / P * 60
         t_min = (vol_l * 1.16 * delta_t) / float(power_w) * 60.0
         try:
-            return max(0, int(round(t_min)))
+            base = max(0, int(round(t_min)))
+            offset = float(self.heat_startup_offset_minutes or 0.0)
+            return max(0, int(round(base + offset)))
         except Exception:
             return None
 
@@ -946,41 +987,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             # 3. Kalender & Aufheizzeit
             # Heizleistung ist eine Konstante (W) und darf NICHT aus einem Live-Pumpen-Power-Sensor abgeleitet werden.
             # Sonst wird die Preheat-Berechnung massiv falsch und startet u.U. Tage zu früh.
-            power_w = None
-            try:
-                base_w = int(conf.get(CONF_HEATER_BASE_POWER_W, DEFAULT_HEATER_BASE_POWER_W))
-            except Exception:
-                base_w = DEFAULT_HEATER_BASE_POWER_W
-            try:
-                aux_w = int(conf.get(CONF_HEATER_AUX_POWER_W, DEFAULT_HEATER_AUX_POWER_W))
-            except Exception:
-                aux_w = DEFAULT_HEATER_AUX_POWER_W
-            base_w = max(0, int(base_w or 0))
-            aux_w = max(0, int(aux_w or 0))
-
-            # Backward compatibility:
-            # Older versions used a single `heater_power_w` value.
-            # If split values are not configured (both unset/zero), fall back to the legacy value.
-            try:
-                legacy_present = CONF_HEATER_POWER_W in conf and conf.get(CONF_HEATER_POWER_W) is not None
-                split_effective_raw = base_w + aux_w
-                if legacy_present and split_effective_raw <= 0:
-                    base_w = max(0, int(float(conf.get(CONF_HEATER_POWER_W))))
-            except Exception:
-                pass
-
-            # Prefer split model if configured to a meaningful value.
-            split_effective = base_w + (aux_w if conf.get(CONF_ENABLE_AUX_HEATING, False) else 0)
-            if split_effective > 0:
-                power_w = split_effective
-            else:
-                try:
-                    power_w = int(conf.get(CONF_HEATER_POWER_W, DEFAULT_HEATER_POWER_W))
-                except Exception:
-                    power_w = DEFAULT_HEATER_POWER_W
-
-            if not power_w or power_w <= 0:
-                power_w = DEFAULT_HEATER_POWER_W
+            power_w = self._effective_heating_power(conf, water_temp, outdoor_temp)
 
             # Temperaturdifferenz (DeltaT).
             # Wenn Wassertemperatur fehlt, konservativer Default 20°C (statt Fehler)
@@ -1002,7 +1009,9 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 # t_min in Minuten: V * 1.16 * deltaT / P * 60
                 t_min = (vol_l * 1.16 * delta_t) / float(power_w) * 60.0
                 try:
-                    heat_time = max(0, int(round(t_min)))
+                    base = max(0, int(round(t_min)))
+                    offset = float(self.heat_startup_offset_minutes or 0.0)
+                    heat_time = max(0, int(round(base + offset)))
                 except Exception:
                     heat_time = None
 
@@ -1426,6 +1435,79 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 frost_credit_effective += float(self._credit_streak_minutes or 0.0)
             filter_missing_minutes = max(0, int(round(float(getattr(self, "filter_minutes", DEFAULT_FILTER_DURATION)) - filter_credit_effective)))
 
+            # =========================
+            # Adaptive heating tuning (loss + startup offset)
+            # =========================
+            try:
+                if water_temp is not None:
+                    # Update loss coefficient while pool is OFF (no pump, no aux heat)
+                    if (not pump_switch_on) and (not aux_heating_switch_on):
+                        if self._last_temp_ts and self._last_temp_value is not None and outdoor_temp is not None and vol_l:
+                            dt_min = max(0.0, (now - self._last_temp_ts).total_seconds() / 60.0)
+                            # Use a longer window to handle sparse sensor updates (often 15–30 min).
+                            # This avoids zero-delta samples from short intervals.
+                            if dt_min >= 60:
+                                dtemp = float(water_temp) - float(self._last_temp_value)
+                                if dtemp < 0:
+                                    cooling_rate = abs(dtemp) / dt_min  # °C/min
+                                    delta = max(0.1, float(water_temp) - float(outdoor_temp))
+                                    loss_w = float(vol_l) * 1.16 * float(cooling_rate) * 60.0
+                                    est_w_per_c = max(0.0, loss_w / delta)
+                                    # EMA smoothing
+                                    alpha = 0.2
+                                    self.heat_loss_w_per_c = max(0.0, (1 - alpha) * float(self.heat_loss_w_per_c) + alpha * est_w_per_c)
+
+                    # Update startup offset based on how long it takes to see first warming
+                    heat_active = bool(pump_switch_on and (heat_reason not in ("off", "disabled")))
+                    if heat_active and not self._last_heat_active:
+                        self._heat_start_ts = now
+                        self._heat_start_temp = float(water_temp)
+                        self._heat_start_reached = False
+                    if heat_active and (self._heat_start_ts is not None) and (not self._heat_start_reached):
+                        try:
+                            if float(water_temp) >= float(self._heat_start_temp or water_temp) + 0.1:
+                                lag_min = max(0.0, (now - self._heat_start_ts).total_seconds() / 60.0)
+                                if lag_min <= 30:
+                                    alpha = 0.2
+                                    self.heat_startup_offset_minutes = max(0.0, (1 - alpha) * float(self.heat_startup_offset_minutes) + alpha * lag_min)
+                                self._heat_start_reached = True
+                        except Exception:
+                            pass
+                    if not heat_active:
+                        self._heat_start_ts = None
+                        self._heat_start_temp = None
+                        self._heat_start_reached = False
+                    self._last_heat_active = heat_active
+
+                    # Persist tuned values occasionally (best effort)
+                    if self.entry and self.entry.options:
+                        should_save = False
+                        try:
+                            last_save = self._heat_tuning_last_saved
+                            if (last_save is None) or ((now - last_save).total_seconds() >= 15 * 60):
+                                should_save = True
+                        except Exception:
+                            should_save = True
+                        if should_save:
+                            try:
+                                new_opts = {**self.entry.options}
+                                new_opts[OPT_KEY_HEAT_LOSS_W_PER_C] = float(self.heat_loss_w_per_c)
+                                new_opts[OPT_KEY_HEAT_STARTUP_OFFSET_MINUTES] = float(self.heat_startup_offset_minutes)
+                                await self._async_update_entry_options(new_opts)
+                                self._heat_tuning_last_saved = now
+                            except Exception:
+                                pass
+            except Exception:
+                pass
+
+            # Track last temp sample for adaptive tuning
+            try:
+                if water_temp is not None:
+                    self._last_temp_ts = now
+                    self._last_temp_value = float(water_temp)
+            except Exception:
+                pass
+
 
             # Start calendar-driven bathing: if event is ongoing, ensure manual timer active
             # (in Wartung deaktiviert)
@@ -1705,6 +1787,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "in_quiet": in_quiet,
                 "main_power": round(main_power, 1) if main_power is not None else None,
                 "aux_power": round(aux_power, 1) if aux_power is not None else None,
+                "heat_loss_w_per_c": round(float(self.heat_loss_w_per_c), 2) if self.heat_loss_w_per_c is not None else None,
+                "heat_startup_offset_minutes": round(float(self.heat_startup_offset_minutes), 1) if self.heat_startup_offset_minutes is not None else None,
                 # Stromversorgung an, wenn der Pool laufen muss (inkl. Frost) oder wenn die Pumpe laufen soll.
                 "should_pump_on": (
                     (not maintenance_active)

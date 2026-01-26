@@ -37,6 +37,8 @@ Entity IDs depend on your instance name, but the integration uses stable suffix 
 | `sensor.<pool>_filter_missing_minutes` | Integer | Remaining filter minutes needed for the next cycle |
 | `sensor.<pool>_frost_credit_minutes` | Integer | Effective frost credit minutes |
 | `sensor.<pool>_frost_credit_shift_minutes` | Integer | Minutes the frost cycle is shifted due to credit |
+| `sensor.<pool>_heat_loss_w_per_c` | Float | Learned heat loss coefficient (W/°C) |
+| `sensor.<pool>_heat_startup_offset_minutes` | Float | Learned heating startup delay (minutes) |
 | `sensor.<pool>_sanitizer_mode` | Enum | Disinfection style: `chlorine`, `saltwater`, `mixed` |
 | `sensor.<pool>_tds_status` | Enum | Water quality assessment (backend-derived) |
 | `sensor.<pool>_ph_val` | Float | Water pH (0-14) |
@@ -134,6 +136,8 @@ The integration provides four quick-action buttons (one per topic, using the def
 - `sensor.pool_filter_missing_minutes` - Remaining minutes needed for filter
 - `sensor.pool_frost_credit_minutes` - Effective frost credit
 - `sensor.pool_frost_credit_shift_minutes` - Frost shift minutes
+- `sensor.pool_heat_loss_w_per_c` - Learned heat loss coefficient (W/°C)
+- `sensor.pool_heat_startup_offset_minutes` - Learned heating startup delay (minutes)
 - `sensor.pool_outdoor_temp` - Outdoor temperature (input for frost protection)
 - `binary_sensor.pool_should_main_on` - Power supply requested
 - `binary_sensor.pool_should_pump_on` - Pump requested

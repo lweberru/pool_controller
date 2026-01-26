@@ -28,6 +28,8 @@ from .const import (
     CONF_MAX_MERGE_RUN_MINUTES,
     CONF_MIN_CREDIT_MINUTES,
     CONF_CREDIT_SOURCES,
+    OPT_KEY_HEAT_LOSS_W_PER_C,
+    OPT_KEY_HEAT_STARTUP_OFFSET_MINUTES,
 )
 from .coordinator import PoolControllerDataCoordinator
 
@@ -62,6 +64,8 @@ _NO_RELOAD_OPTION_KEYS = {
     CONF_MAX_MERGE_RUN_MINUTES,
     CONF_MIN_CREDIT_MINUTES,
     CONF_CREDIT_SOURCES,
+    OPT_KEY_HEAT_LOSS_W_PER_C,
+    OPT_KEY_HEAT_STARTUP_OFFSET_MINUTES,
 }
 
 # "button" wurde hier hinzugefügt (timer ist keine Entity-Plattform)

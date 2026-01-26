@@ -539,6 +539,8 @@
             "filter_missing_minutes": { "name": "Filtrado restante (min)" },
             "frost_credit_minutes": { "name": "Crédito de antiheladas (min)" },
             "frost_credit_shift_minutes": { "name": "Desplazamiento antiheladas (min)" },
+            "heat_loss_w_per_c": { "name": "Coeficiente de pérdida de calor (W/°C)" },
+            "heat_startup_offset_minutes": { "name": "Offset de arranque de calefacción (min)" },
             "sanitizer_mode": { "name": "Desinfección" },
             "ph_val": { "name": "pH" },
             "chlor_val": { "name": "Cloro (mV)" },

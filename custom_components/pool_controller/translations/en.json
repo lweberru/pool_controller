@@ -480,6 +480,8 @@
       "filter_missing_minutes": { "name": "Filter remaining (min)" },
       "frost_credit_minutes": { "name": "Frost credit (min)" },
       "frost_credit_shift_minutes": { "name": "Frost shift (min)" },
+      "heat_loss_w_per_c": { "name": "Heat loss coefficient (W/°C)" },
+      "heat_startup_offset_minutes": { "name": "Heat startup offset (min)" },
       "sanitizer_mode": { "name": "Sanitizer" },
       "ph_val": { "name": "pH" },
       "chlor_val": { "name": "Chlorine (mV)" },
