@@ -22,6 +22,55 @@ The controller tracks **eligible run minutes** (credit). If a recent run already
 
 This improves efficiency by avoiding redundant runs while keeping protection targets intact.
 
+#### Flow: How bathing/PV affects the next filter run
+
+```mermaid
+flowchart TD
+	A[Coordinator update cycle] --> B[Determine run_reason / heat_reason]
+	B --> C{Source in credit_sources?}
+	C -- yes --> D[_update_run_credit adds minutes]
+	C -- no --> E[No credit added]
+	D --> F[Compute filter_credit_effective]
+	E --> F
+	F --> G[Filter due? (now >= next_filter_start)]
+	G -- no --> H[No change to schedule]
+	G -- yes --> I{Maintenance/Pause/Quiet hours?}
+	I -- yes --> J[next_filter_start shifted to quiet end]
+	I -- no --> K{min_gap_remaining > 0?}
+	K -- yes --> L[next_filter_start = now + min_gap]
+	K -- no --> M{filter_missing_minutes <= 0?}
+	M -- yes --> N[Skip run; next_filter_start = now + filter_interval]
+	M -- no --> O[Start auto-filter for filter_missing_minutes]
+```
+
+#### Example 1: PV run creates credit and skips the next filter
+
+**Setup:**
+- `filter_interval_minutes = 720` (12h)
+- `filter_minutes = 30`
+- `credit_sources` includes `pv`
+
+**Scenario:**
+1. The pool runs for **30 minutes** due to **PV surplus**.
+2. Those minutes are added to `filter_credit_minutes`.
+3. When the next filter time is reached, `filter_missing_minutes <= 0`.
+
+**Result:** The filter run is skipped and `next_filter_start` is moved to **now + 12h**.
+
+#### Example 2: Bathing run creates partial credit and shortens the next filter
+
+**Setup:**
+- `filter_interval_minutes = 720` (12h)
+- `filter_minutes = 40`
+- `credit_sources` includes `bathing`
+
+**Scenario:**
+1. A **20‑minute bathing session** runs.
+2. Those minutes are counted as credit.
+3. When the next filter time is reached, `filter_missing_minutes = 20`.
+
+**Result:** The auto‑filter starts but runs for **20 minutes** instead of 40.
+
 ## Temperature Control & Water Volume Calculations
 
 The **water volume** setting is critical for automated calculations.
