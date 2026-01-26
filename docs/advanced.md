@@ -26,20 +26,20 @@ This improves efficiency by avoiding redundant runs while keeping protection tar
 
 ```mermaid
 flowchart TD
-	A[Coordinator update cycle] --> B[Determine run_reason / heat_reason]
-	B --> C{Source in credit_sources?}
+	A[Coordinator update cycle] --> B[Determine run_reason and heat_reason]
+	B --> C{Source in credit_sources}
 	C -- yes --> D[_update_run_credit adds minutes]
 	C -- no --> E[No credit added]
 	D --> F[Compute filter_credit_effective]
 	E --> F
-	F --> G[Filter due? (now >= next_filter_start)]
+	F --> G{Filter due}
 	G -- no --> H[No change to schedule]
-	G -- yes --> I{Maintenance/Pause/Quiet hours?}
-	I -- yes --> J[next_filter_start shifted to quiet end]
-	I -- no --> K{min_gap_remaining > 0?}
-	K -- yes --> L[next_filter_start = now + min_gap]
-	K -- no --> M{filter_missing_minutes <= 0?}
-	M -- yes --> N[Skip run; next_filter_start = now + filter_interval]
+	G -- yes --> I{Maintenance Pause Quiet hours}
+	I -- yes --> J[Shift next_filter_start to quiet end]
+	I -- no --> K{min_gap_remaining > 0}
+	K -- yes --> L[next_filter_start = now plus min_gap]
+	K -- no --> M{filter_missing_minutes <= 0}
+	M -- yes --> N[Skip run; next_filter_start = now plus filter_interval]
 	M -- no --> O[Start auto-filter for filter_missing_minutes]
 ```
 
