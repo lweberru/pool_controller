@@ -488,7 +488,7 @@
                 "name": "Activer chauffage auxiliaire"
             },
             "aux": {
-                "name": "Activer chauffage auxiliaire"
+                "name": "Chauffage auxiliaire"
             }
         },
         "binary_sensor": {

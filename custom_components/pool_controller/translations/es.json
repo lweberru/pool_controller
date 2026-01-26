@@ -488,7 +488,7 @@
                 "name": "Permitir calefacción auxiliar"
             },
             "aux": {
-                "name": "Permitir calefacción auxiliar"
+                "name": "Calefacción auxiliar"
             }
         },
         "binary_sensor": {

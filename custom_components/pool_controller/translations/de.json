@@ -488,7 +488,7 @@
                 "name": "Zusatzheizung erlauben"
             },
             "aux": {
-                "name": "Zusatzheizung erlauben"
+                "name": "Zusatzheizung"
             }
         },
         "binary_sensor": {

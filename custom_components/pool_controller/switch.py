@@ -8,6 +8,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
     entities = [PoolMainSwitch(coordinator), PoolPumpSwitch(coordinator)]
     if entry.data.get(CONF_AUX_HEATING_SWITCH):
+        entities.append(PoolAuxSwitch(coordinator))
         entities.append(PoolAuxAllowedSwitch(coordinator))
     async_add_entities(entities)
 
@@ -75,6 +76,35 @@ class PoolPumpSwitch(PoolBaseSwitch):
             return
         entity_id = self.coordinator.entry.data.get(CONF_PUMP_SWITCH) or self.coordinator.entry.data.get(CONF_MAIN_SWITCH)
         await self.hass.services.async_call("switch", "turn_off", {"entity_id": entity_id})
+
+class PoolAuxSwitch(PoolBaseSwitch):
+    _attr_translation_key = "aux"
+    def __init__(self, coordinator):
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.entry.entry_id}_aux"
+
+    @property
+    def is_on(self):
+        aux_switch_id = self.coordinator.entry.data.get(CONF_AUX_HEATING_SWITCH)
+        if not aux_switch_id:
+            return False
+        return self.coordinator.hass.states.get(aux_switch_id, None) is not None and self.coordinator.hass.states.get(aux_switch_id).state == "on"
+
+    async def async_turn_on(self, **kwargs):
+        demo = self.coordinator.entry.data.get(CONF_DEMO_MODE, False)
+        if demo:
+            return
+        aux_switch_id = self.coordinator.entry.data.get(CONF_AUX_HEATING_SWITCH)
+        if aux_switch_id:
+            await self.hass.services.async_call("switch", "turn_on", {"entity_id": aux_switch_id})
+
+    async def async_turn_off(self, **kwargs):
+        demo = self.coordinator.entry.data.get(CONF_DEMO_MODE, False)
+        if demo:
+            return
+        aux_switch_id = self.coordinator.entry.data.get(CONF_AUX_HEATING_SWITCH)
+        if aux_switch_id:
+            await self.hass.services.async_call("switch", "turn_off", {"entity_id": aux_switch_id})
 
 class PoolAuxAllowedSwitch(PoolBaseSwitch):
     _attr_translation_key = "aux_allowed"

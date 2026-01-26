@@ -669,7 +669,7 @@
         "name": "Allow auxiliary heater"
       },
       "aux": {
-        "name": "Allow auxiliary heater"
+        "name": "Auxiliary heater"
       }
     },
     "button": {

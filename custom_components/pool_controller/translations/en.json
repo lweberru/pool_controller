@@ -444,7 +444,7 @@
       "main": { "name": "Power" },
       "pump": { "name": "Pump" },
       "aux_allowed": { "name": "Allow auxiliary heating" },
-      "aux": { "name": "Enable auxiliary heating" }
+      "aux": { "name": "Auxiliary heater" }
     },
     "binary_sensor": {
       "maintenance_active": { "name": "Maintenance mode" },
