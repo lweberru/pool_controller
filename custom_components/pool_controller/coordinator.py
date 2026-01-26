@@ -1780,12 +1780,12 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     except Exception:
                         return False
 
-                def _can_attempt(entity_id: str) -> bool:
+                def _can_attempt(entity_id: str, allow_integration: bool = False) -> bool:
                     # No entity configured -> nothing to attempt (caller should handle)
                     if not entity_id:
                         return True
                     # Avoid toggling entities that were created by this integration (would cause feedback loops)
-                    if _is_integration_entity(entity_id):
+                    if _is_integration_entity(entity_id) and not allow_integration:
                         _LOGGER.debug("Skipping toggle for %s: entity created by this integration (avoid recursion)", entity_id)
                         return False
                     # Do not attempt when entity is unavailable/unknown
@@ -1836,15 +1836,29 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 # aux_allowed ist der Master-Enable: wenn False, bleibt physischer Schalter immer aus
                 if aux_switch_id:
                     physical_aux_should_be_on = desired_aux and self.aux_allowed
+                    # Prefer toggling the integration's aux switch if present (this calls the physical switch).
+                    aux_entity_id = None
+                    if ent_reg:
+                        try:
+                            cand = ent_reg.async_get_entity_id("switch", DOMAIN, f"{self.entry.entry_id}_aux")
+                            if cand:
+                                ent = ent_reg.async_get(cand)
+                                if ent and getattr(ent, "translation_key", None) == "aux":
+                                    aux_entity_id = cand
+                        except Exception:
+                            aux_entity_id = None
+                    target_aux_id = aux_entity_id or aux_switch_id
+                    allow_integration = bool(aux_entity_id)
+
                     if physical_aux_should_be_on != self._last_should_aux_on:
                         if physical_aux_should_be_on:
-                            if not demo and _can_attempt(aux_switch_id):
-                                self._last_toggle_attempts[aux_switch_id] = now
-                                await self._async_turn_entity(aux_switch_id, True)
+                            if not demo and _can_attempt(target_aux_id, allow_integration=allow_integration):
+                                self._last_toggle_attempts[target_aux_id] = now
+                                await self._async_turn_entity(target_aux_id, True)
                         else:
-                            if not demo and _can_attempt(aux_switch_id):
-                                self._last_toggle_attempts[aux_switch_id] = now
-                                await self._async_turn_entity(aux_switch_id, False)
+                            if not demo and _can_attempt(target_aux_id, allow_integration=allow_integration):
+                                self._last_toggle_attempts[target_aux_id] = now
+                                await self._async_turn_entity(target_aux_id, False)
                         self._last_should_aux_on = physical_aux_should_be_on
             except Exception:
                 _LOGGER.exception("Fehler beim Anwenden der gewünschten Schaltzustände")
