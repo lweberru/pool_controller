@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 from homeassistant.components.climate import ClimateEntity, ClimateEntityFeature, HVACMode, HVACAction
 from homeassistant.const import UnitOfTemperature, ATTR_TEMPERATURE
 from homeassistant.helpers.device_registry import DeviceInfo
@@ -15,6 +16,22 @@ from .const import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+_CACHED_SW_VERSION = None
+
+def _integration_version() -> str | None:
+    global _CACHED_SW_VERSION
+    if _CACHED_SW_VERSION is not None:
+        return _CACHED_SW_VERSION
+    try:
+        manifest_path = Path(__file__).resolve().parent / "manifest.json"
+        raw = manifest_path.read_text(encoding="utf-8")
+        import json
+        data = json.loads(raw)
+        _CACHED_SW_VERSION = str(data.get("version")) if data.get("version") else None
+    except Exception:
+        _CACHED_SW_VERSION = None
+    return _CACHED_SW_VERSION
 
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
@@ -77,8 +94,8 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
             identifiers={(DOMAIN, self.coordinator.entry.entry_id)},
             name=self.coordinator.entry.data.get("name", "Whirlpool"),
             manufacturer=MANUFACTURER,
-            model="Advanced Controller v1",
-            sw_version="1.6.22",
+            model="Advanced Controller v2",
+            sw_version=_integration_version(),
         )
 
     @property
