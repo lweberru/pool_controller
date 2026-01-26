@@ -96,13 +96,15 @@ class PoolAuxAllowedSwitch(PoolBaseSwitch):
     @property
     def is_on(self):
         # Zeigt Master-Enable-Status, nicht den physischen Schalter
-        return self.coordinator.aux_enabled
+        return self.coordinator.aux_allowed
     async def async_turn_on(self, **kwargs):
         # Aktiviere Master-Enable für Zusatzheizung
+        self.coordinator.aux_allowed = True
         self.coordinator.aux_enabled = True
         await self.coordinator.async_request_refresh()
     async def async_turn_off(self, **kwargs):
         # Deaktiviere Master-Enable und schalte physischen Schalter sofort aus
+        self.coordinator.aux_allowed = False
         self.coordinator.aux_enabled = False
         demo = self.coordinator.entry.data.get(CONF_DEMO_MODE, False)
         aux_switch_id = self.coordinator.entry.data.get(CONF_AUX_HEATING_SWITCH)

@@ -31,11 +31,14 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         # Track last toggle attempts per entity to avoid rapid retry loops
         # when an entity becomes unavailable after a toggle (prevents oscillation).
         self._last_toggle_attempts = {}
-        # Master-Enable für Zusatzheizung: vom gemergten config/options lesen (default: False)
+        # Master-Enable für Zusatzheizung (aux allowed): vom gemergten config/options lesen (default: False)
         try:
             merged = {**(entry.data or {}), **(entry.options or {})} if entry else {}
-            self.aux_enabled = bool(merged.get(CONF_ENABLE_AUX_HEATING, False))
+            self.aux_allowed = bool(merged.get(CONF_ENABLE_AUX_HEATING, False))
+            # Backward-compatible alias (legacy internal name)
+            self.aux_enabled = self.aux_allowed
         except Exception:
+            self.aux_allowed = False
             self.aux_enabled = False
         # Toggle debounce seconds (configurable via entry.options or defaults)
         try:
@@ -675,8 +678,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             now = dt_util.now()
             conf = {**self.entry.data, **self.entry.options}
 
-            # Ensure aux_enabled is always a boolean (defensive)
-            self.aux_enabled = bool(getattr(self, "aux_enabled", False))
+            # Ensure aux_allowed is always a boolean (defensive)
+            self.aux_allowed = bool(getattr(self, "aux_allowed", getattr(self, "aux_enabled", False)))
+            # Keep legacy alias in sync
+            self.aux_enabled = self.aux_allowed
 
             # Physical switch entity IDs (may be external entities). Used for state mirroring.
             main_switch_id = conf.get(CONF_MAIN_SWITCH)
@@ -1827,10 +1832,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     # Keep in sync when both are the same underlying entity
                     self._last_should_pump_on = desired_main
 
-                # Toggle aux switch according to desired_aux AND aux_enabled
-                # aux_enabled ist der Master-Enable: wenn False, bleibt physischer Schalter immer aus
+                # Toggle aux switch according to desired_aux AND aux_allowed
+                # aux_allowed ist der Master-Enable: wenn False, bleibt physischer Schalter immer aus
                 if aux_switch_id:
-                    physical_aux_should_be_on = desired_aux and self.aux_enabled
+                    physical_aux_should_be_on = desired_aux and self.aux_allowed
                     if physical_aux_should_be_on != self._last_should_aux_on:
                         if physical_aux_should_be_on:
                             if not demo and _can_attempt(aux_switch_id):
