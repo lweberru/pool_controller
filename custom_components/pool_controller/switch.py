@@ -8,8 +8,19 @@ async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
     entities = [PoolMainSwitch(coordinator), PoolPumpSwitch(coordinator)]
     if entry.data.get(CONF_AUX_HEATING_SWITCH):
-        entities.append(PoolAuxSwitch(coordinator))
+        # Always add the feature-enable switch
         entities.append(PoolAuxAllowedSwitch(coordinator))
+        # Only add the physical aux power switch if the legacy aux unique_id
+        # is not already occupied by the old aux-allowed switch.
+        try:
+            ent_reg = er.async_get(hass)
+            legacy_aux_entity = ent_reg.async_get_entity_id("switch", DOMAIN, f"{entry.entry_id}_aux")
+            aux_allowed_entity = ent_reg.async_get_entity_id("switch", DOMAIN, f"{entry.entry_id}_aux_allowed")
+        except Exception:
+            legacy_aux_entity = None
+            aux_allowed_entity = None
+        if (not legacy_aux_entity) or aux_allowed_entity:
+            entities.append(PoolAuxSwitch(coordinator))
     async_add_entities(entities)
 
 class PoolBaseSwitch(CoordinatorEntity, SwitchEntity):
