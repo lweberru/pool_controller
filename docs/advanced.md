@@ -106,8 +106,8 @@ Notes:
 ### Auxiliary Heating
 If you've added an extra heater (resistive, heat pump, etc.):
 1. Configure a secondary smart switch entity during setup
-2. Switch appears as `switch.pool_aux`
-3. Controlled independently via automation or manual button
+2. Switch appears as `switch.pool_aux_allowed`
+3. Controls whether the auxiliary heater is currently allowed (feature enable)
 
 ### Salt Water Chlorination
 If your pool uses salt chlorination:

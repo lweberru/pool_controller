@@ -484,6 +484,9 @@
             "pump": {
                 "name": "Pumpe"
             },
+            "aux_allowed": {
+                "name": "Zusatzheizung erlauben"
+            },
             "aux": {
                 "name": "Zusatzheizung erlauben"
             }

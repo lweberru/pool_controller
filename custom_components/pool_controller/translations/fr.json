@@ -484,6 +484,9 @@
             "pump": {
                 "name": "Pompe"
             },
+            "aux_allowed": {
+                "name": "Activer chauffage auxiliaire"
+            },
             "aux": {
                 "name": "Activer chauffage auxiliaire"
             }

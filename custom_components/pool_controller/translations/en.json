@@ -443,6 +443,7 @@
     "switch": {
       "main": { "name": "Power" },
       "pump": { "name": "Pump" },
+      "aux_allowed": { "name": "Allow auxiliary heating" },
       "aux": { "name": "Enable auxiliary heating" }
     },
     "binary_sensor": {

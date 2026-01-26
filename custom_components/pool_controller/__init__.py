@@ -316,6 +316,52 @@ def _ensure_services_registered(hass: HomeAssistant):
 
     hass.data[DOMAIN][_SERVICES_REGISTERED_KEY] = True
 
+async def _migrate_aux_allowed_switch_unique_id(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Best-effort migration: rename aux switch unique_id to `_aux_allowed`."""
+    try:
+        ent_reg = er.async_get(hass)
+        try:
+            entries = er.async_entries_for_config_entry(ent_reg, entry.entry_id)
+        except Exception:
+            entries = [
+                e
+                for e in ent_reg.entities.values()
+                if getattr(e, "config_entry_id", None) == entry.entry_id
+            ]
+
+        old_uid = f"{entry.entry_id}_aux"
+        new_uid = f"{entry.entry_id}_aux_allowed"
+
+        # If the new unique_id already exists, nothing to do.
+        if ent_reg.async_get_entity_id("switch", DOMAIN, new_uid):
+            return
+
+        for e in entries:
+            if getattr(e, "domain", None) != "switch":
+                continue
+            if getattr(e, "platform", None) != DOMAIN:
+                continue
+            if getattr(e, "unique_id", None) != old_uid:
+                continue
+            try:
+                ent_reg.async_update_entity(
+                    e.entity_id,
+                    new_unique_id=new_uid,
+                    translation_key="aux_allowed",
+                )
+                _LOGGER.info("Migrated aux switch unique_id to %s for %s", new_uid, e.entity_id)
+                return
+            except TypeError:
+                # Older HA might not support new_unique_id; at least update translation_key.
+                ent_reg.async_update_entity(e.entity_id, translation_key="aux_allowed")
+                _LOGGER.info("Updated aux switch translation_key for %s", e.entity_id)
+                return
+            except Exception:
+                _LOGGER.exception("Failed to migrate aux switch unique_id for %s", e.entity_id)
+                return
+    except Exception:
+        _LOGGER.debug("Aux switch unique_id migration skipped for %s", entry.entry_id)
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Setup der Integration."""
     _LOGGER.info("Setting up pool_controller entry %s", entry.entry_id)
@@ -331,6 +377,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # Services werden global (einmalig) registriert und routen dann auf die richtige Instanz.
     _ensure_services_registered(hass)
+
+    # Best-effort migration for the aux "allowed" switch unique_id.
+    try:
+        await _migrate_aux_allowed_switch_unique_id(hass, entry)
+    except Exception:
+        _LOGGER.debug("Aux switch unique_id migration failed for %s", entry.entry_id)
 
     # Plattformen laden
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)

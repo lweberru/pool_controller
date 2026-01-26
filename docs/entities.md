@@ -102,7 +102,7 @@ All three timer sensors use **minutes remaining** as their state (unit: `min`).
 |--------|-------------|
 | `switch.<pool>_main` | Power supply / main relay on/off |
 | `switch.<pool>_pump` | Circulation pump on/off (may point to the same physical entity as `main` if not configured separately) |
-| `switch.<pool>_aux` | Auxiliary heater on/off |
+| `switch.<pool>_aux_allowed` | Allow auxiliary heater (feature enable; not the physical heater switch) |
 
 ## Climate
 

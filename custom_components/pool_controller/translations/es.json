@@ -484,6 +484,9 @@
             "pump": {
                 "name": "Bomba"
             },
+            "aux_allowed": {
+                "name": "Permitir calefacción auxiliar"
+            },
             "aux": {
                 "name": "Permitir calefacción auxiliar"
             }
