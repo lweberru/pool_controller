@@ -215,3 +215,11 @@ DEFAULT_MIN_GAP_MINUTES = 45
 DEFAULT_MAX_MERGE_RUN_MINUTES = 40
 DEFAULT_MIN_CREDIT_MINUTES = 5
 DEFAULT_CREDIT_SOURCES = ["bathing", "filter", "frost", "preheat", "pv", "thermostat", "chlorine"]
+
+# Persisted option keys for run credit (best-effort)
+OPT_KEY_FILTER_CREDIT_MINUTES = "filter_credit_minutes"
+OPT_KEY_FILTER_CREDIT_EXPIRES_AT = "filter_credit_expires_at"
+OPT_KEY_FROST_CREDIT_MINUTES = "frost_credit_minutes"
+OPT_KEY_FROST_CREDIT_EXPIRES_AT = "frost_credit_expires_at"
+OPT_KEY_CREDIT_STREAK_SOURCE = "credit_streak_source"
+OPT_KEY_CREDIT_STREAK_MINUTES = "credit_streak_minutes"

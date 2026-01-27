@@ -8,6 +8,9 @@ All notable changes to this integration are documented in this file.
 - New diagnostic sensors: `heat_loss_w_per_c` and `heat_startup_offset_minutes`.
 - Heat-loss tuning uses a minimum 60‑minute window to handle sparse temperature updates.
 
+## [2.2.9] - 2026-01-27
+- Persist filter/frost run credits across Home Assistant restarts (best-effort, throttled).
+
 ## [1.6.30] - 2026-01-12
 - Add `binary_sensor.<pool>_aux_present` — indicates whether an auxiliary heater is configured (true when `enable_aux_heating` is set or an `aux_heating_switch` is configured).
 - Minor docs update to list the new binary sensor.

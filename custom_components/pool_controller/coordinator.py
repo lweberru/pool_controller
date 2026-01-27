@@ -91,6 +91,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self._last_run_active = False
         self._last_run_source = None
         self._last_run_end = None
+        self._credit_persist_last_saved = None
+        self._credit_persist_snapshot = None
 
         # Adaptive heating tuning
         self.heat_loss_w_per_c = DEFAULT_HEAT_LOSS_W_PER_C
@@ -130,6 +132,37 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 self.manual_timer_duration = int(entry.options.get(OPT_KEY_MANUAL_DURATION)) if entry.options.get(OPT_KEY_MANUAL_DURATION) is not None else None
             except Exception:
                 self.manual_timer_duration = None
+
+            # Run credit persisted values (best effort)
+            try:
+                if entry.options.get(OPT_KEY_FILTER_CREDIT_MINUTES) is not None:
+                    self._filter_credit_minutes = float(entry.options.get(OPT_KEY_FILTER_CREDIT_MINUTES))
+            except Exception:
+                self._filter_credit_minutes = 0.0
+            try:
+                fc_exp = entry.options.get(OPT_KEY_FILTER_CREDIT_EXPIRES_AT)
+                self._filter_credit_expires_at = dt_util.parse_datetime(fc_exp) if fc_exp else None
+            except Exception:
+                self._filter_credit_expires_at = None
+            try:
+                if entry.options.get(OPT_KEY_FROST_CREDIT_MINUTES) is not None:
+                    self._frost_credit_minutes = float(entry.options.get(OPT_KEY_FROST_CREDIT_MINUTES))
+            except Exception:
+                self._frost_credit_minutes = 0.0
+            try:
+                fr_exp = entry.options.get(OPT_KEY_FROST_CREDIT_EXPIRES_AT)
+                self._frost_credit_expires_at = dt_util.parse_datetime(fr_exp) if fr_exp else None
+            except Exception:
+                self._frost_credit_expires_at = None
+            try:
+                self._credit_streak_source = entry.options.get(OPT_KEY_CREDIT_STREAK_SOURCE) or None
+            except Exception:
+                self._credit_streak_source = None
+            try:
+                if entry.options.get(OPT_KEY_CREDIT_STREAK_MINUTES) is not None:
+                    self._credit_streak_minutes = float(entry.options.get(OPT_KEY_CREDIT_STREAK_MINUTES))
+            except Exception:
+                self._credit_streak_minutes = 0.0
 
             au = entry.options.get(OPT_KEY_AUTO_FILTER_UNTIL)
             if au:
@@ -706,6 +739,50 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 frost_is_severe,
             )
 
+    async def _maybe_persist_credit_state(self, now: datetime) -> None:
+        if not self.entry or self.entry.options is None:
+            return
+
+        filter_minutes = float(self._filter_credit_minutes or 0.0)
+        frost_minutes = float(self._frost_credit_minutes or 0.0)
+        streak_minutes = float(self._credit_streak_minutes or 0.0)
+        filter_exp = self._filter_credit_expires_at.isoformat() if self._filter_credit_expires_at else None
+        frost_exp = self._frost_credit_expires_at.isoformat() if self._frost_credit_expires_at else None
+        streak_source = self._credit_streak_source or None
+
+        snapshot = (filter_minutes, filter_exp, frost_minutes, frost_exp, streak_source, streak_minutes)
+        if self._credit_persist_snapshot == snapshot:
+            return
+
+        # Throttle saves to reduce churn.
+        try:
+            last_saved = self._credit_persist_last_saved
+            if last_saved and (now - last_saved).total_seconds() < 5 * 60:
+                return
+        except Exception:
+            pass
+
+        opts = {**self.entry.options}
+        opts[OPT_KEY_FILTER_CREDIT_MINUTES] = filter_minutes
+        opts[OPT_KEY_FROST_CREDIT_MINUTES] = frost_minutes
+        opts[OPT_KEY_CREDIT_STREAK_MINUTES] = streak_minutes
+        if streak_source:
+            opts[OPT_KEY_CREDIT_STREAK_SOURCE] = streak_source
+        else:
+            opts.pop(OPT_KEY_CREDIT_STREAK_SOURCE, None)
+        if filter_exp:
+            opts[OPT_KEY_FILTER_CREDIT_EXPIRES_AT] = filter_exp
+        else:
+            opts.pop(OPT_KEY_FILTER_CREDIT_EXPIRES_AT, None)
+        if frost_exp:
+            opts[OPT_KEY_FROST_CREDIT_EXPIRES_AT] = frost_exp
+        else:
+            opts.pop(OPT_KEY_FROST_CREDIT_EXPIRES_AT, None)
+
+        await self._async_update_entry_options(opts)
+        self._credit_persist_last_saved = now
+        self._credit_persist_snapshot = snapshot
+
     async def _async_update_data(self):
         # Safe defaults used if update cannot complete (avoid exposing None/unset keys)
         _safe_defaults = {
@@ -936,6 +1013,12 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 frost_danger=frost_danger,
                 frost_is_severe=frost_is_severe,
             )
+
+            # Persist run credit state (best effort, throttled)
+            try:
+                await self._maybe_persist_credit_state(now)
+            except Exception:
+                pass
 
             # Frost-Timer: Wenn frost_active, berechne Restlaufzeit und setze Timer-Attribute
             frost_timer_mins = None
