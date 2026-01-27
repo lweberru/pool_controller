@@ -11,7 +11,8 @@ If your spa/pool is connected to a simple smart switch (on/off only), you lose a
 
 ## Dashboard Card Preview
 
-![Pool Controller Dashboard Card](card_example_1.png)
+![Pool Controller Dashboard Card 1](card_example_1.png)
+![Pool Controller Dashboard Card 2](card_example_2.png)
 
 > The dashboard card shown above is available as a separate HACS plugin: [lweberru/pool_controller_dashboard_frontend](https://github.com/lweberru/pool_controller_dashboard_frontend)
 
