@@ -906,6 +906,41 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             
             main_power = self._get_float(conf.get(CONF_MAIN_POWER_SENSOR))
             aux_power = self._get_float(conf.get(CONF_AUX_POWER_SENSOR))
+
+            # Electricity price (fixed or dynamic entity)
+            electricity_price = None
+            price_entity = conf.get(CONF_ELECTRICITY_PRICE_ENTITY)
+            price_from_entity = self._get_float(price_entity) if price_entity else None
+            if price_from_entity is not None:
+                electricity_price = price_from_entity
+            else:
+                try:
+                    electricity_price = float(conf.get(CONF_ELECTRICITY_PRICE, DEFAULT_ELECTRICITY_PRICE))
+                except Exception:
+                    electricity_price = None
+
+            # Feed-in tariff (fixed or dynamic entity)
+            feed_in_tariff = None
+            feed_in_entity = conf.get(CONF_FEED_IN_TARIFF_ENTITY)
+            feed_in_from_entity = self._get_float(feed_in_entity) if feed_in_entity else None
+            if feed_in_from_entity is not None:
+                feed_in_tariff = feed_in_from_entity
+            else:
+                try:
+                    feed_in_tariff = float(conf.get(CONF_FEED_IN_TARIFF, DEFAULT_FEED_IN_TARIFF))
+                except Exception:
+                    feed_in_tariff = None
+
+            # Total power and current cost per hour (best effort)
+            total_power_w = None
+            if main_power is not None or aux_power is not None:
+                total_power_w = float(main_power or 0.0) + float(aux_power or 0.0)
+            power_cost_per_hour = None
+            try:
+                if total_power_w is not None and electricity_price is not None:
+                    power_cost_per_hour = (float(total_power_w) / 1000.0) * float(electricity_price)
+            except Exception:
+                power_cost_per_hour = None
             
             # 1. Frost & Wochenende
             # Frostschutz nur wenn aktiviert UND Outdoor-Sensor vorhanden
@@ -1177,6 +1212,25 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             enable_pv = conf.get(CONF_ENABLE_PV_OPTIMIZATION, False)
             pv_raw = self._get_float(conf.get(CONF_PV_SURPLUS_SENSOR))
             pv_val = pv_raw if enable_pv else None
+
+            # Net cost and feed-in loss (best effort). pv_raw is treated as surplus (exportable) power in W.
+            power_cost_per_hour_net = None
+            power_cost_feed_in_loss_per_hour = None
+            try:
+                if total_power_w is not None and electricity_price is not None:
+                    pv_surplus_w = float(pv_raw) if pv_raw is not None else 0.0
+                    pv_surplus_w = max(0.0, pv_surplus_w)
+                    net_grid_w = max(0.0, float(total_power_w) - pv_surplus_w)
+                    power_cost_per_hour_net = (net_grid_w / 1000.0) * float(electricity_price)
+
+                if total_power_w is not None and feed_in_tariff is not None:
+                    pv_surplus_w = float(pv_raw) if pv_raw is not None else 0.0
+                    pv_surplus_w = max(0.0, pv_surplus_w)
+                    feed_in_loss_w = min(float(total_power_w), pv_surplus_w)
+                    power_cost_feed_in_loss_per_hour = (feed_in_loss_w / 1000.0) * float(feed_in_tariff)
+            except Exception:
+                power_cost_per_hour_net = None
+                power_cost_feed_in_loss_per_hour = None
 
             # Compute smoothed PV (exponential moving average) using configured window (seconds).
             try:
@@ -1870,6 +1924,11 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "in_quiet": in_quiet,
                 "main_power": round(main_power, 1) if main_power is not None else None,
                 "aux_power": round(aux_power, 1) if aux_power is not None else None,
+                "electricity_price": round(float(electricity_price), 4) if electricity_price is not None else None,
+                "feed_in_tariff": round(float(feed_in_tariff), 4) if feed_in_tariff is not None else None,
+                "power_cost_per_hour": round(float(power_cost_per_hour), 4) if power_cost_per_hour is not None else None,
+                "power_cost_per_hour_net": round(float(power_cost_per_hour_net), 4) if power_cost_per_hour_net is not None else None,
+                "power_cost_feed_in_loss_per_hour": round(float(power_cost_feed_in_loss_per_hour), 4) if power_cost_feed_in_loss_per_hour is not None else None,
                 "heat_loss_w_per_c": round(float(self.heat_loss_w_per_c), 2) if self.heat_loss_w_per_c is not None else None,
                 "heat_startup_offset_minutes": round(float(self.heat_startup_offset_minutes), 1) if self.heat_startup_offset_minutes is not None else None,
                 # Stromversorgung an, wenn der Pool laufen muss (inkl. Frost) oder wenn die Pumpe laufen soll.

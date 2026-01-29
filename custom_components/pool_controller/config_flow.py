@@ -73,6 +73,14 @@ def _climate_schema(curr: dict | None = None):
         vol.Optional(CONF_MIN_TEMP, default=c.get(CONF_MIN_TEMP, DEFAULT_MIN_TEMP)): vol.Coerce(float),
         vol.Optional(CONF_MAX_TEMP, default=c.get(CONF_MAX_TEMP, DEFAULT_MAX_TEMP)): vol.Coerce(float),
         vol.Optional(CONF_TARGET_TEMP_STEP, default=c.get(CONF_TARGET_TEMP_STEP, DEFAULT_TARGET_TEMP_STEP)): vol.Coerce(float),
+        vol.Optional(CONF_ELECTRICITY_PRICE, default=c.get(CONF_ELECTRICITY_PRICE, DEFAULT_ELECTRICITY_PRICE)):
+            selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=5, step=0.001, mode=selector.NumberSelectorMode.BOX)),
+        vol.Optional(CONF_ELECTRICITY_PRICE_ENTITY, default=c.get(CONF_ELECTRICITY_PRICE_ENTITY, "")):
+            selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+        vol.Optional(CONF_FEED_IN_TARIFF, default=c.get(CONF_FEED_IN_TARIFF, DEFAULT_FEED_IN_TARIFF)):
+            selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=5, step=0.001, mode=selector.NumberSelectorMode.BOX)),
+        vol.Optional(CONF_FEED_IN_TARIFF_ENTITY, default=c.get(CONF_FEED_IN_TARIFF_ENTITY, "")):
+            selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
         vol.Optional(CONF_HEATER_BASE_POWER_W, default=c.get(CONF_HEATER_BASE_POWER_W, DEFAULT_HEATER_BASE_POWER_W)):
             selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=20000, step=50, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="W")),
         vol.Optional(CONF_HEATER_AUX_POWER_W, default=c.get(CONF_HEATER_AUX_POWER_W, DEFAULT_HEATER_AUX_POWER_W)):

@@ -2,6 +2,10 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.3.0] - 2026-01-29
+- Add electricity cost estimation with fixed/dynamic price and feed-in tariff.
+- New diagnostic sensors: `electricity_price`, `feed_in_tariff`, `power_cost_per_hour`, `power_cost_per_hour_net`, `power_cost_feed_in_loss_per_hour`.
+
 ## [2.2.9] - 2026-01-27
 - Persist filter/frost run credits across Home Assistant restarts (best-effort, throttled).
 

@@ -41,6 +41,12 @@ CONF_TARGET_TEMP_STEP = "target_temp_step"
 CONF_COLD_TOLERANCE = "cold_tolerance"
 CONF_HOT_TOLERANCE = "hot_tolerance"
 
+# Electricity price (cost estimation)
+CONF_ELECTRICITY_PRICE = "electricity_price"
+CONF_ELECTRICITY_PRICE_ENTITY = "electricity_price_entity"
+CONF_FEED_IN_TARIFF = "feed_in_tariff"
+CONF_FEED_IN_TARIFF_ENTITY = "feed_in_tariff_entity"
+
 # Heating power used for preheat time estimation (watts).
 # Do NOT derive this from a live pump power sensor.
 CONF_HEATER_POWER_W = "heater_power_w"
@@ -199,6 +205,10 @@ DEFAULT_TARGET_SALT_G_L = 4.0
 # Defaults preserve current behavior as close as possible, while allowing proper 'stop at target'.
 DEFAULT_COLD_TOLERANCE = 0.5
 DEFAULT_HOT_TOLERANCE = 0.5
+
+# Electricity price default (currency per kWh)
+DEFAULT_ELECTRICITY_PRICE = 0.30
+DEFAULT_FEED_IN_TARIFF = 0.08
 
 # Frost duty-cycle defaults (intentionally conservative / neighbor-friendly)
 DEFAULT_FROST_START_TEMP = 1.0
