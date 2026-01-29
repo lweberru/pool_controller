@@ -2,6 +2,9 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.3.2] - 2026-01-29
+- Fix options menu label for costs and add missing costs-step titles/descriptions in translations.
+
 ## [2.3.1] - 2026-01-29
 - Move costs configuration to a dedicated step at the end of setup and options flow.
 - Allow `input_number` helpers for electricity price and feed-in tariff entities.

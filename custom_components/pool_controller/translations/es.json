@@ -246,6 +246,7 @@
                     "filter": "Filtrado",
                     "durations": "Duraciones",
                     "pv": "Excedente FV",
+                    "costs": "Costes eléctricos",
                     "all": "Configuración guiada (todos los pasos)"
                 }
             },
@@ -489,6 +490,23 @@
                     "pv_smooth_window_seconds": "Ventana en segundos usada para el suavizado exponencial del valor PV. 0 desactiva el suavizado.",
                     "pv_stability_seconds": "Cuánto tiempo debe persistir un valor PV suavizado antes de que se aplique el cambio (segundos).",
                     "pv_min_run_minutes": "Tiempo mínimo de ejecución automática en minutos antes de permitir un apagado automático. Evita paradas inmediatas tras un encendido breve."                
+                }
+            },
+            "costs": {
+                "title": "Costes eléctricos",
+                "description": "Configura el precio de electricidad y la tarifa de inyección para estimar costes.",
+                "submit": "Guardar",
+                "data": {
+                    "electricity_price": "Precio de electricidad (por kWh)",
+                    "electricity_price_entity": "Entidad de precio de electricidad",
+                    "feed_in_tariff": "Tarifa de inyección (por kWh)",
+                    "feed_in_tariff_entity": "Entidad de tarifa de inyección"
+                },
+                "data_description": {
+                    "electricity_price": "Precio fijo de electricidad para estimar costes (moneda por kWh)",
+                    "electricity_price_entity": "Sensor/helper opcional de precio dinámico (anula el precio fijo)",
+                    "feed_in_tariff": "Tarifa de inyección para estimar ingresos perdidos (moneda por kWh)",
+                    "feed_in_tariff_entity": "Sensor/helper opcional de tarifa dinámica (anula la tarifa fija)"
                 }
             }
         }

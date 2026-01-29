@@ -254,6 +254,7 @@
                     "filter": "Filter",
                     "durations": "Dauern",
                     "pv": "PV-Überschuss",
+                    "costs": "Stromkosten",
                     "all": "Geführtes Setup (alle Schritte)"
                 }
             },
@@ -489,6 +490,23 @@
                     "pv_smooth_window_seconds": "Zeitfenster in Sekunden, das für die exponentielle Glättung des PV-Werts verwendet wird. 0 deaktiviert die Glättung.",
                     "pv_stability_seconds": "Wie lange ein geänderter, geglätteter PV-Wert bestehen muss, bevor die Änderung übernommen wird (Sekunden).",
                     "pv_min_run_minutes": "Minimale automatische Laufzeit in Minuten, bevor ein automatisches Abschalten erlaubt ist. Verhindert sofortiges Stoppen nach kurzem Einschalten."
+                }
+            },
+            "costs": {
+                "title": "Stromkosten",
+                "description": "Strompreis und Einspeisevergütung für Kostenschätzung konfigurieren.",
+                "submit": "Speichern",
+                "data": {
+                    "electricity_price": "Strompreis (pro kWh)",
+                    "electricity_price_entity": "Entität für Strompreis",
+                    "feed_in_tariff": "Einspeisevergütung (pro kWh)",
+                    "feed_in_tariff_entity": "Entität für Einspeisevergütung"
+                },
+                "data_description": {
+                    "electricity_price": "Fixer Strompreis zur Kostenschätzung (Währung pro kWh)",
+                    "electricity_price_entity": "Optionaler Sensor/Helper für dynamischen Strompreis (überschreibt den fixen Preis)",
+                    "feed_in_tariff": "Einspeisevergütung zur Schätzung entgangener Erlöse (Währung pro kWh)",
+                    "feed_in_tariff_entity": "Optionaler Sensor/Helper für dynamische Einspeisevergütung (überschreibt den fixen Tarif)"
                 }
             }
         }

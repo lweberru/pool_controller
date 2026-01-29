@@ -13,6 +13,7 @@
           "name": "Display name for this pool installation",
           "water_volume": "Water volume in liters (used for dosing and heating time calculations)",
           "demo_mode": "Demo mode: does not switch real devices (for testing only)"
+          "costs": "Electricity costs",
         }
       },
       "switches": {
@@ -234,6 +235,23 @@
           "pv_smooth_window_seconds": "Window in seconds used for exponential smoothing of the PV value. Set 0 to disable smoothing.",
           "pv_stability_seconds": "How long a changed, smoothed PV value must persist before the change is committed (seconds).",
           "pv_min_run_minutes": "Minimum automatic run time in minutes before an automatic OFF is allowed. Prevents immediate stop after a short ON period."
+        }
+      },
+      "costs": {
+        "title": "Electricity costs",
+        "description": "Configure electricity price and feed-in tariff for cost estimation.",
+        "submit": "Save",
+        "data": {
+          "electricity_price": "Electricity price (per kWh)",
+          "electricity_price_entity": "Electricity price entity",
+          "feed_in_tariff": "Feed-in tariff (per kWh)",
+          "feed_in_tariff_entity": "Feed-in tariff entity"
+        },
+        "data_description": {
+          "electricity_price": "Fixed electricity price used for cost estimation (currency per kWh)",
+          "electricity_price_entity": "Optional sensor/helper for dynamic electricity price (overrides the fixed price)",
+          "feed_in_tariff": "Feed-in tariff used to estimate lost export revenue (currency per kWh)",
+          "feed_in_tariff_entity": "Optional sensor/helper for dynamic feed-in tariff (overrides the fixed tariff)"
         }
       }
     }
