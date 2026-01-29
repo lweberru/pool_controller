@@ -88,10 +88,6 @@
           "min_temp": "Minimum temperature",
           "max_temp": "Maximum temperature",
           "target_temp_step": "Temperature step",
-          "electricity_price": "Electricity price (per kWh)",
-          "electricity_price_entity": "Electricity price entity",
-          "feed_in_tariff": "Feed-in tariff (per kWh)",
-          "feed_in_tariff_entity": "Feed-in tariff entity",
           "heater_base_power_w": "Base heating power (W)",
           "heater_aux_power_w": "Aux heater power (W)",
           "cold_tolerance": "Cold tolerance",
@@ -102,14 +98,27 @@
           "min_temp": "Minimum setpoint available",
           "max_temp": "Maximum setpoint available",
           "target_temp_step": "Step size for setting the target temperature",
-          "electricity_price": "Fixed electricity price used for cost estimation (currency per kWh)",
-          "electricity_price_entity": "Optional sensor for dynamic electricity price (overrides the fixed price)",
-          "feed_in_tariff": "Feed-in tariff used to estimate lost export revenue (currency per kWh)",
-          "feed_in_tariff_entity": "Optional sensor for dynamic feed-in tariff (overrides the fixed tariff)",
           "heater_base_power_w": "Base heating contribution while the circulation pump runs (e.g. waste heat). Used for preheat estimation.",
           "heater_aux_power_w": "Aux heater rated power (watts). Used for preheat estimation when aux heating is enabled. Total = base + aux.",
           "cold_tolerance": "Heater starts when water temperature is below target minus this value",
           "hot_tolerance": "Heater stops when water temperature is at or above target plus this value"
+        }
+      },
+      "costs": {
+        "title": "Electricity costs",
+        "description": "Configure electricity price and feed-in tariff for cost estimation.",
+        "submit": "Continue",
+        "data": {
+          "electricity_price": "Electricity price (per kWh)",
+          "electricity_price_entity": "Electricity price entity",
+          "feed_in_tariff": "Feed-in tariff (per kWh)",
+          "feed_in_tariff_entity": "Feed-in tariff entity"
+        },
+        "data_description": {
+          "electricity_price": "Fixed electricity price used for cost estimation (currency per kWh)",
+          "electricity_price_entity": "Optional sensor/helper for dynamic electricity price (overrides the fixed price)",
+          "feed_in_tariff": "Feed-in tariff used to estimate lost export revenue (currency per kWh)",
+          "feed_in_tariff_entity": "Optional sensor/helper for dynamic feed-in tariff (overrides the fixed tariff)"
         }
       },
       "frost": {

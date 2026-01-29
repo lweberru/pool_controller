@@ -2,6 +2,11 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.3.1] - 2026-01-29
+- Move costs configuration to a dedicated step at the end of setup and options flow.
+- Allow `input_number` helpers for electricity price and feed-in tariff entities.
+- Costs are fully optional; if not configured, cost sensors remain empty.
+
 ## [2.3.0] - 2026-01-29
 - Add electricity cost estimation with fixed/dynamic price and feed-in tariff.
 - New diagnostic sensors: `electricity_price`, `feed_in_tariff`, `power_cost_per_hour`, `power_cost_per_hour_net`, `power_cost_feed_in_loss_per_hour`.

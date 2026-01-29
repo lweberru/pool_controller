@@ -7,10 +7,6 @@
                 "data": {
                     "name": "Pool-Name",
                     "water_volume": "Wassermenge (Liter)",
-                    "demo_mode": "Demo-Modus"
-                },
-                "data_description": {
-                    "name": "Anzeigename für diese Pool-Installation",
                     "water_volume": "Wassermenge in Litern (für Dosierung und Heizzeit-Berechnung)",
                     "demo_mode": "Demo-Modus: schaltet keine echten Geräte (nur zum Testen)"
                 }
@@ -21,16 +17,29 @@
                 "submit": "Weiter",
                 "data": {
                     "main_switch": "Hauptschalter",
-                    "pump_switch": "Pumpen-Schalter (optional)",
-                    "filter_switch": "Filter-Schalter (optional)",
-                    "enable_aux_heating": "Zusatzheizung aktivieren",
-                    "aux_heating_switch": "Zusatzheizung Schalter",
                     "main_power_sensor": "Haupt-Leistungssensor",
                     "aux_power_sensor": "Zusatzheizung Leistungssensor"
                 },
                 "data_description": {
                     "main_switch": "Hauptschalter / Stromversorgung für den Pool (Pflichtfeld)",
                     "pump_switch": "Optional: separater Schalter für Umwälzpumpe (leer lassen, um Hauptschalter zu nutzen)",
+            "costs": {
+                "title": "Stromkosten",
+                "description": "Strompreis und Einspeisevergütung für Kostenschätzung konfigurieren.",
+                "submit": "Weiter",
+                "data": {
+                    "electricity_price": "Strompreis (pro kWh)",
+                    "electricity_price_entity": "Entität für Strompreis",
+                    "feed_in_tariff": "Einspeisevergütung (pro kWh)",
+                    "feed_in_tariff_entity": "Entität für Einspeisevergütung"
+                },
+                "data_description": {
+                    "electricity_price": "Fixer Strompreis zur Kostenschätzung (Währung pro kWh)",
+                    "electricity_price_entity": "Optionaler Sensor/Helper für dynamischen Strompreis (überschreibt den fixen Preis)",
+                    "feed_in_tariff": "Einspeisevergütung zur Schätzung entgangener Erlöse (Währung pro kWh)",
+                    "feed_in_tariff_entity": "Optionaler Sensor/Helper für dynamische Einspeisevergütung (überschreibt den fixen Tarif)"
+                }
+            },
                     "filter_switch": "Optional: separater Schalter für Filterpumpe (leer lassen, um Hauptschalter zu nutzen)",
                     "enable_aux_heating": "Aktiviert zusätzliche Heizung für schnelleres Aufheizen",
                     "aux_heating_switch": "Schalter für elektrische Zusatzheizung",

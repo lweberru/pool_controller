@@ -88,10 +88,6 @@
                     "min_temp": "Température minimale",
                     "max_temp": "Température maximale",
                     "target_temp_step": "Pas de température",
-                    "electricity_price": "Prix de l’électricité (par kWh)",
-                    "electricity_price_entity": "Entité du prix de l’électricité",
-                    "feed_in_tariff": "Tarif d’injection (par kWh)",
-                    "feed_in_tariff_entity": "Entité du tarif d’injection",
                     "heater_base_power_w": "Puissance de base (W)",
                     "heater_aux_power_w": "Puissance auxiliaire (W)",
                     "cold_tolerance": "Tolérance froide",
@@ -102,14 +98,27 @@
                     "min_temp": "Consigne minimale disponible",
                     "max_temp": "Consigne maximale disponible",
                     "target_temp_step": "Pas pour régler la consigne",
-                    "electricity_price": "Prix fixe de l’électricité pour estimer les coûts (monnaie par kWh)",
-                    "electricity_price_entity": "Capteur optionnel de prix dynamique (remplace le prix fixe)",
-                    "feed_in_tariff": "Tarif d’injection pour estimer le revenu perdu (monnaie par kWh)",
-                    "feed_in_tariff_entity": "Capteur optionnel de tarif dynamique (remplace le tarif fixe)",
                     "heater_base_power_w": "Apport de base pendant la circulation (p. ex. chaleur résiduelle). Utilisé pour la pré‑chauffe.",
                     "heater_aux_power_w": "Puissance nominale du chauffage auxiliaire (W). Utilisée pour la pré‑chauffe lorsque l’auxiliaire est activé. Total = base + aux.",
                     "cold_tolerance": "Le chauffage démarre lorsque la température de l’eau est en dessous de la consigne moins cette valeur",
                     "hot_tolerance": "Le chauffage s’arrête lorsque la température de l’eau est à ou au‑dessus de la consigne plus cette valeur"
+                }
+            },
+            "costs": {
+                "title": "Coûts d’électricité",
+                "description": "Configurer le prix de l’électricité et le tarif d’injection pour estimer les coûts.",
+                "submit": "Continuer",
+                "data": {
+                    "electricity_price": "Prix de l’électricité (par kWh)",
+                    "electricity_price_entity": "Entité du prix de l’électricité",
+                    "feed_in_tariff": "Tarif d’injection (par kWh)",
+                    "feed_in_tariff_entity": "Entité du tarif d’injection"
+                },
+                "data_description": {
+                    "electricity_price": "Prix fixe de l’électricité pour estimer les coûts (monnaie par kWh)",
+                    "electricity_price_entity": "Capteur/helper optionnel de prix dynamique (remplace le prix fixe)",
+                    "feed_in_tariff": "Tarif d’injection pour estimer le revenu perdu (monnaie par kWh)",
+                    "feed_in_tariff_entity": "Capteur/helper optionnel de tarif dynamique (remplace le tarif fixe)"
                 }
             },
             "frost": {

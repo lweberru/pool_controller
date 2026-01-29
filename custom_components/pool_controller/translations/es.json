@@ -7,10 +7,6 @@
                 "data": {
                     "name": "Nombre de la piscina",
                     "water_volume": "Volumen de agua (litros)",
-                    "demo_mode": "Modo demo"
-                },
-                "data_description": {
-                    "name": "Nombre que se mostrará para esta instalación",
                     "water_volume": "Volumen de agua en litros (para cálculos de dosificación y calentamiento)",
                     "demo_mode": "Modo demo: no controla dispositivos reales (solo pruebas)"
                 }
@@ -21,16 +17,29 @@
                 "submit": "Continuar",
                 "data": {
                     "main_switch": "Interruptor principal",
-                    "pump_switch": "Interruptor de bomba (opcional)",
-                    "filter_switch": "Interruptor de filtro (opcional)",
-                    "enable_aux_heating": "Habilitar calefacción auxiliar",
-                    "aux_heating_switch": "Interruptor de calefactor auxiliar",
                     "main_power_sensor": "Sensor de potencia principal",
                     "aux_power_sensor": "Sensor de potencia del calefactor auxiliar"
                 },
                 "data_description": {
                     "main_switch": "Interruptor principal / alimentación de la piscina (obligatorio)",
                     "pump_switch": "Opcional: interruptor dedicado para la bomba de circulación (dejar vacío para usar el principal)",
+            "costs": {
+                "title": "Costes eléctricos",
+                "description": "Configura el precio de electricidad y la tarifa de inyección para estimar costes.",
+                "submit": "Continuar",
+                "data": {
+                    "electricity_price": "Precio de electricidad (por kWh)",
+                    "electricity_price_entity": "Entidad de precio de electricidad",
+                    "feed_in_tariff": "Tarifa de inyección (por kWh)",
+                    "feed_in_tariff_entity": "Entidad de tarifa de inyección"
+                },
+                "data_description": {
+                    "electricity_price": "Precio fijo de electricidad para estimar costes (moneda por kWh)",
+                    "electricity_price_entity": "Sensor/helper opcional de precio dinámico (anula el precio fijo)",
+                    "feed_in_tariff": "Tarifa de inyección para estimar ingresos perdidos (moneda por kWh)",
+                    "feed_in_tariff_entity": "Sensor/helper opcional de tarifa dinámica (anula la tarifa fija)"
+                }
+            },
                     "filter_switch": "Opcional: interruptor separado para la bomba del filtro (dejar vacío para usar el principal)",
                     "enable_aux_heating": "Habilita el calefactor auxiliar para calentar más rápido",
                     "aux_heating_switch": "Interruptor del calefactor auxiliar eléctrico",

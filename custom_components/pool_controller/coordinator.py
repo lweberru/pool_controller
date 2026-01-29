@@ -915,7 +915,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 electricity_price = price_from_entity
             else:
                 try:
-                    electricity_price = float(conf.get(CONF_ELECTRICITY_PRICE, DEFAULT_ELECTRICITY_PRICE))
+                    raw_price = conf.get(CONF_ELECTRICITY_PRICE) if CONF_ELECTRICITY_PRICE in conf else None
+                    electricity_price = float(raw_price) if raw_price is not None else None
                 except Exception:
                     electricity_price = None
 
@@ -927,7 +928,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 feed_in_tariff = feed_in_from_entity
             else:
                 try:
-                    feed_in_tariff = float(conf.get(CONF_FEED_IN_TARIFF, DEFAULT_FEED_IN_TARIFF))
+                    raw_tariff = conf.get(CONF_FEED_IN_TARIFF) if CONF_FEED_IN_TARIFF in conf else None
+                    feed_in_tariff = float(raw_tariff) if raw_tariff is not None else None
                 except Exception:
                     feed_in_tariff = None
 

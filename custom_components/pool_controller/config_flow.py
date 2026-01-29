@@ -73,14 +73,6 @@ def _climate_schema(curr: dict | None = None):
         vol.Optional(CONF_MIN_TEMP, default=c.get(CONF_MIN_TEMP, DEFAULT_MIN_TEMP)): vol.Coerce(float),
         vol.Optional(CONF_MAX_TEMP, default=c.get(CONF_MAX_TEMP, DEFAULT_MAX_TEMP)): vol.Coerce(float),
         vol.Optional(CONF_TARGET_TEMP_STEP, default=c.get(CONF_TARGET_TEMP_STEP, DEFAULT_TARGET_TEMP_STEP)): vol.Coerce(float),
-        vol.Optional(CONF_ELECTRICITY_PRICE, default=c.get(CONF_ELECTRICITY_PRICE, DEFAULT_ELECTRICITY_PRICE)):
-            selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=5, step=0.001, mode=selector.NumberSelectorMode.BOX)),
-        vol.Optional(CONF_ELECTRICITY_PRICE_ENTITY, default=c.get(CONF_ELECTRICITY_PRICE_ENTITY, "")):
-            selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
-        vol.Optional(CONF_FEED_IN_TARIFF, default=c.get(CONF_FEED_IN_TARIFF, DEFAULT_FEED_IN_TARIFF)):
-            selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=5, step=0.001, mode=selector.NumberSelectorMode.BOX)),
-        vol.Optional(CONF_FEED_IN_TARIFF_ENTITY, default=c.get(CONF_FEED_IN_TARIFF_ENTITY, "")):
-            selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
         vol.Optional(CONF_HEATER_BASE_POWER_W, default=c.get(CONF_HEATER_BASE_POWER_W, DEFAULT_HEATER_BASE_POWER_W)):
             selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=20000, step=50, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="W")),
         vol.Optional(CONF_HEATER_AUX_POWER_W, default=c.get(CONF_HEATER_AUX_POWER_W, DEFAULT_HEATER_AUX_POWER_W)):
@@ -88,6 +80,40 @@ def _climate_schema(curr: dict | None = None):
         vol.Optional(CONF_COLD_TOLERANCE, default=c.get(CONF_COLD_TOLERANCE, DEFAULT_COLD_TOLERANCE)): vol.Coerce(float),
         vol.Optional(CONF_HOT_TOLERANCE, default=c.get(CONF_HOT_TOLERANCE, DEFAULT_HOT_TOLERANCE)): vol.Coerce(float),
     })
+
+def _costs_schema(curr: dict | None = None):
+    c = curr or {}
+    schema = {}
+    price_default = c.get(CONF_ELECTRICITY_PRICE) if c.get(CONF_ELECTRICITY_PRICE) is not None else None
+    price_entity_default = c.get(CONF_ELECTRICITY_PRICE_ENTITY) if c.get(CONF_ELECTRICITY_PRICE_ENTITY) else None
+    tariff_default = c.get(CONF_FEED_IN_TARIFF) if c.get(CONF_FEED_IN_TARIFF) is not None else None
+    tariff_entity_default = c.get(CONF_FEED_IN_TARIFF_ENTITY) if c.get(CONF_FEED_IN_TARIFF_ENTITY) else None
+
+    schema[
+        vol.Optional(CONF_ELECTRICITY_PRICE, default=price_default)
+        if price_default is not None
+        else vol.Optional(CONF_ELECTRICITY_PRICE)
+    ] = selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=5, step=0.001, mode=selector.NumberSelectorMode.BOX))
+
+    schema[
+        vol.Optional(CONF_ELECTRICITY_PRICE_ENTITY, default=price_entity_default)
+        if price_entity_default is not None
+        else vol.Optional(CONF_ELECTRICITY_PRICE_ENTITY)
+    ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor", "input_number"]))
+
+    schema[
+        vol.Optional(CONF_FEED_IN_TARIFF, default=tariff_default)
+        if tariff_default is not None
+        else vol.Optional(CONF_FEED_IN_TARIFF)
+    ] = selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=5, step=0.001, mode=selector.NumberSelectorMode.BOX))
+
+    schema[
+        vol.Optional(CONF_FEED_IN_TARIFF_ENTITY, default=tariff_entity_default)
+        if tariff_entity_default is not None
+        else vol.Optional(CONF_FEED_IN_TARIFF_ENTITY)
+    ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor", "input_number"]))
+
+    return vol.Schema(schema)
 
 def _frost_schema(curr: dict | None = None):
     c = curr or {}
@@ -395,7 +421,7 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             try:
                 self.data.update(user_input)
-                return self.async_create_entry(title=self.data[CONF_POOL_NAME], data=self.data)
+                return await self.async_step_costs()
             except Exception:
                 _LOGGER.exception("Unerwarteter Fehler im Config Flow")
                 errors["base"] = "unknown"
@@ -406,6 +432,25 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors=errors,
             data_schema=_pv_schema(curr),
             last_step=True
+        )
+
+    async def async_step_costs(self, user_input=None):
+        """Electricity costs and feed-in tariff."""
+        errors = {}
+        if user_input is not None:
+            try:
+                self.data.update(user_input)
+                return self.async_create_entry(title=self.data[CONF_POOL_NAME], data=self.data)
+            except Exception:
+                _LOGGER.exception("Unerwarteter Fehler im Config Flow")
+                errors["base"] = "unknown"
+
+        curr = {**self.data}
+        return self.async_show_form(
+            step_id="costs",
+            errors=errors,
+            data_schema=_costs_schema(curr),
+            last_step=True,
         )
 
     @staticmethod
@@ -442,6 +487,7 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
                 "filter",
                 "durations",
                 "pv",
+                "costs",
                 "all",
             ],
         )
@@ -654,7 +700,7 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             try:
                 self.options.update(user_input)
-                return self.async_create_entry(title="", data=self.options)
+                return await self.async_step_costs()
             except Exception:
                 _LOGGER.exception("Fehler im Options Flow (Zahnrad)")
                 errors["base"] = "unknown"
@@ -664,5 +710,24 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
             step_id="pv",
             errors=errors,
             data_schema=_pv_schema(curr),
+            last_step=True
+        )
+
+    async def async_step_costs(self, user_input=None):
+        """Electricity costs and feed-in tariff."""
+        errors = {}
+        if user_input is not None:
+            try:
+                self.options.update(user_input)
+                return self.async_create_entry(title="", data=self.options)
+            except Exception:
+                _LOGGER.exception("Fehler im Options Flow (Zahnrad)")
+                errors["base"] = "unknown"
+
+        curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
+        return self.async_show_form(
+            step_id="costs",
+            errors=errors,
+            data_schema=_costs_schema(curr),
             last_step=True
         )
