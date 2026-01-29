@@ -254,6 +254,7 @@
                     "filter": "Filtration",
                     "durations": "Durées",
                     "pv": "Surplus PV",
+                    "costs": "Coûts d’électricité",
                     "all": "Configuration guidée (toutes les étapes)"
                 }
             },

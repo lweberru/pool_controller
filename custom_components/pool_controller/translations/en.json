@@ -13,7 +13,6 @@
           "name": "Display name for this pool installation",
           "water_volume": "Water volume in liters (used for dosing and heating time calculations)",
           "demo_mode": "Demo mode: does not switch real devices (for testing only)"
-          "costs": "Electricity costs",
         }
       },
       "switches": {
@@ -258,7 +257,25 @@
   },
   "options": {
     "step": {
-      "init": {
+      "menu": {
+        "title": "Options menu",
+        "description": "Select the section you want to edit.",
+        "menu_options": {
+          "basic": "Basic settings",
+          "switches": "Switches & power",
+          "water_quality": "Water quality",
+          "sanitizer": "Sanitizer",
+          "climate": "Temperature control",
+          "frost": "Frost protection",
+          "calendars": "Calendars & quiet times",
+          "filter": "Filter settings",
+          "durations": "Durations",
+          "pv": "PV surplus",
+          "costs": "Electricity costs",
+          "all": "Guided setup (all steps)"
+        }
+      },
+      "basic": {
         "title": "Settings",
         "description": "General settings. Changes are stored in the config entry options.",
         "submit": "Continue",
@@ -462,18 +479,40 @@
           "enable_pv_optimization": "Enable PV optimization",
           "pv_surplus_sensor": "PV power sensor",
           "pv_on_threshold": "PV ON threshold (W)",
-          "pv_off_threshold": "PV OFF threshold (W)"
+          "pv_off_threshold": "PV OFF threshold (W)",
+          "pv_smooth_window_seconds": "PV smoothing window (s)",
+          "pv_stability_seconds": "PV stability window (s)",
+          "pv_min_run_minutes": "PV minimum run (min)"
         },
         "data_description": {
           "enable_pv_optimization": "Only run pump/heating when PV surplus is available",
           "pv_surplus_sensor": "Sensor reporting PV surplus/production in watts",
           "pv_on_threshold": "Turns main pump ON when PV power >= this value (default: 1000)",
-          "pv_off_threshold": "Turns main pump OFF when PV power <= this value (default: 500)"
+          "pv_off_threshold": "Turns main pump OFF when PV power <= this value (default: 500)",
+          "pv_smooth_window_seconds": "Window in seconds used for exponential smoothing of the PV value. Set 0 to disable smoothing.",
+          "pv_stability_seconds": "How long a changed, smoothed PV value must persist before the change is committed (seconds).",
+          "pv_min_run_minutes": "Minimum automatic run time in minutes before an automatic OFF is allowed. Prevents immediate stop after a short ON period."
+        }
+      },
+      "costs": {
+        "title": "Electricity costs",
+        "description": "Configure electricity price and feed-in tariff for cost estimation.",
+        "submit": "Save",
+        "data": {
+          "electricity_price": "Electricity price (per kWh)",
+          "electricity_price_entity": "Electricity price entity",
+          "feed_in_tariff": "Feed-in tariff (per kWh)",
+          "feed_in_tariff_entity": "Feed-in tariff entity"
+        },
+        "data_description": {
+          "electricity_price": "Fixed electricity price used for cost estimation (currency per kWh)",
+          "electricity_price_entity": "Optional sensor/helper for dynamic electricity price (overrides the fixed price)",
+          "feed_in_tariff": "Feed-in tariff used to estimate lost export revenue (currency per kWh)",
+          "feed_in_tariff_entity": "Optional sensor/helper for dynamic feed-in tariff (overrides the fixed tariff)"
         }
       }
     }
-  }
-  ,
+  },
   "entity": {
     "switch": {
       "main": { "name": "Power" },
@@ -515,11 +554,11 @@
       "filter_missing_minutes": { "name": "Filter remaining (min)" },
       "frost_credit_minutes": { "name": "Frost credit (min)" },
       "frost_credit_shift_minutes": { "name": "Frost shift (min)" },
-            "electricity_price": { "name": "Electricity price (per kWh)" },
-            "feed_in_tariff": { "name": "Feed-in tariff (per kWh)" },
-            "power_cost_per_hour": { "name": "Power cost (per hour)" },
-            "power_cost_per_hour_net": { "name": "Power cost (net per hour)" },
-            "power_cost_feed_in_loss_per_hour": { "name": "Lost feed-in revenue (per hour)" },
+      "electricity_price": { "name": "Electricity price (per kWh)" },
+      "feed_in_tariff": { "name": "Feed-in tariff (per kWh)" },
+      "power_cost_per_hour": { "name": "Power cost (per hour)" },
+      "power_cost_per_hour_net": { "name": "Power cost (net per hour)" },
+      "power_cost_feed_in_loss_per_hour": { "name": "Lost feed-in revenue (per hour)" },
       "heat_loss_w_per_c": { "name": "Heat loss coefficient (W/°C)" },
       "heat_startup_offset_minutes": { "name": "Heat startup offset (min)" },
       "sanitizer_mode": { "name": "Sanitizer" },
