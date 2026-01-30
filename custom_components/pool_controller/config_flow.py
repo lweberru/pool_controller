@@ -187,6 +187,48 @@ def _costs_schema(curr: dict | None = None):
 
     return vol.Schema(schema)
 
+def _alphaess_pick(hass, suffixes: list[str]):
+    if not hass:
+        return None
+    try:
+        states = hass.states.async_all()
+    except Exception:
+        states = list(hass.states.values())
+    for st in states:
+        try:
+            eid = st.entity_id
+        except Exception:
+            continue
+        if not isinstance(eid, str) or not eid.startswith("sensor."):
+            continue
+        # Heuristic: AlphaESS entities typically start with sensor.al...
+        if not eid.startswith("sensor.al"):
+            continue
+        for suffix in suffixes:
+            if eid.endswith(suffix):
+                return eid
+    return None
+
+def _alphaess_defaults(hass):
+    if not hass:
+        return {}
+    defaults = {
+        CONF_GRID_TO_LOAD_ENERGY_ENTITY_DAILY: _alphaess_pick(hass, ["_grid_to_load"]),
+        CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_DAILY: _alphaess_pick(hass, ["_solar_to_load"]),
+        CONF_SOLAR_TO_GRID_ENERGY_ENTITY: _alphaess_pick(hass, ["_solar_to_grid"]),
+        CONF_TOTAL_LOAD_ENERGY_ENTITY: _alphaess_pick(hass, ["_total_load"]),
+    }
+    return {k: v for k, v in defaults.items() if v}
+
+def _apply_auto_defaults(curr: dict, hass):
+    merged = dict(curr or {})
+    defaults = _alphaess_defaults(hass)
+    for key, val in defaults.items():
+        if merged.get(key):
+            continue
+        merged[key] = val
+    return merged
+
 def _frost_schema(curr: dict | None = None):
     c = curr or {}
     return vol.Schema({
@@ -518,6 +560,7 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors["base"] = "unknown"
 
         curr = {**self.data}
+        curr = _apply_auto_defaults(curr, self.hass)
         return self.async_show_form(
             step_id="costs",
             errors=errors,
@@ -797,6 +840,7 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
                 errors["base"] = "unknown"
 
         curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
+        curr = _apply_auto_defaults(curr, self.hass)
         return self.async_show_form(
             step_id="costs",
             errors=errors,

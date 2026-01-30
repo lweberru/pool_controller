@@ -245,3 +245,18 @@ OPT_KEY_FROST_CREDIT_MINUTES = "frost_credit_minutes"
 OPT_KEY_FROST_CREDIT_EXPIRES_AT = "frost_credit_expires_at"
 OPT_KEY_CREDIT_STREAK_SOURCE = "credit_streak_source"
 OPT_KEY_CREDIT_STREAK_MINUTES = "credit_streak_minutes"
+
+# Derived energy aggregation (when only daily sensors are provided)
+OPT_KEY_DERIVED_GRID_DAILY_LAST_VALUE = "derived_grid_daily_last_value"
+OPT_KEY_DERIVED_GRID_DAILY_LAST_DATE = "derived_grid_daily_last_date"
+OPT_KEY_DERIVED_GRID_MONTH_TOTAL = "derived_grid_month_total"
+OPT_KEY_DERIVED_GRID_YEAR_TOTAL = "derived_grid_year_total"
+OPT_KEY_DERIVED_GRID_MONTH_ID = "derived_grid_month_id"
+OPT_KEY_DERIVED_GRID_YEAR_ID = "derived_grid_year_id"
+
+OPT_KEY_DERIVED_SOLAR_DAILY_LAST_VALUE = "derived_solar_daily_last_value"
+OPT_KEY_DERIVED_SOLAR_DAILY_LAST_DATE = "derived_solar_daily_last_date"
+OPT_KEY_DERIVED_SOLAR_MONTH_TOTAL = "derived_solar_month_total"
+OPT_KEY_DERIVED_SOLAR_YEAR_TOTAL = "derived_solar_year_total"
+OPT_KEY_DERIVED_SOLAR_MONTH_ID = "derived_solar_month_id"
+OPT_KEY_DERIVED_SOLAR_YEAR_ID = "derived_solar_year_id"

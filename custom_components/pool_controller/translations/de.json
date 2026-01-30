@@ -244,15 +244,15 @@
                     "electricity_price_entity": "Optionaler Sensor/Helfer für dynamischen Strompreis (überschreibt festen Preis)",
                     "feed_in_tariff": "Einspeisevergütung zur Schätzung entgangener Exporterlöse (Währung pro kWh)",
                     "feed_in_tariff_entity": "Optionaler Sensor/Helfer für dynamische Einspeisevergütung (überschreibt festen Tarif)",
-                    "grid_to_load_energy_entity": "Energie (kWh) aus dem Netz für den Zeitraum (z. B. utility_meter daily/monthly/yearly)",
+                    "grid_to_load_energy_entity": "Optional: gesamte Energie (kWh) aus dem Netz. Leer lassen, wenn du nur daily/monthly/yearly Sensoren hast.",
                     "grid_to_load_energy_entity_daily": "Energie (kWh) aus dem Netz für den Tag",
-                    "grid_to_load_energy_entity_monthly": "Energie (kWh) aus dem Netz für den Monat",
-                    "grid_to_load_energy_entity_yearly": "Energie (kWh) aus dem Netz für das Jahr",
+                    "grid_to_load_energy_entity_monthly": "Energie (kWh) aus dem Netz für den Monat (optional; wird aus daily abgeleitet, wenn leer)",
+                    "grid_to_load_energy_entity_yearly": "Energie (kWh) aus dem Netz für das Jahr (optional; wird aus daily abgeleitet, wenn leer)",
                     "solar_to_grid_energy_entity": "Energie (kWh) ins Netz für den Zeitraum",
                     "solar_to_load_energy_entity": "Energie (kWh) aus Solar zur Last für den Zeitraum",
                     "solar_to_load_energy_entity_daily": "Energie (kWh) aus Solar zur Last für den Tag",
-                    "solar_to_load_energy_entity_monthly": "Energie (kWh) aus Solar zur Last für den Monat",
-                    "solar_to_load_energy_entity_yearly": "Energie (kWh) aus Solar zur Last für das Jahr",
+                    "solar_to_load_energy_entity_monthly": "Energie (kWh) aus Solar zur Last für den Monat (optional; wird aus daily abgeleitet, wenn leer)",
+                    "solar_to_load_energy_entity_yearly": "Energie (kWh) aus Solar zur Last für das Jahr (optional; wird aus daily abgeleitet, wenn leer)",
                     "total_load_energy_entity": "Gesamtlast-Energie (kWh) für den Zeitraum (optional)"
                 }
             }
@@ -522,15 +522,15 @@
                     "electricity_price_entity": "Optionaler Sensor/Helper für dynamischen Strompreis (überschreibt den fixen Preis)",
                     "feed_in_tariff": "Einspeisevergütung zur Schätzung entgangener Erlöse (Währung pro kWh)",
                     "feed_in_tariff_entity": "Optionaler Sensor/Helper für dynamische Einspeisevergütung (überschreibt den fixen Tarif)",
-                    "grid_to_load_energy_entity": "Energie (kWh) aus dem Netz für den Zeitraum (z. B. utility_meter daily/monthly/yearly)",
+                    "grid_to_load_energy_entity": "Optional: gesamte Energie (kWh) aus dem Netz. Leer lassen, wenn du nur daily/monthly/yearly Sensoren hast.",
                     "grid_to_load_energy_entity_daily": "Energie (kWh) aus dem Netz für den Tag",
-                    "grid_to_load_energy_entity_monthly": "Energie (kWh) aus dem Netz für den Monat",
-                    "grid_to_load_energy_entity_yearly": "Energie (kWh) aus dem Netz für das Jahr",
+                    "grid_to_load_energy_entity_monthly": "Energie (kWh) aus dem Netz für den Monat (optional; wird aus daily abgeleitet, wenn leer)",
+                    "grid_to_load_energy_entity_yearly": "Energie (kWh) aus dem Netz für das Jahr (optional; wird aus daily abgeleitet, wenn leer)",
                     "solar_to_grid_energy_entity": "Energie (kWh) ins Netz für den Zeitraum",
                     "solar_to_load_energy_entity": "Energie (kWh) aus Solar zur Last für den Zeitraum",
                     "solar_to_load_energy_entity_daily": "Energie (kWh) aus Solar zur Last für den Tag",
-                    "solar_to_load_energy_entity_monthly": "Energie (kWh) aus Solar zur Last für den Monat",
-                    "solar_to_load_energy_entity_yearly": "Energie (kWh) aus Solar zur Last für das Jahr",
+                    "solar_to_load_energy_entity_monthly": "Energie (kWh) aus Solar zur Last für den Monat (optional; wird aus daily abgeleitet, wenn leer)",
+                    "solar_to_load_energy_entity_yearly": "Energie (kWh) aus Solar zur Last für das Jahr (optional; wird aus daily abgeleitet, wenn leer)",
                     "total_load_energy_entity": "Gesamtlast-Energie (kWh) für den Zeitraum (optional)"
                 }
             }

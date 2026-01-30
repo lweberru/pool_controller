@@ -105,6 +105,24 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self._last_heat_active = False
         self._heat_tuning_last_saved = None
 
+        # Derived energy aggregation (month/year from daily sensors)
+        self._derived_grid_daily_last_value = None
+        self._derived_grid_daily_last_date = None
+        self._derived_grid_month_total = 0.0
+        self._derived_grid_year_total = 0.0
+        self._derived_grid_month_id = None
+        self._derived_grid_year_id = None
+
+        self._derived_solar_daily_last_value = None
+        self._derived_solar_daily_last_date = None
+        self._derived_solar_month_total = 0.0
+        self._derived_solar_year_total = 0.0
+        self._derived_solar_month_id = None
+        self._derived_solar_year_id = None
+
+        self._derived_energy_last_saved = None
+        self._derived_energy_snapshot = None
+
         self._did_migrate_timers = False
         if entry and entry.options:
             self.maintenance_active = bool(entry.options.get(OPT_KEY_MAINTENANCE_ACTIVE, False))
@@ -120,6 +138,62 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     self.heat_startup_offset_minutes = float(entry.options.get(OPT_KEY_HEAT_STARTUP_OFFSET_MINUTES))
             except Exception:
                 self.heat_startup_offset_minutes = DEFAULT_HEAT_STARTUP_OFFSET_MINUTES
+            # Derived energy aggregation (best effort)
+            try:
+                if entry.options.get(OPT_KEY_DERIVED_GRID_DAILY_LAST_VALUE) is not None:
+                    self._derived_grid_daily_last_value = float(entry.options.get(OPT_KEY_DERIVED_GRID_DAILY_LAST_VALUE))
+            except Exception:
+                self._derived_grid_daily_last_value = None
+            try:
+                self._derived_grid_daily_last_date = entry.options.get(OPT_KEY_DERIVED_GRID_DAILY_LAST_DATE) or None
+            except Exception:
+                self._derived_grid_daily_last_date = None
+            try:
+                if entry.options.get(OPT_KEY_DERIVED_GRID_MONTH_TOTAL) is not None:
+                    self._derived_grid_month_total = float(entry.options.get(OPT_KEY_DERIVED_GRID_MONTH_TOTAL))
+            except Exception:
+                self._derived_grid_month_total = 0.0
+            try:
+                if entry.options.get(OPT_KEY_DERIVED_GRID_YEAR_TOTAL) is not None:
+                    self._derived_grid_year_total = float(entry.options.get(OPT_KEY_DERIVED_GRID_YEAR_TOTAL))
+            except Exception:
+                self._derived_grid_year_total = 0.0
+            try:
+                self._derived_grid_month_id = entry.options.get(OPT_KEY_DERIVED_GRID_MONTH_ID) or None
+            except Exception:
+                self._derived_grid_month_id = None
+            try:
+                self._derived_grid_year_id = entry.options.get(OPT_KEY_DERIVED_GRID_YEAR_ID) or None
+            except Exception:
+                self._derived_grid_year_id = None
+
+            try:
+                if entry.options.get(OPT_KEY_DERIVED_SOLAR_DAILY_LAST_VALUE) is not None:
+                    self._derived_solar_daily_last_value = float(entry.options.get(OPT_KEY_DERIVED_SOLAR_DAILY_LAST_VALUE))
+            except Exception:
+                self._derived_solar_daily_last_value = None
+            try:
+                self._derived_solar_daily_last_date = entry.options.get(OPT_KEY_DERIVED_SOLAR_DAILY_LAST_DATE) or None
+            except Exception:
+                self._derived_solar_daily_last_date = None
+            try:
+                if entry.options.get(OPT_KEY_DERIVED_SOLAR_MONTH_TOTAL) is not None:
+                    self._derived_solar_month_total = float(entry.options.get(OPT_KEY_DERIVED_SOLAR_MONTH_TOTAL))
+            except Exception:
+                self._derived_solar_month_total = 0.0
+            try:
+                if entry.options.get(OPT_KEY_DERIVED_SOLAR_YEAR_TOTAL) is not None:
+                    self._derived_solar_year_total = float(entry.options.get(OPT_KEY_DERIVED_SOLAR_YEAR_TOTAL))
+            except Exception:
+                self._derived_solar_year_total = 0.0
+            try:
+                self._derived_solar_month_id = entry.options.get(OPT_KEY_DERIVED_SOLAR_MONTH_ID) or None
+            except Exception:
+                self._derived_solar_month_id = None
+            try:
+                self._derived_solar_year_id = entry.options.get(OPT_KEY_DERIVED_SOLAR_YEAR_ID) or None
+            except Exception:
+                self._derived_solar_year_id = None
             # New timers
             mu = entry.options.get(OPT_KEY_MANUAL_UNTIL)
             if mu:
@@ -239,6 +313,145 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             self.hvac_enabled = True
             self.heat_loss_w_per_c = DEFAULT_HEAT_LOSS_W_PER_C
             self.heat_startup_offset_minutes = DEFAULT_HEAT_STARTUP_OFFSET_MINUTES
+
+            self._derived_grid_daily_last_value = None
+            self._derived_grid_daily_last_date = None
+            self._derived_grid_month_total = 0.0
+            self._derived_grid_year_total = 0.0
+            self._derived_grid_month_id = None
+            self._derived_grid_year_id = None
+
+            self._derived_solar_daily_last_value = None
+            self._derived_solar_daily_last_date = None
+            self._derived_solar_month_total = 0.0
+            self._derived_solar_year_total = 0.0
+            self._derived_solar_month_id = None
+            self._derived_solar_year_id = None
+
+            self._derived_energy_last_saved = None
+            self._derived_energy_snapshot = None
+
+    def _update_derived_energy_from_daily(self, prefix: str, daily_value: float | None, now: datetime) -> tuple[float | None, float | None, bool]:
+        """Return (month_total, year_total, changed) derived from a daily-reset sensor."""
+        if daily_value is None:
+            return None, None, False
+
+        today = dt_util.as_local(now).date()
+        month_id = today.strftime("%Y-%m")
+        year_id = today.strftime("%Y")
+
+        last_date = getattr(self, f"_derived_{prefix}_daily_last_date", None)
+        last_value = getattr(self, f"_derived_{prefix}_daily_last_value", None)
+        month_total = float(getattr(self, f"_derived_{prefix}_month_total", 0.0) or 0.0)
+        year_total = float(getattr(self, f"_derived_{prefix}_year_total", 0.0) or 0.0)
+        stored_month_id = getattr(self, f"_derived_{prefix}_month_id", None)
+        stored_year_id = getattr(self, f"_derived_{prefix}_year_id", None)
+
+        changed = False
+
+        if stored_month_id != month_id:
+            month_total = 0.0
+            stored_month_id = month_id
+            changed = True
+        if stored_year_id != year_id:
+            year_total = 0.0
+            stored_year_id = year_id
+            changed = True
+
+        if last_date is None:
+            last_date = today
+            last_value = float(daily_value)
+            changed = True
+        else:
+            # Convert stored date string to date if needed
+            if isinstance(last_date, str):
+                try:
+                    last_date = datetime.strptime(last_date, "%Y-%m-%d").date()
+                except Exception:
+                    last_date = today
+            if last_date != today:
+                try:
+                    if last_value is not None:
+                        month_total += float(last_value)
+                        year_total += float(last_value)
+                except Exception:
+                    pass
+                last_date = today
+                last_value = float(daily_value)
+                changed = True
+            else:
+                try:
+                    if last_value is None or float(last_value) != float(daily_value):
+                        last_value = float(daily_value)
+                        changed = True
+                except Exception:
+                    pass
+
+        # Include current day partial value in derived totals
+        try:
+            derived_month = float(month_total) + float(daily_value)
+        except Exception:
+            derived_month = None
+        try:
+            derived_year = float(year_total) + float(daily_value)
+        except Exception:
+            derived_year = None
+
+        setattr(self, f"_derived_{prefix}_daily_last_value", last_value)
+        setattr(self, f"_derived_{prefix}_daily_last_date", last_date.strftime("%Y-%m-%d") if hasattr(last_date, "strftime") else last_date)
+        setattr(self, f"_derived_{prefix}_month_total", month_total)
+        setattr(self, f"_derived_{prefix}_year_total", year_total)
+        setattr(self, f"_derived_{prefix}_month_id", stored_month_id)
+        setattr(self, f"_derived_{prefix}_year_id", stored_year_id)
+
+        return derived_month, derived_year, changed
+
+    async def _maybe_persist_derived_energy_state(self, now: datetime) -> None:
+        if not self.entry or self.entry.options is None:
+            return
+
+        snapshot = (
+            self._derived_grid_daily_last_value,
+            self._derived_grid_daily_last_date,
+            self._derived_grid_month_total,
+            self._derived_grid_year_total,
+            self._derived_grid_month_id,
+            self._derived_grid_year_id,
+            self._derived_solar_daily_last_value,
+            self._derived_solar_daily_last_date,
+            self._derived_solar_month_total,
+            self._derived_solar_year_total,
+            self._derived_solar_month_id,
+            self._derived_solar_year_id,
+        )
+        if self._derived_energy_snapshot == snapshot:
+            return
+
+        try:
+            last_saved = self._derived_energy_last_saved
+            if last_saved and (now - last_saved).total_seconds() < 5 * 60:
+                return
+        except Exception:
+            pass
+
+        opts = {**self.entry.options}
+        opts[OPT_KEY_DERIVED_GRID_DAILY_LAST_VALUE] = self._derived_grid_daily_last_value
+        opts[OPT_KEY_DERIVED_GRID_DAILY_LAST_DATE] = self._derived_grid_daily_last_date
+        opts[OPT_KEY_DERIVED_GRID_MONTH_TOTAL] = self._derived_grid_month_total
+        opts[OPT_KEY_DERIVED_GRID_YEAR_TOTAL] = self._derived_grid_year_total
+        opts[OPT_KEY_DERIVED_GRID_MONTH_ID] = self._derived_grid_month_id
+        opts[OPT_KEY_DERIVED_GRID_YEAR_ID] = self._derived_grid_year_id
+
+        opts[OPT_KEY_DERIVED_SOLAR_DAILY_LAST_VALUE] = self._derived_solar_daily_last_value
+        opts[OPT_KEY_DERIVED_SOLAR_DAILY_LAST_DATE] = self._derived_solar_daily_last_date
+        opts[OPT_KEY_DERIVED_SOLAR_MONTH_TOTAL] = self._derived_solar_month_total
+        opts[OPT_KEY_DERIVED_SOLAR_YEAR_TOTAL] = self._derived_solar_year_total
+        opts[OPT_KEY_DERIVED_SOLAR_MONTH_ID] = self._derived_solar_month_id
+        opts[OPT_KEY_DERIVED_SOLAR_YEAR_ID] = self._derived_solar_year_id
+
+        await self._async_update_entry_options(opts)
+        self._derived_energy_last_saved = now
+        self._derived_energy_snapshot = snapshot
 
     def _effective_heating_power(self, conf: dict, water_temp: float | None, outdoor_temp: float | None) -> float:
         """Return effective heating power in W after subtracting estimated heat loss."""
@@ -944,6 +1157,31 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             solar_to_load_kwh_monthly = self._get_float(conf.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_MONTHLY))
             solar_to_load_kwh_yearly = self._get_float(conf.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_YEARLY))
             total_load_kwh = self._get_float(conf.get(CONF_TOTAL_LOAD_ENERGY_ENTITY))
+
+            # Derive month/year totals from daily sensors when not provided
+            derived_changed = False
+            if grid_to_load_kwh_daily is not None and (grid_to_load_kwh_monthly is None or grid_to_load_kwh_yearly is None):
+                d_month, d_year, changed = self._update_derived_energy_from_daily("grid", grid_to_load_kwh_daily, now)
+                derived_changed = derived_changed or changed
+                if grid_to_load_kwh_monthly is None:
+                    grid_to_load_kwh_monthly = d_month
+                if grid_to_load_kwh_yearly is None:
+                    grid_to_load_kwh_yearly = d_year
+
+            if solar_to_load_kwh_daily is not None and (solar_to_load_kwh_monthly is None or solar_to_load_kwh_yearly is None):
+                d_month, d_year, changed = self._update_derived_energy_from_daily("solar", solar_to_load_kwh_daily, now)
+                derived_changed = derived_changed or changed
+                if solar_to_load_kwh_monthly is None:
+                    solar_to_load_kwh_monthly = d_month
+                if solar_to_load_kwh_yearly is None:
+                    solar_to_load_kwh_yearly = d_year
+
+            # Persist derived aggregation state (best-effort, throttled)
+            if derived_changed:
+                try:
+                    await self._maybe_persist_derived_energy_state(now)
+                except Exception:
+                    pass
 
             def _calc_energy_costs(grid_kwh, solar_load_kwh):
                 cost = None

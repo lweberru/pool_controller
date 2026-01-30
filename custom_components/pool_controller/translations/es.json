@@ -244,15 +244,15 @@
                     "electricity_price_entity": "Sensor/ayudante opcional para precio dinámico (sobrescribe el fijo)",
                     "feed_in_tariff": "Tarifa de inyección para estimar ingresos perdidos (moneda por kWh)",
                     "feed_in_tariff_entity": "Sensor/ayudante opcional para tarifa dinámica (sobrescribe la fija)",
-                    "grid_to_load_energy_entity": "Energía (kWh) importada de la red para el periodo (p. ej. utility_meter daily/monthly/yearly)",
+                    "grid_to_load_energy_entity": "Opcional: energía total (kWh) importada de la red. Déjalo vacío si solo usas daily/monthly/yearly.",
                     "grid_to_load_energy_entity_daily": "Energía (kWh) importada de la red para el día",
-                    "grid_to_load_energy_entity_monthly": "Energía (kWh) importada de la red para el mes",
-                    "grid_to_load_energy_entity_yearly": "Energía (kWh) importada de la red para el año",
+                    "grid_to_load_energy_entity_monthly": "Energía (kWh) importada de la red para el mes (opcional; se deriva de daily si está vacío)",
+                    "grid_to_load_energy_entity_yearly": "Energía (kWh) importada de la red para el año (opcional; se deriva de daily si está vacío)",
                     "solar_to_grid_energy_entity": "Energía (kWh) exportada a la red para el periodo",
                     "solar_to_load_energy_entity": "Energía (kWh) suministrada por solar a la carga para el periodo",
                     "solar_to_load_energy_entity_daily": "Energía (kWh) suministrada por solar a la carga para el día",
-                    "solar_to_load_energy_entity_monthly": "Energía (kWh) suministrada por solar a la carga para el mes",
-                    "solar_to_load_energy_entity_yearly": "Energía (kWh) suministrada por solar a la carga para el año",
+                    "solar_to_load_energy_entity_monthly": "Energía (kWh) suministrada por solar a la carga para el mes (opcional; se deriva de daily si está vacío)",
+                    "solar_to_load_energy_entity_yearly": "Energía (kWh) suministrada por solar a la carga para el año (opcional; se deriva de daily si está vacío)",
                     "total_load_energy_entity": "Energía total de carga (kWh) para el periodo (opcional)"
                 }
             }
@@ -522,15 +522,15 @@
                     "electricity_price_entity": "Sensor/helper opcional de precio dinámico (anula el precio fijo)",
                     "feed_in_tariff": "Tarifa de inyección para estimar ingresos perdidos (moneda por kWh)",
                     "feed_in_tariff_entity": "Sensor/helper opcional de tarifa dinámica (anula la tarifa fija)",
-                    "grid_to_load_energy_entity": "Energía (kWh) importada de la red para el periodo (p. ej. utility_meter daily/monthly/yearly)",
+                    "grid_to_load_energy_entity": "Opcional: energía total (kWh) importada de la red. Déjalo vacío si solo usas daily/monthly/yearly.",
                     "grid_to_load_energy_entity_daily": "Energía (kWh) importada de la red para el día",
-                    "grid_to_load_energy_entity_monthly": "Energía (kWh) importada de la red para el mes",
-                    "grid_to_load_energy_entity_yearly": "Energía (kWh) importada de la red para el año",
+                    "grid_to_load_energy_entity_monthly": "Energía (kWh) importada de la red para el mes (opcional; se deriva de daily si está vacío)",
+                    "grid_to_load_energy_entity_yearly": "Energía (kWh) importada de la red para el año (opcional; se deriva de daily si está vacío)",
                     "solar_to_grid_energy_entity": "Energía (kWh) exportada a la red para el periodo",
                     "solar_to_load_energy_entity": "Energía (kWh) suministrada por solar a la carga para el periodo",
                     "solar_to_load_energy_entity_daily": "Energía (kWh) suministrada por solar a la carga para el día",
-                    "solar_to_load_energy_entity_monthly": "Energía (kWh) suministrada por solar a la carga para el mes",
-                    "solar_to_load_energy_entity_yearly": "Energía (kWh) suministrada por solar a la carga para el año",
+                    "solar_to_load_energy_entity_monthly": "Energía (kWh) suministrada por solar a la carga para el mes (opcional; se deriva de daily si está vacío)",
+                    "solar_to_load_energy_entity_yearly": "Energía (kWh) suministrada por solar a la carga para el año (opcional; se deriva de daily si está vacío)",
                     "total_load_energy_entity": "Energía total de carga (kWh) para el periodo (opcional)"
                 }
             }
