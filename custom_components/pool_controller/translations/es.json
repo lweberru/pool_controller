@@ -6,9 +6,13 @@
                 "submit": "Continuar",
                 "data": {
                     "name": "Nombre de la piscina",
-                    "water_volume": "Volumen de agua (litros)",
                     "water_volume": "Volumen de agua en litros (para cálculos de dosificación y calentamiento)",
                     "demo_mode": "Modo demo: no controla dispositivos reales (solo pruebas)"
+                },
+                "data_description": {
+                    "name": "Display name for this pool installation",
+                    "water_volume": "Water volume in liters (used for dosing and heating time calculations)",
+                    "demo_mode": "Demo mode: does not switch real devices (for testing only)"
                 }
             },
             "switches": {
@@ -17,29 +21,16 @@
                 "submit": "Continuar",
                 "data": {
                     "main_switch": "Interruptor principal",
+                    "pump_switch": "Pump switch (optional)",
+                    "filter_switch": "Filter switch (optional)",
+                    "enable_aux_heating": "Enable auxiliary heating",
+                    "aux_heating_switch": "Auxiliary heater switch",
                     "main_power_sensor": "Sensor de potencia principal",
                     "aux_power_sensor": "Sensor de potencia del calefactor auxiliar"
                 },
                 "data_description": {
                     "main_switch": "Interruptor principal / alimentación de la piscina (obligatorio)",
                     "pump_switch": "Opcional: interruptor dedicado para la bomba de circulación (dejar vacío para usar el principal)",
-            "costs": {
-                "title": "Costes eléctricos",
-                "description": "Configura el precio de electricidad y la tarifa de inyección para estimar costes.",
-                "submit": "Continuar",
-                "data": {
-                    "electricity_price": "Precio de electricidad (por kWh)",
-                    "electricity_price_entity": "Entidad de precio de electricidad",
-                    "feed_in_tariff": "Tarifa de inyección (por kWh)",
-                    "feed_in_tariff_entity": "Entidad de tarifa de inyección"
-                },
-                "data_description": {
-                    "electricity_price": "Precio fijo de electricidad para estimar costes (moneda por kWh)",
-                    "electricity_price_entity": "Sensor/helper opcional de precio dinámico (anula el precio fijo)",
-                    "feed_in_tariff": "Tarifa de inyección para estimar ingresos perdidos (moneda por kWh)",
-                    "feed_in_tariff_entity": "Sensor/helper opcional de tarifa dinámica (anula la tarifa fija)"
-                }
-            },
                     "filter_switch": "Opcional: interruptor separado para la bomba del filtro (dejar vacío para usar el principal)",
                     "enable_aux_heating": "Habilita el calefactor auxiliar para calentar más rápido",
                     "aux_heating_switch": "Interruptor del calefactor auxiliar eléctrico",
@@ -227,6 +218,43 @@
                     "pv_stability_seconds": "Cuánto tiempo debe mantenerse un valor FV cambiado y suavizado antes de aplicarlo (segundos).",
                     "pv_min_run_minutes": "Tiempo mínimo automático en minutos antes de permitir el apagado. Evita detenerse justo después de encender."
                 }
+            },
+            "costs": {
+                "title": "Costes eléctricos",
+                "description": "Configura el precio de la electricidad y la tarifa de inyección para estimar costes.",
+                "submit": "Continuar",
+                "data": {
+                    "electricity_price": "Precio de electricidad (por kWh)",
+                    "electricity_price_entity": "Entidad de precio de electricidad",
+                    "feed_in_tariff": "Tarifa de inyección (por kWh)",
+                    "feed_in_tariff_entity": "Entidad de tarifa de inyección",
+                    "grid_to_load_energy_entity": "Energía red → carga (kWh)",
+                    "grid_to_load_energy_entity_daily": "Energía red → carga (diaria kWh)",
+                    "grid_to_load_energy_entity_monthly": "Energía red → carga (mensual kWh)",
+                    "grid_to_load_energy_entity_yearly": "Energía red → carga (anual kWh)",
+                    "solar_to_grid_energy_entity": "Energía solar → red (kWh)",
+                    "solar_to_load_energy_entity": "Energía solar → carga (kWh)",
+                    "solar_to_load_energy_entity_daily": "Energía solar → carga (diaria kWh)",
+                    "solar_to_load_energy_entity_monthly": "Energía solar → carga (mensual kWh)",
+                    "solar_to_load_energy_entity_yearly": "Energía solar → carga (anual kWh)",
+                    "total_load_energy_entity": "Energía total de carga (kWh)"
+                },
+                "data_description": {
+                    "electricity_price": "Precio fijo para estimar costes (moneda por kWh)",
+                    "electricity_price_entity": "Sensor/ayudante opcional para precio dinámico (sobrescribe el fijo)",
+                    "feed_in_tariff": "Tarifa de inyección para estimar ingresos perdidos (moneda por kWh)",
+                    "feed_in_tariff_entity": "Sensor/ayudante opcional para tarifa dinámica (sobrescribe la fija)",
+                    "grid_to_load_energy_entity": "Energía (kWh) importada de la red para el periodo (p. ej. utility_meter daily/monthly/yearly)",
+                    "grid_to_load_energy_entity_daily": "Energía (kWh) importada de la red para el día",
+                    "grid_to_load_energy_entity_monthly": "Energía (kWh) importada de la red para el mes",
+                    "grid_to_load_energy_entity_yearly": "Energía (kWh) importada de la red para el año",
+                    "solar_to_grid_energy_entity": "Energía (kWh) exportada a la red para el periodo",
+                    "solar_to_load_energy_entity": "Energía (kWh) suministrada por solar a la carga para el periodo",
+                    "solar_to_load_energy_entity_daily": "Energía (kWh) suministrada por solar a la carga para el día",
+                    "solar_to_load_energy_entity_monthly": "Energía (kWh) suministrada por solar a la carga para el mes",
+                    "solar_to_load_energy_entity_yearly": "Energía (kWh) suministrada por solar a la carga para el año",
+                    "total_load_energy_entity": "Energía total de carga (kWh) para el periodo (opcional)"
+                }
             }
         }
     },
@@ -251,21 +279,6 @@
                 }
             },
             "basic": {
-                "title": "Ajustes",
-                "description": "Ajustes generales. Los cambios se guardan en las opciones de la entrada.",
-                "submit": "Siguiente",
-                "data": {
-                    "name": "Nombre de la piscina",
-                    "water_volume": "Volumen de agua (litros)",
-                    "demo_mode": "Modo demo"
-                },
-                "data_description": {
-                    "name": "Nombre mostrado para esta instalación",
-                    "water_volume": "Volumen de agua en litros (para cálculos de dosificación y calentamiento)",
-                    "demo_mode": "Modo demo: no controla dispositivos reales (solo pruebas)"
-                }
-            },
-            "init": {
                 "title": "Ajustes",
                 "description": "Ajustes generales. Los cambios se guardan en las opciones de la entrada.",
                 "submit": "Siguiente",
@@ -353,10 +366,6 @@
                     "min_temp": "Temperatura mínima",
                     "max_temp": "Temperatura máxima",
                     "target_temp_step": "Paso de temperatura",
-                    "electricity_price": "Precio de electricidad (por kWh)",
-                    "electricity_price_entity": "Entidad de precio de electricidad",
-                    "feed_in_tariff": "Tarifa de inyección (por kWh)",
-                    "feed_in_tariff_entity": "Entidad de tarifa de inyección",
                     "heater_base_power_w": "Potencia base de calefacción (W)",
                     "heater_aux_power_w": "Potencia del calentador auxiliar (W)",
                     "cold_tolerance": "Tolerancia fría",
@@ -367,10 +376,6 @@
                     "min_temp": "Consigna mínima disponible",
                     "max_temp": "Consigna máxima disponible",
                     "target_temp_step": "Paso para ajustar la temperatura objetivo",
-                    "electricity_price": "Precio fijo de electricidad para estimar costes (moneda por kWh)",
-                    "electricity_price_entity": "Sensor opcional de precio dinámico (anula el precio fijo)",
-                    "feed_in_tariff": "Tarifa de inyección para estimar ingresos perdidos (moneda por kWh)",
-                    "feed_in_tariff_entity": "Sensor opcional de tarifa dinámica (anula la tarifa fija)",
                     "heater_base_power_w": "Contribución base (p. ej. calor residual de la bomba) usada para estimar el precalentamiento.",
                     "heater_aux_power_w": "Potencia nominal del calentador auxiliar (W) usada para estimar el precalentamiento cuando la calefacción auxiliar está activada. Total = base + auxiliar.",
                     "cold_tolerance": "El calentador arranca cuando la temperatura del agua está por debajo de objetivo menos este valor",
@@ -489,7 +494,7 @@
                     "pv_off_threshold": "Apagar por debajo de este valor (por defecto: 500W)",
                     "pv_smooth_window_seconds": "Ventana en segundos usada para el suavizado exponencial del valor PV. 0 desactiva el suavizado.",
                     "pv_stability_seconds": "Cuánto tiempo debe persistir un valor PV suavizado antes de que se aplique el cambio (segundos).",
-                    "pv_min_run_minutes": "Tiempo mínimo de ejecución automática en minutos antes de permitir un apagado automático. Evita paradas inmediatas tras un encendido breve."                
+                    "pv_min_run_minutes": "Tiempo mínimo de ejecución automática en minutos antes de permitir un apagado automático. Evita paradas inmediatas tras un encendido breve."
                 }
             },
             "costs": {
@@ -500,13 +505,33 @@
                     "electricity_price": "Precio de electricidad (por kWh)",
                     "electricity_price_entity": "Entidad de precio de electricidad",
                     "feed_in_tariff": "Tarifa de inyección (por kWh)",
-                    "feed_in_tariff_entity": "Entidad de tarifa de inyección"
+                    "feed_in_tariff_entity": "Entidad de tarifa de inyección",
+                    "grid_to_load_energy_entity": "Energía red → carga (kWh)",
+                    "grid_to_load_energy_entity_daily": "Energía red → carga (diaria kWh)",
+                    "grid_to_load_energy_entity_monthly": "Energía red → carga (mensual kWh)",
+                    "grid_to_load_energy_entity_yearly": "Energía red → carga (anual kWh)",
+                    "solar_to_grid_energy_entity": "Energía solar → red (kWh)",
+                    "solar_to_load_energy_entity": "Energía solar → carga (kWh)",
+                    "solar_to_load_energy_entity_daily": "Energía solar → carga (diaria kWh)",
+                    "solar_to_load_energy_entity_monthly": "Energía solar → carga (mensual kWh)",
+                    "solar_to_load_energy_entity_yearly": "Energía solar → carga (anual kWh)",
+                    "total_load_energy_entity": "Energía total de carga (kWh)"
                 },
                 "data_description": {
                     "electricity_price": "Precio fijo de electricidad para estimar costes (moneda por kWh)",
                     "electricity_price_entity": "Sensor/helper opcional de precio dinámico (anula el precio fijo)",
                     "feed_in_tariff": "Tarifa de inyección para estimar ingresos perdidos (moneda por kWh)",
-                    "feed_in_tariff_entity": "Sensor/helper opcional de tarifa dinámica (anula la tarifa fija)"
+                    "feed_in_tariff_entity": "Sensor/helper opcional de tarifa dinámica (anula la tarifa fija)",
+                    "grid_to_load_energy_entity": "Energía (kWh) importada de la red para el periodo (p. ej. utility_meter daily/monthly/yearly)",
+                    "grid_to_load_energy_entity_daily": "Energía (kWh) importada de la red para el día",
+                    "grid_to_load_energy_entity_monthly": "Energía (kWh) importada de la red para el mes",
+                    "grid_to_load_energy_entity_yearly": "Energía (kWh) importada de la red para el año",
+                    "solar_to_grid_energy_entity": "Energía (kWh) exportada a la red para el periodo",
+                    "solar_to_load_energy_entity": "Energía (kWh) suministrada por solar a la carga para el periodo",
+                    "solar_to_load_energy_entity_daily": "Energía (kWh) suministrada por solar a la carga para el día",
+                    "solar_to_load_energy_entity_monthly": "Energía (kWh) suministrada por solar a la carga para el mes",
+                    "solar_to_load_energy_entity_yearly": "Energía (kWh) suministrada por solar a la carga para el año",
+                    "total_load_energy_entity": "Energía total de carga (kWh) para el periodo (opcional)"
                 }
             }
         }
@@ -530,24 +555,42 @@
             "maintenance_active": {
                 "name": "Modo de mantenimiento"
             },
-            "is_we_holiday": { "name": "Fin de semana/feriado" },
-            "frost_danger": { "name": "Peligro de helada" },
-            "frost_active": { "name": "Protección contra heladas activa" },
+            "is_we_holiday": {
+                "name": "Fin de semana/feriado"
+            },
+            "frost_danger": {
+                "name": "Peligro de helada"
+            },
+            "frost_active": {
+                "name": "Protección contra heladas activa"
+            },
             "aux_present": {
                 "name": "Calefacción auxiliar configurada"
             },
-            "in_quiet": { "name": "Horas de silencio activas" },
-            "pv_allows": { "name": "Excedente FV disponible" },
+            "in_quiet": {
+                "name": "Horas de silencio activas"
+            },
+            "pv_allows": {
+                "name": "Excedente FV disponible"
+            },
             "should_main_on": {
                 "name": "Alimentación requerida"
             },
             "should_pump_on": {
                 "name": "Bomba requerida"
             },
-            "low_chlor": { "name": "Cloro bajo" },
-            "ph_alert": { "name": "pH fuera de rango" },
-            "tds_high": { "name": "TDS alto" },
-            "event_rain_blocked": { "name": "Evento bloqueado por lluvia" },
+            "low_chlor": {
+                "name": "Cloro bajo"
+            },
+            "ph_alert": {
+                "name": "pH fuera de rango"
+            },
+            "tds_high": {
+                "name": "TDS alto"
+            },
+            "event_rain_blocked": {
+                "name": "Evento bloqueado por lluvia"
+            },
             "main_switch_on": {
                 "name": "Interruptor principal encendido"
             },
@@ -559,66 +602,218 @@
             }
         },
         "button": {
-            "pause_60": { "name": "Pausa 60 min" },
-            "bath_60": { "name": "Baño 60 min" },
-            "filter_30": { "name": "Filtrar 30 min" },
-            "chlorine_5": { "name": "Cloro rápido 5 min" }
+            "pause_60": {
+                "name": "Pausa 60 min"
+            },
+            "bath_60": {
+                "name": "Baño 60 min"
+            },
+            "filter_30": {
+                "name": "Filtrado 30 min"
+            },
+            "chlorine_5": {
+                "name": "Cloración rápida 5 min"
+            }
         },
         "sensor": {
-            "status": { "name": "Estado" },
-            "run_reason": { "name": "Motivo de funcionamiento" },
-            "heat_reason": { "name": "Motivo de calefacción" },
-            "run_credit_source": { "name": "Fuente de crédito" },
-            "run_credit_minutes": { "name": "Crédito (min)" },
-            "filter_credit_minutes": { "name": "Crédito de filtrado (min)" },
-            "filter_missing_minutes": { "name": "Filtrado restante (min)" },
-            "frost_credit_minutes": { "name": "Crédito de antiheladas (min)" },
-            "frost_credit_shift_minutes": { "name": "Desplazamiento antiheladas (min)" },
-            "electricity_price": { "name": "Precio de electricidad (por kWh)" },
-            "feed_in_tariff": { "name": "Tarifa de inyección (por kWh)" },
-            "power_cost_per_hour": { "name": "Coste eléctrico (por hora)" },
-            "power_cost_per_hour_net": { "name": "Coste eléctrico (neto por hora)" },
-            "power_cost_feed_in_loss_per_hour": { "name": "Ingresos de inyección perdidos (por hora)" },
-            "heat_loss_w_per_c": { "name": "Coeficiente de pérdida de calor (W/°C)" },
-            "heat_startup_offset_minutes": { "name": "Offset de arranque de calefacción (min)" },
-            "sanitizer_mode": { "name": "Desinfección" },
-            "ph_val": { "name": "pH" },
-            "chlor_val": { "name": "Cloro (mV)" },
-            "salt_val": { "name": "Sal" },
-            "salt_add_g": { "name": "Añadir sal (g)" },
-            "tds_val": { "name": "TDS" },
-            "tds_effective": { "name": "TDS (sin sal)" },
-            "tds_status": { "name": "Estado TDS" },
-            "tds_water_change_liters": { "name": "Cambio de agua recomendado (L)" },
-            "tds_water_change_percent": { "name": "Cambio de agua recomendado (%)" },
-            "ph_minus_g": { "name": "Añadir pH- (g)" },
-            "ph_plus_g": { "name": "Añadir pH+ (g)" },
-            "chlor_spoons": { "name": "Dosificación de cloro (cucharas)" },
-            "next_start_mins": { "name": "Próximo inicio en" },
-            "next_filter_mins": { "name": "Próximo filtrado en" },
-            "next_frost_mins": { "name": "Próximo ciclo antihielo en" },
-            "next_event": { "name": "Próximo evento" },
-            "next_event_end": { "name": "Fin del próximo evento" },
-            "next_event_summary": { "name": "Resumen del próximo evento" },
-            "event_rain_probability": { "name": "Probabilidad de lluvia del evento" },
-            "manual_timer_mins": { "name": "Temporizador manual (min)" },
-            "auto_filter_timer_mins": { "name": "Temporizador auto-filtrado (min)" },
-            "pause_timer_mins": { "name": "Temporizador pausa (min)" },
-            "frost_timer_mins": { "name": "Temporizador frost (min)" },
-            "outdoor_temp": { "name": "Temperatura exterior" },
-            "pv_power": { "name": "Potencia PV" },
-            "pv_smoothed": { "name": "PV (suavizado)" },
-            "pv_band_low": { "name": "Banda PV baja" },
-            "pv_band_mid_on": { "name": "Banda PV media (encendido)" },
-            "pv_band_mid_off": { "name": "Banda PV media (apagado)" },
-            "pv_band_high": { "name": "Banda PV alta" },
-            "main_power": { "name": "Potencia principal" },
-            "aux_power": { "name": "Potencia auxiliar" },
-            "pv_on_threshold": { "name": "Umbral PV encendido" },
-            "pv_off_threshold": { "name": "Umbral PV apagado" },
-            "filter_minutes": { "name": "Duración de filtro configurada (min)" },
-            "chlorine_duration": { "name": "Duración de cloro configurada (min)" },
-            "bathing_minutes": { "name": "Duración de baño configurada (min)" }
+            "feed_in_tariff": {
+                "name": "Tarifa de inyección (por kWh)"
+            },
+            "power_cost_per_hour": {
+                "name": "Coste eléctrico (por hora)"
+            },
+            "power_cost_per_hour_net": {
+                "name": "Coste eléctrico (neto por hora)"
+            },
+            "power_cost_feed_in_loss_per_hour": {
+                "name": "Ingresos de inyección perdidos (por hora)"
+            },
+            "energy_grid_to_load_kwh": {
+                "name": "Energía red → carga"
+            },
+            "energy_grid_to_load_kwh_daily": {
+                "name": "Energía red → carga (diaria)"
+            },
+            "energy_grid_to_load_kwh_monthly": {
+                "name": "Energía red → carga (mensual)"
+            },
+            "energy_grid_to_load_kwh_yearly": {
+                "name": "Energía red → carga (anual)"
+            },
+            "energy_solar_to_grid_kwh": {
+                "name": "Energía solar → red"
+            },
+            "energy_solar_to_load_kwh": {
+                "name": "Energía solar → carga"
+            },
+            "energy_solar_to_load_kwh_daily": {
+                "name": "Energía solar → carga (diaria)"
+            },
+            "energy_solar_to_load_kwh_monthly": {
+                "name": "Energía solar → carga (mensual)"
+            },
+            "energy_solar_to_load_kwh_yearly": {
+                "name": "Energía solar → carga (anual)"
+            },
+            "energy_total_load_kwh": {
+                "name": "Energía total de carga"
+            },
+            "energy_cost": {
+                "name": "Coste energético (periodo)"
+            },
+            "energy_cost_net": {
+                "name": "Coste energético (neto, periodo)"
+            },
+            "energy_cost_daily": {
+                "name": "Coste energético (diario)"
+            },
+            "energy_cost_monthly": {
+                "name": "Coste energético (mensual)"
+            },
+            "energy_cost_yearly": {
+                "name": "Coste energético (anual)"
+            },
+            "energy_feed_in_loss": {
+                "name": "Ingreso de inyección perdido (periodo)"
+            },
+            "energy_feed_in_loss_daily": {
+                "name": "Ingreso de inyección perdido (diario)"
+            },
+            "energy_feed_in_loss_monthly": {
+                "name": "Ingreso de inyección perdido (mensual)"
+            },
+            "energy_feed_in_loss_yearly": {
+                "name": "Ingreso de inyección perdido (anual)"
+            },
+            "energy_cost_net_daily": {
+                "name": "Coste energético (neto, diario)"
+            },
+            "energy_cost_net_monthly": {
+                "name": "Coste energético (neto, mensual)"
+            },
+            "energy_cost_net_yearly": {
+                "name": "Coste energético (neto, anual)"
+            },
+            "heat_loss_w_per_c": {
+                "name": "Coeficiente de pérdida de calor (W/°C)"
+            },
+            "heat_startup_offset_minutes": {
+                "name": "Offset de arranque de calefacción (min)"
+            },
+            "sanitizer_mode": {
+                "name": "Desinfección"
+            },
+            "ph_val": {
+                "name": "pH"
+            },
+            "chlor_val": {
+                "name": "Cloro (mV)"
+            },
+            "salt_val": {
+                "name": "Sal"
+            },
+            "salt_add_g": {
+                "name": "Añadir sal (g)"
+            },
+            "tds_val": {
+                "name": "TDS"
+            },
+            "tds_effective": {
+                "name": "TDS (sin sal)"
+            },
+            "tds_status": {
+                "name": "Estado TDS"
+            },
+            "tds_water_change_liters": {
+                "name": "Cambio de agua recomendado (L)"
+            },
+            "tds_water_change_percent": {
+                "name": "Cambio de agua recomendado (%)"
+            },
+            "ph_minus_g": {
+                "name": "Añadir pH- (g)"
+            },
+            "ph_plus_g": {
+                "name": "Añadir pH+ (g)"
+            },
+            "chlor_spoons": {
+                "name": "Dosificación de cloro (cucharas)"
+            },
+            "next_start_mins": {
+                "name": "Próximo inicio en"
+            },
+            "next_filter_mins": {
+                "name": "Próximo filtrado en"
+            },
+            "next_frost_mins": {
+                "name": "Próximo ciclo antihielo en"
+            },
+            "next_event": {
+                "name": "Próximo evento"
+            },
+            "next_event_end": {
+                "name": "Fin del próximo evento"
+            },
+            "next_event_summary": {
+                "name": "Resumen del próximo evento"
+            },
+            "event_rain_probability": {
+                "name": "Probabilidad de lluvia del evento"
+            },
+            "manual_timer_mins": {
+                "name": "Temporizador manual (min)"
+            },
+            "auto_filter_timer_mins": {
+                "name": "Temporizador auto-filtrado (min)"
+            },
+            "pause_timer_mins": {
+                "name": "Temporizador pausa (min)"
+            },
+            "frost_timer_mins": {
+                "name": "Temporizador frost (min)"
+            },
+            "outdoor_temp": {
+                "name": "Temperatura exterior"
+            },
+            "pv_power": {
+                "name": "Potencia PV"
+            },
+            "pv_smoothed": {
+                "name": "PV (suavizado)"
+            },
+            "pv_band_low": {
+                "name": "Banda PV baja"
+            },
+            "pv_band_mid_on": {
+                "name": "Banda PV media (encendido)"
+            },
+            "pv_band_mid_off": {
+                "name": "Banda PV media (apagado)"
+            },
+            "pv_band_high": {
+                "name": "Banda PV alta"
+            },
+            "main_power": {
+                "name": "Potencia principal"
+            },
+            "aux_power": {
+                "name": "Potencia auxiliar"
+            },
+            "pv_on_threshold": {
+                "name": "Umbral PV encendido"
+            },
+            "pv_off_threshold": {
+                "name": "Umbral PV apagado"
+            },
+            "filter_minutes": {
+                "name": "Duración de filtro configurada (min)"
+            },
+            "chlorine_duration": {
+                "name": "Duración de cloro configurada (min)"
+            },
+            "bathing_minutes": {
+                "name": "Duración de baño configurada (min)"
+            }
         }
     },
     "state": {

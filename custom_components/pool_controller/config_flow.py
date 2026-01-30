@@ -113,6 +113,78 @@ def _costs_schema(curr: dict | None = None):
         else vol.Optional(CONF_FEED_IN_TARIFF_ENTITY)
     ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor", "input_number"]))
 
+    # Optional energy (kWh) sensors for period-based costs
+    grid_load_default = c.get(CONF_GRID_TO_LOAD_ENERGY_ENTITY) if c.get(CONF_GRID_TO_LOAD_ENERGY_ENTITY) else None
+    grid_load_daily_default = c.get(CONF_GRID_TO_LOAD_ENERGY_ENTITY_DAILY) if c.get(CONF_GRID_TO_LOAD_ENERGY_ENTITY_DAILY) else None
+    grid_load_monthly_default = c.get(CONF_GRID_TO_LOAD_ENERGY_ENTITY_MONTHLY) if c.get(CONF_GRID_TO_LOAD_ENERGY_ENTITY_MONTHLY) else None
+    grid_load_yearly_default = c.get(CONF_GRID_TO_LOAD_ENERGY_ENTITY_YEARLY) if c.get(CONF_GRID_TO_LOAD_ENERGY_ENTITY_YEARLY) else None
+    solar_grid_default = c.get(CONF_SOLAR_TO_GRID_ENERGY_ENTITY) if c.get(CONF_SOLAR_TO_GRID_ENERGY_ENTITY) else None
+    solar_load_default = c.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY) if c.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY) else None
+    solar_load_daily_default = c.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_DAILY) if c.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_DAILY) else None
+    solar_load_monthly_default = c.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_MONTHLY) if c.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_MONTHLY) else None
+    solar_load_yearly_default = c.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_YEARLY) if c.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_YEARLY) else None
+    total_load_default = c.get(CONF_TOTAL_LOAD_ENERGY_ENTITY) if c.get(CONF_TOTAL_LOAD_ENERGY_ENTITY) else None
+
+    schema[
+        vol.Optional(CONF_GRID_TO_LOAD_ENERGY_ENTITY, default=grid_load_default)
+        if grid_load_default is not None
+        else vol.Optional(CONF_GRID_TO_LOAD_ENERGY_ENTITY)
+    ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
+
+    schema[
+        vol.Optional(CONF_GRID_TO_LOAD_ENERGY_ENTITY_DAILY, default=grid_load_daily_default)
+        if grid_load_daily_default is not None
+        else vol.Optional(CONF_GRID_TO_LOAD_ENERGY_ENTITY_DAILY)
+    ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
+
+    schema[
+        vol.Optional(CONF_GRID_TO_LOAD_ENERGY_ENTITY_MONTHLY, default=grid_load_monthly_default)
+        if grid_load_monthly_default is not None
+        else vol.Optional(CONF_GRID_TO_LOAD_ENERGY_ENTITY_MONTHLY)
+    ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
+
+    schema[
+        vol.Optional(CONF_GRID_TO_LOAD_ENERGY_ENTITY_YEARLY, default=grid_load_yearly_default)
+        if grid_load_yearly_default is not None
+        else vol.Optional(CONF_GRID_TO_LOAD_ENERGY_ENTITY_YEARLY)
+    ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
+
+    schema[
+        vol.Optional(CONF_SOLAR_TO_GRID_ENERGY_ENTITY, default=solar_grid_default)
+        if solar_grid_default is not None
+        else vol.Optional(CONF_SOLAR_TO_GRID_ENERGY_ENTITY)
+    ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
+
+    schema[
+        vol.Optional(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY, default=solar_load_default)
+        if solar_load_default is not None
+        else vol.Optional(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY)
+    ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
+
+    schema[
+        vol.Optional(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_DAILY, default=solar_load_daily_default)
+        if solar_load_daily_default is not None
+        else vol.Optional(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_DAILY)
+    ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
+
+    schema[
+        vol.Optional(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_MONTHLY, default=solar_load_monthly_default)
+        if solar_load_monthly_default is not None
+        else vol.Optional(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_MONTHLY)
+    ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
+
+    schema[
+        vol.Optional(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_YEARLY, default=solar_load_yearly_default)
+        if solar_load_yearly_default is not None
+        else vol.Optional(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_YEARLY)
+    ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
+
+    schema[
+        vol.Optional(CONF_TOTAL_LOAD_ENERGY_ENTITY, default=total_load_default)
+        if total_load_default is not None
+        else vol.Optional(CONF_TOTAL_LOAD_ENERGY_ENTITY)
+    ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
+
     return vol.Schema(schema)
 
 def _frost_schema(curr: dict | None = None):

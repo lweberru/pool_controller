@@ -104,23 +104,6 @@
           "hot_tolerance": "Heater stops when water temperature is at or above target plus this value"
         }
       },
-      "costs": {
-        "title": "Electricity costs",
-        "description": "Configure electricity price and feed-in tariff for cost estimation.",
-        "submit": "Continue",
-        "data": {
-          "electricity_price": "Electricity price (per kWh)",
-          "electricity_price_entity": "Electricity price entity",
-          "feed_in_tariff": "Feed-in tariff (per kWh)",
-          "feed_in_tariff_entity": "Feed-in tariff entity"
-        },
-        "data_description": {
-          "electricity_price": "Fixed electricity price used for cost estimation (currency per kWh)",
-          "electricity_price_entity": "Optional sensor/helper for dynamic electricity price (overrides the fixed price)",
-          "feed_in_tariff": "Feed-in tariff used to estimate lost export revenue (currency per kWh)",
-          "feed_in_tariff_entity": "Optional sensor/helper for dynamic feed-in tariff (overrides the fixed tariff)"
-        }
-      },
       "frost": {
         "title": "Frost protection",
         "description": "Protects the pool system in cold weather by running the pump in a duty-cycle based on the outdoor temperature. Quiet hours are respected unless it is extremely cold.",
@@ -244,13 +227,33 @@
           "electricity_price": "Electricity price (per kWh)",
           "electricity_price_entity": "Electricity price entity",
           "feed_in_tariff": "Feed-in tariff (per kWh)",
-          "feed_in_tariff_entity": "Feed-in tariff entity"
+          "feed_in_tariff_entity": "Feed-in tariff entity",
+          "grid_to_load_energy_entity": "Grid to load energy (kWh)",
+          "grid_to_load_energy_entity_daily": "Grid to load energy (daily kWh)",
+          "grid_to_load_energy_entity_monthly": "Grid to load energy (monthly kWh)",
+          "grid_to_load_energy_entity_yearly": "Grid to load energy (yearly kWh)",
+          "solar_to_grid_energy_entity": "Solar to grid energy (kWh)",
+          "solar_to_load_energy_entity": "Solar to load energy (kWh)",
+          "solar_to_load_energy_entity_daily": "Solar to load energy (daily kWh)",
+          "solar_to_load_energy_entity_monthly": "Solar to load energy (monthly kWh)",
+          "solar_to_load_energy_entity_yearly": "Solar to load energy (yearly kWh)",
+          "total_load_energy_entity": "Total load energy (kWh)"
         },
         "data_description": {
           "electricity_price": "Fixed electricity price used for cost estimation (currency per kWh)",
           "electricity_price_entity": "Optional sensor/helper for dynamic electricity price (overrides the fixed price)",
           "feed_in_tariff": "Feed-in tariff used to estimate lost export revenue (currency per kWh)",
-          "feed_in_tariff_entity": "Optional sensor/helper for dynamic feed-in tariff (overrides the fixed tariff)"
+          "feed_in_tariff_entity": "Optional sensor/helper for dynamic feed-in tariff (overrides the fixed tariff)",
+          "grid_to_load_energy_entity": "Energy (kWh) imported from grid for the period (e.g. utility_meter daily/monthly/yearly)",
+          "grid_to_load_energy_entity_daily": "Energy (kWh) imported from grid for the day",
+          "grid_to_load_energy_entity_monthly": "Energy (kWh) imported from grid for the month",
+          "grid_to_load_energy_entity_yearly": "Energy (kWh) imported from grid for the year",
+          "solar_to_grid_energy_entity": "Energy (kWh) exported to grid for the period",
+          "solar_to_load_energy_entity": "Energy (kWh) supplied from solar to house/load for the period",
+          "solar_to_load_energy_entity_daily": "Energy (kWh) supplied from solar to house/load for the day",
+          "solar_to_load_energy_entity_monthly": "Energy (kWh) supplied from solar to house/load for the month",
+          "solar_to_load_energy_entity_yearly": "Energy (kWh) supplied from solar to house/load for the year",
+          "total_load_energy_entity": "Total load energy (kWh) for the period (optional, informational)"
         }
       }
     }
@@ -502,13 +505,33 @@
           "electricity_price": "Electricity price (per kWh)",
           "electricity_price_entity": "Electricity price entity",
           "feed_in_tariff": "Feed-in tariff (per kWh)",
-          "feed_in_tariff_entity": "Feed-in tariff entity"
+          "feed_in_tariff_entity": "Feed-in tariff entity",
+          "grid_to_load_energy_entity": "Grid to load energy (kWh)",
+          "grid_to_load_energy_entity_daily": "Grid to load energy (daily kWh)",
+          "grid_to_load_energy_entity_monthly": "Grid to load energy (monthly kWh)",
+          "grid_to_load_energy_entity_yearly": "Grid to load energy (yearly kWh)",
+          "solar_to_grid_energy_entity": "Solar to grid energy (kWh)",
+          "solar_to_load_energy_entity": "Solar to load energy (kWh)",
+          "solar_to_load_energy_entity_daily": "Solar to load energy (daily kWh)",
+          "solar_to_load_energy_entity_monthly": "Solar to load energy (monthly kWh)",
+          "solar_to_load_energy_entity_yearly": "Solar to load energy (yearly kWh)",
+          "total_load_energy_entity": "Total load energy (kWh)"
         },
         "data_description": {
           "electricity_price": "Fixed electricity price used for cost estimation (currency per kWh)",
           "electricity_price_entity": "Optional sensor/helper for dynamic electricity price (overrides the fixed price)",
           "feed_in_tariff": "Feed-in tariff used to estimate lost export revenue (currency per kWh)",
-          "feed_in_tariff_entity": "Optional sensor/helper for dynamic feed-in tariff (overrides the fixed tariff)"
+          "feed_in_tariff_entity": "Optional sensor/helper for dynamic feed-in tariff (overrides the fixed tariff)",
+          "grid_to_load_energy_entity": "Energy (kWh) imported from grid for the period (e.g. utility_meter daily/monthly/yearly)",
+          "grid_to_load_energy_entity_daily": "Energy (kWh) imported from grid for the day",
+          "grid_to_load_energy_entity_monthly": "Energy (kWh) imported from grid for the month",
+          "grid_to_load_energy_entity_yearly": "Energy (kWh) imported from grid for the year",
+          "solar_to_grid_energy_entity": "Energy (kWh) exported to grid for the period",
+          "solar_to_load_energy_entity": "Energy (kWh) supplied from solar to house/load for the period",
+          "solar_to_load_energy_entity_daily": "Energy (kWh) supplied from solar to house/load for the day",
+          "solar_to_load_energy_entity_monthly": "Energy (kWh) supplied from solar to house/load for the month",
+          "solar_to_load_energy_entity_yearly": "Energy (kWh) supplied from solar to house/load for the year",
+          "total_load_energy_entity": "Total load energy (kWh) for the period (optional, informational)"
         }
       }
     }
@@ -559,6 +582,28 @@
       "power_cost_per_hour": { "name": "Power cost (per hour)" },
       "power_cost_per_hour_net": { "name": "Power cost (net per hour)" },
       "power_cost_feed_in_loss_per_hour": { "name": "Lost feed-in revenue (per hour)" },
+      "energy_grid_to_load_kwh": { "name": "Grid to load energy" },
+      "energy_grid_to_load_kwh_daily": { "name": "Grid to load energy (daily)" },
+      "energy_grid_to_load_kwh_monthly": { "name": "Grid to load energy (monthly)" },
+      "energy_grid_to_load_kwh_yearly": { "name": "Grid to load energy (yearly)" },
+      "energy_solar_to_grid_kwh": { "name": "Solar to grid energy" },
+      "energy_solar_to_load_kwh": { "name": "Solar to load energy" },
+      "energy_solar_to_load_kwh_daily": { "name": "Solar to load energy (daily)" },
+      "energy_solar_to_load_kwh_monthly": { "name": "Solar to load energy (monthly)" },
+      "energy_solar_to_load_kwh_yearly": { "name": "Solar to load energy (yearly)" },
+      "energy_total_load_kwh": { "name": "Total load energy" },
+      "energy_cost": { "name": "Energy cost (period)" },
+      "energy_cost_net": { "name": "Energy cost (net, period)" },
+      "energy_cost_daily": { "name": "Energy cost (daily)" },
+      "energy_cost_monthly": { "name": "Energy cost (monthly)" },
+      "energy_cost_yearly": { "name": "Energy cost (yearly)" },
+      "energy_feed_in_loss": { "name": "Lost feed-in revenue (period)" },
+      "energy_feed_in_loss_daily": { "name": "Lost feed-in revenue (daily)" },
+      "energy_feed_in_loss_monthly": { "name": "Lost feed-in revenue (monthly)" },
+      "energy_feed_in_loss_yearly": { "name": "Lost feed-in revenue (yearly)" },
+      "energy_cost_net_daily": { "name": "Energy cost (net, daily)" },
+      "energy_cost_net_monthly": { "name": "Energy cost (net, monthly)" },
+      "energy_cost_net_yearly": { "name": "Energy cost (net, yearly)" },
       "heat_loss_w_per_c": { "name": "Heat loss coefficient (W/°C)" },
       "heat_startup_offset_minutes": { "name": "Heat startup offset (min)" },
       "sanitizer_mode": { "name": "Sanitizer" },

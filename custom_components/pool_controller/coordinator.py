@@ -933,6 +933,41 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 except Exception:
                     feed_in_tariff = None
 
+            # Optional energy (kWh) sensors for period-based costs
+            grid_to_load_kwh = self._get_float(conf.get(CONF_GRID_TO_LOAD_ENERGY_ENTITY))
+            grid_to_load_kwh_daily = self._get_float(conf.get(CONF_GRID_TO_LOAD_ENERGY_ENTITY_DAILY))
+            grid_to_load_kwh_monthly = self._get_float(conf.get(CONF_GRID_TO_LOAD_ENERGY_ENTITY_MONTHLY))
+            grid_to_load_kwh_yearly = self._get_float(conf.get(CONF_GRID_TO_LOAD_ENERGY_ENTITY_YEARLY))
+            solar_to_grid_kwh = self._get_float(conf.get(CONF_SOLAR_TO_GRID_ENERGY_ENTITY))
+            solar_to_load_kwh = self._get_float(conf.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY))
+            solar_to_load_kwh_daily = self._get_float(conf.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_DAILY))
+            solar_to_load_kwh_monthly = self._get_float(conf.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_MONTHLY))
+            solar_to_load_kwh_yearly = self._get_float(conf.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_YEARLY))
+            total_load_kwh = self._get_float(conf.get(CONF_TOTAL_LOAD_ENERGY_ENTITY))
+
+            def _calc_energy_costs(grid_kwh, solar_load_kwh):
+                cost = None
+                loss = None
+                net = None
+                try:
+                    if grid_kwh is not None and electricity_price is not None:
+                        cost = float(grid_kwh) * float(electricity_price)
+                except Exception:
+                    cost = None
+                try:
+                    if solar_load_kwh is not None and feed_in_tariff is not None:
+                        loss = float(solar_load_kwh) * float(feed_in_tariff)
+                except Exception:
+                    loss = None
+                if cost is not None or loss is not None:
+                    net = float(cost or 0.0) + float(loss or 0.0)
+                return cost, loss, net
+
+            energy_cost, energy_feed_in_loss, energy_cost_net = _calc_energy_costs(grid_to_load_kwh, solar_to_load_kwh)
+            energy_cost_daily, energy_feed_in_loss_daily, energy_cost_net_daily = _calc_energy_costs(grid_to_load_kwh_daily, solar_to_load_kwh_daily)
+            energy_cost_monthly, energy_feed_in_loss_monthly, energy_cost_net_monthly = _calc_energy_costs(grid_to_load_kwh_monthly, solar_to_load_kwh_monthly)
+            energy_cost_yearly, energy_feed_in_loss_yearly, energy_cost_net_yearly = _calc_energy_costs(grid_to_load_kwh_yearly, solar_to_load_kwh_yearly)
+
             # Total power and current cost per hour (best effort)
             total_power_w = None
             if main_power is not None or aux_power is not None:
@@ -1931,6 +1966,28 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "power_cost_per_hour": round(float(power_cost_per_hour), 4) if power_cost_per_hour is not None else None,
                 "power_cost_per_hour_net": round(float(power_cost_per_hour_net), 4) if power_cost_per_hour_net is not None else None,
                 "power_cost_feed_in_loss_per_hour": round(float(power_cost_feed_in_loss_per_hour), 4) if power_cost_feed_in_loss_per_hour is not None else None,
+                "energy_grid_to_load_kwh": round(float(grid_to_load_kwh), 3) if grid_to_load_kwh is not None else None,
+                "energy_grid_to_load_kwh_daily": round(float(grid_to_load_kwh_daily), 3) if grid_to_load_kwh_daily is not None else None,
+                "energy_grid_to_load_kwh_monthly": round(float(grid_to_load_kwh_monthly), 3) if grid_to_load_kwh_monthly is not None else None,
+                "energy_grid_to_load_kwh_yearly": round(float(grid_to_load_kwh_yearly), 3) if grid_to_load_kwh_yearly is not None else None,
+                "energy_solar_to_grid_kwh": round(float(solar_to_grid_kwh), 3) if solar_to_grid_kwh is not None else None,
+                "energy_solar_to_load_kwh": round(float(solar_to_load_kwh), 3) if solar_to_load_kwh is not None else None,
+                "energy_solar_to_load_kwh_daily": round(float(solar_to_load_kwh_daily), 3) if solar_to_load_kwh_daily is not None else None,
+                "energy_solar_to_load_kwh_monthly": round(float(solar_to_load_kwh_monthly), 3) if solar_to_load_kwh_monthly is not None else None,
+                "energy_solar_to_load_kwh_yearly": round(float(solar_to_load_kwh_yearly), 3) if solar_to_load_kwh_yearly is not None else None,
+                "energy_total_load_kwh": round(float(total_load_kwh), 3) if total_load_kwh is not None else None,
+                "energy_cost": round(float(energy_cost), 4) if energy_cost is not None else None,
+                "energy_cost_net": round(float(energy_cost_net), 4) if energy_cost_net is not None else None,
+                "energy_cost_daily": round(float(energy_cost_daily), 4) if energy_cost_daily is not None else None,
+                "energy_cost_monthly": round(float(energy_cost_monthly), 4) if energy_cost_monthly is not None else None,
+                "energy_cost_yearly": round(float(energy_cost_yearly), 4) if energy_cost_yearly is not None else None,
+                "energy_feed_in_loss": round(float(energy_feed_in_loss), 4) if energy_feed_in_loss is not None else None,
+                "energy_feed_in_loss_daily": round(float(energy_feed_in_loss_daily), 4) if energy_feed_in_loss_daily is not None else None,
+                "energy_feed_in_loss_monthly": round(float(energy_feed_in_loss_monthly), 4) if energy_feed_in_loss_monthly is not None else None,
+                "energy_feed_in_loss_yearly": round(float(energy_feed_in_loss_yearly), 4) if energy_feed_in_loss_yearly is not None else None,
+                "energy_cost_net_daily": round(float(energy_cost_net_daily), 4) if energy_cost_net_daily is not None else None,
+                "energy_cost_net_monthly": round(float(energy_cost_net_monthly), 4) if energy_cost_net_monthly is not None else None,
+                "energy_cost_net_yearly": round(float(energy_cost_net_yearly), 4) if energy_cost_net_yearly is not None else None,
                 "heat_loss_w_per_c": round(float(self.heat_loss_w_per_c), 2) if self.heat_loss_w_per_c is not None else None,
                 "heat_startup_offset_minutes": round(float(self.heat_startup_offset_minutes), 1) if self.heat_startup_offset_minutes is not None else None,
                 # Stromversorgung an, wenn der Pool laufen muss (inkl. Frost) oder wenn die Pumpe laufen soll.

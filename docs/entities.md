@@ -37,6 +37,33 @@ Entity IDs depend on your instance name, but the integration uses stable suffix 
 | `sensor.<pool>_filter_missing_minutes` | Integer | Remaining filter minutes needed for the next cycle |
 | `sensor.<pool>_frost_credit_minutes` | Integer | Effective frost credit minutes |
 | `sensor.<pool>_frost_credit_shift_minutes` | Integer | Minutes the frost cycle is shifted due to credit |
+| `sensor.<pool>_electricity_price` | Float | Electricity price (currency per kWh) |
+| `sensor.<pool>_feed_in_tariff` | Float | Feed-in tariff (currency per kWh) |
+| `sensor.<pool>_power_cost_per_hour` | Float | Instantaneous power cost (per hour) |
+| `sensor.<pool>_power_cost_per_hour_net` | Float | Instantaneous net power cost (per hour; PV surplus deducted) |
+| `sensor.<pool>_power_cost_feed_in_loss_per_hour` | Float | Instantaneous lost feed-in revenue (per hour) |
+| `sensor.<pool>_energy_grid_to_load_kwh` | Float | Grid → load energy (kWh) for the selected period (from utility meter or energy sensor) |
+| `sensor.<pool>_energy_grid_to_load_kwh_daily` | Float | Grid → load energy (kWh) for the day |
+| `sensor.<pool>_energy_grid_to_load_kwh_monthly` | Float | Grid → load energy (kWh) for the month |
+| `sensor.<pool>_energy_grid_to_load_kwh_yearly` | Float | Grid → load energy (kWh) for the year |
+| `sensor.<pool>_energy_solar_to_grid_kwh` | Float | Solar → grid energy (kWh) for the selected period |
+| `sensor.<pool>_energy_solar_to_load_kwh` | Float | Solar → load energy (kWh) for the selected period |
+| `sensor.<pool>_energy_solar_to_load_kwh_daily` | Float | Solar → load energy (kWh) for the day |
+| `sensor.<pool>_energy_solar_to_load_kwh_monthly` | Float | Solar → load energy (kWh) for the month |
+| `sensor.<pool>_energy_solar_to_load_kwh_yearly` | Float | Solar → load energy (kWh) for the year |
+| `sensor.<pool>_energy_total_load_kwh` | Float | Total load energy (kWh) for the selected period |
+| `sensor.<pool>_energy_cost` | Float | Energy cost for the selected period (based on grid → load energy) |
+| `sensor.<pool>_energy_cost_net` | Float | Net energy cost for the selected period (grid cost + PV opportunity cost) |
+| `sensor.<pool>_energy_cost_daily` | Float | Energy cost for the day (based on grid → load energy) |
+| `sensor.<pool>_energy_cost_monthly` | Float | Energy cost for the month (based on grid → load energy) |
+| `sensor.<pool>_energy_cost_yearly` | Float | Energy cost for the year (based on grid → load energy) |
+| `sensor.<pool>_energy_feed_in_loss` | Float | PV opportunity cost for the selected period (based on solar → load energy) |
+| `sensor.<pool>_energy_feed_in_loss_daily` | Float | PV opportunity cost for the day |
+| `sensor.<pool>_energy_feed_in_loss_monthly` | Float | PV opportunity cost for the month |
+| `sensor.<pool>_energy_feed_in_loss_yearly` | Float | PV opportunity cost for the year |
+| `sensor.<pool>_energy_cost_net_daily` | Float | Net energy cost for the day |
+| `sensor.<pool>_energy_cost_net_monthly` | Float | Net energy cost for the month |
+| `sensor.<pool>_energy_cost_net_yearly` | Float | Net energy cost for the year |
 | `sensor.<pool>_heat_loss_w_per_c` | Float | Learned heat loss coefficient (W/°C) |
 | `sensor.<pool>_heat_startup_offset_minutes` | Float | Learned heating startup delay (minutes) |
 | `sensor.<pool>_sanitizer_mode` | Enum | Disinfection style: `chlorine`, `saltwater`, `mixed` |

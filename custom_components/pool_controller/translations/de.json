@@ -6,9 +6,13 @@
                 "submit": "Weiter",
                 "data": {
                     "name": "Pool-Name",
-                    "water_volume": "Wassermenge (Liter)",
                     "water_volume": "Wassermenge in Litern (für Dosierung und Heizzeit-Berechnung)",
                     "demo_mode": "Demo-Modus: schaltet keine echten Geräte (nur zum Testen)"
+                },
+                "data_description": {
+                    "name": "Display name for this pool installation",
+                    "water_volume": "Water volume in liters (used for dosing and heating time calculations)",
+                    "demo_mode": "Demo mode: does not switch real devices (for testing only)"
                 }
             },
             "switches": {
@@ -17,29 +21,16 @@
                 "submit": "Weiter",
                 "data": {
                     "main_switch": "Hauptschalter",
+                    "pump_switch": "Pump switch (optional)",
+                    "filter_switch": "Filter switch (optional)",
+                    "enable_aux_heating": "Enable auxiliary heating",
+                    "aux_heating_switch": "Auxiliary heater switch",
                     "main_power_sensor": "Haupt-Leistungssensor",
                     "aux_power_sensor": "Zusatzheizung Leistungssensor"
                 },
                 "data_description": {
                     "main_switch": "Hauptschalter / Stromversorgung für den Pool (Pflichtfeld)",
                     "pump_switch": "Optional: separater Schalter für Umwälzpumpe (leer lassen, um Hauptschalter zu nutzen)",
-            "costs": {
-                "title": "Stromkosten",
-                "description": "Strompreis und Einspeisevergütung für Kostenschätzung konfigurieren.",
-                "submit": "Weiter",
-                "data": {
-                    "electricity_price": "Strompreis (pro kWh)",
-                    "electricity_price_entity": "Entität für Strompreis",
-                    "feed_in_tariff": "Einspeisevergütung (pro kWh)",
-                    "feed_in_tariff_entity": "Entität für Einspeisevergütung"
-                },
-                "data_description": {
-                    "electricity_price": "Fixer Strompreis zur Kostenschätzung (Währung pro kWh)",
-                    "electricity_price_entity": "Optionaler Sensor/Helper für dynamischen Strompreis (überschreibt den fixen Preis)",
-                    "feed_in_tariff": "Einspeisevergütung zur Schätzung entgangener Erlöse (Währung pro kWh)",
-                    "feed_in_tariff_entity": "Optionaler Sensor/Helper für dynamische Einspeisevergütung (überschreibt den fixen Tarif)"
-                }
-            },
                     "filter_switch": "Optional: separater Schalter für Filterpumpe (leer lassen, um Hauptschalter zu nutzen)",
                     "enable_aux_heating": "Aktiviert zusätzliche Heizung für schnelleres Aufheizen",
                     "aux_heating_switch": "Schalter für elektrische Zusatzheizung",
@@ -97,10 +88,6 @@
                     "min_temp": "Minimum-Temperatur",
                     "max_temp": "Maximum-Temperatur",
                     "target_temp_step": "Schrittweite",
-                    "electricity_price": "Strompreis (pro kWh)",
-                    "electricity_price_entity": "Strompreis-Entity",
-                    "feed_in_tariff": "Einspeisevergütung (pro kWh)",
-                    "feed_in_tariff_entity": "Einspeisevergütung-Entity",
                     "heater_base_power_w": "Basis-Heizleistung (W)",
                     "heater_aux_power_w": "Zusatzheizung-Leistung (W)",
                     "cold_tolerance": "Kalt-Toleranz",
@@ -111,10 +98,6 @@
                     "min_temp": "Minimaler einstellbarer Sollwert",
                     "max_temp": "Maximaler einstellbarer Sollwert",
                     "target_temp_step": "Schrittweite für das Setzen der Zieltemperatur",
-                    "electricity_price": "Fester Strompreis für die Kostenschätzung (Währung pro kWh)",
-                    "electricity_price_entity": "Optionale Entity für dynamischen Strompreis (überschreibt den festen Preis)",
-                    "feed_in_tariff": "Einspeisevergütung für entgangene Erlöse (Währung pro kWh)",
-                    "feed_in_tariff_entity": "Optionale Entity für dynamische Einspeisevergütung (überschreibt den festen Wert)",
                     "heater_base_power_w": "Basis-Heizanteil (z.B. Pumpen-Abwärme) für die Vorheiz-Zeitberechnung.",
                     "heater_aux_power_w": "Nennleistung der Zusatzheizung (W) für die Vorheiz-Zeitberechnung (wenn Zusatzheizung aktiviert ist). Gesamt = Basis + Zusatz.",
                     "cold_tolerance": "Heizung startet, wenn Wassertemperatur unter Ziel minus diesem Wert liegt",
@@ -235,6 +218,43 @@
                     "pv_stability_seconds": "Wie lange ein geänderter, geglätteter PV-Wert bestehen muss, bevor die Änderung übernommen wird (Sekunden).",
                     "pv_min_run_minutes": "Minimale automatische Laufzeit in Minuten, bevor ein automatisches Abschalten erlaubt ist. Verhindert sofortiges Stoppen nach kurzem Einschalten."
                 }
+            },
+            "costs": {
+                "title": "Stromkosten",
+                "description": "Strompreis und Einspeisevergütung für die Kostenschätzung konfigurieren.",
+                "submit": "Weiter",
+                "data": {
+                    "electricity_price": "Strompreis (pro kWh)",
+                    "electricity_price_entity": "Strompreis-Entity",
+                    "feed_in_tariff": "Einspeisevergütung (pro kWh)",
+                    "feed_in_tariff_entity": "Einspeisevergütung-Entity",
+                    "grid_to_load_energy_entity": "Netz → Last Energie (kWh)",
+                    "grid_to_load_energy_entity_daily": "Netz → Last Energie (täglich kWh)",
+                    "grid_to_load_energy_entity_monthly": "Netz → Last Energie (monatlich kWh)",
+                    "grid_to_load_energy_entity_yearly": "Netz → Last Energie (jährlich kWh)",
+                    "solar_to_grid_energy_entity": "Solar → Netz Energie (kWh)",
+                    "solar_to_load_energy_entity": "Solar → Last Energie (kWh)",
+                    "solar_to_load_energy_entity_daily": "Solar → Last Energie (täglich kWh)",
+                    "solar_to_load_energy_entity_monthly": "Solar → Last Energie (monatlich kWh)",
+                    "solar_to_load_energy_entity_yearly": "Solar → Last Energie (jährlich kWh)",
+                    "total_load_energy_entity": "Gesamtlast Energie (kWh)"
+                },
+                "data_description": {
+                    "electricity_price": "Fester Strompreis für die Kostenschätzung (Währung pro kWh)",
+                    "electricity_price_entity": "Optionaler Sensor/Helfer für dynamischen Strompreis (überschreibt festen Preis)",
+                    "feed_in_tariff": "Einspeisevergütung zur Schätzung entgangener Exporterlöse (Währung pro kWh)",
+                    "feed_in_tariff_entity": "Optionaler Sensor/Helfer für dynamische Einspeisevergütung (überschreibt festen Tarif)",
+                    "grid_to_load_energy_entity": "Energie (kWh) aus dem Netz für den Zeitraum (z. B. utility_meter daily/monthly/yearly)",
+                    "grid_to_load_energy_entity_daily": "Energie (kWh) aus dem Netz für den Tag",
+                    "grid_to_load_energy_entity_monthly": "Energie (kWh) aus dem Netz für den Monat",
+                    "grid_to_load_energy_entity_yearly": "Energie (kWh) aus dem Netz für das Jahr",
+                    "solar_to_grid_energy_entity": "Energie (kWh) ins Netz für den Zeitraum",
+                    "solar_to_load_energy_entity": "Energie (kWh) aus Solar zur Last für den Zeitraum",
+                    "solar_to_load_energy_entity_daily": "Energie (kWh) aus Solar zur Last für den Tag",
+                    "solar_to_load_energy_entity_monthly": "Energie (kWh) aus Solar zur Last für den Monat",
+                    "solar_to_load_energy_entity_yearly": "Energie (kWh) aus Solar zur Last für das Jahr",
+                    "total_load_energy_entity": "Gesamtlast-Energie (kWh) für den Zeitraum (optional)"
+                }
             }
         }
     },
@@ -259,21 +279,6 @@
                 }
             },
             "basic": {
-                "title": "Einstellungen",
-                "description": "Allgemeine Einstellungen. Änderungen werden in den Optionen der Config-Entry gespeichert.",
-                "submit": "Weiter",
-                "data": {
-                    "name": "Pool-Name",
-                    "water_volume": "Wassermenge (Liter)",
-                    "demo_mode": "Demo-Modus"
-                },
-                "data_description": {
-                    "name": "Anzeigenname für diese Pool-Installation",
-                    "water_volume": "Wassermenge in Litern (für Dosierung und Heizzeit-Berechnung)",
-                    "demo_mode": "Demo-Modus: schaltet keine echten Geräte (nur zum Testen)"
-                }
-            },
-            "init": {
                 "title": "Einstellungen",
                 "description": "Allgemeine Einstellungen. Änderungen werden in den Optionen der Config-Entry gespeichert.",
                 "submit": "Weiter",
@@ -500,13 +505,33 @@
                     "electricity_price": "Strompreis (pro kWh)",
                     "electricity_price_entity": "Entität für Strompreis",
                     "feed_in_tariff": "Einspeisevergütung (pro kWh)",
-                    "feed_in_tariff_entity": "Entität für Einspeisevergütung"
+                    "feed_in_tariff_entity": "Entität für Einspeisevergütung",
+                    "grid_to_load_energy_entity": "Netz → Last Energie (kWh)",
+                    "grid_to_load_energy_entity_daily": "Netz → Last Energie (täglich kWh)",
+                    "grid_to_load_energy_entity_monthly": "Netz → Last Energie (monatlich kWh)",
+                    "grid_to_load_energy_entity_yearly": "Netz → Last Energie (jährlich kWh)",
+                    "solar_to_grid_energy_entity": "Solar → Netz Energie (kWh)",
+                    "solar_to_load_energy_entity": "Solar → Last Energie (kWh)",
+                    "solar_to_load_energy_entity_daily": "Solar → Last Energie (täglich kWh)",
+                    "solar_to_load_energy_entity_monthly": "Solar → Last Energie (monatlich kWh)",
+                    "solar_to_load_energy_entity_yearly": "Solar → Last Energie (jährlich kWh)",
+                    "total_load_energy_entity": "Gesamtlast Energie (kWh)"
                 },
                 "data_description": {
                     "electricity_price": "Fixer Strompreis zur Kostenschätzung (Währung pro kWh)",
                     "electricity_price_entity": "Optionaler Sensor/Helper für dynamischen Strompreis (überschreibt den fixen Preis)",
                     "feed_in_tariff": "Einspeisevergütung zur Schätzung entgangener Erlöse (Währung pro kWh)",
-                    "feed_in_tariff_entity": "Optionaler Sensor/Helper für dynamische Einspeisevergütung (überschreibt den fixen Tarif)"
+                    "feed_in_tariff_entity": "Optionaler Sensor/Helper für dynamische Einspeisevergütung (überschreibt den fixen Tarif)",
+                    "grid_to_load_energy_entity": "Energie (kWh) aus dem Netz für den Zeitraum (z. B. utility_meter daily/monthly/yearly)",
+                    "grid_to_load_energy_entity_daily": "Energie (kWh) aus dem Netz für den Tag",
+                    "grid_to_load_energy_entity_monthly": "Energie (kWh) aus dem Netz für den Monat",
+                    "grid_to_load_energy_entity_yearly": "Energie (kWh) aus dem Netz für das Jahr",
+                    "solar_to_grid_energy_entity": "Energie (kWh) ins Netz für den Zeitraum",
+                    "solar_to_load_energy_entity": "Energie (kWh) aus Solar zur Last für den Zeitraum",
+                    "solar_to_load_energy_entity_daily": "Energie (kWh) aus Solar zur Last für den Tag",
+                    "solar_to_load_energy_entity_monthly": "Energie (kWh) aus Solar zur Last für den Monat",
+                    "solar_to_load_energy_entity_yearly": "Energie (kWh) aus Solar zur Last für das Jahr",
+                    "total_load_energy_entity": "Gesamtlast-Energie (kWh) für den Zeitraum (optional)"
                 }
             }
         }
@@ -577,66 +602,248 @@
             }
         },
         "button": {
-            "pause_60": { "name": "Pause 60 min" },
-            "bath_60": { "name": "Baden 60 min" },
-            "filter_30": { "name": "Filtern 30 min" },
-            "chlorine_5": { "name": "Stoßchlorung 5 min" }
+            "pause_60": {
+                "name": "Pause 60 min"
+            },
+            "bath_60": {
+                "name": "Baden 60 min"
+            },
+            "filter_30": {
+                "name": "Filtern 30 min"
+            },
+            "chlorine_5": {
+                "name": "Stoßchlorung 5 min"
+            }
         },
         "sensor": {
-            "status": { "name": "Status" },
-            "run_reason": { "name": "Laufgrund" },
-            "heat_reason": { "name": "Heizgrund" },
-            "run_credit_source": { "name": "Gutschrift-Quelle" },
-            "run_credit_minutes": { "name": "Gutschrift (min)" },
-            "filter_credit_minutes": { "name": "Filter-Gutschrift (min)" },
-            "filter_missing_minutes": { "name": "Filter-Rest (min)" },
-            "frost_credit_minutes": { "name": "Frost-Gutschrift (min)" },
-            "frost_credit_shift_minutes": { "name": "Frost-Verschiebung (min)" },
-            "electricity_price": { "name": "Strompreis (pro kWh)" },
-            "feed_in_tariff": { "name": "Einspeisevergütung (pro kWh)" },
-            "power_cost_per_hour": { "name": "Stromkosten (pro Stunde)" },
-            "power_cost_per_hour_net": { "name": "Stromkosten (netto pro Stunde)" },
-            "power_cost_feed_in_loss_per_hour": { "name": "Entgangene Einspeisevergütung (pro Stunde)" },
-            "heat_loss_w_per_c": { "name": "Wärmeverlust-Koeffizient (W/°C)" },
-            "heat_startup_offset_minutes": { "name": "Heiz-Anlauf-Offset (min)" },
-            "sanitizer_mode": { "name": "Desinfektion" },
-            "ph_val": { "name": "pH" },
-            "chlor_val": { "name": "Chlor (mV)" },
-            "salt_val": { "name": "Salzgehalt" },
-            "salt_add_g": { "name": "Salz nachfüllen" },
-            "tds_val": { "name": "TDS" },
-            "tds_effective": { "name": "TDS (ohne Salz)" },
-            "tds_status": { "name": "TDS-Status" },
-            "tds_water_change_liters": { "name": "Empfohlener Wasserwechsel (L)" },
-            "tds_water_change_percent": { "name": "Empfohlener Wasserwechsel (%)" },
-            "ph_minus_g": { "name": "pH- hinzufügen (g)" },
-            "ph_plus_g": { "name": "pH+ hinzufügen (g)" },
-            "chlor_spoons": { "name": "Chlor-Dosierung (Löffel)" },
-            "next_start_mins": { "name": "Nächster Start in" },
-            "next_filter_mins": { "name": "Nächster Filterlauf in" },
-            "next_frost_mins": { "name": "Nächster Frostlauf in" },
-            "next_event": { "name": "Nächstes Ereignis" },
-            "next_event_end": { "name": "Ende des nächsten Ereignisses" },
-            "next_event_summary": { "name": "Zusammenfassung des nächsten Ereignisses" },
-            "event_rain_probability": { "name": "Regenwahrscheinlichkeit (Event)" },
-            "manual_timer_mins": { "name": "Manueller Timer (min)" },
-            "auto_filter_timer_mins": { "name": "Auto-Filter Timer (min)" },
-            "pause_timer_mins": { "name": "Pause Timer (min)" },
-            "frost_timer_mins": { "name": "Frost Timer (min)" },
-            "outdoor_temp": { "name": "Außentemperatur" },
-            "pv_power": { "name": "PV-Leistung" },
-            "pv_smoothed": { "name": "PV (geglättet)" },
-            "pv_band_low": { "name": "PV-Band unten" },
-            "pv_band_mid_on": { "name": "PV-Band Mitte (an)" },
-            "pv_band_mid_off": { "name": "PV-Band Mitte (aus)" },
-            "pv_band_high": { "name": "PV-Band oben" },
-            "main_power": { "name": "Netz-Leistung" },
-            "aux_power": { "name": "Zusatzheizung Leistung" },
-            "pv_on_threshold": { "name": "PV-Einschalt-Schwelle" },
-            "pv_off_threshold": { "name": "PV-Ausschalt-Schwelle" },
-            "filter_minutes": { "name": "Konfigurierte Filterdauer (min)" },
-            "chlorine_duration": { "name": "Konfigurierte Chlor-Dauer (min)" },
-            "bathing_minutes": { "name": "Konfigurierte Bade-Dauer (min)" }
+            "status": {
+                "name": "Status"
+            },
+            "run_reason": {
+                "name": "Laufgrund"
+            },
+            "heat_reason": {
+                "name": "Heizgrund"
+            },
+            "run_credit_source": {
+                "name": "Gutschrift-Quelle"
+            },
+            "run_credit_minutes": {
+                "name": "Gutschrift (min)"
+            },
+            "filter_credit_minutes": {
+                "name": "Filter-Gutschrift (min)"
+            },
+            "filter_missing_minutes": {
+                "name": "Filter-Rest (min)"
+            },
+            "frost_credit_minutes": {
+                "name": "Frost-Gutschrift (min)"
+            },
+            "frost_credit_shift_minutes": {
+                "name": "Frost-Verschiebung (min)"
+            },
+            "electricity_price": {
+                "name": "Strompreis (pro kWh)"
+            },
+            "feed_in_tariff": {
+                "name": "Einspeisevergütung (pro kWh)"
+            },
+            "power_cost_per_hour": {
+                "name": "Stromkosten (pro Stunde)"
+            },
+            "power_cost_per_hour_net": {
+                "name": "Stromkosten (netto pro Stunde)"
+            },
+            "power_cost_feed_in_loss_per_hour": {
+                "name": "Entgangene Einspeisevergütung (pro Stunde)"
+            },
+            "energy_grid_to_load_kwh": {
+                "name": "Netz → Last Energie"
+            },
+            "energy_grid_to_load_kwh_daily": {
+                "name": "Netz → Last Energie (täglich)"
+            },
+            "energy_grid_to_load_kwh_monthly": {
+                "name": "Netz → Last Energie (monatlich)"
+            },
+            "energy_grid_to_load_kwh_yearly": {
+                "name": "Netz → Last Energie (jährlich)"
+            },
+            "energy_solar_to_grid_kwh": {
+                "name": "Solar → Netz Energie"
+            },
+            "energy_solar_to_load_kwh": {
+                "name": "Solar → Last Energie"
+            },
+            "energy_solar_to_load_kwh_daily": {
+                "name": "Solar → Last Energie (täglich)"
+            },
+            "energy_solar_to_load_kwh_monthly": {
+                "name": "Solar → Last Energie (monatlich)"
+            },
+            "energy_solar_to_load_kwh_yearly": {
+                "name": "Solar → Last Energie (jährlich)"
+            },
+            "energy_total_load_kwh": {
+                "name": "Gesamtlast Energie"
+            },
+            "energy_cost": {
+                "name": "Energiekosten (Zeitraum)"
+            },
+            "energy_cost_net": {
+                "name": "Energiekosten (netto, Zeitraum)"
+            },
+            "energy_cost_daily": {
+                "name": "Energiekosten (täglich)"
+            },
+            "energy_cost_monthly": {
+                "name": "Energiekosten (monatlich)"
+            },
+            "energy_cost_yearly": {
+                "name": "Energiekosten (jährlich)"
+            },
+            "energy_feed_in_loss": {
+                "name": "Entgangene Einspeisevergütung (Zeitraum)"
+            },
+            "energy_feed_in_loss_daily": {
+                "name": "Entgangene Einspeisevergütung (täglich)"
+            },
+            "energy_feed_in_loss_monthly": {
+                "name": "Entgangene Einspeisevergütung (monatlich)"
+            },
+            "energy_feed_in_loss_yearly": {
+                "name": "Entgangene Einspeisevergütung (jährlich)"
+            },
+            "energy_cost_net_daily": {
+                "name": "Energiekosten (netto, täglich)"
+            },
+            "energy_cost_net_monthly": {
+                "name": "Energiekosten (netto, monatlich)"
+            },
+            "energy_cost_net_yearly": {
+                "name": "Energiekosten (netto, jährlich)"
+            },
+            "heat_loss_w_per_c": {
+                "name": "Wärmeverlust-Koeffizient (W/°C)"
+            },
+            "heat_startup_offset_minutes": {
+                "name": "Heiz-Anlauf-Offset (min)"
+            },
+            "sanitizer_mode": {
+                "name": "Desinfektion"
+            },
+            "ph_val": {
+                "name": "pH"
+            },
+            "chlor_val": {
+                "name": "Chlor (mV)"
+            },
+            "salt_val": {
+                "name": "Salzgehalt"
+            },
+            "salt_add_g": {
+                "name": "Salz nachfüllen"
+            },
+            "tds_val": {
+                "name": "TDS"
+            },
+            "tds_effective": {
+                "name": "TDS (ohne Salz)"
+            },
+            "tds_status": {
+                "name": "TDS-Status"
+            },
+            "tds_water_change_liters": {
+                "name": "Empfohlener Wasserwechsel (L)"
+            },
+            "tds_water_change_percent": {
+                "name": "Empfohlener Wasserwechsel (%)"
+            },
+            "ph_minus_g": {
+                "name": "pH- hinzufügen (g)"
+            },
+            "ph_plus_g": {
+                "name": "pH+ hinzufügen (g)"
+            },
+            "chlor_spoons": {
+                "name": "Chlor-Dosierung (Löffel)"
+            },
+            "next_start_mins": {
+                "name": "Nächster Start in"
+            },
+            "next_filter_mins": {
+                "name": "Nächster Filterlauf in"
+            },
+            "next_frost_mins": {
+                "name": "Nächster Frostlauf in"
+            },
+            "next_event": {
+                "name": "Nächstes Ereignis"
+            },
+            "next_event_end": {
+                "name": "Ende des nächsten Ereignisses"
+            },
+            "next_event_summary": {
+                "name": "Zusammenfassung des nächsten Ereignisses"
+            },
+            "event_rain_probability": {
+                "name": "Regenwahrscheinlichkeit (Event)"
+            },
+            "manual_timer_mins": {
+                "name": "Manueller Timer (min)"
+            },
+            "auto_filter_timer_mins": {
+                "name": "Auto-Filter Timer (min)"
+            },
+            "pause_timer_mins": {
+                "name": "Pause Timer (min)"
+            },
+            "frost_timer_mins": {
+                "name": "Frost Timer (min)"
+            },
+            "outdoor_temp": {
+                "name": "Außentemperatur"
+            },
+            "pv_power": {
+                "name": "PV-Leistung"
+            },
+            "pv_smoothed": {
+                "name": "PV (geglättet)"
+            },
+            "pv_band_low": {
+                "name": "PV-Band unten"
+            },
+            "pv_band_mid_on": {
+                "name": "PV-Band Mitte (an)"
+            },
+            "pv_band_mid_off": {
+                "name": "PV-Band Mitte (aus)"
+            },
+            "pv_band_high": {
+                "name": "PV-Band oben"
+            },
+            "main_power": {
+                "name": "Netz-Leistung"
+            },
+            "aux_power": {
+                "name": "Zusatzheizung Leistung"
+            },
+            "pv_on_threshold": {
+                "name": "PV-Einschalt-Schwelle"
+            },
+            "pv_off_threshold": {
+                "name": "PV-Ausschalt-Schwelle"
+            },
+            "filter_minutes": {
+                "name": "Konfigurierte Filterdauer (min)"
+            },
+            "chlorine_duration": {
+                "name": "Konfigurierte Chlor-Dauer (min)"
+            },
+            "bathing_minutes": {
+                "name": "Konfigurierte Bade-Dauer (min)"
+            }
         }
     },
     "state": {
