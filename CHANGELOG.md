@@ -2,15 +2,19 @@
 
 All notable changes to this integration are documented in this file.
 
-## [2.3.4] - 2026-01-30
-- Add daily/monthly/yearly energy inputs and cost/net cost sensors.
-- Expose PV opportunity-cost (feed-in loss) period variants.
-- Update translations for new costs/energy fields.
+## [2.3.6] - 2026-01-30
+- Make daily cost sensors time-weighted and monotonic within the day (tariff applied at time of consumption).
+- Derive monthly/yearly costs from daily totals to avoid tariff retroactive changes.
 
 ## [2.3.5] - 2026-01-30
 - Auto-derive monthly/yearly energy totals from daily sensors when missing.
 - Auto-detect AlphaESS energy sensors as defaults in the costs step.
 - Clarify cost input descriptions for optional month/year fields.
+
+## [2.3.4] - 2026-01-30
+- Add daily/monthly/yearly energy inputs and cost/net cost sensors.
+- Expose PV opportunity-cost (feed-in loss) period variants.
+- Update translations for new costs/energy fields.
 
 ## [2.3.3] - 2026-01-29
 - Fix English translation formatting and sync options/costs labels.

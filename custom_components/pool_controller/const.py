@@ -260,3 +260,25 @@ OPT_KEY_DERIVED_SOLAR_MONTH_TOTAL = "derived_solar_month_total"
 OPT_KEY_DERIVED_SOLAR_YEAR_TOTAL = "derived_solar_year_total"
 OPT_KEY_DERIVED_SOLAR_MONTH_ID = "derived_solar_month_id"
 OPT_KEY_DERIVED_SOLAR_YEAR_ID = "derived_solar_year_id"
+
+# Cost accumulation (time-weighted tariffs, daily reset)
+OPT_KEY_COST_DAILY_LAST_GRID_KWH = "cost_daily_last_grid_kwh"
+OPT_KEY_COST_DAILY_LAST_SOLAR_KWH = "cost_daily_last_solar_kwh"
+OPT_KEY_COST_DAILY_DATE = "cost_daily_date"
+OPT_KEY_COST_DAILY_ACCUM = "cost_daily_accum"
+OPT_KEY_COST_DAILY_FEED_IN_LOSS_ACCUM = "cost_daily_feed_in_loss_accum"
+
+# Derived cost aggregation (month/year from daily cost)
+OPT_KEY_DERIVED_COST_DAILY_LAST_VALUE = "derived_cost_daily_last_value"
+OPT_KEY_DERIVED_COST_DAILY_LAST_DATE = "derived_cost_daily_last_date"
+OPT_KEY_DERIVED_COST_MONTH_TOTAL = "derived_cost_month_total"
+OPT_KEY_DERIVED_COST_YEAR_TOTAL = "derived_cost_year_total"
+OPT_KEY_DERIVED_COST_MONTH_ID = "derived_cost_month_id"
+OPT_KEY_DERIVED_COST_YEAR_ID = "derived_cost_year_id"
+
+OPT_KEY_DERIVED_COST_NET_DAILY_LAST_VALUE = "derived_cost_net_daily_last_value"
+OPT_KEY_DERIVED_COST_NET_DAILY_LAST_DATE = "derived_cost_net_daily_last_date"
+OPT_KEY_DERIVED_COST_NET_MONTH_TOTAL = "derived_cost_net_month_total"
+OPT_KEY_DERIVED_COST_NET_YEAR_TOTAL = "derived_cost_net_year_total"
+OPT_KEY_DERIVED_COST_NET_MONTH_ID = "derived_cost_net_month_id"
+OPT_KEY_DERIVED_COST_NET_YEAR_ID = "derived_cost_net_year_id"

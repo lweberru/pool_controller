@@ -123,6 +123,32 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self._derived_energy_last_saved = None
         self._derived_energy_snapshot = None
 
+        # Cost accumulation (time-weighted tariffs, daily reset)
+        self._cost_daily_last_grid_kwh = None
+        self._cost_daily_last_solar_kwh = None
+        self._cost_daily_date = None
+        self._cost_daily_accum = 0.0
+        self._cost_daily_feed_in_loss_accum = 0.0
+        self._cost_persist_last_saved = None
+        self._cost_persist_snapshot = None
+
+        # Derived cost aggregation (month/year from daily cost)
+        self._derived_cost_daily_last_value = None
+        self._derived_cost_daily_last_date = None
+        self._derived_cost_month_total = 0.0
+        self._derived_cost_year_total = 0.0
+        self._derived_cost_month_id = None
+        self._derived_cost_year_id = None
+
+        self._derived_cost_net_daily_last_value = None
+        self._derived_cost_net_daily_last_date = None
+        self._derived_cost_net_month_total = 0.0
+        self._derived_cost_net_year_total = 0.0
+        self._derived_cost_net_month_id = None
+        self._derived_cost_net_year_id = None
+        self._derived_cost_last_saved = None
+        self._derived_cost_snapshot = None
+
         self._did_migrate_timers = False
         if entry and entry.options:
             self.maintenance_active = bool(entry.options.get(OPT_KEY_MAINTENANCE_ACTIVE, False))
@@ -194,6 +220,89 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 self._derived_solar_year_id = entry.options.get(OPT_KEY_DERIVED_SOLAR_YEAR_ID) or None
             except Exception:
                 self._derived_solar_year_id = None
+
+            # Cost accumulation persisted values (best effort)
+            try:
+                if entry.options.get(OPT_KEY_COST_DAILY_LAST_GRID_KWH) is not None:
+                    self._cost_daily_last_grid_kwh = float(entry.options.get(OPT_KEY_COST_DAILY_LAST_GRID_KWH))
+            except Exception:
+                self._cost_daily_last_grid_kwh = None
+            try:
+                if entry.options.get(OPT_KEY_COST_DAILY_LAST_SOLAR_KWH) is not None:
+                    self._cost_daily_last_solar_kwh = float(entry.options.get(OPT_KEY_COST_DAILY_LAST_SOLAR_KWH))
+            except Exception:
+                self._cost_daily_last_solar_kwh = None
+            try:
+                self._cost_daily_date = entry.options.get(OPT_KEY_COST_DAILY_DATE) or None
+            except Exception:
+                self._cost_daily_date = None
+            try:
+                if entry.options.get(OPT_KEY_COST_DAILY_ACCUM) is not None:
+                    self._cost_daily_accum = float(entry.options.get(OPT_KEY_COST_DAILY_ACCUM))
+            except Exception:
+                self._cost_daily_accum = 0.0
+            try:
+                if entry.options.get(OPT_KEY_COST_DAILY_FEED_IN_LOSS_ACCUM) is not None:
+                    self._cost_daily_feed_in_loss_accum = float(entry.options.get(OPT_KEY_COST_DAILY_FEED_IN_LOSS_ACCUM))
+            except Exception:
+                self._cost_daily_feed_in_loss_accum = 0.0
+
+            # Derived cost aggregation (best effort)
+            try:
+                if entry.options.get(OPT_KEY_DERIVED_COST_DAILY_LAST_VALUE) is not None:
+                    self._derived_cost_daily_last_value = float(entry.options.get(OPT_KEY_DERIVED_COST_DAILY_LAST_VALUE))
+            except Exception:
+                self._derived_cost_daily_last_value = None
+            try:
+                self._derived_cost_daily_last_date = entry.options.get(OPT_KEY_DERIVED_COST_DAILY_LAST_DATE) or None
+            except Exception:
+                self._derived_cost_daily_last_date = None
+            try:
+                if entry.options.get(OPT_KEY_DERIVED_COST_MONTH_TOTAL) is not None:
+                    self._derived_cost_month_total = float(entry.options.get(OPT_KEY_DERIVED_COST_MONTH_TOTAL))
+            except Exception:
+                self._derived_cost_month_total = 0.0
+            try:
+                if entry.options.get(OPT_KEY_DERIVED_COST_YEAR_TOTAL) is not None:
+                    self._derived_cost_year_total = float(entry.options.get(OPT_KEY_DERIVED_COST_YEAR_TOTAL))
+            except Exception:
+                self._derived_cost_year_total = 0.0
+            try:
+                self._derived_cost_month_id = entry.options.get(OPT_KEY_DERIVED_COST_MONTH_ID) or None
+            except Exception:
+                self._derived_cost_month_id = None
+            try:
+                self._derived_cost_year_id = entry.options.get(OPT_KEY_DERIVED_COST_YEAR_ID) or None
+            except Exception:
+                self._derived_cost_year_id = None
+
+            try:
+                if entry.options.get(OPT_KEY_DERIVED_COST_NET_DAILY_LAST_VALUE) is not None:
+                    self._derived_cost_net_daily_last_value = float(entry.options.get(OPT_KEY_DERIVED_COST_NET_DAILY_LAST_VALUE))
+            except Exception:
+                self._derived_cost_net_daily_last_value = None
+            try:
+                self._derived_cost_net_daily_last_date = entry.options.get(OPT_KEY_DERIVED_COST_NET_DAILY_LAST_DATE) or None
+            except Exception:
+                self._derived_cost_net_daily_last_date = None
+            try:
+                if entry.options.get(OPT_KEY_DERIVED_COST_NET_MONTH_TOTAL) is not None:
+                    self._derived_cost_net_month_total = float(entry.options.get(OPT_KEY_DERIVED_COST_NET_MONTH_TOTAL))
+            except Exception:
+                self._derived_cost_net_month_total = 0.0
+            try:
+                if entry.options.get(OPT_KEY_DERIVED_COST_NET_YEAR_TOTAL) is not None:
+                    self._derived_cost_net_year_total = float(entry.options.get(OPT_KEY_DERIVED_COST_NET_YEAR_TOTAL))
+            except Exception:
+                self._derived_cost_net_year_total = 0.0
+            try:
+                self._derived_cost_net_month_id = entry.options.get(OPT_KEY_DERIVED_COST_NET_MONTH_ID) or None
+            except Exception:
+                self._derived_cost_net_month_id = None
+            try:
+                self._derived_cost_net_year_id = entry.options.get(OPT_KEY_DERIVED_COST_NET_YEAR_ID) or None
+            except Exception:
+                self._derived_cost_net_year_id = None
             # New timers
             mu = entry.options.get(OPT_KEY_MANUAL_UNTIL)
             if mu:
@@ -331,6 +440,30 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             self._derived_energy_last_saved = None
             self._derived_energy_snapshot = None
 
+            self._cost_daily_last_grid_kwh = None
+            self._cost_daily_last_solar_kwh = None
+            self._cost_daily_date = None
+            self._cost_daily_accum = 0.0
+            self._cost_daily_feed_in_loss_accum = 0.0
+            self._cost_persist_last_saved = None
+            self._cost_persist_snapshot = None
+
+            self._derived_cost_daily_last_value = None
+            self._derived_cost_daily_last_date = None
+            self._derived_cost_month_total = 0.0
+            self._derived_cost_year_total = 0.0
+            self._derived_cost_month_id = None
+            self._derived_cost_year_id = None
+
+            self._derived_cost_net_daily_last_value = None
+            self._derived_cost_net_daily_last_date = None
+            self._derived_cost_net_month_total = 0.0
+            self._derived_cost_net_year_total = 0.0
+            self._derived_cost_net_month_id = None
+            self._derived_cost_net_year_id = None
+            self._derived_cost_last_saved = None
+            self._derived_cost_snapshot = None
+
     def _update_derived_energy_from_daily(self, prefix: str, daily_value: float | None, now: datetime) -> tuple[float | None, float | None, bool]:
         """Return (month_total, year_total, changed) derived from a daily-reset sensor."""
         if daily_value is None:
@@ -452,6 +585,85 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         await self._async_update_entry_options(opts)
         self._derived_energy_last_saved = now
         self._derived_energy_snapshot = snapshot
+
+    async def _maybe_persist_cost_daily_state(self, now: datetime) -> None:
+        if not self.entry or self.entry.options is None:
+            return
+
+        snapshot = (
+            self._cost_daily_last_grid_kwh,
+            self._cost_daily_last_solar_kwh,
+            self._cost_daily_date,
+            self._cost_daily_accum,
+            self._cost_daily_feed_in_loss_accum,
+        )
+        if self._cost_persist_snapshot == snapshot:
+            return
+
+        try:
+            last_saved = self._cost_persist_last_saved
+            if last_saved and (now - last_saved).total_seconds() < 5 * 60:
+                return
+        except Exception:
+            pass
+
+        opts = {**self.entry.options}
+        opts[OPT_KEY_COST_DAILY_LAST_GRID_KWH] = self._cost_daily_last_grid_kwh
+        opts[OPT_KEY_COST_DAILY_LAST_SOLAR_KWH] = self._cost_daily_last_solar_kwh
+        opts[OPT_KEY_COST_DAILY_DATE] = self._cost_daily_date
+        opts[OPT_KEY_COST_DAILY_ACCUM] = self._cost_daily_accum
+        opts[OPT_KEY_COST_DAILY_FEED_IN_LOSS_ACCUM] = self._cost_daily_feed_in_loss_accum
+
+        await self._async_update_entry_options(opts)
+        self._cost_persist_last_saved = now
+        self._cost_persist_snapshot = snapshot
+
+    async def _maybe_persist_derived_cost_state(self, now: datetime) -> None:
+        if not self.entry or self.entry.options is None:
+            return
+
+        snapshot = (
+            self._derived_cost_daily_last_value,
+            self._derived_cost_daily_last_date,
+            self._derived_cost_month_total,
+            self._derived_cost_year_total,
+            self._derived_cost_month_id,
+            self._derived_cost_year_id,
+            self._derived_cost_net_daily_last_value,
+            self._derived_cost_net_daily_last_date,
+            self._derived_cost_net_month_total,
+            self._derived_cost_net_year_total,
+            self._derived_cost_net_month_id,
+            self._derived_cost_net_year_id,
+        )
+        if getattr(self, "_derived_cost_snapshot", None) == snapshot:
+            return
+
+        try:
+            last_saved = getattr(self, "_derived_cost_last_saved", None)
+            if last_saved and (now - last_saved).total_seconds() < 5 * 60:
+                return
+        except Exception:
+            pass
+
+        opts = {**self.entry.options}
+        opts[OPT_KEY_DERIVED_COST_DAILY_LAST_VALUE] = self._derived_cost_daily_last_value
+        opts[OPT_KEY_DERIVED_COST_DAILY_LAST_DATE] = self._derived_cost_daily_last_date
+        opts[OPT_KEY_DERIVED_COST_MONTH_TOTAL] = self._derived_cost_month_total
+        opts[OPT_KEY_DERIVED_COST_YEAR_TOTAL] = self._derived_cost_year_total
+        opts[OPT_KEY_DERIVED_COST_MONTH_ID] = self._derived_cost_month_id
+        opts[OPT_KEY_DERIVED_COST_YEAR_ID] = self._derived_cost_year_id
+
+        opts[OPT_KEY_DERIVED_COST_NET_DAILY_LAST_VALUE] = self._derived_cost_net_daily_last_value
+        opts[OPT_KEY_DERIVED_COST_NET_DAILY_LAST_DATE] = self._derived_cost_net_daily_last_date
+        opts[OPT_KEY_DERIVED_COST_NET_MONTH_TOTAL] = self._derived_cost_net_month_total
+        opts[OPT_KEY_DERIVED_COST_NET_YEAR_TOTAL] = self._derived_cost_net_year_total
+        opts[OPT_KEY_DERIVED_COST_NET_MONTH_ID] = self._derived_cost_net_month_id
+        opts[OPT_KEY_DERIVED_COST_NET_YEAR_ID] = self._derived_cost_net_year_id
+
+        await self._async_update_entry_options(opts)
+        setattr(self, "_derived_cost_last_saved", now)
+        setattr(self, "_derived_cost_snapshot", snapshot)
 
     def _effective_heating_power(self, conf: dict, water_temp: float | None, outdoor_temp: float | None) -> float:
         """Return effective heating power in W after subtracting estimated heat loss."""
@@ -1205,6 +1417,107 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             energy_cost_daily, energy_feed_in_loss_daily, energy_cost_net_daily = _calc_energy_costs(grid_to_load_kwh_daily, solar_to_load_kwh_daily)
             energy_cost_monthly, energy_feed_in_loss_monthly, energy_cost_net_monthly = _calc_energy_costs(grid_to_load_kwh_monthly, solar_to_load_kwh_monthly)
             energy_cost_yearly, energy_feed_in_loss_yearly, energy_cost_net_yearly = _calc_energy_costs(grid_to_load_kwh_yearly, solar_to_load_kwh_yearly)
+
+            # Time-weighted cost accumulation (daily reset, monotonic within day)
+            cost_daily_changed = False
+            try:
+                today = dt_util.as_local(now).date()
+            except Exception:
+                today = now.date()
+
+            last_date = self._cost_daily_date
+            if isinstance(last_date, str):
+                try:
+                    last_date = datetime.strptime(last_date, "%Y-%m-%d").date()
+                except Exception:
+                    last_date = None
+
+            if last_date != today:
+                self._cost_daily_accum = 0.0
+                self._cost_daily_feed_in_loss_accum = 0.0
+                self._cost_daily_date = today.strftime("%Y-%m-%d")
+                self._cost_daily_last_grid_kwh = grid_to_load_kwh_daily
+                self._cost_daily_last_solar_kwh = solar_to_load_kwh_daily
+                cost_daily_changed = True
+
+            if grid_to_load_kwh_daily is not None and self._cost_daily_last_grid_kwh is None:
+                self._cost_daily_last_grid_kwh = grid_to_load_kwh_daily
+                cost_daily_changed = True
+            if solar_to_load_kwh_daily is not None and self._cost_daily_last_solar_kwh is None:
+                self._cost_daily_last_solar_kwh = solar_to_load_kwh_daily
+                cost_daily_changed = True
+
+            delta_grid = None
+            if grid_to_load_kwh_daily is not None and self._cost_daily_last_grid_kwh is not None:
+                try:
+                    delta_grid = float(grid_to_load_kwh_daily) - float(self._cost_daily_last_grid_kwh)
+                except Exception:
+                    delta_grid = None
+                if delta_grid is not None and delta_grid < 0:
+                    self._cost_daily_last_grid_kwh = grid_to_load_kwh_daily
+                    delta_grid = 0.0
+                    cost_daily_changed = True
+
+            delta_solar = None
+            if solar_to_load_kwh_daily is not None and self._cost_daily_last_solar_kwh is not None:
+                try:
+                    delta_solar = float(solar_to_load_kwh_daily) - float(self._cost_daily_last_solar_kwh)
+                except Exception:
+                    delta_solar = None
+                if delta_solar is not None and delta_solar < 0:
+                    self._cost_daily_last_solar_kwh = solar_to_load_kwh_daily
+                    delta_solar = 0.0
+                    cost_daily_changed = True
+
+            if delta_grid is not None:
+                if electricity_price is not None and delta_grid > 0:
+                    self._cost_daily_accum = float(self._cost_daily_accum or 0.0) + float(delta_grid) * float(electricity_price)
+                    cost_daily_changed = True
+                self._cost_daily_last_grid_kwh = grid_to_load_kwh_daily
+
+            if delta_solar is not None:
+                if feed_in_tariff is not None and delta_solar > 0:
+                    self._cost_daily_feed_in_loss_accum = float(self._cost_daily_feed_in_loss_accum or 0.0) + float(delta_solar) * float(feed_in_tariff)
+                    cost_daily_changed = True
+                self._cost_daily_last_solar_kwh = solar_to_load_kwh_daily
+
+            if self._cost_daily_date is not None:
+                try:
+                    energy_cost_daily = float(self._cost_daily_accum or 0.0)
+                    energy_feed_in_loss_daily = float(self._cost_daily_feed_in_loss_accum or 0.0)
+                    energy_cost_net_daily = float(energy_cost_daily or 0.0) + float(energy_feed_in_loss_daily or 0.0)
+                except Exception:
+                    pass
+
+            if cost_daily_changed:
+                try:
+                    await self._maybe_persist_cost_daily_state(now)
+                except Exception:
+                    pass
+
+            # Derive month/year costs from daily accumulated costs (monotonic, tariff-weighted)
+            derived_cost_changed = False
+            if energy_cost_daily is not None:
+                d_month, d_year, changed = self._update_derived_energy_from_daily("cost", energy_cost_daily, now)
+                derived_cost_changed = derived_cost_changed or changed
+                if d_month is not None:
+                    energy_cost_monthly = d_month
+                if d_year is not None:
+                    energy_cost_yearly = d_year
+
+            if energy_cost_net_daily is not None:
+                d_month, d_year, changed = self._update_derived_energy_from_daily("cost_net", energy_cost_net_daily, now)
+                derived_cost_changed = derived_cost_changed or changed
+                if d_month is not None:
+                    energy_cost_net_monthly = d_month
+                if d_year is not None:
+                    energy_cost_net_yearly = d_year
+
+            if derived_cost_changed:
+                try:
+                    await self._maybe_persist_derived_cost_state(now)
+                except Exception:
+                    pass
 
             # Total power and current cost per hour (best effort)
             total_power_w = None
