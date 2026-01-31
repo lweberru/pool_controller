@@ -17,7 +17,7 @@
       },
       "switches": {
         "title": "Switches & power",
-        "description": "Configure which switches and power sensors the controller should use. You can optionally separate the power supply (main) from the circulation pump (pump).",
+        "description": "Configure switches and power sensors. Optionally separate main supply and circulation pump.",
         "submit": "Continue",
         "data": {
           "main_switch": "Main switch",
@@ -40,7 +40,7 @@
       },
       "water_quality": {
         "title": "Water quality",
-        "description": "Select sensors for water temperature and (optionally) chemistry. Only the water temperature sensor is required.",
+        "description": "Select temperature and (optional) water chemistry sensors.",
         "submit": "Continue",
         "data": {
           "temp_water_sensor": "Water temperature",
@@ -55,6 +55,17 @@
           "chlorine_sensor": "Redox sensor for chlorine measurement in mV",
           "salt_sensor": "Salt content sensor for saltwater pools",
           "tds_sensor": "Conductivity sensor (TDS) for water quality"
+        }
+      },
+      "sanitizer": {
+        "title": "Sanitizer",
+        "description": "Choose the sanitizer mode.",
+        "submit": "Continue",
+        "data": {
+          "sanitizer_mode": "Sanitizer mode"
+        },
+        "data_description": {
+          "sanitizer_mode": "Chlorine = classic dosing, Saltwater = salt chlorinator, Mixed = both"
         }
       },
       "sanitizer": {
@@ -102,51 +113,6 @@
           "heater_aux_power_w": "Aux heater rated power (watts). Used for preheat estimation when aux heating is enabled. Total = base + aux.",
           "cold_tolerance": "Heater starts when water temperature is below target minus this value",
           "hot_tolerance": "Heater stops when water temperature is at or above target plus this value"
-        }
-      },
-      "costs": {
-        "title": "Electricity costs",
-        "description": "Configure electricity price and feed-in tariff for cost estimation.",
-        "submit": "Continue",
-        "data": {
-          "electricity_price": "Electricity price (per kWh)",
-          "electricity_price_entity": "Electricity price entity",
-          "feed_in_tariff": "Feed-in tariff (per kWh)",
-          "feed_in_tariff_entity": "Feed-in tariff entity",
-          "grid_to_load_energy_entity": "Grid to load energy (kWh)",
-          "grid_to_load_energy_entity_daily": "Grid to load energy (daily kWh)",
-          "grid_to_load_energy_entity_monthly": "Grid to load energy (monthly kWh)",
-          "grid_to_load_energy_entity_yearly": "Grid to load energy (yearly kWh)",
-          "solar_to_grid_energy_entity": "Solar to grid energy (kWh)",
-          "solar_to_load_energy_entity": "Solar to load energy (kWh)",
-          "solar_to_load_energy_entity_daily": "Solar to load energy (daily kWh)",
-          "solar_to_load_energy_entity_monthly": "Solar to load energy (monthly kWh)",
-          "solar_to_load_energy_entity_yearly": "Solar to load energy (yearly kWh)",
-          "total_load_energy_entity": "Total load energy (kWh)",
-          "pool_energy_entity": "Pool energy (kWh)",
-          "pool_energy_entity_daily": "Pool energy (daily kWh)",
-          "pool_energy_entity_monthly": "Pool energy (monthly kWh)",
-          "pool_energy_entity_yearly": "Pool energy (yearly kWh)"
-        },
-        "data_description": {
-          "electricity_price": "Fixed electricity price used for cost estimation (currency per kWh)",
-          "electricity_price_entity": "Optional sensor/helper for dynamic electricity price (overrides the fixed price)",
-          "feed_in_tariff": "Feed-in tariff used to estimate lost export revenue (currency per kWh)",
-          "feed_in_tariff_entity": "Optional sensor/helper for dynamic feed-in tariff (overrides the fixed tariff)",
-          "grid_to_load_energy_entity": "Optional overall energy (kWh) imported from grid. Leave empty if you only provide daily/monthly/yearly sensors.",
-          "grid_to_load_energy_entity_daily": "Energy (kWh) imported from grid for the day",
-          "grid_to_load_energy_entity_monthly": "Energy (kWh) imported from grid for the month (optional; auto-derived from daily if empty)",
-          "grid_to_load_energy_entity_yearly": "Energy (kWh) imported from grid for the year (optional; auto-derived from daily if empty)",
-          "solar_to_grid_energy_entity": "Energy (kWh) exported to grid for the period",
-          "solar_to_load_energy_entity": "Energy (kWh) supplied from solar to house/load for the period",
-          "solar_to_load_energy_entity_daily": "Energy (kWh) supplied from solar to house/load for the day",
-          "solar_to_load_energy_entity_monthly": "Energy (kWh) supplied from solar to house/load for the month (optional; auto-derived from daily if empty)",
-          "solar_to_load_energy_entity_yearly": "Energy (kWh) supplied from solar to house/load for the year (optional; auto-derived from daily if empty)",
-          "total_load_energy_entity": "Total load energy (kWh) for the period (optional, informational)",
-          "pool_energy_entity": "Pool-specific energy total (kWh). If set, used instead of whole-house grid energy.",
-          "pool_energy_entity_daily": "Pool energy (kWh) for the day (optional; preferred for pool-only cost)",
-          "pool_energy_entity_monthly": "Pool energy (kWh) for the month (optional; auto-derived from daily if empty)",
-          "pool_energy_entity_yearly": "Pool energy (kWh) for the year (optional; auto-derived from daily if empty)"
         }
       },
       "frost": {
@@ -228,6 +194,19 @@
           "credit_sources": "Which run reasons contribute credit to reduce/shift future runs."
         }
       },
+      "durations": {
+        "title": "Durations",
+        "description": "Configure default durations for bathing and quick chlorination actions.",
+        "submit": "Continue",
+        "data": {
+          "bathing_minutes": "Bathing duration (minutes)",
+          "chlorine_duration": "Quick-chlorination duration (minutes)"
+        },
+        "data_description": {
+          "bathing_minutes": "Default duration for bathing/manual heat actions (minutes).",
+          "chlorine_duration": "Default duration for quick chlorination (minutes). Range: 2–30."
+        }
+      },
       "pv": {
         "title": "PV surplus",
         "description": "Optional PV optimization: run pump/heating when PV surplus is available. Use ON/OFF thresholds as hysteresis.",
@@ -245,18 +224,62 @@
           "enable_pv_optimization": "Only run pump/heating when PV surplus is available",
           "pv_surplus_sensor": "Sensor reporting PV surplus/production in watts",
           "pv_on_threshold": "Turns main pump ON when PV power >= this value (default: 1000)",
-          "pv_off_threshold": "Turns main pump OFF when PV power <= this value (default: 500)"
-          ,
+          "pv_off_threshold": "Turns main pump OFF when PV power <= this value (default: 500)",
           "pv_smooth_window_seconds": "Window in seconds used for exponential smoothing of the PV value. Set 0 to disable smoothing.",
           "pv_stability_seconds": "How long a changed, smoothed PV value must persist before the change is committed (seconds).",
           "pv_min_run_minutes": "Minimum automatic run time in minutes before an automatic OFF is allowed. Prevents immediate stop after a short ON period."
+        }
+      },
+      "costs": {
+        "title": "Electricity costs",
+        "description": "Configure electricity price and feed-in tariff for cost estimation.",
+        "submit": "Save",
+        "data": {
+          "electricity_price": "Electricity price (per kWh)",
+          "electricity_price_entity": "Electricity price entity",
+          "feed_in_tariff": "Feed-in tariff (per kWh)",
+          "feed_in_tariff_entity": "Feed-in tariff entity",
+          "pool_energy_entity_base": "Pool energy base (kWh)",
+          "pool_energy_entity_aux": "Pool energy aux heater (kWh)",
+          "pool_energy_entity_base_daily": "Pool energy base (daily kWh)",
+          "pool_energy_entity_aux_daily": "Pool energy aux heater (daily kWh)",
+          "solar_energy_entity_daily": "Solar energy (daily kWh)"
+        },
+        "data_description": {
+          "electricity_price": "Fixed electricity price used for cost estimation (currency per kWh)",
+          "electricity_price_entity": "Optional sensor/helper for dynamic electricity price (overrides the fixed price)",
+          "feed_in_tariff": "Feed-in tariff used to estimate lost export revenue (currency per kWh)",
+          "feed_in_tariff_entity": "Optional sensor/helper for dynamic feed-in tariff (overrides the fixed tariff)",
+          "pool_energy_entity_base": "Base pool energy total (kWh) from circulation pump",
+          "pool_energy_entity_aux": "Aux heater energy total (kWh)",
+          "pool_energy_entity_base_daily": "Base pool energy (daily kWh) from circulation pump",
+          "pool_energy_entity_aux_daily": "Aux heater energy (daily kWh)",
+          "solar_energy_entity_daily": "Daily solar energy allocated to the pool (kWh). Used to compute net cost."
         }
       }
     }
   },
   "options": {
     "step": {
-      "init": {
+      "menu": {
+        "title": "Options menu",
+        "description": "Select the section you want to edit.",
+        "menu_options": {
+          "basic": "Basic settings",
+          "switches": "Switches & power",
+          "water_quality": "Water quality",
+          "sanitizer": "Sanitizer",
+          "climate": "Temperature control",
+          "frost": "Frost protection",
+          "calendars": "Calendars & quiet times",
+          "filter": "Filter settings",
+          "durations": "Durations",
+          "pv": "PV surplus",
+          "costs": "Electricity costs",
+          "all": "Guided setup (all steps)"
+        }
+      },
+      "basic": {
         "title": "Settings",
         "description": "General settings. Changes are stored in the config entry options.",
         "submit": "Continue",
@@ -294,39 +317,6 @@
           "aux_power_sensor": "Heater power sensor in watts"
         }
       },
-        "menu": {
-          "title": "Options menu",
-          "description": "Select the section you want to edit.",
-          "menu_options": {
-            "basic": "Basic settings",
-            "switches": "Switches & power",
-            "water_quality": "Water quality",
-            "sanitizer": "Sanitizer",
-            "climate": "Temperature control",
-            "frost": "Frost protection",
-            "calendars": "Calendars & quiet times",
-            "filter": "Filter settings",
-            "durations": "Durations",
-            "pv": "PV surplus",
-            "costs": "Electricity costs",
-            "all": "Guided setup (all steps)"
-          }
-        },
-        "basic": {
-          "title": "Settings",
-          "description": "General settings. Changes are stored in the config entry options.",
-          "submit": "Continue",
-          "data": {
-            "name": "Pool name",
-            "water_volume": "Water volume (liters)",
-            "demo_mode": "Demo mode"
-          },
-          "data_description": {
-            "name": "Display name for this pool installation",
-            "water_volume": "Water volume in liters (used for dosing and heating time calculations)",
-            "demo_mode": "Demo mode: does not switch real devices (for testing only)"
-          }
-        },
       "water_quality": {
         "title": "Water quality",
         "description": "Update sensor mapping for temperature and (optionally) chemistry.",
@@ -370,14 +360,11 @@
       },
       "climate": {
         "title": "Temperature control",
-        "description": "Optional calendar automation, quiet hours, and weather guard for events.",
+        "description": "Adjust thermostat bounds and hysteresis. The setpoint itself is changed via the climate entity and persisted.",
         "submit": "Continue",
         "data": {
           "target_temp": "Initial target temperature",
           "min_temp": "Minimum temperature",
-          "enable_event_weather_guard": "Enable weather guard for events",
-          "event_weather_entity": "Weather entity",
-          "event_rain_probability": "Rain probability threshold (%)",
           "max_temp": "Maximum temperature",
           "target_temp_step": "Temperature step",
           "heater_base_power_w": "Base heating power (W)",
@@ -386,9 +373,6 @@
           "hot_tolerance": "Hot tolerance"
         },
         "data_description": {
-          "enable_event_weather_guard": "If enabled, the controller checks the weather forecast and skips preheat and event start when rain is likely",
-          "event_weather_entity": "Weather entity that supports the weather.get_forecasts service (hourly)",
-          "event_rain_probability": "If forecasted rain probability during the event is >= this value, the event is blocked",
           "target_temp": "Initial target temperature (setpoint) used on first start; later the setpoint is persisted",
           "min_temp": "Minimum setpoint available",
           "max_temp": "Maximum setpoint available",
@@ -428,11 +412,14 @@
       },
       "calendars": {
         "title": "Calendars & quiet times",
-        "description": "Configure calendar-based automation and quiet hours.",
+        "description": "Configure calendar-based automation, quiet hours, and weather guard for events.",
         "submit": "Continue",
         "data": {
           "pool_calendar": "Pool calendar",
           "holiday_calendar": "Holiday calendar",
+          "enable_event_weather_guard": "Enable weather guard for events",
+          "event_weather_entity": "Weather entity",
+          "event_rain_probability": "Rain probability threshold (%)",
           "quiet_time_start": "Quiet time start (weekday)",
           "quiet_time_end": "Quiet time end (weekday)",
           "quiet_time_start_weekend": "Quiet time start (weekend/holiday)",
@@ -441,6 +428,9 @@
         "data_description": {
           "pool_calendar": "Calendar with pool events (automatically starts bathing mode for appointments)",
           "holiday_calendar": "Holiday calendar (uses weekend quiet times on holidays)",
+          "enable_event_weather_guard": "If enabled, the controller checks the weather forecast and skips preheat and event start when rain is likely",
+          "event_weather_entity": "Weather entity that supports the weather.get_forecasts service (hourly)",
+          "event_rain_probability": "If forecasted rain probability during the event is >= this value, the event is blocked",
           "quiet_time_start": "Start of quiet hours on weekdays (e.g. 22:00)",
           "quiet_time_end": "End of quiet hours on weekdays (e.g. 07:00)",
           "quiet_time_start_weekend": "Start of quiet hours on weekends/holidays (e.g. 23:00)",
@@ -474,15 +464,15 @@
       },
       "durations": {
         "title": "Durations",
-        "description": "Default durations for bathing and quick chlorine actions.",
+        "description": "Configure default durations for bathing and quick chlorination actions.",
         "submit": "Continue",
         "data": {
           "bathing_minutes": "Bathing duration (minutes)",
-          "chlorine_duration": "Quick chlorine duration (minutes)"
+          "chlorine_duration": "Quick-chlorination duration (minutes)"
         },
         "data_description": {
-          "bathing_minutes": "Default bathing duration in minutes (used when starting bathing from UI or calendar)",
-          "chlorine_duration": "Default quick chlorine duration in minutes"
+          "bathing_minutes": "Default duration for bathing/manual heat actions (minutes).",
+          "chlorine_duration": "Default duration for quick chlorination (minutes). Range: 2–30."
         }
       },
       "pv": {
@@ -502,8 +492,7 @@
           "enable_pv_optimization": "Only run pump/heating when PV surplus is available",
           "pv_surplus_sensor": "Sensor reporting PV surplus/production in watts",
           "pv_on_threshold": "Turns main pump ON when PV power >= this value (default: 1000)",
-          "pv_off_threshold": "Turns main pump OFF when PV power <= this value (default: 500)"
-          ,
+          "pv_off_threshold": "Turns main pump OFF when PV power <= this value (default: 500)",
           "pv_smooth_window_seconds": "Window in seconds used for exponential smoothing of the PV value. Set 0 to disable smoothing.",
           "pv_stability_seconds": "How long a changed, smoothed PV value must persist before the change is committed (seconds).",
           "pv_min_run_minutes": "Minimum automatic run time in minutes before an automatic OFF is allowed. Prevents immediate stop after a short ON period."
@@ -518,342 +507,164 @@
           "electricity_price_entity": "Electricity price entity",
           "feed_in_tariff": "Feed-in tariff (per kWh)",
           "feed_in_tariff_entity": "Feed-in tariff entity",
-          "grid_to_load_energy_entity": "Grid to load energy (kWh)",
-          "grid_to_load_energy_entity_daily": "Grid to load energy (daily kWh)",
-          "grid_to_load_energy_entity_monthly": "Grid to load energy (monthly kWh)",
-          "grid_to_load_energy_entity_yearly": "Grid to load energy (yearly kWh)",
-          "solar_to_grid_energy_entity": "Solar to grid energy (kWh)",
-          "solar_to_load_energy_entity": "Solar to load energy (kWh)",
-          "solar_to_load_energy_entity_daily": "Solar to load energy (daily kWh)",
-          "solar_to_load_energy_entity_monthly": "Solar to load energy (monthly kWh)",
-          "solar_to_load_energy_entity_yearly": "Solar to load energy (yearly kWh)",
-          "total_load_energy_entity": "Total load energy (kWh)"
+          "pool_energy_entity_base": "Pool energy base (kWh)",
+          "pool_energy_entity_aux": "Pool energy aux heater (kWh)",
+          "pool_energy_entity_base_daily": "Pool energy base (daily kWh)",
+          "pool_energy_entity_aux_daily": "Pool energy aux heater (daily kWh)",
+          "solar_energy_entity_daily": "Solar energy (daily kWh)"
         },
         "data_description": {
           "electricity_price": "Fixed electricity price used for cost estimation (currency per kWh)",
           "electricity_price_entity": "Optional sensor/helper for dynamic electricity price (overrides the fixed price)",
           "feed_in_tariff": "Feed-in tariff used to estimate lost export revenue (currency per kWh)",
           "feed_in_tariff_entity": "Optional sensor/helper for dynamic feed-in tariff (overrides the fixed tariff)",
-          "grid_to_load_energy_entity": "Energy (kWh) imported from grid for the period (e.g. utility_meter daily/monthly/yearly)",
-          "grid_to_load_energy_entity_daily": "Energy (kWh) imported from grid for the day",
-          "grid_to_load_energy_entity_monthly": "Energy (kWh) imported from grid for the month",
-          "grid_to_load_energy_entity_yearly": "Energy (kWh) imported from grid for the year",
-          "solar_to_grid_energy_entity": "Energy (kWh) exported to grid for the period",
-          "solar_to_load_energy_entity": "Energy (kWh) supplied from solar to house/load for the period",
-          "solar_to_load_energy_entity_daily": "Energy (kWh) supplied from solar to house/load for the day",
-          "solar_to_load_energy_entity_monthly": "Energy (kWh) supplied from solar to house/load for the month",
-          "solar_to_load_energy_entity_yearly": "Energy (kWh) supplied from solar to house/load for the year",
-          "total_load_energy_entity": "Total load energy (kWh) for the period (optional, informational)"
+          "pool_energy_entity_base": "Base pool energy total (kWh) from circulation pump",
+          "pool_energy_entity_aux": "Aux heater energy total (kWh)",
+          "pool_energy_entity_base_daily": "Base pool energy (daily kWh) from circulation pump",
+          "pool_energy_entity_aux_daily": "Aux heater energy (daily kWh)",
+          "solar_energy_entity_daily": "Daily solar energy allocated to the pool (kWh). Used to compute net cost."
         }
       }
     }
   },
   "entity": {
-    "climate": {
-      "pool_climate": {
-        "name": "Pool controller"
-      }
+    "switch": {
+      "main": { "name": "Power" },
+      "pump": { "name": "Pump" },
+      "aux_allowed": { "name": "Allow auxiliary heating" },
+      "aux": { "name": "Auxiliary heater" }
     },
     "binary_sensor": {
-      "maintenance_active": {
-        "name": "Maintenance mode"
-      },
-      "is_we_holiday": {
-        "name": "Weekend/holiday"
-      },
-      "frost_danger": {
-        "name": "Frost danger"
-      },
-      "frost_active": {
-        "name": "Frost protection active"
-      },
-      "in_quiet": {
-        "name": "Quiet hours"
-      },
-      "pv_allows": {
-        "name": "PV surplus available"
-      },
-      "should_main_on": {
-        "name": "Main switch required"
-      },
-      "low_chlor": {
-        "name": "Low chlorine"
-      },
-      "ph_alert": {
-        "name": "pH out of range"
-      },
-      "tds_high": {
-        "name": "TDS too high"
-      },
-      "event_rain_blocked": {
-        "name": "Event blocked due to rain"
-      },
-      "aux_present": {
-        "name": "Auxiliary heater configured"
-      },
-      "main_switch_on": {
-        "name": "Main switch required"
-      },
-      "pump_switch_on": {
-        "name": "Pump switch required"
-      },
-      "aux_heating_switch_on": {
-        "name": "Auxiliary heater is on"
-      },
-      "is_paused": {
-        "name": "Paused"
-      },
-      "is_bathing": {
-        "name": "Bathing active"
-      },
-      "filter_active": {
-        "name": "Filter running"
-      },
-      "is_quick_chlor": {
-        "name": "Quick chlorine active"
-      }
-    },
-    "sensor": {
-      "status": {
-        "name": "Status"
-      },
-      "run_reason": {
-        "name": "Run reason"
-      },
-      "heat_reason": {
-        "name": "Heating reason"
-      },
-      "run_credit_source": {
-        "name": "Run credit source"
-      },
-      "run_credit_minutes": {
-        "name": "Run credit (min)"
-      },
-      "filter_credit_minutes": {
-        "name": "Filter credit (min)"
-      },
-      "filter_missing_minutes": {
-        "name": "Filter remaining (min)"
-      },
-      "frost_credit_minutes": {
-        "name": "Frost credit (min)"
-      },
-      "frost_credit_shift_minutes": {
-        "name": "Frost shift (min)"
-      },
-      "electricity_price": {
-        "name": "Electricity price (per kWh)"
-      },
-      "feed_in_tariff": {
-        "name": "Feed-in tariff (per kWh)"
-      },
-      "power_cost_per_hour": {
-        "name": "Power cost (per hour)"
-      },
-      "power_cost_per_hour_net": {
-        "name": "Power cost (net per hour)"
-      },
-      "power_cost_feed_in_loss_per_hour": {
-        "name": "Lost feed-in revenue (per hour)"
-      },
-      "energy_grid_to_load_kwh": {
-        "name": "Grid to load energy"
-      },
-      "energy_grid_to_load_kwh_daily": {
-        "name": "Grid to load energy (daily)"
-      },
-      "energy_grid_to_load_kwh_monthly": {
-        "name": "Grid to load energy (monthly)"
-      },
-      "energy_grid_to_load_kwh_yearly": {
-        "name": "Grid to load energy (yearly)"
-      },
-      "energy_solar_to_grid_kwh": {
-        "name": "Solar to grid energy"
-      },
-      "energy_solar_to_load_kwh": {
-        "name": "Solar to load energy"
-      },
-      "energy_solar_to_load_kwh_daily": {
-        "name": "Solar to load energy (daily)"
-      },
-      "energy_solar_to_load_kwh_monthly": {
-        "name": "Solar to load energy (monthly)"
-      },
-      "energy_solar_to_load_kwh_yearly": {
-        "name": "Solar to load energy (yearly)"
-      },
-      "energy_total_load_kwh": {
-        "name": "Total load energy"
-      },
-      "energy_cost": {
-        "name": "Energy cost (period)"
-      },
-      "energy_cost_net": {
-        "name": "Energy cost (net, period)"
-      },
-      "energy_cost_daily": {
-        "name": "Energy cost (daily)"
-      },
-      "energy_cost_monthly": {
-        "name": "Energy cost (monthly)"
-      },
-      "energy_cost_yearly": {
-        "name": "Energy cost (yearly)"
-      },
-      "energy_feed_in_loss": {
-        "name": "Lost feed-in revenue (period)"
-      },
-      "energy_feed_in_loss_daily": {
-        "name": "Lost feed-in revenue (daily)"
-      },
-      "energy_feed_in_loss_monthly": {
-        "name": "Lost feed-in revenue (monthly)"
-      },
-      "energy_feed_in_loss_yearly": {
-        "name": "Lost feed-in revenue (yearly)"
-      },
-      "energy_cost_net_daily": {
-        "name": "Energy cost (net, daily)"
-      },
-      "energy_cost_net_monthly": {
-        "name": "Energy cost (net, monthly)"
-      },
-      "energy_cost_net_yearly": {
-        "name": "Energy cost (net, yearly)"
-      },
-      "heat_loss_w_per_c": {
-        "name": "Heat loss coefficient (W/°C)"
-      },
-      "heat_startup_offset_minutes": {
-        "name": "Heat startup offset (min)"
-      },
-      "sanitizer_mode": {
-        "name": "Sanitizer mode"
-      },
-      "tds_status": {
-        "name": "TDS status"
-      },
-      "ph_val": {
-        "name": "pH"
-      },
-      "chlor_val": {
-        "name": "Chlorine (redox)"
-      },
-      "salt_val": {
-        "name": "Salt"
-      },
-      "tds_val": {
-        "name": "TDS"
-      },
-      "tds_effective": {
-        "name": "TDS (excluding salt)"
-      },
-      "tds_water_change_liters": {
-        "name": "Recommended water change (L)"
-      },
-      "tds_water_change_percent": {
-        "name": "Recommended water change (%)"
-      },
-      "pv_smoothed": {
-        "name": "PV (smoothed)"
-      },
-      "ph_minus_g": {
-        "name": "Add pH-"
-      },
-      "ph_plus_g": {
-        "name": "Add pH+"
-      },
-      "chlor_spoons": {
-        "name": "Add chlorine"
-      },
-      "next_start_mins": {
-        "name": "Next start in"
-      },
-      "next_filter_mins": {
-        "name": "Next filter cycle in"
-      },
-      "next_event": {
-        "name": "Next event start"
-      },
-      "next_event_end": {
-        "name": "Next event end"
-      },
-      "next_event_summary": {
-        "name": "Next event name"
-      },
-      "event_rain_probability": {
-        "name": "Event rain probability"
-      },
-      "manual_timer_mins": {
-        "name": "Manual timer"
-      },
-      "auto_filter_timer_mins": {
-        "name": "Filter cycle timer"
-      },
-      "pause_timer_mins": {
-        "name": "Pause timer"
-      },
-      "pv_power": {
-        "name": "PV power"
-      },
-      "pv_band_low": {
-        "name": "PV band low"
-      },
-      "pv_band_mid_on": {
-        "name": "PV band mid (on)"
-      },
-      "pv_band_mid_off": {
-        "name": "PV band mid (off)"
-      },
-      "pv_band_high": {
-        "name": "PV band high"
-      },
-      "main_power": {
-        "name": "Main pump power"
-      },
-      "aux_power": {
-        "name": "Heater power"
-      },
-      "pv_on_threshold": {
-        "name": "PV ON threshold"
-      },
-      "pv_off_threshold": {
-        "name": "PV OFF threshold"
-      },
-      "next_frost_mins": {
-        "name": "Next frost run in"
-      },
-      "frost_timer_mins": {
-        "name": "Frost timer"
-      }
-    },
-    "switch": {
-      "main": {
-        "name": "Power supply"
-      },
-      "pump": {
-        "name": "Pump"
-      },
-      "aux_allowed": {
-        "name": "Allow auxiliary heater"
-      },
-      "aux": {
-        "name": "Auxiliary heater"
-      }
+      "maintenance_active": { "name": "Maintenance mode" },
+      "is_we_holiday": { "name": "Weekend/Holiday" },
+      "frost_danger": { "name": "Frost danger" },
+      "frost_active": { "name": "Frost protection active" },
+      "aux_present": { "name": "Auxiliary heater configured" },
+      "in_quiet": { "name": "Quiet hours active" },
+      "pv_allows": { "name": "PV surplus allowed" },
+      "should_main_on": { "name": "Power required" },
+      "should_pump_on": { "name": "Pump required" },
+      "low_chlor": { "name": "Low chlorine" },
+      "ph_alert": { "name": "pH out of range" },
+      "tds_high": { "name": "TDS too high" },
+      "event_rain_blocked": { "name": "Event blocked due to rain" },
+      "main_switch_on": { "name": "Main switch on" },
+      "pump_switch_on": { "name": "Pump on" },
+      "aux_heating_switch_on": { "name": "Aux heater on" }
     },
     "button": {
-      "pause_60": {
-        "name": "Pause (60 min)"
+      "pause_60": { "name": "Pause 60 min" },
+      "bath_60": { "name": "Bath 60 min" },
+      "filter_30": { "name": "Filter 30 min" },
+      "chlorine_5": { "name": "Quick chlorine 5 min" }
+    },
+    "sensor": {
+      "status": { "name": "Status" },
+      "run_reason": { "name": "Run reason" },
+      "heat_reason": { "name": "Heating reason" },
+      "run_credit_source": { "name": "Run credit source" },
+      "run_credit_minutes": { "name": "Run credit (min)" },
+      "filter_credit_minutes": { "name": "Filter credit (min)" },
+      "filter_missing_minutes": { "name": "Filter remaining (min)" },
+      "frost_credit_minutes": { "name": "Frost credit (min)" },
+      "frost_credit_shift_minutes": { "name": "Frost shift (min)" },
+      "electricity_price": { "name": "Electricity price (per kWh)" },
+      "feed_in_tariff": { "name": "Feed-in tariff (per kWh)" },
+      "power_cost_per_hour": { "name": "Power cost (per hour)" },
+      "power_cost_per_hour_net": { "name": "Power cost (net per hour)" },
+      "power_cost_feed_in_loss_per_hour": { "name": "Lost feed-in revenue (per hour)" },
+      "energy_cost": { "name": "Energy cost (period)" },
+      "energy_cost_net": { "name": "Energy cost (net, period)" },
+      "energy_cost_daily": { "name": "Energy cost (daily)" },
+      "energy_cost_monthly": { "name": "Energy cost (monthly)" },
+      "energy_cost_yearly": { "name": "Energy cost (yearly)" },
+      "energy_feed_in_loss": { "name": "Lost feed-in revenue (period)" },
+      "energy_feed_in_loss_daily": { "name": "Lost feed-in revenue (daily)" },
+      "energy_feed_in_loss_monthly": { "name": "Lost feed-in revenue (monthly)" },
+      "energy_feed_in_loss_yearly": { "name": "Lost feed-in revenue (yearly)" },
+      "energy_cost_net_daily": { "name": "Energy cost (net, daily)" },
+      "energy_cost_net_monthly": { "name": "Energy cost (net, monthly)" },
+      "energy_cost_net_yearly": { "name": "Energy cost (net, yearly)" },
+      "heat_loss_w_per_c": { "name": "Heat loss coefficient (W/°C)" },
+      "heat_startup_offset_minutes": { "name": "Heat startup offset (min)" },
+      "sanitizer_mode": { "name": "Sanitizer" },
+      "ph_val": { "name": "pH" },
+      "chlor_val": { "name": "Chlorine (mV)" },
+      "salt_val": { "name": "Salt" },
+      "salt_add_g": { "name": "Add salt" },
+      "tds_val": { "name": "TDS" },
+      "tds_effective": { "name": "TDS (excluding salt)" },
+      "tds_status": { "name": "TDS status" },
+      "tds_water_change_liters": { "name": "Recommended water change (L)" },
+      "tds_water_change_percent": { "name": "Recommended water change (%)" },
+      "ph_minus_g": { "name": "Add pH- (g)" },
+      "ph_plus_g": { "name": "Add pH+ (g)" },
+      "chlor_spoons": { "name": "Chlor dosing (spoons)" },
+      "next_start_mins": { "name": "Next start in" },
+      "next_filter_mins": { "name": "Next filter in" },
+      "next_frost_mins": { "name": "Next frost protection run in" },
+      "next_event": { "name": "Next event" },
+      "next_event_end": { "name": "Next event end" },
+      "next_event_summary": { "name": "Next event summary" },
+      "event_rain_probability": { "name": "Event rain probability" },
+      "manual_timer_mins": { "name": "Manual timer (min)" },
+      "auto_filter_timer_mins": { "name": "Auto filter timer (min)" },
+      "pause_timer_mins": { "name": "Pause timer (min)" },
+      "frost_timer_mins": { "name": "Frost timer (min)" },
+      "outdoor_temp": { "name": "Outdoor temperature" },
+      "pv_power": { "name": "PV power" },
+      "pv_smoothed": { "name": "PV (smoothed)" },
+      "pv_band_low": { "name": "PV band low" },
+      "pv_band_mid_on": { "name": "PV band mid (on)" },
+      "pv_band_mid_off": { "name": "PV band mid (off)" },
+      "pv_band_high": { "name": "PV band high" },
+      "main_power": { "name": "Main power" },
+      "aux_power": { "name": "Aux power" },
+      "pv_on_threshold": { "name": "PV ON threshold" },
+      "pv_off_threshold": { "name": "PV OFF threshold" },
+      "filter_minutes": { "name": "Configured filter duration (min)" },
+      "chlorine_duration": { "name": "Configured chlorine duration (min)" },
+      "bathing_minutes": { "name": "Configured bathing duration (min)" }
+    }
+  },
+  "state": {
+    "sensor": {
+      "status": {
+        "state": {
+          "normal": "Normal",
+          "paused": "Paused",
+          "frost_protection": "Frost protection",
+          "maintenance": "Maintenance"
+        }
       },
-      "bath_60": {
-        "name": "Bathing (60 min)"
+      "run_reason": {
+        "state": {
+          "idle": "Idle",
+          "bathing": "Bathing",
+          "chlorine": "Chlorine",
+          "filter": "Filtering",
+          "preheat": "Preheating",
+          "pv": "PV",
+          "frost": "Frost protection",
+          "pause": "Pause",
+          "maintenance": "Maintenance"
+        }
       },
-      "filter_30": {
-        "name": "Filter cycle (30 min)"
+      "heat_reason": {
+        "state": {
+          "off": "Off",
+          "disabled": "Disabled",
+          "bathing": "Bathing",
+          "preheat": "Preheating",
+          "pv": "PV"
+        }
       },
-      "chlorine_5": {
-        "name": "Chlorine (5 min)"
+      "sanitizer_mode": {
+        "state": {
+          "chlorine": "Chlorine",
+          "saltwater": "Saltwater",
+          "mixed": "Mixed"
+        }
       }
     }
   }

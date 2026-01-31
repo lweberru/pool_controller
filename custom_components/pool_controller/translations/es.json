@@ -10,9 +10,9 @@
                     "demo_mode": "Modo demo: no controla dispositivos reales (solo pruebas)"
                 },
                 "data_description": {
-                    "name": "Display name for this pool installation",
-                    "water_volume": "Water volume in liters (used for dosing and heating time calculations)",
-                    "demo_mode": "Demo mode: does not switch real devices (for testing only)"
+                    "name": "Nombre visible para esta instalación",
+                    "water_volume": "Volumen de agua en litros (usado para dosificación y tiempo de calentamiento)",
+                    "demo_mode": "Modo demo: no controla dispositivos reales (solo pruebas)"
                 }
             },
             "switches": {
@@ -21,10 +21,10 @@
                 "submit": "Continuar",
                 "data": {
                     "main_switch": "Interruptor principal",
-                    "pump_switch": "Pump switch (optional)",
-                    "filter_switch": "Filter switch (optional)",
-                    "enable_aux_heating": "Enable auxiliary heating",
-                    "aux_heating_switch": "Auxiliary heater switch",
+                    "pump_switch": "Interruptor de bomba (opcional)",
+                    "filter_switch": "Interruptor de filtro (opcional)",
+                    "enable_aux_heating": "Habilitar calefactor auxiliar",
+                    "aux_heating_switch": "Interruptor del calefactor auxiliar",
                     "main_power_sensor": "Sensor de potencia principal",
                     "aux_power_sensor": "Sensor de potencia del calefactor auxiliar"
                 },
@@ -81,35 +81,27 @@
             },
             "climate": {
                 "title": "Control de temperatura",
-                "description": "Ajustes del termostato e histéresis. La consigna se guarda en opciones tras cambiarla.",
-                    "total_load_energy_entity": "Energía total de carga (kWh)",
-                    "pool_energy_entity": "Energía del pool (kWh)",
-                    "pool_energy_entity_daily": "Energía del pool (kWh diario)",
-                    "pool_energy_entity_monthly": "Energía del pool (kWh mensual)",
-                    "pool_energy_entity_yearly": "Energía del pool (kWh anual)"
+                "description": "Ajusta límites del termostato e histéresis.",
+                "submit": "Siguiente",
                 "data": {
                     "target_temp": "Temperatura objetivo inicial",
                     "min_temp": "Temperatura mínima",
                     "max_temp": "Temperatura máxima",
                     "target_temp_step": "Paso de temperatura",
-                    "heater_base_power_w": "Potencia base (W)",
-                    "heater_aux_power_w": "Potencia del auxiliar (W)",
+                    "heater_base_power_w": "Potencia base de calefacción (W)",
+                    "heater_aux_power_w": "Potencia del calentador auxiliar (W)",
                     "cold_tolerance": "Tolerancia fría",
                     "hot_tolerance": "Tolerancia caliente"
                 },
                 "data_description": {
-                    "target_temp": "Temperatura objetivo inicial (consigna) en el primer inicio; luego se guarda",
+                    "target_temp": "Temperatura objetivo (consigna) inicial; después se guarda automáticamente",
                     "min_temp": "Consigna mínima disponible",
                     "max_temp": "Consigna máxima disponible",
-                    "target_temp_step": "Paso para ajustar la consigna",
-                    "total_load_energy_entity": "Energía total de carga (kWh) del periodo (opcional, informativo)",
-                    "pool_energy_entity": "Energía total específica del pool (kWh). Si se establece, se usa en lugar de la carga de la casa.",
-                    "pool_energy_entity_daily": "Energía del pool (kWh) del día (opcional; preferida para costes del pool)",
-                    "pool_energy_entity_monthly": "Energía del pool (kWh) del mes (opcional; se deriva del diario)",
-                    "pool_energy_entity_yearly": "Energía del pool (kWh) del año (opcional; se deriva del diario)"
-                    "heater_aux_power_w": "Potencia nominal del calefactor auxiliar (W). Se usa para el pre‑calentamiento cuando está habilitado. Total = base + aux.",
-                    "cold_tolerance": "El calentador arranca cuando la temperatura del agua está por debajo de la consigna menos este valor",
-                    "hot_tolerance": "El calentador se detiene cuando la temperatura del agua está en o por encima de la consigna más este valor"
+                    "target_temp_step": "Paso para ajustar la temperatura objetivo",
+                    "heater_base_power_w": "Contribución base (p. ej. calor residual de la bomba) usada para estimar el precalentamiento.",
+                    "heater_aux_power_w": "Potencia nominal del calentador auxiliar (W) usada para estimar el precalentamiento cuando la calefacción auxiliar está activada. Total = base + auxiliar.",
+                    "cold_tolerance": "El calentador arranca cuando la temperatura del agua está por debajo de objetivo menos este valor",
+                    "hot_tolerance": "El calentador se detiene cuando la temperatura del agua es igual o superior a objetivo más este valor"
                 }
             },
             "frost": {
@@ -157,7 +149,6 @@
                 "data_description": {
                     "pool_calendar": "Calendario con eventos de piscina (inicia el modo baño automáticamente)",
                     "holiday_calendar": "Calendario de festivos (usa horas de fin de semana en festivos)",
-                    "enable_event_weather_guard": "Si está activo, se comprueba la previsión y se omite el pre‑calentamiento/arranque con lluvia",
                     "event_weather_entity": "Entidad del tiempo compatible con weather.get_forecasts (horario)",
                     "event_rain_probability": "Si la probabilidad de lluvia durante el evento >= este valor, el evento se bloquea",
                     "quiet_time_start": "Inicio de horas de silencio en laborables (p. ej. 22:00)",
@@ -236,32 +227,22 @@
                     "electricity_price_entity": "Entidad de precio de electricidad",
                     "feed_in_tariff": "Tarifa de inyección (por kWh)",
                     "feed_in_tariff_entity": "Entidad de tarifa de inyección",
-                    "grid_to_load_energy_entity": "Energía red → carga (kWh)",
-                    "grid_to_load_energy_entity_daily": "Energía red → carga (diaria kWh)",
-                    "grid_to_load_energy_entity_monthly": "Energía red → carga (mensual kWh)",
-                    "grid_to_load_energy_entity_yearly": "Energía red → carga (anual kWh)",
-                    "solar_to_grid_energy_entity": "Energía solar → red (kWh)",
-                    "solar_to_load_energy_entity": "Energía solar → carga (kWh)",
-                    "solar_to_load_energy_entity_daily": "Energía solar → carga (diaria kWh)",
-                    "solar_to_load_energy_entity_monthly": "Energía solar → carga (mensual kWh)",
-                    "solar_to_load_energy_entity_yearly": "Energía solar → carga (anual kWh)",
-                    "total_load_energy_entity": "Energía total de carga (kWh)"
+                    "pool_energy_entity_base": "Energía base de la piscina (kWh)",
+                    "pool_energy_entity_aux": "Energía del calefactor auxiliar (kWh)",
+                    "pool_energy_entity_base_daily": "Energía base de la piscina (diaria kWh)",
+                    "pool_energy_entity_aux_daily": "Energía del calefactor auxiliar (diaria kWh)",
+                    "solar_energy_entity_daily": "Energía solar (diaria kWh)"
                 },
                 "data_description": {
                     "electricity_price": "Precio fijo para estimar costes (moneda por kWh)",
                     "electricity_price_entity": "Sensor/ayudante opcional para precio dinámico (sobrescribe el fijo)",
                     "feed_in_tariff": "Tarifa de inyección para estimar ingresos perdidos (moneda por kWh)",
                     "feed_in_tariff_entity": "Sensor/ayudante opcional para tarifa dinámica (sobrescribe la fija)",
-                    "grid_to_load_energy_entity": "Opcional: energía total (kWh) importada de la red. Déjalo vacío si solo usas daily/monthly/yearly.",
-                    "grid_to_load_energy_entity_daily": "Energía (kWh) importada de la red para el día",
-                    "grid_to_load_energy_entity_monthly": "Energía (kWh) importada de la red para el mes (opcional; se deriva de daily si está vacío)",
-                    "grid_to_load_energy_entity_yearly": "Energía (kWh) importada de la red para el año (opcional; se deriva de daily si está vacío)",
-                    "solar_to_grid_energy_entity": "Energía (kWh) exportada a la red para el periodo",
-                    "solar_to_load_energy_entity": "Energía (kWh) suministrada por solar a la carga para el periodo",
-                    "solar_to_load_energy_entity_daily": "Energía (kWh) suministrada por solar a la carga para el día",
-                    "solar_to_load_energy_entity_monthly": "Energía (kWh) suministrada por solar a la carga para el mes (opcional; se deriva de daily si está vacío)",
-                    "solar_to_load_energy_entity_yearly": "Energía (kWh) suministrada por solar a la carga para el año (opcional; se deriva de daily si está vacío)",
-                    "total_load_energy_entity": "Energía total de carga (kWh) para el periodo (opcional)"
+                    "pool_energy_entity_base": "Energía base total (kWh) de la bomba de circulación",
+                    "pool_energy_entity_aux": "Energía total del calefactor auxiliar (kWh)",
+                    "pool_energy_entity_base_daily": "Energía base diaria (kWh) de la bomba de circulación",
+                    "pool_energy_entity_aux_daily": "Energía diaria del calefactor auxiliar (kWh)",
+                    "solar_energy_entity_daily": "Energía solar diaria asignada al pool (kWh). Se usa para el coste neto."
                 }
             }
         }
@@ -514,32 +495,22 @@
                     "electricity_price_entity": "Entidad de precio de electricidad",
                     "feed_in_tariff": "Tarifa de inyección (por kWh)",
                     "feed_in_tariff_entity": "Entidad de tarifa de inyección",
-                    "grid_to_load_energy_entity": "Energía red → carga (kWh)",
-                    "grid_to_load_energy_entity_daily": "Energía red → carga (diaria kWh)",
-                    "grid_to_load_energy_entity_monthly": "Energía red → carga (mensual kWh)",
-                    "grid_to_load_energy_entity_yearly": "Energía red → carga (anual kWh)",
-                    "solar_to_grid_energy_entity": "Energía solar → red (kWh)",
-                    "solar_to_load_energy_entity": "Energía solar → carga (kWh)",
-                    "solar_to_load_energy_entity_daily": "Energía solar → carga (diaria kWh)",
-                    "solar_to_load_energy_entity_monthly": "Energía solar → carga (mensual kWh)",
-                    "solar_to_load_energy_entity_yearly": "Energía solar → carga (anual kWh)",
-                    "total_load_energy_entity": "Energía total de carga (kWh)"
+                    "pool_energy_entity_base": "Energía base de la piscina (kWh)",
+                    "pool_energy_entity_aux": "Energía del calefactor auxiliar (kWh)",
+                    "pool_energy_entity_base_daily": "Energía base de la piscina (diaria kWh)",
+                    "pool_energy_entity_aux_daily": "Energía del calefactor auxiliar (diaria kWh)",
+                    "solar_energy_entity_daily": "Energía solar (diaria kWh)"
                 },
                 "data_description": {
                     "electricity_price": "Precio fijo de electricidad para estimar costes (moneda por kWh)",
                     "electricity_price_entity": "Sensor/helper opcional de precio dinámico (anula el precio fijo)",
                     "feed_in_tariff": "Tarifa de inyección para estimar ingresos perdidos (moneda por kWh)",
                     "feed_in_tariff_entity": "Sensor/helper opcional de tarifa dinámica (anula la tarifa fija)",
-                    "grid_to_load_energy_entity": "Opcional: energía total (kWh) importada de la red. Déjalo vacío si solo usas daily/monthly/yearly.",
-                    "grid_to_load_energy_entity_daily": "Energía (kWh) importada de la red para el día",
-                    "grid_to_load_energy_entity_monthly": "Energía (kWh) importada de la red para el mes (opcional; se deriva de daily si está vacío)",
-                    "grid_to_load_energy_entity_yearly": "Energía (kWh) importada de la red para el año (opcional; se deriva de daily si está vacío)",
-                    "solar_to_grid_energy_entity": "Energía (kWh) exportada a la red para el periodo",
-                    "solar_to_load_energy_entity": "Energía (kWh) suministrada por solar a la carga para el periodo",
-                    "solar_to_load_energy_entity_daily": "Energía (kWh) suministrada por solar a la carga para el día",
-                    "solar_to_load_energy_entity_monthly": "Energía (kWh) suministrada por solar a la carga para el mes (opcional; se deriva de daily si está vacío)",
-                    "solar_to_load_energy_entity_yearly": "Energía (kWh) suministrada por solar a la carga para el año (opcional; se deriva de daily si está vacío)",
-                    "total_load_energy_entity": "Energía total de carga (kWh) para el periodo (opcional)"
+                    "pool_energy_entity_base": "Energía base total (kWh) de la bomba de circulación",
+                    "pool_energy_entity_aux": "Energía total del calefactor auxiliar (kWh)",
+                    "pool_energy_entity_base_daily": "Energía base diaria (kWh) de la bomba de circulación",
+                    "pool_energy_entity_aux_daily": "Energía diaria del calefactor auxiliar (kWh)",
+                    "solar_energy_entity_daily": "Energía solar diaria asignada al pool (kWh). Se usa para el coste neto."
                 }
             }
         }
@@ -635,36 +606,6 @@
             },
             "power_cost_feed_in_loss_per_hour": {
                 "name": "Ingresos de inyección perdidos (por hora)"
-            },
-            "energy_grid_to_load_kwh": {
-                "name": "Energía red → carga"
-            },
-            "energy_grid_to_load_kwh_daily": {
-                "name": "Energía red → carga (diaria)"
-            },
-            "energy_grid_to_load_kwh_monthly": {
-                "name": "Energía red → carga (mensual)"
-            },
-            "energy_grid_to_load_kwh_yearly": {
-                "name": "Energía red → carga (anual)"
-            },
-            "energy_solar_to_grid_kwh": {
-                "name": "Energía solar → red"
-            },
-            "energy_solar_to_load_kwh": {
-                "name": "Energía solar → carga"
-            },
-            "energy_solar_to_load_kwh_daily": {
-                "name": "Energía solar → carga (diaria)"
-            },
-            "energy_solar_to_load_kwh_monthly": {
-                "name": "Energía solar → carga (mensual)"
-            },
-            "energy_solar_to_load_kwh_yearly": {
-                "name": "Energía solar → carga (anual)"
-            },
-            "energy_total_load_kwh": {
-                "name": "Energía total de carga"
             },
             "energy_cost": {
                 "name": "Coste energético (periodo)"

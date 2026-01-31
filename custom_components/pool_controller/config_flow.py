@@ -113,105 +113,40 @@ def _costs_schema(curr: dict | None = None):
         else vol.Optional(CONF_FEED_IN_TARIFF_ENTITY)
     ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor", "input_number"]))
 
-    # Optional energy (kWh) sensors for period-based costs
-    grid_load_default = c.get(CONF_GRID_TO_LOAD_ENERGY_ENTITY) if c.get(CONF_GRID_TO_LOAD_ENERGY_ENTITY) else None
-    grid_load_daily_default = c.get(CONF_GRID_TO_LOAD_ENERGY_ENTITY_DAILY) if c.get(CONF_GRID_TO_LOAD_ENERGY_ENTITY_DAILY) else None
-    grid_load_monthly_default = c.get(CONF_GRID_TO_LOAD_ENERGY_ENTITY_MONTHLY) if c.get(CONF_GRID_TO_LOAD_ENERGY_ENTITY_MONTHLY) else None
-    grid_load_yearly_default = c.get(CONF_GRID_TO_LOAD_ENERGY_ENTITY_YEARLY) if c.get(CONF_GRID_TO_LOAD_ENERGY_ENTITY_YEARLY) else None
-    solar_grid_default = c.get(CONF_SOLAR_TO_GRID_ENERGY_ENTITY) if c.get(CONF_SOLAR_TO_GRID_ENERGY_ENTITY) else None
-    solar_load_default = c.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY) if c.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY) else None
-    solar_load_daily_default = c.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_DAILY) if c.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_DAILY) else None
-    solar_load_monthly_default = c.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_MONTHLY) if c.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_MONTHLY) else None
-    solar_load_yearly_default = c.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_YEARLY) if c.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_YEARLY) else None
-    total_load_default = c.get(CONF_TOTAL_LOAD_ENERGY_ENTITY) if c.get(CONF_TOTAL_LOAD_ENERGY_ENTITY) else None
-
-    pool_energy_default = c.get(CONF_POOL_ENERGY_ENTITY) if c.get(CONF_POOL_ENERGY_ENTITY) else None
-    pool_energy_daily_default = c.get(CONF_POOL_ENERGY_ENTITY_DAILY) if c.get(CONF_POOL_ENERGY_ENTITY_DAILY) else None
-    pool_energy_monthly_default = c.get(CONF_POOL_ENERGY_ENTITY_MONTHLY) if c.get(CONF_POOL_ENERGY_ENTITY_MONTHLY) else None
-    pool_energy_yearly_default = c.get(CONF_POOL_ENERGY_ENTITY_YEARLY) if c.get(CONF_POOL_ENERGY_ENTITY_YEARLY) else None
+    pool_energy_base_default = c.get(CONF_POOL_ENERGY_ENTITY_BASE) if c.get(CONF_POOL_ENERGY_ENTITY_BASE) else None
+    pool_energy_aux_default = c.get(CONF_POOL_ENERGY_ENTITY_AUX) if c.get(CONF_POOL_ENERGY_ENTITY_AUX) else None
+    pool_energy_base_daily_default = c.get(CONF_POOL_ENERGY_ENTITY_BASE_DAILY) if c.get(CONF_POOL_ENERGY_ENTITY_BASE_DAILY) else None
+    pool_energy_aux_daily_default = c.get(CONF_POOL_ENERGY_ENTITY_AUX_DAILY) if c.get(CONF_POOL_ENERGY_ENTITY_AUX_DAILY) else None
+    solar_energy_daily_default = c.get(CONF_SOLAR_ENERGY_ENTITY_DAILY) if c.get(CONF_SOLAR_ENERGY_ENTITY_DAILY) else None
 
     schema[
-        vol.Optional(CONF_GRID_TO_LOAD_ENERGY_ENTITY, default=grid_load_default)
-        if grid_load_default is not None
-        else vol.Optional(CONF_GRID_TO_LOAD_ENERGY_ENTITY)
+        vol.Optional(CONF_POOL_ENERGY_ENTITY_BASE, default=pool_energy_base_default)
+        if pool_energy_base_default is not None
+        else vol.Optional(CONF_POOL_ENERGY_ENTITY_BASE)
     ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
 
     schema[
-        vol.Optional(CONF_GRID_TO_LOAD_ENERGY_ENTITY_DAILY, default=grid_load_daily_default)
-        if grid_load_daily_default is not None
-        else vol.Optional(CONF_GRID_TO_LOAD_ENERGY_ENTITY_DAILY)
+        vol.Optional(CONF_POOL_ENERGY_ENTITY_AUX, default=pool_energy_aux_default)
+        if pool_energy_aux_default is not None
+        else vol.Optional(CONF_POOL_ENERGY_ENTITY_AUX)
     ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
 
     schema[
-        vol.Optional(CONF_GRID_TO_LOAD_ENERGY_ENTITY_MONTHLY, default=grid_load_monthly_default)
-        if grid_load_monthly_default is not None
-        else vol.Optional(CONF_GRID_TO_LOAD_ENERGY_ENTITY_MONTHLY)
+        vol.Optional(CONF_POOL_ENERGY_ENTITY_BASE_DAILY, default=pool_energy_base_daily_default)
+        if pool_energy_base_daily_default is not None
+        else vol.Optional(CONF_POOL_ENERGY_ENTITY_BASE_DAILY)
     ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
 
     schema[
-        vol.Optional(CONF_GRID_TO_LOAD_ENERGY_ENTITY_YEARLY, default=grid_load_yearly_default)
-        if grid_load_yearly_default is not None
-        else vol.Optional(CONF_GRID_TO_LOAD_ENERGY_ENTITY_YEARLY)
+        vol.Optional(CONF_POOL_ENERGY_ENTITY_AUX_DAILY, default=pool_energy_aux_daily_default)
+        if pool_energy_aux_daily_default is not None
+        else vol.Optional(CONF_POOL_ENERGY_ENTITY_AUX_DAILY)
     ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
 
     schema[
-        vol.Optional(CONF_SOLAR_TO_GRID_ENERGY_ENTITY, default=solar_grid_default)
-        if solar_grid_default is not None
-        else vol.Optional(CONF_SOLAR_TO_GRID_ENERGY_ENTITY)
-    ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
-
-    schema[
-        vol.Optional(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY, default=solar_load_default)
-        if solar_load_default is not None
-        else vol.Optional(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY)
-    ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
-
-    schema[
-        vol.Optional(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_DAILY, default=solar_load_daily_default)
-        if solar_load_daily_default is not None
-        else vol.Optional(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_DAILY)
-    ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
-
-    schema[
-        vol.Optional(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_MONTHLY, default=solar_load_monthly_default)
-        if solar_load_monthly_default is not None
-        else vol.Optional(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_MONTHLY)
-    ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
-
-    schema[
-        vol.Optional(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_YEARLY, default=solar_load_yearly_default)
-        if solar_load_yearly_default is not None
-        else vol.Optional(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_YEARLY)
-    ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
-
-    schema[
-        vol.Optional(CONF_TOTAL_LOAD_ENERGY_ENTITY, default=total_load_default)
-        if total_load_default is not None
-        else vol.Optional(CONF_TOTAL_LOAD_ENERGY_ENTITY)
-    ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
-
-    schema[
-        vol.Optional(CONF_POOL_ENERGY_ENTITY, default=pool_energy_default)
-        if pool_energy_default is not None
-        else vol.Optional(CONF_POOL_ENERGY_ENTITY)
-    ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
-
-    schema[
-        vol.Optional(CONF_POOL_ENERGY_ENTITY_DAILY, default=pool_energy_daily_default)
-        if pool_energy_daily_default is not None
-        else vol.Optional(CONF_POOL_ENERGY_ENTITY_DAILY)
-    ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
-
-    schema[
-        vol.Optional(CONF_POOL_ENERGY_ENTITY_MONTHLY, default=pool_energy_monthly_default)
-        if pool_energy_monthly_default is not None
-        else vol.Optional(CONF_POOL_ENERGY_ENTITY_MONTHLY)
-    ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
-
-    schema[
-        vol.Optional(CONF_POOL_ENERGY_ENTITY_YEARLY, default=pool_energy_yearly_default)
-        if pool_energy_yearly_default is not None
-        else vol.Optional(CONF_POOL_ENERGY_ENTITY_YEARLY)
+        vol.Optional(CONF_SOLAR_ENERGY_ENTITY_DAILY, default=solar_energy_daily_default)
+        if solar_energy_daily_default is not None
+        else vol.Optional(CONF_SOLAR_ENERGY_ENTITY_DAILY)
     ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
 
     return vol.Schema(schema)
@@ -239,24 +174,10 @@ def _alphaess_pick(hass, suffixes: list[str]):
     return None
 
 def _alphaess_defaults(hass):
-    if not hass:
-        return {}
-    defaults = {
-        CONF_GRID_TO_LOAD_ENERGY_ENTITY_DAILY: _alphaess_pick(hass, ["_grid_to_load"]),
-        CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_DAILY: _alphaess_pick(hass, ["_solar_to_load"]),
-        CONF_SOLAR_TO_GRID_ENERGY_ENTITY: _alphaess_pick(hass, ["_solar_to_grid"]),
-        CONF_TOTAL_LOAD_ENERGY_ENTITY: _alphaess_pick(hass, ["_total_load"]),
-    }
-    return {k: v for k, v in defaults.items() if v}
+    return {}
 
 def _apply_auto_defaults(curr: dict, hass):
-    merged = dict(curr or {})
-    defaults = _alphaess_defaults(hass)
-    for key, val in defaults.items():
-        if merged.get(key):
-            continue
-        merged[key] = val
-    return merged
+    return dict(curr or {})
 
 def _frost_schema(curr: dict | None = None):
     c = curr or {}

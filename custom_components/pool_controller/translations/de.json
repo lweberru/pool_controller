@@ -6,13 +6,13 @@
                 "submit": "Weiter",
                 "data": {
                     "name": "Pool-Name",
-                    "water_volume": "Wassermenge in Litern (für Dosierung und Heizzeit-Berechnung)",
-                    "demo_mode": "Demo-Modus: schaltet keine echten Geräte (nur zum Testen)"
+                    "water_volume": "Wasservolumen (Liter)",
+                    "demo_mode": "Demo-Modus"
                 },
                 "data_description": {
-                    "name": "Display name for this pool installation",
-                    "water_volume": "Water volume in liters (used for dosing and heating time calculations)",
-                    "demo_mode": "Demo mode: does not switch real devices (for testing only)"
+                    "name": "Anzeigename für diese Pool-Installation",
+                    "water_volume": "Wasservolumen in Litern (für Dosierung und Heizzeit)",
+                    "demo_mode": "Demo-Modus: schaltet keine echten Geräte (nur Test)"
                 }
             },
             "switches": {
@@ -21,10 +21,10 @@
                 "submit": "Weiter",
                 "data": {
                     "main_switch": "Hauptschalter",
-                    "pump_switch": "Pump switch (optional)",
-                    "filter_switch": "Filter switch (optional)",
-                    "enable_aux_heating": "Enable auxiliary heating",
-                    "aux_heating_switch": "Auxiliary heater switch",
+                    "pump_switch": "Pumpen-Schalter (optional)",
+                    "filter_switch": "Filter-Schalter (optional)",
+                    "enable_aux_heating": "Zusatzheizung aktivieren",
+                    "aux_heating_switch": "Zusatzheizung-Schalter",
                     "main_power_sensor": "Haupt-Leistungssensor",
                     "aux_power_sensor": "Zusatzheizung Leistungssensor"
                 },
@@ -53,8 +53,8 @@
                     "temp_water_sensor": "Sensor für Poolwasser-Temperatur (Pflichtfeld)",
                     "ph_sensor": "pH-Wert Sensor (Blueriiot oder ähnlich)",
                     "chlorine_sensor": "Redox-Sensor für Chlor-Messung in mV",
-                    "salt_sensor": "Salzgehalt-Sensor für Salzwasserpools",
-                    "tds_sensor": "Leitfähigkeits-Sensor (TDS) für Wasserqualität"
+                    "salt_sensor": "Sensor für Salzgehalt (Salzwasser)",
+                    "tds_sensor": "Leitfähigkeitssensor (TDS)"
                 }
             },
             "sanitizer": {
@@ -81,12 +81,8 @@
             },
             "climate": {
                 "title": "Temperaturregelung",
-                "description": "Thermostat-Grenzen und Hysterese einstellen. Der Sollwert wird nach Änderung in den Optionen gespeichert.",
-                    "total_load_energy_entity": "Gesamtverbrauch Energie (kWh)",
-                    "pool_energy_entity": "Pool-Energie (kWh)",
-                    "pool_energy_entity_daily": "Pool-Energie (täglich kWh)",
-                    "pool_energy_entity_monthly": "Pool-Energie (monatlich kWh)",
-                    "pool_energy_entity_yearly": "Pool-Energie (jährlich kWh)"
+                "description": "Thermostat-Grenzen und Hysterese einstellen. Der Sollwert selbst wird über die `climate.*` Entity geändert und gespeichert.",
+                "submit": "Weiter",
                 "data": {
                     "target_temp": "Initiale Zieltemperatur",
                     "min_temp": "Minimum-Temperatur",
@@ -102,11 +98,7 @@
                     "min_temp": "Minimaler einstellbarer Sollwert",
                     "max_temp": "Maximaler einstellbarer Sollwert",
                     "target_temp_step": "Schrittweite für das Setzen der Zieltemperatur",
-                    "total_load_energy_entity": "Gesamtverbrauch (kWh) für den Zeitraum (optional, rein informativ)",
-                    "pool_energy_entity": "Pool-spezifische Gesamtenergie (kWh). Wenn gesetzt, wird sie statt Haus-Last verwendet.",
-                    "pool_energy_entity_daily": "Pool-Energie (kWh) für den Tag (optional; bevorzugt für Pool-Kosten)",
-                    "pool_energy_entity_monthly": "Pool-Energie (kWh) für den Monat (optional; wird aus täglich abgeleitet)",
-                    "pool_energy_entity_yearly": "Pool-Energie (kWh) für das Jahr (optional; wird aus täglich abgeleitet)"
+                    "heater_base_power_w": "Basis-Heizanteil (z.B. Pumpen-Abwärme) für die Vorheiz-Zeitberechnung.",
                     "heater_aux_power_w": "Nennleistung der Zusatzheizung (W) für die Vorheiz-Zeitberechnung (wenn Zusatzheizung aktiviert ist). Gesamt = Basis + Zusatz.",
                     "cold_tolerance": "Heizung startet, wenn Wassertemperatur unter Ziel minus diesem Wert liegt",
                     "hot_tolerance": "Heizung stoppt, wenn Wassertemperatur bei/über Ziel plus diesem Wert liegt"
@@ -157,7 +149,6 @@
                 "data_description": {
                     "pool_calendar": "Kalender mit Pool-Events (startet automatisch Baden-Modus bei Terminen)",
                     "holiday_calendar": "Feiertagskalender (nutzt Wochenend-Ruhezeiten an Feiertagen)",
-                    "enable_event_weather_guard": "Wenn aktiv, wird die Wetterprognose geprüft und Vorheizen/Start bei Regenwahrscheinlichkeit übersprungen",
                     "event_weather_entity": "Wetter-Entity, die weather.get_forecasts (stündlich) unterstützt",
                     "event_rain_probability": "Wenn die Regenwahrscheinlichkeit während des Events >= diesem Wert ist, wird das Event blockiert",
                     "quiet_time_start": "Beginn der Ruhezeit an Wochentagen (z.B. 22:00)",
@@ -236,32 +227,22 @@
                     "electricity_price_entity": "Strompreis-Entity",
                     "feed_in_tariff": "Einspeisevergütung (pro kWh)",
                     "feed_in_tariff_entity": "Einspeisevergütung-Entity",
-                    "grid_to_load_energy_entity": "Netz → Last Energie (kWh)",
-                    "grid_to_load_energy_entity_daily": "Netz → Last Energie (täglich kWh)",
-                    "grid_to_load_energy_entity_monthly": "Netz → Last Energie (monatlich kWh)",
-                    "grid_to_load_energy_entity_yearly": "Netz → Last Energie (jährlich kWh)",
-                    "solar_to_grid_energy_entity": "Solar → Netz Energie (kWh)",
-                    "solar_to_load_energy_entity": "Solar → Last Energie (kWh)",
-                    "solar_to_load_energy_entity_daily": "Solar → Last Energie (täglich kWh)",
-                    "solar_to_load_energy_entity_monthly": "Solar → Last Energie (monatlich kWh)",
-                    "solar_to_load_energy_entity_yearly": "Solar → Last Energie (jährlich kWh)",
-                    "total_load_energy_entity": "Gesamtlast Energie (kWh)"
+                    "pool_energy_entity_base": "Pool-Energie Basis (kWh)",
+                    "pool_energy_entity_aux": "Pool-Energie Zusatzheizung (kWh)",
+                    "pool_energy_entity_base_daily": "Pool-Energie Basis (täglich kWh)",
+                    "pool_energy_entity_aux_daily": "Pool-Energie Zusatzheizung (täglich kWh)",
+                    "solar_energy_entity_daily": "Solarenergie (täglich kWh)"
                 },
                 "data_description": {
                     "electricity_price": "Fester Strompreis für die Kostenschätzung (Währung pro kWh)",
                     "electricity_price_entity": "Optionaler Sensor/Helfer für dynamischen Strompreis (überschreibt festen Preis)",
                     "feed_in_tariff": "Einspeisevergütung zur Schätzung entgangener Exporterlöse (Währung pro kWh)",
                     "feed_in_tariff_entity": "Optionaler Sensor/Helfer für dynamische Einspeisevergütung (überschreibt festen Tarif)",
-                    "grid_to_load_energy_entity": "Optional: gesamte Energie (kWh) aus dem Netz. Leer lassen, wenn du nur daily/monthly/yearly Sensoren hast.",
-                    "grid_to_load_energy_entity_daily": "Energie (kWh) aus dem Netz für den Tag",
-                    "grid_to_load_energy_entity_monthly": "Energie (kWh) aus dem Netz für den Monat (optional; wird aus daily abgeleitet, wenn leer)",
-                    "grid_to_load_energy_entity_yearly": "Energie (kWh) aus dem Netz für das Jahr (optional; wird aus daily abgeleitet, wenn leer)",
-                    "solar_to_grid_energy_entity": "Energie (kWh) ins Netz für den Zeitraum",
-                    "solar_to_load_energy_entity": "Energie (kWh) aus Solar zur Last für den Zeitraum",
-                    "solar_to_load_energy_entity_daily": "Energie (kWh) aus Solar zur Last für den Tag",
-                    "solar_to_load_energy_entity_monthly": "Energie (kWh) aus Solar zur Last für den Monat (optional; wird aus daily abgeleitet, wenn leer)",
-                    "solar_to_load_energy_entity_yearly": "Energie (kWh) aus Solar zur Last für das Jahr (optional; wird aus daily abgeleitet, wenn leer)",
-                    "total_load_energy_entity": "Gesamtlast-Energie (kWh) für den Zeitraum (optional)"
+                    "pool_energy_entity_base": "Pool-Energie Basis (kWh) aus der Umwälzpumpe",
+                    "pool_energy_entity_aux": "Pool-Energie Zusatzheizung (kWh)",
+                    "pool_energy_entity_base_daily": "Pool-Energie Basis (täglich kWh) aus der Umwälzpumpe",
+                    "pool_energy_entity_aux_daily": "Pool-Energie Zusatzheizung (täglich kWh)",
+                    "solar_energy_entity_daily": "Tägliche Solarenergie, die dem Pool zugeordnet wird (kWh). Wird für Nettokosten genutzt."
                 }
             }
         }
@@ -514,32 +495,22 @@
                     "electricity_price_entity": "Entität für Strompreis",
                     "feed_in_tariff": "Einspeisevergütung (pro kWh)",
                     "feed_in_tariff_entity": "Entität für Einspeisevergütung",
-                    "grid_to_load_energy_entity": "Netz → Last Energie (kWh)",
-                    "grid_to_load_energy_entity_daily": "Netz → Last Energie (täglich kWh)",
-                    "grid_to_load_energy_entity_monthly": "Netz → Last Energie (monatlich kWh)",
-                    "grid_to_load_energy_entity_yearly": "Netz → Last Energie (jährlich kWh)",
-                    "solar_to_grid_energy_entity": "Solar → Netz Energie (kWh)",
-                    "solar_to_load_energy_entity": "Solar → Last Energie (kWh)",
-                    "solar_to_load_energy_entity_daily": "Solar → Last Energie (täglich kWh)",
-                    "solar_to_load_energy_entity_monthly": "Solar → Last Energie (monatlich kWh)",
-                    "solar_to_load_energy_entity_yearly": "Solar → Last Energie (jährlich kWh)",
-                    "total_load_energy_entity": "Gesamtlast Energie (kWh)"
+                    "pool_energy_entity_base": "Pool-Energie Basis (kWh)",
+                    "pool_energy_entity_aux": "Pool-Energie Zusatzheizung (kWh)",
+                    "pool_energy_entity_base_daily": "Pool-Energie Basis (täglich kWh)",
+                    "pool_energy_entity_aux_daily": "Pool-Energie Zusatzheizung (täglich kWh)",
+                    "solar_energy_entity_daily": "Solarenergie (täglich kWh)"
                 },
                 "data_description": {
                     "electricity_price": "Fixer Strompreis zur Kostenschätzung (Währung pro kWh)",
                     "electricity_price_entity": "Optionaler Sensor/Helper für dynamischen Strompreis (überschreibt den fixen Preis)",
                     "feed_in_tariff": "Einspeisevergütung zur Schätzung entgangener Erlöse (Währung pro kWh)",
                     "feed_in_tariff_entity": "Optionaler Sensor/Helper für dynamische Einspeisevergütung (überschreibt den fixen Tarif)",
-                    "grid_to_load_energy_entity": "Optional: gesamte Energie (kWh) aus dem Netz. Leer lassen, wenn du nur daily/monthly/yearly Sensoren hast.",
-                    "grid_to_load_energy_entity_daily": "Energie (kWh) aus dem Netz für den Tag",
-                    "grid_to_load_energy_entity_monthly": "Energie (kWh) aus dem Netz für den Monat (optional; wird aus daily abgeleitet, wenn leer)",
-                    "grid_to_load_energy_entity_yearly": "Energie (kWh) aus dem Netz für das Jahr (optional; wird aus daily abgeleitet, wenn leer)",
-                    "solar_to_grid_energy_entity": "Energie (kWh) ins Netz für den Zeitraum",
-                    "solar_to_load_energy_entity": "Energie (kWh) aus Solar zur Last für den Zeitraum",
-                    "solar_to_load_energy_entity_daily": "Energie (kWh) aus Solar zur Last für den Tag",
-                    "solar_to_load_energy_entity_monthly": "Energie (kWh) aus Solar zur Last für den Monat (optional; wird aus daily abgeleitet, wenn leer)",
-                    "solar_to_load_energy_entity_yearly": "Energie (kWh) aus Solar zur Last für das Jahr (optional; wird aus daily abgeleitet, wenn leer)",
-                    "total_load_energy_entity": "Gesamtlast-Energie (kWh) für den Zeitraum (optional)"
+                    "pool_energy_entity_base": "Pool-Energie Basis (kWh) aus der Umwälzpumpe",
+                    "pool_energy_entity_aux": "Pool-Energie Zusatzheizung (kWh)",
+                    "pool_energy_entity_base_daily": "Pool-Energie Basis (täglich kWh) aus der Umwälzpumpe",
+                    "pool_energy_entity_aux_daily": "Pool-Energie Zusatzheizung (täglich kWh)",
+                    "solar_energy_entity_daily": "Tägliche Solarenergie, die dem Pool zugeordnet wird (kWh). Wird für Nettokosten genutzt."
                 }
             }
         }
@@ -665,36 +636,6 @@
             },
             "power_cost_feed_in_loss_per_hour": {
                 "name": "Entgangene Einspeisevergütung (pro Stunde)"
-            },
-            "energy_grid_to_load_kwh": {
-                "name": "Netz → Last Energie"
-            },
-            "energy_grid_to_load_kwh_daily": {
-                "name": "Netz → Last Energie (täglich)"
-            },
-            "energy_grid_to_load_kwh_monthly": {
-                "name": "Netz → Last Energie (monatlich)"
-            },
-            "energy_grid_to_load_kwh_yearly": {
-                "name": "Netz → Last Energie (jährlich)"
-            },
-            "energy_solar_to_grid_kwh": {
-                "name": "Solar → Netz Energie"
-            },
-            "energy_solar_to_load_kwh": {
-                "name": "Solar → Last Energie"
-            },
-            "energy_solar_to_load_kwh_daily": {
-                "name": "Solar → Last Energie (täglich)"
-            },
-            "energy_solar_to_load_kwh_monthly": {
-                "name": "Solar → Last Energie (monatlich)"
-            },
-            "energy_solar_to_load_kwh_yearly": {
-                "name": "Solar → Last Energie (jährlich)"
-            },
-            "energy_total_load_kwh": {
-                "name": "Gesamtlast Energie"
             },
             "energy_cost": {
                 "name": "Energiekosten (Zeitraum)"

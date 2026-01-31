@@ -23,17 +23,17 @@
                     "main_switch": "Interrupteur principal",
                     "pump_switch": "Interrupteur de pompe (optionnel)",
                     "filter_switch": "Interrupteur de filtre (optionnel)",
-                    "enable_aux_heating": "Activer chauffage auxiliaire",
+                    "enable_aux_heating": "Activer le chauffage auxiliaire",
                     "aux_heating_switch": "Interrupteur du chauffage auxiliaire",
                     "main_power_sensor": "Capteur de puissance principal",
                     "aux_power_sensor": "Capteur de puissance du chauffage auxiliaire"
                 },
                 "data_description": {
-                    "main_switch": "Interrupteur principal / alimentation du pool (obligatoire)",
-                    "pump_switch": "Optionnel : interrupteur dédié pour la pompe de circulation (laisser vide pour utiliser l'interrupteur principal)",
-                    "filter_switch": "Optionnel : interrupteur séparé pour la pompe de filtration (laisser vide pour utiliser l'interrupteur principal)",
-                    "enable_aux_heating": "Active le chauffage auxiliaire pour un chauffage plus rapide",
-                    "aux_heating_switch": "Interrupteur du chauffage auxiliaire électrique",
+                    "main_switch": "Interrupteur principal / alimentation de la piscine (obligatoire)",
+                    "pump_switch": "Optionnel : interrupteur dédié à la pompe de circulation (laisser vide pour utiliser le principal)",
+                    "filter_switch": "Optionnel : interrupteur séparé pour la pompe de filtration (laisser vide pour utiliser le principal)",
+                    "enable_aux_heating": "Autorise le chauffage auxiliaire à accélérer la chauffe",
+                    "aux_heating_switch": "Interrupteur du chauffage électrique auxiliaire",
                     "main_power_sensor": "Capteur de puissance de la pompe principale en watts",
                     "aux_power_sensor": "Capteur de puissance du chauffage en watts"
                 }
@@ -54,7 +54,7 @@
                     "ph_sensor": "Capteur de pH (Blueriiot ou similaire)",
                     "chlorine_sensor": "Capteur redox pour mesure du chlore en mV",
                     "salt_sensor": "Capteur de sel pour piscines salées",
-                    "tds_sensor": "Capteur de conductivité (TDS) pour la qualité de l’eau"
+                    "tds_sensor": "Capteur de conductivité (TDS) pour la qualité de l'eau"
                 }
             },
             "sanitizer": {
@@ -65,7 +65,7 @@
                     "sanitizer_mode": "Mode de désinfection"
                 },
                 "data_description": {
-                    "sanitizer_mode": "Chlore = dosage classique, Eau salée = électrolyseur, Mixte = les deux"
+                    "sanitizer_mode": "Chlore = dosage classique, Eau salée = électrolyse, Mixte = les deux"
                 }
             },
             "sanitizer_salt": {
@@ -81,35 +81,27 @@
             },
             "climate": {
                 "title": "Contrôle de température",
-                "description": "Réglages thermostat/hystérésis. La consigne est enregistrée dans les options après modification.",
-                    "total_load_energy_entity": "Énergie totale de charge (kWh)",
-                    "pool_energy_entity": "Énergie piscine (kWh)",
-                    "pool_energy_entity_daily": "Énergie piscine (kWh quotidien)",
-                    "pool_energy_entity_monthly": "Énergie piscine (kWh mensuel)",
-                    "pool_energy_entity_yearly": "Énergie piscine (kWh annuel)"
+                "description": "Ajuste les limites du thermostat et l'hystérésis.",
+                "submit": "Suivant",
                 "data": {
                     "target_temp": "Température cible initiale",
-                    "min_temp": "Température minimale",
-                    "max_temp": "Température maximale",
-                    "target_temp_step": "Pas de réglage",
-                    "heater_base_power_w": "Puissance de base (W)",
-                    "heater_aux_power_w": "Puissance auxiliaire (W)",
+                    "min_temp": "Température minimum",
+                    "max_temp": "Température maximum",
+                    "target_temp_step": "Pas de température",
+                    "heater_base_power_w": "Puissance de chauffe de base (W)",
+                    "heater_aux_power_w": "Puissance du chauffage auxiliaire (W)",
                     "cold_tolerance": "Tolérance froide",
                     "hot_tolerance": "Tolérance chaude"
                 },
                 "data_description": {
-                    "target_temp": "Température cible initiale (consigne) au premier démarrage ; ensuite la consigne est enregistrée",
+                    "target_temp": "Température cible (consigne) initiale ; ensuite la consigne est enregistrée",
                     "min_temp": "Consigne minimale disponible",
                     "max_temp": "Consigne maximale disponible",
-                    "target_temp_step": "Pas pour régler la consigne",
-                    "total_load_energy_entity": "Énergie totale de charge (kWh) pour la période (optionnel, informatif)",
-                    "pool_energy_entity": "Énergie totale spécifique à la piscine (kWh). Si défini, elle remplace la charge maison.",
-                    "pool_energy_entity_daily": "Énergie piscine (kWh) pour la journée (optionnel ; préféré pour les coûts piscine)",
-                    "pool_energy_entity_monthly": "Énergie piscine (kWh) pour le mois (optionnel ; dérivé du quotidien si vide)",
-                    "pool_energy_entity_yearly": "Énergie piscine (kWh) pour l’année (optionnel ; dérivé du quotidien si vide)"
-                    "heater_aux_power_w": "Puissance nominale du chauffage auxiliaire (W). Utilisée pour la pré‑chauffe lorsque l’auxiliaire est activé. Total = base + aux.",
-                    "cold_tolerance": "Le chauffage démarre lorsque la température de l’eau est en dessous de la consigne moins cette valeur",
-                    "hot_tolerance": "Le chauffage s’arrête lorsque la température de l’eau est à ou au‑dessus de la consigne plus cette valeur"
+                    "target_temp_step": "Pas pour régler la température cible",
+                    "heater_base_power_w": "Contribution de base (p. ex. chaleur résiduelle de la pompe) utilisée pour estimer le préchauffage.",
+                    "heater_aux_power_w": "Puissance nominale du chauffage auxiliaire (W) utilisée pour estimer le préchauffage lorsque le chauffage auxiliaire est activé. Total = base + auxiliaire.",
+                    "cold_tolerance": "Le chauffage démarre lorsque la température de l'eau est inférieure à la consigne moins cette valeur",
+                    "hot_tolerance": "Le chauffage s'arrête lorsque la température de l'eau est égale ou supérieure à la consigne plus cette valeur"
                 }
             },
             "costs": {
@@ -121,32 +113,22 @@
                     "electricity_price_entity": "Entité du prix de l’électricité",
                     "feed_in_tariff": "Tarif d’injection (par kWh)",
                     "feed_in_tariff_entity": "Entité du tarif d’injection",
-                    "grid_to_load_energy_entity": "Énergie réseau → charge (kWh)",
-                    "grid_to_load_energy_entity_daily": "Énergie réseau → charge (quotidienne kWh)",
-                    "grid_to_load_energy_entity_monthly": "Énergie réseau → charge (mensuelle kWh)",
-                    "grid_to_load_energy_entity_yearly": "Énergie réseau → charge (annuelle kWh)",
-                    "solar_to_grid_energy_entity": "Énergie solaire → réseau (kWh)",
-                    "solar_to_load_energy_entity": "Énergie solaire → charge (kWh)",
-                    "solar_to_load_energy_entity_daily": "Énergie solaire → charge (quotidienne kWh)",
-                    "solar_to_load_energy_entity_monthly": "Énergie solaire → charge (mensuelle kWh)",
-                    "solar_to_load_energy_entity_yearly": "Énergie solaire → charge (annuelle kWh)",
-                    "total_load_energy_entity": "Énergie totale de charge (kWh)"
+                    "pool_energy_entity_base": "Énergie base de la piscine (kWh)",
+                    "pool_energy_entity_aux": "Énergie du chauffage auxiliaire (kWh)",
+                    "pool_energy_entity_base_daily": "Énergie base de la piscine (quotidienne kWh)",
+                    "pool_energy_entity_aux_daily": "Énergie du chauffage auxiliaire (quotidienne kWh)",
+                    "solar_energy_entity_daily": "Énergie solaire (quotidienne kWh)"
                 },
                 "data_description": {
                     "electricity_price": "Prix fixe de l’électricité pour estimer les coûts (monnaie par kWh)",
                     "electricity_price_entity": "Capteur/helper optionnel de prix dynamique (remplace le prix fixe)",
                     "feed_in_tariff": "Tarif d’injection pour estimer le revenu perdu (monnaie par kWh)",
                     "feed_in_tariff_entity": "Capteur/helper optionnel de tarif dynamique (remplace le tarif fixe)",
-                    "grid_to_load_energy_entity": "Optionnel : énergie totale (kWh) importée du réseau. Laisse vide si tu n’utilises que daily/monthly/yearly.",
-                    "grid_to_load_energy_entity_daily": "Énergie (kWh) importée du réseau pour le jour",
-                    "grid_to_load_energy_entity_monthly": "Énergie (kWh) importée du réseau pour le mois (optionnel ; dérivé du daily si vide)",
-                    "grid_to_load_energy_entity_yearly": "Énergie (kWh) importée du réseau pour l’année (optionnel ; dérivé du daily si vide)",
-                    "solar_to_grid_energy_entity": "Énergie (kWh) exportée vers le réseau pour la période",
-                    "solar_to_load_energy_entity": "Énergie (kWh) fournie par le solaire à la charge pour la période",
-                    "solar_to_load_energy_entity_daily": "Énergie (kWh) fournie par le solaire à la charge pour le jour",
-                    "solar_to_load_energy_entity_monthly": "Énergie (kWh) fournie par le solaire à la charge pour le mois (optionnel ; dérivé du daily si vide)",
-                    "solar_to_load_energy_entity_yearly": "Énergie (kWh) fournie par le solaire à la charge pour l’année (optionnel ; dérivé du daily si vide)",
-                    "total_load_energy_entity": "Énergie totale de charge (kWh) pour la période (optionnel)"
+                    "pool_energy_entity_base": "Énergie base totale (kWh) de la pompe de circulation",
+                    "pool_energy_entity_aux": "Énergie totale du chauffage auxiliaire (kWh)",
+                    "pool_energy_entity_base_daily": "Énergie base quotidienne (kWh) de la pompe de circulation",
+                    "pool_energy_entity_aux_daily": "Énergie quotidienne du chauffage auxiliaire (kWh)",
+                    "solar_energy_entity_daily": "Énergie solaire quotidienne attribuée à la piscine (kWh). Utilisée pour le coût net."
                 }
             },
             "frost": {
@@ -193,9 +175,6 @@
                 },
                 "data_description": {
                     "pool_calendar": "Calendrier avec événements piscine (démarre automatiquement le mode baignade)",
-                    "holiday_calendar": "Calendrier des jours fériés (utilise les heures calmes du week‑end les jours fériés)",
-                    "enable_event_weather_guard": "Si activé, la prévision est vérifiée et le préchauffage/démarrage est ignoré en cas de pluie",
-                    "event_weather_entity": "Entité météo compatible avec weather.get_forecasts (horaire)",
                     "event_rain_probability": "Si la probabilité de pluie pendant l’événement >= cette valeur, l’événement est bloqué",
                     "quiet_time_start": "Début des heures calmes en semaine (ex. 22:00)",
                     "quiet_time_end": "Fin des heures calmes en semaine (ex. 07:00)",
@@ -514,32 +493,22 @@
                     "electricity_price_entity": "Entité du prix de l’électricité",
                     "feed_in_tariff": "Tarif d’injection (par kWh)",
                     "feed_in_tariff_entity": "Entité du tarif d’injection",
-                    "grid_to_load_energy_entity": "Énergie réseau → charge (kWh)",
-                    "grid_to_load_energy_entity_daily": "Énergie réseau → charge (quotidienne kWh)",
-                    "grid_to_load_energy_entity_monthly": "Énergie réseau → charge (mensuelle kWh)",
-                    "grid_to_load_energy_entity_yearly": "Énergie réseau → charge (annuelle kWh)",
-                    "solar_to_grid_energy_entity": "Énergie solaire → réseau (kWh)",
-                    "solar_to_load_energy_entity": "Énergie solaire → charge (kWh)",
-                    "solar_to_load_energy_entity_daily": "Énergie solaire → charge (quotidienne kWh)",
-                    "solar_to_load_energy_entity_monthly": "Énergie solaire → charge (mensuelle kWh)",
-                    "solar_to_load_energy_entity_yearly": "Énergie solaire → charge (annuelle kWh)",
-                    "total_load_energy_entity": "Énergie totale de charge (kWh)"
+                    "pool_energy_entity_base": "Énergie base de la piscine (kWh)",
+                    "pool_energy_entity_aux": "Énergie du chauffage auxiliaire (kWh)",
+                    "pool_energy_entity_base_daily": "Énergie base de la piscine (quotidienne kWh)",
+                    "pool_energy_entity_aux_daily": "Énergie du chauffage auxiliaire (quotidienne kWh)",
+                    "solar_energy_entity_daily": "Énergie solaire (quotidienne kWh)"
                 },
                 "data_description": {
                     "electricity_price": "Prix fixe de l’électricité pour estimer les coûts (monnaie par kWh)",
                     "electricity_price_entity": "Capteur/helper optionnel de prix dynamique (remplace le prix fixe)",
                     "feed_in_tariff": "Tarif d’injection pour estimer le revenu perdu (monnaie par kWh)",
                     "feed_in_tariff_entity": "Capteur/helper optionnel de tarif dynamique (remplace le tarif fixe)",
-                    "grid_to_load_energy_entity": "Optionnel : énergie totale (kWh) importée du réseau. Laisse vide si tu n’utilises que daily/monthly/yearly.",
-                    "grid_to_load_energy_entity_daily": "Énergie (kWh) importée du réseau pour le jour",
-                    "grid_to_load_energy_entity_monthly": "Énergie (kWh) importée du réseau pour le mois (optionnel ; dérivé du daily si vide)",
-                    "grid_to_load_energy_entity_yearly": "Énergie (kWh) importée du réseau pour l’année (optionnel ; dérivé du daily si vide)",
-                    "solar_to_grid_energy_entity": "Énergie (kWh) exportée vers le réseau pour la période",
-                    "solar_to_load_energy_entity": "Énergie (kWh) fournie par le solaire à la charge pour la période",
-                    "solar_to_load_energy_entity_daily": "Énergie (kWh) fournie par le solaire à la charge pour le jour",
-                    "solar_to_load_energy_entity_monthly": "Énergie (kWh) fournie par le solaire à la charge pour le mois (optionnel ; dérivé du daily si vide)",
-                    "solar_to_load_energy_entity_yearly": "Énergie (kWh) fournie par le solaire à la charge pour l’année (optionnel ; dérivé du daily si vide)",
-                    "total_load_energy_entity": "Énergie totale de charge (kWh) pour la période (optionnel)"
+                    "pool_energy_entity_base": "Énergie base totale (kWh) de la pompe de circulation",
+                    "pool_energy_entity_aux": "Énergie totale du chauffage auxiliaire (kWh)",
+                    "pool_energy_entity_base_daily": "Énergie base quotidienne (kWh) de la pompe de circulation",
+                    "pool_energy_entity_aux_daily": "Énergie quotidienne du chauffage auxiliaire (kWh)",
+                    "solar_energy_entity_daily": "Énergie solaire quotidienne attribuée à la piscine (kWh). Utilisée pour le coût net."
                 }
             }
         }
@@ -665,36 +634,6 @@
             },
             "power_cost_feed_in_loss_per_hour": {
                 "name": "Revenu d’injection perdu (par heure)"
-            },
-            "energy_grid_to_load_kwh": {
-                "name": "Énergie réseau → charge"
-            },
-            "energy_grid_to_load_kwh_daily": {
-                "name": "Énergie réseau → charge (quotidienne)"
-            },
-            "energy_grid_to_load_kwh_monthly": {
-                "name": "Énergie réseau → charge (mensuelle)"
-            },
-            "energy_grid_to_load_kwh_yearly": {
-                "name": "Énergie réseau → charge (annuelle)"
-            },
-            "energy_solar_to_grid_kwh": {
-                "name": "Énergie solaire → réseau"
-            },
-            "energy_solar_to_load_kwh": {
-                "name": "Énergie solaire → charge"
-            },
-            "energy_solar_to_load_kwh_daily": {
-                "name": "Énergie solaire → charge (quotidienne)"
-            },
-            "energy_solar_to_load_kwh_monthly": {
-                "name": "Énergie solaire → charge (mensuelle)"
-            },
-            "energy_solar_to_load_kwh_yearly": {
-                "name": "Énergie solaire → charge (annuelle)"
-            },
-            "energy_total_load_kwh": {
-                "name": "Énergie totale de charge"
             },
             "energy_cost": {
                 "name": "Coût énergétique (période)"

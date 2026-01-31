@@ -1358,51 +1358,45 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 except Exception:
                     feed_in_tariff = None
 
-            # Optional energy (kWh) sensors for period-based costs
-            grid_to_load_kwh = self._get_float(conf.get(CONF_GRID_TO_LOAD_ENERGY_ENTITY))
-            grid_to_load_kwh_daily = self._get_float(conf.get(CONF_GRID_TO_LOAD_ENERGY_ENTITY_DAILY))
-            grid_to_load_kwh_monthly = self._get_float(conf.get(CONF_GRID_TO_LOAD_ENERGY_ENTITY_MONTHLY))
-            grid_to_load_kwh_yearly = self._get_float(conf.get(CONF_GRID_TO_LOAD_ENERGY_ENTITY_YEARLY))
-            solar_to_grid_kwh = self._get_float(conf.get(CONF_SOLAR_TO_GRID_ENERGY_ENTITY))
-            solar_to_load_kwh = self._get_float(conf.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY))
-            solar_to_load_kwh_daily = self._get_float(conf.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_DAILY))
-            solar_to_load_kwh_monthly = self._get_float(conf.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_MONTHLY))
-            solar_to_load_kwh_yearly = self._get_float(conf.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_YEARLY))
-            total_load_kwh = self._get_float(conf.get(CONF_TOTAL_LOAD_ENERGY_ENTITY))
+            # Pool-only energy sensors (kWh)
+            pool_energy_kwh_base = self._get_float(conf.get(CONF_POOL_ENERGY_ENTITY_BASE))
+            pool_energy_kwh_aux = self._get_float(conf.get(CONF_POOL_ENERGY_ENTITY_AUX))
+            if pool_energy_kwh_base is not None or pool_energy_kwh_aux is not None:
+                pool_energy_kwh = float(pool_energy_kwh_base or 0.0) + float(pool_energy_kwh_aux or 0.0)
+            else:
+                pool_energy_kwh = self._get_float(conf.get(CONF_POOL_ENERGY_ENTITY))
 
-            # Optional pool-specific energy sensors (kWh)
-            pool_energy_kwh = self._get_float(conf.get(CONF_POOL_ENERGY_ENTITY))
-            pool_energy_kwh_daily = self._get_float(conf.get(CONF_POOL_ENERGY_ENTITY_DAILY))
-            pool_energy_kwh_monthly = self._get_float(conf.get(CONF_POOL_ENERGY_ENTITY_MONTHLY))
-            pool_energy_kwh_yearly = self._get_float(conf.get(CONF_POOL_ENERGY_ENTITY_YEARLY))
+            pool_energy_kwh_daily_base = self._get_float(conf.get(CONF_POOL_ENERGY_ENTITY_BASE_DAILY))
+            pool_energy_kwh_daily_aux = self._get_float(conf.get(CONF_POOL_ENERGY_ENTITY_AUX_DAILY))
+            if pool_energy_kwh_daily_base is not None or pool_energy_kwh_daily_aux is not None:
+                pool_energy_kwh_daily = float(pool_energy_kwh_daily_base or 0.0) + float(pool_energy_kwh_daily_aux or 0.0)
+            else:
+                pool_energy_kwh_daily = self._get_float(conf.get(CONF_POOL_ENERGY_ENTITY_DAILY))
 
-            # If pool-specific energy sensors are provided, prefer them over whole-house values
-            if pool_energy_kwh is not None:
-                grid_to_load_kwh = pool_energy_kwh
-            if pool_energy_kwh_daily is not None:
-                grid_to_load_kwh_daily = pool_energy_kwh_daily
-            if pool_energy_kwh_monthly is not None:
-                grid_to_load_kwh_monthly = pool_energy_kwh_monthly
-            if pool_energy_kwh_yearly is not None:
-                grid_to_load_kwh_yearly = pool_energy_kwh_yearly
+            # Optional pool solar energy (daily) to compute net costs
+            pool_solar_kwh_daily = self._get_float(conf.get(CONF_SOLAR_ENERGY_ENTITY_DAILY))
+
+            # Use pool energy as the basis for cost calculations
+            load_kwh = pool_energy_kwh
+            load_kwh_daily = pool_energy_kwh_daily
+            net_load_kwh_daily = load_kwh_daily
+            if (load_kwh_daily is not None) and (pool_solar_kwh_daily is not None):
+                try:
+                    net_load_kwh_daily = max(0.0, float(load_kwh_daily) - float(pool_solar_kwh_daily))
+                except Exception:
+                    net_load_kwh_daily = load_kwh_daily
+            load_kwh_monthly = None
+            load_kwh_yearly = None
 
             # Derive month/year totals from daily sensors when not provided
             derived_changed = False
-            if grid_to_load_kwh_daily is not None and (grid_to_load_kwh_monthly is None or grid_to_load_kwh_yearly is None):
-                d_month, d_year, changed = self._update_derived_energy_from_daily("grid", grid_to_load_kwh_daily, now)
+            if load_kwh_daily is not None and (load_kwh_monthly is None or load_kwh_yearly is None):
+                d_month, d_year, changed = self._update_derived_energy_from_daily("grid", load_kwh_daily, now)
                 derived_changed = derived_changed or changed
-                if grid_to_load_kwh_monthly is None:
-                    grid_to_load_kwh_monthly = d_month
-                if grid_to_load_kwh_yearly is None:
-                    grid_to_load_kwh_yearly = d_year
-
-            if solar_to_load_kwh_daily is not None and (solar_to_load_kwh_monthly is None or solar_to_load_kwh_yearly is None):
-                d_month, d_year, changed = self._update_derived_energy_from_daily("solar", solar_to_load_kwh_daily, now)
-                derived_changed = derived_changed or changed
-                if solar_to_load_kwh_monthly is None:
-                    solar_to_load_kwh_monthly = d_month
-                if solar_to_load_kwh_yearly is None:
-                    solar_to_load_kwh_yearly = d_year
+                if load_kwh_monthly is None:
+                    load_kwh_monthly = d_month
+                if load_kwh_yearly is None:
+                    load_kwh_yearly = d_year
 
             # Persist derived aggregation state (best-effort, throttled)
             if derived_changed:
@@ -1411,28 +1405,27 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 except Exception:
                     pass
 
-            def _calc_energy_costs(grid_kwh, solar_load_kwh):
+            def _calc_energy_costs(load_kwh):
                 cost = None
-                loss = None
-                net = None
                 try:
-                    if grid_kwh is not None and electricity_price is not None:
-                        cost = float(grid_kwh) * float(electricity_price)
+                    if load_kwh is not None and electricity_price is not None:
+                        cost = float(load_kwh) * float(electricity_price)
                 except Exception:
                     cost = None
-                try:
-                    if solar_load_kwh is not None and feed_in_tariff is not None:
-                        loss = float(solar_load_kwh) * float(feed_in_tariff)
-                except Exception:
-                    loss = None
-                if cost is not None or loss is not None:
-                    net = float(cost or 0.0) + float(loss or 0.0)
-                return cost, loss, net
+                return cost
 
-            energy_cost, energy_feed_in_loss, energy_cost_net = _calc_energy_costs(grid_to_load_kwh, solar_to_load_kwh)
-            energy_cost_daily, energy_feed_in_loss_daily, energy_cost_net_daily = _calc_energy_costs(grid_to_load_kwh_daily, solar_to_load_kwh_daily)
-            energy_cost_monthly, energy_feed_in_loss_monthly, energy_cost_net_monthly = _calc_energy_costs(grid_to_load_kwh_monthly, solar_to_load_kwh_monthly)
-            energy_cost_yearly, energy_feed_in_loss_yearly, energy_cost_net_yearly = _calc_energy_costs(grid_to_load_kwh_yearly, solar_to_load_kwh_yearly)
+            energy_cost = _calc_energy_costs(load_kwh)
+            energy_cost_daily = _calc_energy_costs(load_kwh_daily)
+            energy_cost_monthly = _calc_energy_costs(load_kwh_monthly)
+            energy_cost_yearly = _calc_energy_costs(load_kwh_yearly)
+            energy_feed_in_loss = None
+            energy_feed_in_loss_daily = None
+            energy_feed_in_loss_monthly = None
+            energy_feed_in_loss_yearly = None
+            energy_cost_net = energy_cost
+            energy_cost_net_daily = _calc_energy_costs(net_load_kwh_daily)
+            energy_cost_net_monthly = energy_cost_monthly
+            energy_cost_net_yearly = energy_cost_yearly
 
             # Time-weighted cost accumulation (daily reset, monotonic within day)
             cost_daily_changed = False
@@ -1452,56 +1445,42 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 self._cost_daily_accum = 0.0
                 self._cost_daily_feed_in_loss_accum = 0.0
                 self._cost_daily_date = today.strftime("%Y-%m-%d")
-                self._cost_daily_last_grid_kwh = grid_to_load_kwh_daily
-                self._cost_daily_last_solar_kwh = solar_to_load_kwh_daily
+                self._cost_daily_last_grid_kwh = load_kwh_daily
                 cost_daily_changed = True
 
-            if grid_to_load_kwh_daily is not None and self._cost_daily_last_grid_kwh is None:
-                self._cost_daily_last_grid_kwh = grid_to_load_kwh_daily
-                cost_daily_changed = True
-            if solar_to_load_kwh_daily is not None and self._cost_daily_last_solar_kwh is None:
-                self._cost_daily_last_solar_kwh = solar_to_load_kwh_daily
+            if load_kwh_daily is not None and self._cost_daily_last_grid_kwh is None:
+                self._cost_daily_last_grid_kwh = load_kwh_daily
                 cost_daily_changed = True
 
             delta_grid = None
-            if grid_to_load_kwh_daily is not None and self._cost_daily_last_grid_kwh is not None:
+            if load_kwh_daily is not None and self._cost_daily_last_grid_kwh is not None:
                 try:
-                    delta_grid = float(grid_to_load_kwh_daily) - float(self._cost_daily_last_grid_kwh)
+                    delta_grid = float(load_kwh_daily) - float(self._cost_daily_last_grid_kwh)
                 except Exception:
                     delta_grid = None
                 if delta_grid is not None and delta_grid < 0:
-                    self._cost_daily_last_grid_kwh = grid_to_load_kwh_daily
+                    self._cost_daily_last_grid_kwh = load_kwh_daily
                     delta_grid = 0.0
-                    cost_daily_changed = True
-
-            delta_solar = None
-            if solar_to_load_kwh_daily is not None and self._cost_daily_last_solar_kwh is not None:
-                try:
-                    delta_solar = float(solar_to_load_kwh_daily) - float(self._cost_daily_last_solar_kwh)
-                except Exception:
-                    delta_solar = None
-                if delta_solar is not None and delta_solar < 0:
-                    self._cost_daily_last_solar_kwh = solar_to_load_kwh_daily
-                    delta_solar = 0.0
                     cost_daily_changed = True
 
             if delta_grid is not None:
                 if electricity_price is not None and delta_grid > 0:
                     self._cost_daily_accum = float(self._cost_daily_accum or 0.0) + float(delta_grid) * float(electricity_price)
                     cost_daily_changed = True
-                self._cost_daily_last_grid_kwh = grid_to_load_kwh_daily
-
-            if delta_solar is not None:
-                if feed_in_tariff is not None and delta_solar > 0:
-                    self._cost_daily_feed_in_loss_accum = float(self._cost_daily_feed_in_loss_accum or 0.0) + float(delta_solar) * float(feed_in_tariff)
-                    cost_daily_changed = True
-                self._cost_daily_last_solar_kwh = solar_to_load_kwh_daily
+                self._cost_daily_last_grid_kwh = load_kwh_daily
 
             if self._cost_daily_date is not None:
                 try:
                     energy_cost_daily = float(self._cost_daily_accum or 0.0)
                     energy_feed_in_loss_daily = float(self._cost_daily_feed_in_loss_accum or 0.0)
-                    energy_cost_net_daily = float(energy_cost_daily or 0.0) + float(energy_feed_in_loss_daily or 0.0)
+                    # Net daily cost: prefer solar-adjusted net load if provided; otherwise fall back to gross+loss.
+                    if pool_solar_kwh_daily is not None and electricity_price is not None:
+                        try:
+                            energy_cost_net_daily = float(max(0.0, float(net_load_kwh_daily))) * float(electricity_price)
+                        except Exception:
+                            energy_cost_net_daily = float(energy_cost_daily or 0.0) + float(energy_feed_in_loss_daily or 0.0)
+                    else:
+                        energy_cost_net_daily = float(energy_cost_daily or 0.0) + float(energy_feed_in_loss_daily or 0.0)
                 except Exception:
                     pass
 
@@ -2533,16 +2512,6 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "power_cost_per_hour": round(float(power_cost_per_hour), 4) if power_cost_per_hour is not None else None,
                 "power_cost_per_hour_net": round(float(power_cost_per_hour_net), 4) if power_cost_per_hour_net is not None else None,
                 "power_cost_feed_in_loss_per_hour": round(float(power_cost_feed_in_loss_per_hour), 4) if power_cost_feed_in_loss_per_hour is not None else None,
-                "energy_grid_to_load_kwh": round(float(grid_to_load_kwh), 3) if grid_to_load_kwh is not None else None,
-                "energy_grid_to_load_kwh_daily": round(float(grid_to_load_kwh_daily), 3) if grid_to_load_kwh_daily is not None else None,
-                "energy_grid_to_load_kwh_monthly": round(float(grid_to_load_kwh_monthly), 3) if grid_to_load_kwh_monthly is not None else None,
-                "energy_grid_to_load_kwh_yearly": round(float(grid_to_load_kwh_yearly), 3) if grid_to_load_kwh_yearly is not None else None,
-                "energy_solar_to_grid_kwh": round(float(solar_to_grid_kwh), 3) if solar_to_grid_kwh is not None else None,
-                "energy_solar_to_load_kwh": round(float(solar_to_load_kwh), 3) if solar_to_load_kwh is not None else None,
-                "energy_solar_to_load_kwh_daily": round(float(solar_to_load_kwh_daily), 3) if solar_to_load_kwh_daily is not None else None,
-                "energy_solar_to_load_kwh_monthly": round(float(solar_to_load_kwh_monthly), 3) if solar_to_load_kwh_monthly is not None else None,
-                "energy_solar_to_load_kwh_yearly": round(float(solar_to_load_kwh_yearly), 3) if solar_to_load_kwh_yearly is not None else None,
-                "energy_total_load_kwh": round(float(total_load_kwh), 3) if total_load_kwh is not None else None,
                 "energy_cost": round(float(energy_cost), 4) if energy_cost is not None else None,
                 "energy_cost_net": round(float(energy_cost_net), 4) if energy_cost_net is not None else None,
                 "energy_cost_daily": round(float(energy_cost_daily), 4) if energy_cost_daily is not None else None,

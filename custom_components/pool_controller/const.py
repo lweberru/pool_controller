@@ -47,23 +47,16 @@ CONF_ELECTRICITY_PRICE_ENTITY = "electricity_price_entity"
 CONF_FEED_IN_TARIFF = "feed_in_tariff"
 CONF_FEED_IN_TARIFF_ENTITY = "feed_in_tariff_entity"
 
-# Optional energy (kWh) sensors for period-based cost calculations
-CONF_GRID_TO_LOAD_ENERGY_ENTITY = "grid_to_load_energy_entity"
-CONF_GRID_TO_LOAD_ENERGY_ENTITY_DAILY = "grid_to_load_energy_entity_daily"
-CONF_GRID_TO_LOAD_ENERGY_ENTITY_MONTHLY = "grid_to_load_energy_entity_monthly"
-CONF_GRID_TO_LOAD_ENERGY_ENTITY_YEARLY = "grid_to_load_energy_entity_yearly"
-CONF_SOLAR_TO_GRID_ENERGY_ENTITY = "solar_to_grid_energy_entity"
-CONF_SOLAR_TO_LOAD_ENERGY_ENTITY = "solar_to_load_energy_entity"
-CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_DAILY = "solar_to_load_energy_entity_daily"
-CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_MONTHLY = "solar_to_load_energy_entity_monthly"
-CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_YEARLY = "solar_to_load_energy_entity_yearly"
-CONF_TOTAL_LOAD_ENERGY_ENTITY = "total_load_energy_entity"
-
 # Optional pool-specific energy (kWh) sensors for cost calculations
 CONF_POOL_ENERGY_ENTITY = "pool_energy_entity"
 CONF_POOL_ENERGY_ENTITY_DAILY = "pool_energy_entity_daily"
-CONF_POOL_ENERGY_ENTITY_MONTHLY = "pool_energy_entity_monthly"
-CONF_POOL_ENERGY_ENTITY_YEARLY = "pool_energy_entity_yearly"
+CONF_POOL_ENERGY_ENTITY_BASE = "pool_energy_entity_base"
+CONF_POOL_ENERGY_ENTITY_AUX = "pool_energy_entity_aux"
+CONF_POOL_ENERGY_ENTITY_BASE_DAILY = "pool_energy_entity_base_daily"
+CONF_POOL_ENERGY_ENTITY_AUX_DAILY = "pool_energy_entity_aux_daily"
+
+# Optional pool solar energy (daily, kWh) for net cost calculation
+CONF_SOLAR_ENERGY_ENTITY_DAILY = "solar_energy_entity_daily"
 
 # Heating power used for preheat time estimation (watts).
 # Do NOT derive this from a live pump power sensor.
