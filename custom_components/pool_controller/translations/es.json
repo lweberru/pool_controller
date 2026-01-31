@@ -149,6 +149,7 @@
                 "data_description": {
                     "pool_calendar": "Calendario con eventos de piscina (inicia el modo baño automáticamente)",
                     "holiday_calendar": "Calendario de festivos (usa horas de fin de semana en festivos)",
+                    "enable_event_weather_guard": "Si se activa, el controlador revisa el pronóstico y omite precalentamiento/inicio si es probable lluvia",
                     "event_weather_entity": "Entidad del tiempo compatible con weather.get_forecasts (horario)",
                     "event_rain_probability": "Si la probabilidad de lluvia durante el evento >= este valor, el evento se bloquea",
                     "quiet_time_start": "Inicio de horas de silencio en laborables (p. ej. 22:00)",
@@ -595,6 +596,36 @@
             }
         },
         "sensor": {
+            "status": {
+                "name": "Estado"
+            },
+            "run_reason": {
+                "name": "Motivo de funcionamiento"
+            },
+            "heat_reason": {
+                "name": "Motivo de calefacción"
+            },
+            "run_credit_source": {
+                "name": "Origen de crédito"
+            },
+            "run_credit_minutes": {
+                "name": "Crédito de ejecución (min)"
+            },
+            "filter_credit_minutes": {
+                "name": "Crédito de filtrado (min)"
+            },
+            "filter_missing_minutes": {
+                "name": "Filtrado restante (min)"
+            },
+            "frost_credit_minutes": {
+                "name": "Crédito de heladas (min)"
+            },
+            "frost_credit_shift_minutes": {
+                "name": "Desplazamiento por heladas (min)"
+            },
+            "electricity_price": {
+                "name": "Precio de electricidad (por kWh)"
+            },
             "feed_in_tariff": {
                 "name": "Tarifa de inyección (por kWh)"
             },

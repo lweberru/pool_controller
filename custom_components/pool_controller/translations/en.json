@@ -149,6 +149,7 @@
         "data_description": {
           "pool_calendar": "Calendar with pool events (automatically starts bathing mode for appointments)",
           "holiday_calendar": "Holiday calendar (uses weekend quiet times on holidays)",
+          "enable_event_weather_guard": "If enabled, the controller checks the weather forecast and skips preheat and event start when rain is likely",
           "event_weather_entity": "Weather entity that supports the weather.get_forecasts service (hourly)",
           "event_rain_probability": "If forecasted rain probability during the event is >= this value, the event is blocked",
           "quiet_time_start": "Start of quiet hours on weekdays (e.g. 22:00)",
@@ -254,73 +255,80 @@
         "description": "Select the section you want to edit.",
         "menu_options": {
           "basic": "Basic settings",
-          "init": {
-            "title": "Basic setup",
-            "submit": "Continue",
-            "data": {
-              "name": "Pool name",
-              "water_volume": "Water volume (liters)",
-              "demo_mode": "Demo mode"
-            },
-            "data_description": {
-              "name": "Display name for this pool installation",
-              "water_volume": "Water volume in liters (used for dosing and heating time calculations)",
-              "demo_mode": "Demo mode: does not switch real devices (for testing only)"
-            }
-          },
-          "switches": {
-            "title": "Switches & power",
-            "description": "Configure switches and power sensors. Optionally separate main supply and circulation pump.",
-            "submit": "Continue",
-            "data": {
-              "main_switch": "Main switch",
-              "pump_switch": "Pump switch (optional)",
-              "filter_switch": "Filter switch (optional)",
-              "enable_aux_heating": "Enable auxiliary heating",
-              "aux_heating_switch": "Auxiliary heater switch",
-              "main_power_sensor": "Main power sensor",
-              "aux_power_sensor": "Aux heater power sensor"
-            },
-            "data_description": {
-              "main_switch": "Main power / supply switch for the pool (required)",
-              "pump_switch": "Optional: dedicated circulation/pump switch (leave empty to use main switch)",
-              "filter_switch": "Optional: separate switch for filter pump (leave empty to use main switch)",
-              "enable_aux_heating": "Enables auxiliary heater for faster heating",
-              "aux_heating_switch": "Switch for electric auxiliary heater",
-              "main_power_sensor": "Main pump power sensor in watts",
-              "aux_power_sensor": "Heater power sensor in watts"
-            }
-          },
-          "water_quality": {
-            "title": "Water quality",
-            "description": "Select temperature and (optional) water chemistry sensors.",
-            "submit": "Continue",
-            "data": {
-              "temp_water_sensor": "Water temperature",
-              "ph_sensor": "pH sensor",
-              "chlorine_sensor": "Chlorine (redox) sensor",
-              "salt_sensor": "Salt sensor",
-              "tds_sensor": "Conductivity sensor"
-            },
-            "data_description": {
-              "temp_water_sensor": "Pool water temperature sensor (required)",
-              "ph_sensor": "pH value sensor (Blueriiot or similar)",
-              "chlorine_sensor": "Redox sensor for chlorine measurement in mV",
-              "salt_sensor": "Salt content sensor for saltwater pools",
-              "tds_sensor": "Conductivity sensor (TDS) for water quality"
-            }
-          },
-          "sanitizer": {
-            "title": "Sanitizer",
-            "description": "Choose the sanitizer mode.",
-            "submit": "Continue",
-            "data": {
-              "sanitizer_mode": "Sanitizer mode"
-            },
-            "data_description": {
-              "sanitizer_mode": "Chlorine = classic dosing, Saltwater = salt chlorinator, Mixed = both"
-            }
-          },
+          "switches": "Switches & power",
+          "water_quality": "Water quality",
+          "sanitizer": "Sanitizer",
+          "climate": "Temperature control",
+          "frost": "Frost protection",
+          "calendars": "Calendars & quiet times",
+          "filter": "Filter settings",
+          "durations": "Durations",
+          "pv": "PV surplus",
+          "costs": "Electricity costs",
+          "all": "Guided setup (all steps)"
+        }
+      },
+      "basic": {
+        "title": "Settings",
+        "description": "General settings. Changes are stored in the config entry options.",
+        "submit": "Continue",
+        "data": {
+          "name": "Pool name",
+          "water_volume": "Water volume (liters)",
+          "demo_mode": "Demo mode"
+        },
+        "data_description": {
+          "name": "Display name for this pool installation",
+          "water_volume": "Water volume in liters (used for dosing and heating time calculations)",
+          "demo_mode": "Demo mode: does not switch real devices (for testing only)"
+        }
+      },
+      "switches": {
+        "title": "Switches & power",
+        "description": "Update switches and power sensors. Tip: set a separate pump switch only if you really have two different entities (power supply vs circulation pump).",
+        "submit": "Continue",
+        "data": {
+          "main_switch": "Main switch",
+          "pump_switch": "Pump switch (optional)",
+          "filter_switch": "Filter switch (optional)",
+          "enable_aux_heating": "Enable auxiliary heating",
+          "aux_heating_switch": "Auxiliary heater switch",
+          "main_power_sensor": "Main power sensor",
+          "aux_power_sensor": "Aux heater power sensor"
+        },
+        "data_description": {
+          "main_switch": "Main power / supply switch for the pool (required)",
+          "pump_switch": "Optional: dedicated circulation/pump switch (leave empty to use main switch)",
+          "filter_switch": "Optional: separate switch for filter pump (leave empty to use main switch)",
+          "enable_aux_heating": "Enables auxiliary heater for faster heating",
+          "aux_heating_switch": "Switch for electric auxiliary heater",
+          "main_power_sensor": "Main pump power sensor in watts",
+          "aux_power_sensor": "Heater power sensor in watts"
+        }
+      },
+      "water_quality": {
+        "title": "Water quality",
+        "description": "Update sensor mapping for temperature and (optionally) chemistry.",
+        "submit": "Continue",
+        "data": {
+          "temp_water_sensor": "Water temperature",
+          "ph_sensor": "pH sensor",
+          "chlorine_sensor": "Chlorine (redox) sensor",
+          "salt_sensor": "Salt sensor",
+          "tds_sensor": "Conductivity sensor"
+        },
+        "data_description": {
+          "temp_water_sensor": "Pool water temperature sensor (required)",
+          "ph_sensor": "pH value sensor (Blueriiot or similar)",
+          "chlorine_sensor": "Redox sensor for chlorine measurement in mV",
+          "salt_sensor": "Salt content sensor for saltwater pools",
+          "tds_sensor": "Conductivity sensor (TDS) for water quality"
+        }
+      },
+      "sanitizer": {
+        "title": "Sanitizer",
+        "description": "Choose how the pool is sanitized.",
+        "submit": "Continue",
         "data": {
           "sanitizer_mode": "Sanitizer mode"
         },
@@ -649,5 +657,4 @@
       }
     }
   }
-}
 }

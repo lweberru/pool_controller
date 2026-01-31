@@ -149,6 +149,7 @@
                 "data_description": {
                     "pool_calendar": "Kalender mit Pool-Events (startet automatisch Baden-Modus bei Terminen)",
                     "holiday_calendar": "Feiertagskalender (nutzt Wochenend-Ruhezeiten an Feiertagen)",
+                    "enable_event_weather_guard": "Wenn aktiviert, prüft der Controller die Wettervorhersage und überspringt Vorheizen/Ereignisstart bei Regenwahrscheinlichkeit",
                     "event_weather_entity": "Wetter-Entity, die weather.get_forecasts (stündlich) unterstützt",
                     "event_rain_probability": "Wenn die Regenwahrscheinlichkeit während des Events >= diesem Wert ist, wird das Event blockiert",
                     "quiet_time_start": "Beginn der Ruhezeit an Wochentagen (z.B. 22:00)",

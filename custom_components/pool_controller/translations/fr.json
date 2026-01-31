@@ -175,6 +175,9 @@
                 },
                 "data_description": {
                     "pool_calendar": "Calendrier avec événements piscine (démarre automatiquement le mode baignade)",
+                    "holiday_calendar": "Calendrier des jours fériés (utilise les heures calmes de week‑end les jours fériés)",
+                    "enable_event_weather_guard": "Si activé, le contrôleur vérifie la météo et saute le préchauffage/début d’événement si la pluie est probable",
+                    "event_weather_entity": "Entité météo qui supporte weather.get_forecasts (horaire)",
                     "event_rain_probability": "Si la probabilité de pluie pendant l’événement >= cette valeur, l’événement est bloqué",
                     "quiet_time_start": "Début des heures calmes en semaine (ex. 22:00)",
                     "quiet_time_end": "Fin des heures calmes en semaine (ex. 07:00)",
