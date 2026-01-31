@@ -1370,6 +1370,22 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             solar_to_load_kwh_yearly = self._get_float(conf.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_YEARLY))
             total_load_kwh = self._get_float(conf.get(CONF_TOTAL_LOAD_ENERGY_ENTITY))
 
+            # Optional pool-specific energy sensors (kWh)
+            pool_energy_kwh = self._get_float(conf.get(CONF_POOL_ENERGY_ENTITY))
+            pool_energy_kwh_daily = self._get_float(conf.get(CONF_POOL_ENERGY_ENTITY_DAILY))
+            pool_energy_kwh_monthly = self._get_float(conf.get(CONF_POOL_ENERGY_ENTITY_MONTHLY))
+            pool_energy_kwh_yearly = self._get_float(conf.get(CONF_POOL_ENERGY_ENTITY_YEARLY))
+
+            # If pool-specific energy sensors are provided, prefer them over whole-house values
+            if pool_energy_kwh is not None:
+                grid_to_load_kwh = pool_energy_kwh
+            if pool_energy_kwh_daily is not None:
+                grid_to_load_kwh_daily = pool_energy_kwh_daily
+            if pool_energy_kwh_monthly is not None:
+                grid_to_load_kwh_monthly = pool_energy_kwh_monthly
+            if pool_energy_kwh_yearly is not None:
+                grid_to_load_kwh_yearly = pool_energy_kwh_yearly
+
             # Derive month/year totals from daily sensors when not provided
             derived_changed = False
             if grid_to_load_kwh_daily is not None and (grid_to_load_kwh_monthly is None or grid_to_load_kwh_yearly is None):

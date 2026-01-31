@@ -82,7 +82,11 @@
             "climate": {
                 "title": "Temperaturregelung",
                 "description": "Thermostat-Grenzen und Hysterese einstellen. Der Sollwert wird nach Änderung in den Optionen gespeichert.",
-                "submit": "Weiter",
+                    "total_load_energy_entity": "Gesamtverbrauch Energie (kWh)",
+                    "pool_energy_entity": "Pool-Energie (kWh)",
+                    "pool_energy_entity_daily": "Pool-Energie (täglich kWh)",
+                    "pool_energy_entity_monthly": "Pool-Energie (monatlich kWh)",
+                    "pool_energy_entity_yearly": "Pool-Energie (jährlich kWh)"
                 "data": {
                     "target_temp": "Initiale Zieltemperatur",
                     "min_temp": "Minimum-Temperatur",
@@ -98,7 +102,11 @@
                     "min_temp": "Minimaler einstellbarer Sollwert",
                     "max_temp": "Maximaler einstellbarer Sollwert",
                     "target_temp_step": "Schrittweite für das Setzen der Zieltemperatur",
-                    "heater_base_power_w": "Basis-Heizanteil (z.B. Pumpen-Abwärme) für die Vorheiz-Zeitberechnung.",
+                    "total_load_energy_entity": "Gesamtverbrauch (kWh) für den Zeitraum (optional, rein informativ)",
+                    "pool_energy_entity": "Pool-spezifische Gesamtenergie (kWh). Wenn gesetzt, wird sie statt Haus-Last verwendet.",
+                    "pool_energy_entity_daily": "Pool-Energie (kWh) für den Tag (optional; bevorzugt für Pool-Kosten)",
+                    "pool_energy_entity_monthly": "Pool-Energie (kWh) für den Monat (optional; wird aus täglich abgeleitet)",
+                    "pool_energy_entity_yearly": "Pool-Energie (kWh) für das Jahr (optional; wird aus täglich abgeleitet)"
                     "heater_aux_power_w": "Nennleistung der Zusatzheizung (W) für die Vorheiz-Zeitberechnung (wenn Zusatzheizung aktiviert ist). Gesamt = Basis + Zusatz.",
                     "cold_tolerance": "Heizung startet, wenn Wassertemperatur unter Ziel minus diesem Wert liegt",
                     "hot_tolerance": "Heizung stoppt, wenn Wassertemperatur bei/über Ziel plus diesem Wert liegt"

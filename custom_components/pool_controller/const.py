@@ -59,6 +59,12 @@ CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_MONTHLY = "solar_to_load_energy_entity_monthly"
 CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_YEARLY = "solar_to_load_energy_entity_yearly"
 CONF_TOTAL_LOAD_ENERGY_ENTITY = "total_load_energy_entity"
 
+# Optional pool-specific energy (kWh) sensors for cost calculations
+CONF_POOL_ENERGY_ENTITY = "pool_energy_entity"
+CONF_POOL_ENERGY_ENTITY_DAILY = "pool_energy_entity_daily"
+CONF_POOL_ENERGY_ENTITY_MONTHLY = "pool_energy_entity_monthly"
+CONF_POOL_ENERGY_ENTITY_YEARLY = "pool_energy_entity_yearly"
+
 # Heating power used for preheat time estimation (watts).
 # Do NOT derive this from a live pump power sensor.
 CONF_HEATER_POWER_W = "heater_power_w"

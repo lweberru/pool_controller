@@ -122,7 +122,11 @@
           "solar_to_load_energy_entity_daily": "Solar to load energy (daily kWh)",
           "solar_to_load_energy_entity_monthly": "Solar to load energy (monthly kWh)",
           "solar_to_load_energy_entity_yearly": "Solar to load energy (yearly kWh)",
-          "total_load_energy_entity": "Total load energy (kWh)"
+          "total_load_energy_entity": "Total load energy (kWh)",
+          "pool_energy_entity": "Pool energy (kWh)",
+          "pool_energy_entity_daily": "Pool energy (daily kWh)",
+          "pool_energy_entity_monthly": "Pool energy (monthly kWh)",
+          "pool_energy_entity_yearly": "Pool energy (yearly kWh)"
         },
         "data_description": {
           "electricity_price": "Fixed electricity price used for cost estimation (currency per kWh)",
@@ -138,7 +142,11 @@
           "solar_to_load_energy_entity_daily": "Energy (kWh) supplied from solar to house/load for the day",
           "solar_to_load_energy_entity_monthly": "Energy (kWh) supplied from solar to house/load for the month (optional; auto-derived from daily if empty)",
           "solar_to_load_energy_entity_yearly": "Energy (kWh) supplied from solar to house/load for the year (optional; auto-derived from daily if empty)",
-          "total_load_energy_entity": "Total load energy (kWh) for the period (optional, informational)"
+          "total_load_energy_entity": "Total load energy (kWh) for the period (optional, informational)",
+          "pool_energy_entity": "Pool-specific energy total (kWh). If set, used instead of whole-house grid energy.",
+          "pool_energy_entity_daily": "Pool energy (kWh) for the day (optional; preferred for pool-only cost)",
+          "pool_energy_entity_monthly": "Pool energy (kWh) for the month (optional; auto-derived from daily if empty)",
+          "pool_energy_entity_yearly": "Pool energy (kWh) for the year (optional; auto-derived from daily if empty)"
         }
       },
       "frost": {

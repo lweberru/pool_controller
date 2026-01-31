@@ -2,6 +2,9 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.3.7] - 2026-01-31
+- Add pool-specific energy inputs for costs (use pool kWh instead of whole-house sensors).
+
 ## [2.3.6] - 2026-01-30
 - Make daily cost sensors time-weighted and monotonic within the day (tariff applied at time of consumption).
 - Derive monthly/yearly costs from daily totals to avoid tariff retroactive changes.

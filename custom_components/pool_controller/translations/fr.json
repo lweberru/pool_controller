@@ -82,7 +82,11 @@
             "climate": {
                 "title": "Contrôle de température",
                 "description": "Réglages thermostat/hystérésis. La consigne est enregistrée dans les options après modification.",
-                "submit": "Continuer",
+                    "total_load_energy_entity": "Énergie totale de charge (kWh)",
+                    "pool_energy_entity": "Énergie piscine (kWh)",
+                    "pool_energy_entity_daily": "Énergie piscine (kWh quotidien)",
+                    "pool_energy_entity_monthly": "Énergie piscine (kWh mensuel)",
+                    "pool_energy_entity_yearly": "Énergie piscine (kWh annuel)"
                 "data": {
                     "target_temp": "Température cible initiale",
                     "min_temp": "Température minimale",
@@ -98,7 +102,11 @@
                     "min_temp": "Consigne minimale disponible",
                     "max_temp": "Consigne maximale disponible",
                     "target_temp_step": "Pas pour régler la consigne",
-                    "heater_base_power_w": "Apport de base pendant la circulation (p. ex. chaleur résiduelle). Utilisé pour la pré‑chauffe.",
+                    "total_load_energy_entity": "Énergie totale de charge (kWh) pour la période (optionnel, informatif)",
+                    "pool_energy_entity": "Énergie totale spécifique à la piscine (kWh). Si défini, elle remplace la charge maison.",
+                    "pool_energy_entity_daily": "Énergie piscine (kWh) pour la journée (optionnel ; préféré pour les coûts piscine)",
+                    "pool_energy_entity_monthly": "Énergie piscine (kWh) pour le mois (optionnel ; dérivé du quotidien si vide)",
+                    "pool_energy_entity_yearly": "Énergie piscine (kWh) pour l’année (optionnel ; dérivé du quotidien si vide)"
                     "heater_aux_power_w": "Puissance nominale du chauffage auxiliaire (W). Utilisée pour la pré‑chauffe lorsque l’auxiliaire est activé. Total = base + aux.",
                     "cold_tolerance": "Le chauffage démarre lorsque la température de l’eau est en dessous de la consigne moins cette valeur",
                     "hot_tolerance": "Le chauffage s’arrête lorsque la température de l’eau est à ou au‑dessus de la consigne plus cette valeur"

@@ -125,6 +125,11 @@ def _costs_schema(curr: dict | None = None):
     solar_load_yearly_default = c.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_YEARLY) if c.get(CONF_SOLAR_TO_LOAD_ENERGY_ENTITY_YEARLY) else None
     total_load_default = c.get(CONF_TOTAL_LOAD_ENERGY_ENTITY) if c.get(CONF_TOTAL_LOAD_ENERGY_ENTITY) else None
 
+    pool_energy_default = c.get(CONF_POOL_ENERGY_ENTITY) if c.get(CONF_POOL_ENERGY_ENTITY) else None
+    pool_energy_daily_default = c.get(CONF_POOL_ENERGY_ENTITY_DAILY) if c.get(CONF_POOL_ENERGY_ENTITY_DAILY) else None
+    pool_energy_monthly_default = c.get(CONF_POOL_ENERGY_ENTITY_MONTHLY) if c.get(CONF_POOL_ENERGY_ENTITY_MONTHLY) else None
+    pool_energy_yearly_default = c.get(CONF_POOL_ENERGY_ENTITY_YEARLY) if c.get(CONF_POOL_ENERGY_ENTITY_YEARLY) else None
+
     schema[
         vol.Optional(CONF_GRID_TO_LOAD_ENERGY_ENTITY, default=grid_load_default)
         if grid_load_default is not None
@@ -183,6 +188,30 @@ def _costs_schema(curr: dict | None = None):
         vol.Optional(CONF_TOTAL_LOAD_ENERGY_ENTITY, default=total_load_default)
         if total_load_default is not None
         else vol.Optional(CONF_TOTAL_LOAD_ENERGY_ENTITY)
+    ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
+
+    schema[
+        vol.Optional(CONF_POOL_ENERGY_ENTITY, default=pool_energy_default)
+        if pool_energy_default is not None
+        else vol.Optional(CONF_POOL_ENERGY_ENTITY)
+    ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
+
+    schema[
+        vol.Optional(CONF_POOL_ENERGY_ENTITY_DAILY, default=pool_energy_daily_default)
+        if pool_energy_daily_default is not None
+        else vol.Optional(CONF_POOL_ENERGY_ENTITY_DAILY)
+    ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
+
+    schema[
+        vol.Optional(CONF_POOL_ENERGY_ENTITY_MONTHLY, default=pool_energy_monthly_default)
+        if pool_energy_monthly_default is not None
+        else vol.Optional(CONF_POOL_ENERGY_ENTITY_MONTHLY)
+    ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
+
+    schema[
+        vol.Optional(CONF_POOL_ENERGY_ENTITY_YEARLY, default=pool_energy_yearly_default)
+        if pool_energy_yearly_default is not None
+        else vol.Optional(CONF_POOL_ENERGY_ENTITY_YEARLY)
     ] = selector.EntitySelector(selector.EntitySelectorConfig(domain=["sensor"]))
 
     return vol.Schema(schema)
