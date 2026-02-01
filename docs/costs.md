@@ -2,6 +2,8 @@
 
 This section explains how the integration calculates costs, which sensors are relevant, and what matters with dynamic electricity prices.
 
+The goal of this part of the integration is to make the pool’s (sometimes significant) electricity costs visible and to quantify the impact of a PV system and PV‑aligned pool operation. The credit system contributes to cost reduction by merging and shifting runs, while scheduled bathing with preheat still ensures the desired target temperature is reached on time.
+
 ## Basics
 
 Costs are based on **energy (kWh)** × **electricity price (€/kWh)**. The price can be **fixed** or **dynamic**:
