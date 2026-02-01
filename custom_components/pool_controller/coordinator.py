@@ -562,7 +562,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
         try:
             last_saved = self._derived_energy_last_saved
-            if last_saved and (now - last_saved).total_seconds() < 5 * 60:
+            if last_saved and (now - last_saved).total_seconds() < 30:
                 return
         except Exception:
             pass
@@ -602,7 +602,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
         try:
             last_saved = self._cost_persist_last_saved
-            if last_saved and (now - last_saved).total_seconds() < 5 * 60:
+            if last_saved and (now - last_saved).total_seconds() < 30:
                 return
         except Exception:
             pass
