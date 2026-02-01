@@ -16,7 +16,7 @@ The integration uses a guided wizard (9–10 steps depending on sanitizer mode):
 - **Pump Switch**: Circulation pump (optional; if omitted, the integration uses the main switch)
 - **Auxiliary Heating Switch**: Secondary heater (optional)
 - **Power Sensors**:
-  - Main power sensor (kW) for heating calculations
+  - Main power sensor (W) for heating calculations
   - Auxiliary power sensor (optional)
 
 ### Step 3: Water Quality Sensors (Optional)
@@ -77,6 +77,18 @@ pool_controller:
 - **PV Surplus Sensor**: Entity measuring excess solar production (W)
 - **PV ON Threshold**: Turns pump/heating on when PV power >= threshold (default: 1000W)
 - **PV OFF Threshold**: Turns pump/heating off when PV power <= threshold (default: 500W)
+- **PV Smoothing Window**: Exponential smoothing window (seconds)
+- **PV Stability Window**: How long the smoothed value must persist before a state change (seconds)
+- **PV Minimum Run**: Minimum run time after an automatic PV start (minutes)
+
+### Step 10: Electricity Costs
+- **Electricity Price**: Fixed price (per kWh)
+- **Electricity Price Entity**: Dynamic price entity (overrides fixed price)
+- **Feed-in Tariff**: Fixed export tariff (per kWh)
+- **Feed-in Tariff Entity**: Dynamic export tariff entity (overrides fixed tariff)
+- **Pool Energy (Base/Aux)**: Total kWh counters (required for cost tracking)
+- **Pool Energy (Base/Aux Daily)**: Optional daily kWh sensors
+- **Solar Energy Daily**: Optional daily solar kWh allocated to the pool (used for net cost)
 
 ## Configuration Options & Defaults
 
@@ -110,5 +122,17 @@ pool_controller:
 | Quick Chlorine Duration | 5 | 1-30 min | Duration of chlorine boost |
 | PV ON Threshold | 1000 | 0-20000 W | Enable PV operation above this surplus |
 | PV OFF Threshold | 500 | 0-20000 W | Disable PV operation below this surplus |
+| PV Smoothing Window | 60 | 0-3600 s | Exponential smoothing window (0 disables) |
+| PV Stability Window | 120 | 0-86400 s | Required stability before a state change |
+| PV Minimum Run | 10 | 0-1440 min | Minimum run time after PV start |
+| Electricity Price | 0.30 | 0-5 | Fixed price (currency per kWh) |
+| Electricity Price Entity | - | sensor/input_number | Dynamic price entity (overrides fixed) |
+| Feed-in Tariff | 0.08 | 0-5 | Fixed export tariff (currency per kWh) |
+| Feed-in Tariff Entity | - | sensor/input_number | Dynamic tariff entity (overrides fixed) |
+| Pool Energy Base | - | sensor | Total kWh counter for base load |
+| Pool Energy Aux | - | sensor | Total kWh counter for aux heater |
+| Pool Energy Base Daily | - | sensor | Daily kWh sensor for base load |
+| Pool Energy Aux Daily | - | sensor | Daily kWh sensor for aux heater |
+| Solar Energy Daily | - | sensor | Daily solar kWh allocated to the pool |
 
-All duration settings can be overridden per operation via **Services**.
+All duration settings can be overridden per operation via **Actions**.

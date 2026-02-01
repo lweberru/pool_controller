@@ -8,13 +8,16 @@
 automation:
   - alias: "Heat pool for weekend bathing"
     trigger:
-      time: "14:00"
+      - platform: time
+        at: "14:00"
     condition:
       - condition: time
         weekday: [fri]
     action:
-      - service: pool_controller.start_bathing
+      - action: pool_controller.start_bathing
         data:
+          target:
+            entity_id: climate.my_pool
           duration_minutes: 180  # 3-hour session
 ```
 
@@ -24,13 +27,16 @@ automation:
 automation:
   - alias: "Pause on low chlorine alert"
     trigger:
-      entity_id: binary_sensor.pool_low_chlor
-      to: "on"
+      - platform: state
+        entity_id: binary_sensor.my_pool_low_chlor
+        to: "on"
     action:
-      - service: pool_controller.start_pause
+      - action: pool_controller.start_pause
         data:
+          target:
+            entity_id: climate.my_pool
           duration_minutes: 60
-      - notify.send_message:
+      - action: notify.send_message
           message: "Pool paused - chlorine too low!"
 ```
 
@@ -40,12 +46,15 @@ automation:
 automation:
   - alias: "Extra filter on high temp days"
     trigger:
-      numeric_state:
-        entity_id: sensor.pool_ph_value
+      - platform: numeric_state
+        entity_id: climate.my_pool
+        attribute: current_temperature
         above: 30  # Above 30°C
     action:
-      - service: pool_controller.start_filter
+      - action: pool_controller.start_filter
         data:
+          target:
+            entity_id: climate.my_pool
           duration_minutes: 120  # Extra 2 hours
 ```
 
@@ -55,13 +64,16 @@ automation:
 automation:
   - alias: "Daily filter cycle"
     trigger:
-      time: "02:00"
+      - platform: time
+        at: "02:00"
     condition:
       - condition: state
-        entity_id: binary_sensor.pool_frost_danger
+        entity_id: binary_sensor.my_pool_frost_danger
         state: "off"
     action:
-      - service: pool_controller.start_filter
+      - action: pool_controller.start_filter
         data:
+          target:
+            entity_id: climate.my_pool
           duration_minutes: 45
 ```
