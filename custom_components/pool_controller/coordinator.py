@@ -1478,7 +1478,15 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     # Net daily cost: prefer solar-adjusted net load if provided; otherwise fall back to gross+loss.
                     if pool_solar_kwh_daily is not None and electricity_price is not None:
                         try:
-                            energy_cost_net_daily = float(max(0.0, float(net_load_kwh_daily))) * float(electricity_price)
+                            if net_load_kwh_daily is not None:
+                                energy_cost_net_daily = float(max(0.0, float(net_load_kwh_daily))) * float(electricity_price)
+                            else:
+                                # Fallback when only total energy sensors are available:
+                                # subtract daily solar kWh at current price from the gross daily cost.
+                                energy_cost_net_daily = max(
+                                    0.0,
+                                    float(energy_cost_daily or 0.0) - float(pool_solar_kwh_daily) * float(electricity_price),
+                                )
                         except Exception:
                             energy_cost_net_daily = float(energy_cost_daily or 0.0) + float(energy_feed_in_loss_daily or 0.0)
                     else:

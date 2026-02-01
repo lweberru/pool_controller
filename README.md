@@ -23,6 +23,7 @@ This repository’s documentation has been split into chapters for easier naviga
 - [Installation & Setup](docs/installation.md)
 - [Configuration](docs/configuration.md)
 - [Sensors, Entities & Controls](docs/entities.md)
+- [Costs & Electricity Prices](docs/costs.md)
 - [Services (Automations & Advanced)](docs/services.md)
 - [Water Quality Monitoring & Disinfection](docs/water-quality.md)
 - [Advanced Features](docs/advanced.md)
