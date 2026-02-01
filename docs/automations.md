@@ -58,7 +58,7 @@ automation:
           duration_minutes: 120  # Extra 2 hours
 ```
 
-## Example 4: Daily maintenance at 2 AM
+## Example 4: Daily filtering at 2 AM
 
 ```yaml
 automation:
