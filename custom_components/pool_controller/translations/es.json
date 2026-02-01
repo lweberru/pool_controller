@@ -638,12 +638,6 @@
             "power_cost_feed_in_loss_per_hour": {
                 "name": "Ingresos de inyección perdidos (por hora)"
             },
-            "energy_cost": {
-                "name": "Coste energético (periodo)"
-            },
-            "energy_cost_net": {
-                "name": "Coste energético (neto, periodo)"
-            },
             "energy_cost_daily": {
                 "name": "Coste energético (diario)"
             },
@@ -652,9 +646,6 @@
             },
             "energy_cost_yearly": {
                 "name": "Coste energético (anual)"
-            },
-            "energy_feed_in_loss": {
-                "name": "Ingreso de inyección perdido (periodo)"
             },
             "energy_feed_in_loss_daily": {
                 "name": "Ingreso de inyección perdido (diario)"

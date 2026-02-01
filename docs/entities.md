@@ -52,12 +52,9 @@ Entity IDs depend on your instance name, but the integration uses stable suffix 
 | `sensor.<pool>_energy_solar_to_load_kwh_monthly` | Float | Solar → load energy (kWh) for the month |
 | `sensor.<pool>_energy_solar_to_load_kwh_yearly` | Float | Solar → load energy (kWh) for the year |
 | `sensor.<pool>_energy_total_load_kwh` | Float | Total load energy (kWh) for the selected period |
-| `sensor.<pool>_energy_cost` | Float | Energy cost for the selected period (based on grid → load energy) |
-| `sensor.<pool>_energy_cost_net` | Float | Net energy cost for the selected period (grid cost + PV opportunity cost) |
 | `sensor.<pool>_energy_cost_daily` | Float | Energy cost for the day (based on grid → load energy) |
 | `sensor.<pool>_energy_cost_monthly` | Float | Energy cost for the month (based on grid → load energy) |
 | `sensor.<pool>_energy_cost_yearly` | Float | Energy cost for the year (based on grid → load energy) |
-| `sensor.<pool>_energy_feed_in_loss` | Float | PV opportunity cost for the selected period (based on solar → load energy) |
 | `sensor.<pool>_energy_feed_in_loss_daily` | Float | PV opportunity cost for the day |
 | `sensor.<pool>_energy_feed_in_loss_monthly` | Float | PV opportunity cost for the month |
 | `sensor.<pool>_energy_feed_in_loss_yearly` | Float | PV opportunity cost for the year |

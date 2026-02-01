@@ -638,12 +638,6 @@
             "power_cost_feed_in_loss_per_hour": {
                 "name": "Entgangene Einspeisevergütung (pro Stunde)"
             },
-            "energy_cost": {
-                "name": "Energiekosten (Zeitraum)"
-            },
-            "energy_cost_net": {
-                "name": "Energiekosten (netto, Zeitraum)"
-            },
             "energy_cost_daily": {
                 "name": "Energiekosten (täglich)"
             },
@@ -652,9 +646,6 @@
             },
             "energy_cost_yearly": {
                 "name": "Energiekosten (jährlich)"
-            },
-            "energy_feed_in_loss": {
-                "name": "Entgangene Einspeisevergütung (Zeitraum)"
             },
             "energy_feed_in_loss_daily": {
                 "name": "Entgangene Einspeisevergütung (täglich)"

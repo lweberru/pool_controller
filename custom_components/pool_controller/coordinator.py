@@ -1414,20 +1414,19 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     cost = None
                 return cost
 
-            energy_cost = _calc_energy_costs(load_kwh)
             energy_cost_daily = _calc_energy_costs(load_kwh_daily)
             energy_cost_monthly = _calc_energy_costs(load_kwh_monthly)
             energy_cost_yearly = _calc_energy_costs(load_kwh_yearly)
-            energy_feed_in_loss = None
             energy_feed_in_loss_daily = None
             energy_feed_in_loss_monthly = None
             energy_feed_in_loss_yearly = None
-            energy_cost_net = energy_cost
             energy_cost_net_daily = _calc_energy_costs(net_load_kwh_daily)
             energy_cost_net_monthly = energy_cost_monthly
             energy_cost_net_yearly = energy_cost_yearly
 
             # Time-weighted cost accumulation (daily reset, monotonic within day)
+            # Prefer daily kWh sensors if provided; otherwise fall back to total kWh sensors
+            # and compute deltas within the current day.
             cost_daily_changed = False
             try:
                 today = dt_util.as_local(now).date()
@@ -1441,25 +1440,28 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 except Exception:
                     last_date = None
 
+            cost_kwh_value = load_kwh_daily if load_kwh_daily is not None else load_kwh
+
             if last_date != today:
                 self._cost_daily_accum = 0.0
                 self._cost_daily_feed_in_loss_accum = 0.0
                 self._cost_daily_date = today.strftime("%Y-%m-%d")
-                self._cost_daily_last_grid_kwh = load_kwh_daily
+                self._cost_daily_last_grid_kwh = cost_kwh_value
                 cost_daily_changed = True
 
-            if load_kwh_daily is not None and self._cost_daily_last_grid_kwh is None:
-                self._cost_daily_last_grid_kwh = load_kwh_daily
+            if cost_kwh_value is not None and self._cost_daily_last_grid_kwh is None:
+                self._cost_daily_last_grid_kwh = cost_kwh_value
                 cost_daily_changed = True
 
             delta_grid = None
-            if load_kwh_daily is not None and self._cost_daily_last_grid_kwh is not None:
+            if cost_kwh_value is not None and self._cost_daily_last_grid_kwh is not None:
                 try:
-                    delta_grid = float(load_kwh_daily) - float(self._cost_daily_last_grid_kwh)
+                    delta_grid = float(cost_kwh_value) - float(self._cost_daily_last_grid_kwh)
                 except Exception:
                     delta_grid = None
                 if delta_grid is not None and delta_grid < 0:
-                    self._cost_daily_last_grid_kwh = load_kwh_daily
+                    # Sensor reset detected; reset baseline for the day
+                    self._cost_daily_last_grid_kwh = cost_kwh_value
                     delta_grid = 0.0
                     cost_daily_changed = True
 
@@ -1467,7 +1469,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 if electricity_price is not None and delta_grid > 0:
                     self._cost_daily_accum = float(self._cost_daily_accum or 0.0) + float(delta_grid) * float(electricity_price)
                     cost_daily_changed = True
-                self._cost_daily_last_grid_kwh = load_kwh_daily
+                self._cost_daily_last_grid_kwh = cost_kwh_value
 
             if self._cost_daily_date is not None:
                 try:
@@ -2512,12 +2514,9 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "power_cost_per_hour": round(float(power_cost_per_hour), 4) if power_cost_per_hour is not None else None,
                 "power_cost_per_hour_net": round(float(power_cost_per_hour_net), 4) if power_cost_per_hour_net is not None else None,
                 "power_cost_feed_in_loss_per_hour": round(float(power_cost_feed_in_loss_per_hour), 4) if power_cost_feed_in_loss_per_hour is not None else None,
-                "energy_cost": round(float(energy_cost), 4) if energy_cost is not None else None,
-                "energy_cost_net": round(float(energy_cost_net), 4) if energy_cost_net is not None else None,
                 "energy_cost_daily": round(float(energy_cost_daily), 4) if energy_cost_daily is not None else None,
                 "energy_cost_monthly": round(float(energy_cost_monthly), 4) if energy_cost_monthly is not None else None,
                 "energy_cost_yearly": round(float(energy_cost_yearly), 4) if energy_cost_yearly is not None else None,
-                "energy_feed_in_loss": round(float(energy_feed_in_loss), 4) if energy_feed_in_loss is not None else None,
                 "energy_feed_in_loss_daily": round(float(energy_feed_in_loss_daily), 4) if energy_feed_in_loss_daily is not None else None,
                 "energy_feed_in_loss_monthly": round(float(energy_feed_in_loss_monthly), 4) if energy_feed_in_loss_monthly is not None else None,
                 "energy_feed_in_loss_yearly": round(float(energy_feed_in_loss_yearly), 4) if energy_feed_in_loss_yearly is not None else None,

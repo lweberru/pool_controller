@@ -59,17 +59,6 @@
       },
       "sanitizer": {
         "title": "Sanitizer",
-        "description": "Choose the sanitizer mode.",
-        "submit": "Continue",
-        "data": {
-          "sanitizer_mode": "Sanitizer mode"
-        },
-        "data_description": {
-          "sanitizer_mode": "Chlorine = classic dosing, Saltwater = salt chlorinator, Mixed = both"
-        }
-      },
-      "sanitizer": {
-        "title": "Sanitizer",
         "description": "Choose how the pool is sanitized. For saltwater or mixed operation, you will be asked for a target salt level.",
         "submit": "Continue",
         "data": {
@@ -573,12 +562,9 @@
       "power_cost_per_hour": { "name": "Power cost (per hour)" },
       "power_cost_per_hour_net": { "name": "Power cost (net per hour)" },
       "power_cost_feed_in_loss_per_hour": { "name": "Lost feed-in revenue (per hour)" },
-      "energy_cost": { "name": "Energy cost (period)" },
-      "energy_cost_net": { "name": "Energy cost (net, period)" },
       "energy_cost_daily": { "name": "Energy cost (daily)" },
       "energy_cost_monthly": { "name": "Energy cost (monthly)" },
       "energy_cost_yearly": { "name": "Energy cost (yearly)" },
-      "energy_feed_in_loss": { "name": "Lost feed-in revenue (period)" },
       "energy_feed_in_loss_daily": { "name": "Lost feed-in revenue (daily)" },
       "energy_feed_in_loss_monthly": { "name": "Lost feed-in revenue (monthly)" },
       "energy_feed_in_loss_yearly": { "name": "Lost feed-in revenue (yearly)" },
