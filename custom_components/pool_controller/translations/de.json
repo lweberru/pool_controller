@@ -630,22 +630,22 @@
                 "name": "Einspeisevergütung (pro kWh)"
             },
             "power_cost_per_hour": {
-                "name": "Stromkosten (pro Stunde)"
+                "name": "Stromkosten (brutto pro Stunde)"
             },
             "power_cost_per_hour_net": {
-                "name": "Stromkosten (netto pro Stunde)"
+                "name": "Stromkosten (netto, PV-Abzug pro Stunde)"
             },
             "power_cost_feed_in_loss_per_hour": {
                 "name": "Entgangene Einspeisevergütung (pro Stunde)"
             },
             "energy_cost_daily": {
-                "name": "Energiekosten (täglich)"
+                "name": "Energiekosten (brutto, täglich)"
             },
             "energy_cost_monthly": {
-                "name": "Energiekosten (monatlich)"
+                "name": "Energiekosten (brutto, monatlich)"
             },
             "energy_cost_yearly": {
-                "name": "Energiekosten (jährlich)"
+                "name": "Energiekosten (brutto, jährlich)"
             },
             "energy_feed_in_loss_daily": {
                 "name": "Entgangene Einspeisevergütung (täglich)"
@@ -657,13 +657,13 @@
                 "name": "Entgangene Einspeisevergütung (jährlich)"
             },
             "energy_cost_net_daily": {
-                "name": "Energiekosten (netto, täglich)"
+                "name": "Energiekosten (netto, PV-Abzug, täglich)"
             },
             "energy_cost_net_monthly": {
-                "name": "Energiekosten (netto, monatlich)"
+                "name": "Energiekosten (netto, PV-Abzug, monatlich)"
             },
             "energy_cost_net_yearly": {
-                "name": "Energiekosten (netto, jährlich)"
+                "name": "Energiekosten (netto, PV-Abzug, jährlich)"
             },
             "heat_loss_w_per_c": {
                 "name": "Wärmeverlust-Koeffizient (W/°C)"

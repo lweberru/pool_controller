@@ -40,12 +40,12 @@ For cost calculation, the integration prefers daily kWh sensors (if configured).
 - `sensor.<pool>_energy_feed_in_loss_yearly`
 
 **Instant values (for reference):**
-- `sensor.<pool>_power_cost_per_hour` (gross)
-- `sensor.<pool>_power_cost_per_hour_net` (net, PV accounted for)
+- `sensor.<pool>_power_cost_per_hour` (gross, no PV credit)
+- `sensor.<pool>_power_cost_per_hour_net` (net, PV deducted)
 
 ## Net vs. Gross
 
-- **Gross cost**: grid energy × price.
+- **Gross cost**: grid energy × price (no PV credit applied).
 - **Net cost**: gross minus PV share (if `solar_energy_entity_daily` is configured).
 
 **Fallback:** If no daily load sensors exist, the PV share is approximated as

@@ -630,22 +630,22 @@
                 "name": "Tarif d’injection (par kWh)"
             },
             "power_cost_per_hour": {
-                "name": "Coût électrique (par heure)"
+                "name": "Coût électrique (brut par heure)"
             },
             "power_cost_per_hour_net": {
-                "name": "Coût électrique (net par heure)"
+                "name": "Coût électrique (net, PV déduite par heure)"
             },
             "power_cost_feed_in_loss_per_hour": {
                 "name": "Revenu d’injection perdu (par heure)"
             },
             "energy_cost_daily": {
-                "name": "Coût énergétique (quotidien)"
+                "name": "Coût énergétique (brut, quotidien)"
             },
             "energy_cost_monthly": {
-                "name": "Coût énergétique (mensuel)"
+                "name": "Coût énergétique (brut, mensuel)"
             },
             "energy_cost_yearly": {
-                "name": "Coût énergétique (annuel)"
+                "name": "Coût énergétique (brut, annuel)"
             },
             "energy_feed_in_loss_daily": {
                 "name": "Revenu d’injection perdu (quotidien)"
@@ -657,13 +657,13 @@
                 "name": "Revenu d’injection perdu (annuel)"
             },
             "energy_cost_net_daily": {
-                "name": "Coût énergétique (net, quotidien)"
+                "name": "Coût énergétique (net, PV déduite, quotidien)"
             },
             "energy_cost_net_monthly": {
-                "name": "Coût énergétique (net, mensuel)"
+                "name": "Coût énergétique (net, PV déduite, mensuel)"
             },
             "energy_cost_net_yearly": {
-                "name": "Coût énergétique (net, annuel)"
+                "name": "Coût énergétique (net, PV déduite, annuel)"
             },
             "heat_loss_w_per_c": {
                 "name": "Coefficient de perte de chaleur (W/°C)"

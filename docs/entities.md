@@ -52,15 +52,15 @@ Entity IDs depend on your instance name, but the integration uses stable suffix 
 | `sensor.<pool>_energy_solar_to_load_kwh_monthly` | Float | Solar → load energy (kWh) for the month |
 | `sensor.<pool>_energy_solar_to_load_kwh_yearly` | Float | Solar → load energy (kWh) for the year |
 | `sensor.<pool>_energy_total_load_kwh` | Float | Total load energy (kWh) for the selected period |
-| `sensor.<pool>_energy_cost_daily` | Float | Energy cost for the day (based on grid → load energy) |
-| `sensor.<pool>_energy_cost_monthly` | Float | Energy cost for the month (based on grid → load energy) |
-| `sensor.<pool>_energy_cost_yearly` | Float | Energy cost for the year (based on grid → load energy) |
+| `sensor.<pool>_energy_cost_daily` | Float | Gross energy cost for the day (grid → load, no PV credit) |
+| `sensor.<pool>_energy_cost_monthly` | Float | Gross energy cost for the month (grid → load, no PV credit) |
+| `sensor.<pool>_energy_cost_yearly` | Float | Gross energy cost for the year (grid → load, no PV credit) |
 | `sensor.<pool>_energy_feed_in_loss_daily` | Float | PV opportunity cost for the day |
 | `sensor.<pool>_energy_feed_in_loss_monthly` | Float | PV opportunity cost for the month |
 | `sensor.<pool>_energy_feed_in_loss_yearly` | Float | PV opportunity cost for the year |
-| `sensor.<pool>_energy_cost_net_daily` | Float | Net energy cost for the day |
-| `sensor.<pool>_energy_cost_net_monthly` | Float | Net energy cost for the month |
-| `sensor.<pool>_energy_cost_net_yearly` | Float | Net energy cost for the year |
+| `sensor.<pool>_energy_cost_net_daily` | Float | Net energy cost for the day (PV deducted) |
+| `sensor.<pool>_energy_cost_net_monthly` | Float | Net energy cost for the month (PV deducted) |
+| `sensor.<pool>_energy_cost_net_yearly` | Float | Net energy cost for the year (PV deducted) |
 | `sensor.<pool>_heat_loss_w_per_c` | Float | Learned heat loss coefficient (W/°C) |
 | `sensor.<pool>_heat_startup_offset_minutes` | Float | Learned heating startup delay (minutes) |
 | `sensor.<pool>_sanitizer_mode` | Enum | Disinfection style: `chlorine`, `saltwater`, `mixed` |

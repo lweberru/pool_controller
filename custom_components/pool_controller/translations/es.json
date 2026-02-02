@@ -630,22 +630,22 @@
                 "name": "Tarifa de inyección (por kWh)"
             },
             "power_cost_per_hour": {
-                "name": "Coste eléctrico (por hora)"
+                "name": "Coste eléctrico (bruto por hora)"
             },
             "power_cost_per_hour_net": {
-                "name": "Coste eléctrico (neto por hora)"
+                "name": "Coste eléctrico (neto, PV descontado por hora)"
             },
             "power_cost_feed_in_loss_per_hour": {
                 "name": "Ingresos de inyección perdidos (por hora)"
             },
             "energy_cost_daily": {
-                "name": "Coste energético (diario)"
+                "name": "Coste energético (bruto, diario)"
             },
             "energy_cost_monthly": {
-                "name": "Coste energético (mensual)"
+                "name": "Coste energético (bruto, mensual)"
             },
             "energy_cost_yearly": {
-                "name": "Coste energético (anual)"
+                "name": "Coste energético (bruto, anual)"
             },
             "energy_feed_in_loss_daily": {
                 "name": "Ingreso de inyección perdido (diario)"
@@ -657,13 +657,13 @@
                 "name": "Ingreso de inyección perdido (anual)"
             },
             "energy_cost_net_daily": {
-                "name": "Coste energético (neto, diario)"
+                "name": "Coste energético (neto, PV descontado, diario)"
             },
             "energy_cost_net_monthly": {
-                "name": "Coste energético (neto, mensual)"
+                "name": "Coste energético (neto, PV descontado, mensual)"
             },
             "energy_cost_net_yearly": {
-                "name": "Coste energético (neto, anual)"
+                "name": "Coste energético (neto, PV descontado, anual)"
             },
             "heat_loss_w_per_c": {
                 "name": "Coeficiente de pérdida de calor (W/°C)"
