@@ -42,16 +42,6 @@ Entity IDs depend on your instance name, but the integration uses stable suffix 
 | `sensor.<pool>_power_cost_per_hour` | Float | Instantaneous power cost (per hour) |
 | `sensor.<pool>_power_cost_per_hour_net` | Float | Instantaneous net power cost (per hour; PV surplus deducted) |
 | `sensor.<pool>_power_cost_feed_in_loss_per_hour` | Float | Instantaneous lost feed-in revenue (per hour) |
-| `sensor.<pool>_energy_grid_to_load_kwh` | Float | Grid → load energy (kWh) for the selected period (from utility meter or energy sensor) |
-| `sensor.<pool>_energy_grid_to_load_kwh_daily` | Float | Grid → load energy (kWh) for the day |
-| `sensor.<pool>_energy_grid_to_load_kwh_monthly` | Float | Grid → load energy (kWh) for the month |
-| `sensor.<pool>_energy_grid_to_load_kwh_yearly` | Float | Grid → load energy (kWh) for the year |
-| `sensor.<pool>_energy_solar_to_grid_kwh` | Float | Solar → grid energy (kWh) for the selected period |
-| `sensor.<pool>_energy_solar_to_load_kwh` | Float | Solar → load energy (kWh) for the selected period |
-| `sensor.<pool>_energy_solar_to_load_kwh_daily` | Float | Solar → load energy (kWh) for the day |
-| `sensor.<pool>_energy_solar_to_load_kwh_monthly` | Float | Solar → load energy (kWh) for the month |
-| `sensor.<pool>_energy_solar_to_load_kwh_yearly` | Float | Solar → load energy (kWh) for the year |
-| `sensor.<pool>_energy_total_load_kwh` | Float | Total load energy (kWh) for the selected period |
 | `sensor.<pool>_energy_cost_daily` | Float | Gross energy cost for the day (grid → load, no PV credit) |
 | `sensor.<pool>_energy_cost_monthly` | Float | Gross energy cost for the month (grid → load, no PV credit) |
 | `sensor.<pool>_energy_cost_yearly` | Float | Gross energy cost for the year (grid → load, no PV credit) |
