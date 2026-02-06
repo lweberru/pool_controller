@@ -129,6 +129,9 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self._cost_daily_date = None
         self._cost_daily_accum = 0.0
         self._cost_daily_feed_in_loss_accum = 0.0
+        # Net daily cost tracking (non-decreasing within day)
+        self._cost_net_daily_last_value = None
+        self._cost_net_daily_date = None
         self._cost_persist_last_saved = None
         self._cost_persist_snapshot = None
 
@@ -447,6 +450,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             self._cost_daily_feed_in_loss_accum = 0.0
             self._cost_persist_last_saved = None
             self._cost_persist_snapshot = None
+            self._cost_net_daily_last_value = None
+            self._cost_net_daily_date = None
 
             self._derived_cost_daily_last_value = None
             self._derived_cost_daily_last_date = None
@@ -1493,6 +1498,24 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                         energy_cost_net_daily = float(energy_cost_daily or 0.0) + float(energy_feed_in_loss_daily or 0.0)
                 except Exception:
                     pass
+
+            # Net daily cost should not decrease within a day (avoid drops when PV offsets rise).
+            try:
+                today = dt_util.as_local(now).date()
+                if getattr(self, "_cost_net_daily_date", None) != today:
+                    self._cost_net_daily_date = today
+                    self._cost_net_daily_last_value = None
+                if energy_cost_net_daily is None:
+                    if self._cost_net_daily_last_value is not None:
+                        energy_cost_net_daily = float(self._cost_net_daily_last_value)
+                else:
+                    current_net = float(energy_cost_net_daily)
+                    if self._cost_net_daily_last_value is None or current_net >= float(self._cost_net_daily_last_value):
+                        self._cost_net_daily_last_value = current_net
+                    else:
+                        energy_cost_net_daily = float(self._cost_net_daily_last_value)
+            except Exception:
+                pass
 
             if cost_daily_changed:
                 try:
