@@ -525,17 +525,21 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
     def __init__(self, config_entry):
         self._config_entry = config_entry
-        self.options = {}
+        self.options = dict(config_entry.options or {})
         self._menu_mode = True
 
     async def async_step_init(self, user_input=None):
         """Entry point: show a chapter menu for quick edits."""
         self._menu_mode = True
+        # Ensure we start from the latest persisted options
+        self.options = dict(self._config_entry.options or {})
         return self._show_options_menu()
 
     async def async_step_menu(self, user_input=None):
         """Menu step: render the options menu."""
         self._menu_mode = True
+        # Keep options in sync when returning to the menu
+        self.options = dict(self._config_entry.options or {})
         return self._show_options_menu()
 
     def _show_options_menu(self):
