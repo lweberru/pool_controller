@@ -2211,7 +2211,9 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                                     self.heat_loss_w_per_c = max(0.0, (1 - alpha) * float(self.heat_loss_w_per_c) + alpha * est_w_per_c)
 
                     # Update startup offset based on how long it takes to see first warming
-                    heat_active = bool(pump_switch_on and (heat_reason not in ("off", "disabled")))
+                    # Use the physical aux heater switch state to avoid relying on heat_reason
+                    # (which may not be initialized yet in this update cycle).
+                    heat_active = bool(pump_switch_on and aux_heating_switch_on)
                     if heat_active and not self._last_heat_active:
                         self._heat_start_ts = now
                         self._heat_start_temp = float(water_temp)
