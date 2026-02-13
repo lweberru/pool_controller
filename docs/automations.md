@@ -76,4 +76,31 @@ automation:
           target:
             entity_id: climate.my_pool
           duration_minutes: 45
+
+## Example 5: Enable Away mode when nobody is home
+
+```yaml
+automation:
+  - alias: "Pool away when house is empty"
+    trigger:
+      - platform: state
+        entity_id: group.family
+        to: "not_home"
+    action:
+      - action: pool_controller.start_away
+        data:
+          target:
+            entity_id: climate.my_pool
+
+  - alias: "Pool normal when someone returns"
+    trigger:
+      - platform: state
+        entity_id: group.family
+        to: "home"
+    action:
+      - action: pool_controller.stop_away
+        data:
+          target:
+            entity_id: climate.my_pool
+```
 ```

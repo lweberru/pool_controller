@@ -98,6 +98,22 @@ data:
     entity_id: climate.my_pool
 ```
 
+## Away mode
+
+```yaml
+# Enable away mode (reduces activity, sets Away temperature)
+action: pool_controller.start_away
+data:
+  target:
+    entity_id: climate.my_pool
+
+# Disable away mode
+action: pool_controller.stop_away
+data:
+  target:
+    entity_id: climate.my_pool
+```
+
 ## Alternative: target by device_id
 
 ```yaml

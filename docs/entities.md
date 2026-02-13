@@ -13,6 +13,7 @@ Entity IDs depend on your instance name, but the integration uses stable suffix 
 | `binary_sensor.<pool>_frost_active` | True when the frost duty-cycle currently requests the pump to run |
 | `binary_sensor.<pool>_in_quiet` | Quiet hours active |
 | `binary_sensor.<pool>_pv_allows` | PV surplus available for operation |
+| `binary_sensor.<pool>_away_active` | Away mode active |
 | `binary_sensor.<pool>_should_main_on` | Power supply should be on |
 | `binary_sensor.<pool>_should_pump_on` | Circulation pump should be on |
 | `binary_sensor.<pool>_main_switch_on` | Physical main switch is currently ON (mirrors the configured external switch state) |
@@ -28,7 +29,7 @@ Entity IDs depend on your instance name, but the integration uses stable suffix 
 
 | Entity | Type | Description |
 |--------|------|-------------|
-| `sensor.<pool>_status` | Enum | Current state: `normal`, `paused`, `frost_protection` |
+| `sensor.<pool>_status` | Enum | Current state: `normal`, `paused`, `frost_protection`, `maintenance`, `away` |
 | `sensor.<pool>_run_reason` | Enum | Why the pool is running right now: `idle`, `bathing`, `chlorine`, `filter`, `preheat`, `pv`, `frost`, `pause`, `maintenance` |
 | `sensor.<pool>_heat_reason` | Enum | Why heating is allowed/active: `off`, `disabled`, `bathing`, `preheat`, `pv` |
 | `sensor.<pool>_run_credit_source` | Enum | Current credit source (if a streak is active) |
@@ -125,7 +126,7 @@ All three timer sensors use **minutes remaining** as their state (unit: `min`).
 
 | Entity | Description |
 |--------|-------------|
-| `climate.<pool>_*` | Pool heater thermostat entity (select this as the controller entity in automations and the dashboard card) |
+| `climate.<pool>_*` | Pool heater thermostat entity (select this as the controller entity in automations and the dashboard card). Presets: Auto, Baden, Chloren, Filtern, Abwesend, Wartung |
 
 ## Buttons & Manual Controls
 
@@ -135,6 +136,8 @@ The integration provides four quick-action buttons (one per topic, using the def
 - `button.<pool>_filter_30` - Start filter cycle (30 min)
 - `button.<pool>_chlorine_5` - Start quick chlorine (5 min)
 - `button.<pool>_pause_60` - Start pause (60 min)
+- `button.<pool>_away_start` - Enable Away mode
+- `button.<pool>_away_stop` - Disable Away mode
 
 ## Status Sensors & Debugging
 

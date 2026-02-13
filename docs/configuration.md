@@ -35,8 +35,14 @@ Pool Controller supports different disinfection styles and adapts some water-qua
 
 ### Step 5: Temperature Control (Thermostat)
 - **Target Temp**: Desired water temperature (persisted)
+- **Away Temperature**: Target temperature used when Away mode is active
 - **Min/Max/Step**: UI bounds for the thermostat entity
 - **Tolerances**: Simple hysteresis (cold/hot tolerance)
+
+**Away mode behavior**:
+- Sets the target temperature to **Away Temperature**
+- Stops manual timers and pause
+- Keeps automatic filtering and frost protection active
 
 ### Step 6: Frost Protection
 - **Outdoor Temperature Sensor**: For frost protection logic
@@ -114,6 +120,7 @@ pool_controller:
 | Frost Severe Run | 10 | 0-240 min | Run time within the severe interval (minutes) |
 | Quiet Override Below | -8°C | -30 to 0°C | During quiet hours frost cycling stays off unless outdoor temp is <= this value |
 | Heating Temp Target | 38°C | 10-40°C | Target water temperature (persisted) |
+| Away Temperature | 25°C | 10-40°C | Target temperature while Away mode is active |
 | Min Temp | 10°C | - | Climate min temp bound |
 | Max Temp | 40°C | - | Climate max temp bound |
 | Temperature Step | 0.5°C | - | Climate target temperature step |
