@@ -47,9 +47,6 @@
                     "ph_sensor": "Sensor de pH",
                     "chlorine_sensor": "Sensor de cloro (redox)",
                     "salt_sensor": "Sensor de sal",
-            "away_active": {
-                "name": "Ausente"
-            }
                     "tds_sensor": "Sensor de conductividad"
                 },
                 "data_description": {
@@ -266,12 +263,6 @@
                     "climate": "Control de temperatura",
                     "frost": "Protección contra heladas",
                     "calendars": "Calendarios y horas de silencio",
-            "away_start": {
-                "name": "Modo ausente activado"
-            },
-            "away_stop": {
-                "name": "Modo ausente desactivado"
-            }
                     "filter": "Filtrado",
                     "durations": "Duraciones",
                     "pv": "Excedente FV",
@@ -548,6 +539,9 @@
             "maintenance_active": {
                 "name": "Modo de mantenimiento"
             },
+            "away_active": {
+                "name": "Ausente"
+            },
             "is_we_holiday": {
                 "name": "Fin de semana/feriado"
             },
@@ -606,6 +600,12 @@
             },
             "chlorine_5": {
                 "name": "Cloración rápida 5 min"
+            },
+            "away_start": {
+                "name": "Modo ausente activado"
+            },
+            "away_stop": {
+                "name": "Modo ausente desactivado"
             }
         },
         "sensor": {

@@ -21,6 +21,8 @@
 1. Backend ändern (Repo `pool_controller`)
   - Code/Translations anpassen.
   - Version bump: [custom_components/pool_controller/manifest.json](custom_components/pool_controller/manifest.json) → `version` hochsetzen.
+  - JSON-Check: Übersetzungen vor Release validieren (z.B. `python -m json.tool`).
+  - Übersetzungen via Tools konsolidieren (z.B. `tools/sync_translations.py`).
 2. Frontend ändern (Repo `pool_controller_dashboard_frontend`)
   - `main.js` anpassen.
   - Version bump: `main.js` → `const VERSION = "x.y.z";` (muss zum Release-Tag passen).
@@ -36,6 +38,10 @@
 - Backend: Coordinator ist „authoritative“ (Switch-Calls/State-Machine). Entities sollten keine Hardware direkt schalten.
 - Backend: nach Zustandsänderungen immer `await coordinator.async_request_refresh()`.
 - Frontend: keine externen Dependencies/Build; alles in `main.js`; Strings über `I18N`/`_t()` (de/en/es/fr).
+
+## Übersetzungen / JSON-Qualität
+- Vor jedem Release JSON-Lint/Check für die Übersetzungsdateien ausführen.
+- Übersetzungen ausschließlich über die Tools im `tools/`-Verzeichnis konsolidieren (z.B. `sync_translations.py` oder `translations_rebuild.py`).
 
 ## Wenn du (AI) etwas änderst
 - Prüfe, ob Frontend-Autodiscovery oder Service-Calls betroffen sind.

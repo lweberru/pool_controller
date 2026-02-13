@@ -106,33 +106,6 @@
                     "hot_tolerance": "Le chauffage s'arrête lorsque la température de l'eau est égale ou supérieure à la consigne plus cette valeur"
                 }
             },
-            "costs": {
-                "title": "Coûts d’électricité",
-                "description": "Configurer le prix de l’électricité et le tarif d’injection pour estimer les coûts.",
-                "submit": "Continuer",
-                "data": {
-                    "electricity_price": "Prix de l’électricité (par kWh)",
-                    "electricity_price_entity": "Entité du prix de l’électricité",
-                    "feed_in_tariff": "Tarif d’injection (par kWh)",
-                    "feed_in_tariff_entity": "Entité du tarif d’injection",
-                    "pool_energy_entity_base": "Énergie base de la piscine (kWh)",
-                    "pool_energy_entity_aux": "Énergie du chauffage auxiliaire (kWh)",
-                    "pool_energy_entity_base_daily": "Énergie base de la piscine (quotidienne kWh)",
-                    "pool_energy_entity_aux_daily": "Énergie du chauffage auxiliaire (quotidienne kWh)",
-                    "solar_energy_entity_daily": "Énergie solaire (quotidienne kWh)"
-                },
-                "data_description": {
-                    "electricity_price": "Prix fixe de l’électricité pour estimer les coûts (monnaie par kWh)",
-                    "electricity_price_entity": "Capteur/helper optionnel de prix dynamique (remplace le prix fixe)",
-                    "feed_in_tariff": "Tarif d’injection pour estimer le revenu perdu (monnaie par kWh)",
-                    "feed_in_tariff_entity": "Capteur/helper optionnel de tarif dynamique (remplace le tarif fixe)",
-                    "pool_energy_entity_base": "Énergie base totale (kWh) de la pompe de circulation",
-                    "pool_energy_entity_aux": "Énergie totale du chauffage auxiliaire (kWh)",
-                    "pool_energy_entity_base_daily": "Énergie base quotidienne (kWh) de la pompe de circulation",
-                    "pool_energy_entity_aux_daily": "Énergie quotidienne du chauffage auxiliaire (kWh)",
-                    "solar_energy_entity_daily": "Énergie solaire quotidienne attribuée à la piscine (kWh). Utilisée pour le coût net."
-                }
-            },
             "frost": {
                 "title": "Protection antigel",
                 "description": "Protège le système par cycles de pompe ; respecte les heures calmes sauf froid extrême.",
@@ -246,6 +219,33 @@
                     "pv_smooth_window_seconds": "Fenêtre en secondes utilisée pour le lissage exponentiel de la valeur PV. 0 désactive le lissage.",
                     "pv_stability_seconds": "Durée pendant laquelle une valeur PV modifiée et lissée doit persister avant d’être appliquée (secondes).",
                     "pv_min_run_minutes": "Durée minimale automatique en minutes avant d’autoriser l’arrêt. Évite un arrêt immédiat après démarrage."
+                }
+            },
+            "costs": {
+                "title": "Coûts d’électricité",
+                "description": "Configurer le prix de l’électricité et le tarif d’injection pour estimer les coûts.",
+                "submit": "Continuer",
+                "data": {
+                    "electricity_price": "Prix de l’électricité (par kWh)",
+                    "electricity_price_entity": "Entité du prix de l’électricité",
+                    "feed_in_tariff": "Tarif d’injection (par kWh)",
+                    "feed_in_tariff_entity": "Entité du tarif d’injection",
+                    "pool_energy_entity_base": "Énergie base de la piscine (kWh)",
+                    "pool_energy_entity_aux": "Énergie du chauffage auxiliaire (kWh)",
+                    "pool_energy_entity_base_daily": "Énergie base de la piscine (quotidienne kWh)",
+                    "pool_energy_entity_aux_daily": "Énergie du chauffage auxiliaire (quotidienne kWh)",
+                    "solar_energy_entity_daily": "Énergie solaire (quotidienne kWh)"
+                },
+                "data_description": {
+                    "electricity_price": "Prix fixe de l’électricité pour estimer les coûts (monnaie par kWh)",
+                    "electricity_price_entity": "Capteur/helper optionnel de prix dynamique (remplace le prix fixe)",
+                    "feed_in_tariff": "Tarif d’injection pour estimer le revenu perdu (monnaie par kWh)",
+                    "feed_in_tariff_entity": "Capteur/helper optionnel de tarif dynamique (remplace le tarif fixe)",
+                    "pool_energy_entity_base": "Énergie base totale (kWh) de la pompe de circulation",
+                    "pool_energy_entity_aux": "Énergie totale du chauffage auxiliaire (kWh)",
+                    "pool_energy_entity_base_daily": "Énergie base quotidienne (kWh) de la pompe de circulation",
+                    "pool_energy_entity_aux_daily": "Énergie quotidienne du chauffage auxiliaire (kWh)",
+                    "solar_energy_entity_daily": "Énergie solaire quotidienne attribuée à la piscine (kWh). Utilisée pour le coût net."
                 }
             }
         }
