@@ -35,6 +35,7 @@ CONF_DEMO_MODE = "demo_mode"
 
 # Climate / thermostat-like behavior
 CONF_TARGET_TEMP = "target_temp"
+CONF_AWAY_TEMP = "away_temperature"
 CONF_MIN_TEMP = "min_temp"
 CONF_MAX_TEMP = "max_temp"
 CONF_TARGET_TEMP_STEP = "target_temp_step"
@@ -139,6 +140,10 @@ OPT_KEY_MANUAL_DURATION = "manual_timer_duration"  # minutes
 # Persisted target temperature (so HA restarts keep the setpoint)
 OPT_KEY_TARGET_TEMP = "target_temp"
 
+# Away mode (reduced activity)
+OPT_KEY_AWAY_ACTIVE = "away_active"
+OPT_KEY_AWAY_PREV_TARGET = "away_prev_target"
+
 # Adaptive heating tuning (stored in options)
 OPT_KEY_HEAT_LOSS_W_PER_C = "heat_loss_w_per_c"
 OPT_KEY_HEAT_STARTUP_OFFSET_MINUTES = "heat_startup_offset_minutes"
@@ -190,6 +195,7 @@ DEFAULT_EVENT_RAIN_PROBABILITY = 50
 
 # Climate defaults
 DEFAULT_TARGET_TEMP = 38.0
+DEFAULT_AWAY_TEMP = 25.0
 DEFAULT_MIN_TEMP = 10.0
 DEFAULT_MAX_TEMP = 40.0
 DEFAULT_TARGET_TEMP_STEP = 0.5

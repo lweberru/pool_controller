@@ -49,6 +49,16 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self.maintenance_active = False
         # HVAC enabled state (thermostat-style heating when PV optimization is disabled).
         self.hvac_enabled = True
+        # Away mode (reduced activity)
+        self.away_active = False
+        self.away_temp = DEFAULT_AWAY_TEMP
+        if entry:
+            try:
+                merged = {**(entry.data or {}), **(entry.options or {})}
+                if merged.get(CONF_AWAY_TEMP) is not None:
+                    self.away_temp = float(merged.get(CONF_AWAY_TEMP))
+            except Exception:
+                self.away_temp = DEFAULT_AWAY_TEMP
         # Internal demand states (hysteresis)
         self._aux_heat_demand = False
         self._pv_heat_demand = False
@@ -156,6 +166,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         if entry and entry.options:
             self.maintenance_active = bool(entry.options.get(OPT_KEY_MAINTENANCE_ACTIVE, False))
             self.hvac_enabled = bool(entry.options.get(OPT_KEY_HVAC_ENABLED, True))
+            self.away_active = bool(entry.options.get(OPT_KEY_AWAY_ACTIVE, False))
             # Adaptive tuning persisted values (best effort)
             try:
                 if entry.options.get(OPT_KEY_HEAT_LOSS_W_PER_C) is not None:
@@ -423,6 +434,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             self.pv_stability_seconds = DEFAULT_PV_STABILITY_SECONDS
             self.pv_min_run_minutes = DEFAULT_PV_MIN_RUN_MINUTES
             self.hvac_enabled = True
+            self.away_active = False
+            self.away_temp = DEFAULT_AWAY_TEMP
             self.heat_loss_w_per_c = DEFAULT_HEAT_LOSS_W_PER_C
             self.heat_startup_offset_minutes = DEFAULT_HEAT_STARTUP_OFFSET_MINUTES
 
@@ -972,6 +985,72 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         except Exception:
             _LOGGER.exception("Fehler beim Speichern von Wartungsmodus")
 
+    async def set_away(self, active: bool):
+        """Aktiviert/deaktiviert Away-Modus und persistiert den Zustand."""
+        active = bool(active)
+        if active == bool(getattr(self, "away_active", False)):
+            return
+
+        self.away_active = active
+        merged = {**(self.entry.data or {}), **(self.entry.options or {})}
+        try:
+            away_temp = float(merged.get(CONF_AWAY_TEMP, DEFAULT_AWAY_TEMP))
+        except Exception:
+            away_temp = DEFAULT_AWAY_TEMP
+        try:
+            min_t = float(merged.get(CONF_MIN_TEMP, DEFAULT_MIN_TEMP))
+        except Exception:
+            min_t = DEFAULT_MIN_TEMP
+        try:
+            max_t = float(merged.get(CONF_MAX_TEMP, DEFAULT_MAX_TEMP))
+        except Exception:
+            max_t = DEFAULT_MAX_TEMP
+        away_temp = max(min_t, min(max_t, away_temp))
+
+        try:
+            new_opts = {**self.entry.options}
+
+            if active:
+                # Ensure maintenance is off so filter/frost can run.
+                self.maintenance_active = False
+                new_opts.pop(OPT_KEY_MAINTENANCE_ACTIVE, None)
+
+                # Store previous target temp for restore.
+                if self.target_temp is not None:
+                    new_opts[OPT_KEY_AWAY_PREV_TARGET] = float(self.target_temp)
+
+                # Stop non-filter manual timers and pause to keep filtering active.
+                if self.manual_timer_type in ("bathing", "chlorine"):
+                    self.manual_timer_until = None
+                    self.manual_timer_type = None
+                    self.manual_timer_duration = None
+                    new_opts.pop(OPT_KEY_MANUAL_UNTIL, None)
+                    new_opts.pop(OPT_KEY_MANUAL_TYPE, None)
+                    new_opts.pop(OPT_KEY_MANUAL_DURATION, None)
+                if self.pause_until is not None:
+                    self.pause_until = None
+                    self.pause_duration = None
+                    new_opts.pop(OPT_KEY_PAUSE_UNTIL, None)
+                    new_opts.pop(OPT_KEY_PAUSE_DURATION, None)
+
+                # Apply away target temperature.
+                self.target_temp = away_temp
+                new_opts[OPT_KEY_TARGET_TEMP] = float(self.target_temp)
+                new_opts[OPT_KEY_AWAY_ACTIVE] = True
+            else:
+                new_opts.pop(OPT_KEY_AWAY_ACTIVE, None)
+                prev_target = new_opts.pop(OPT_KEY_AWAY_PREV_TARGET, None)
+                if prev_target is not None:
+                    try:
+                        self.target_temp = float(prev_target)
+                        new_opts[OPT_KEY_TARGET_TEMP] = float(self.target_temp)
+                    except Exception:
+                        pass
+
+            await self._async_update_entry_options(new_opts)
+        except Exception:
+            _LOGGER.exception("Fehler beim Speichern von Away-Modus")
+
     async def set_hvac_enabled(self, enabled: bool):
         """Enable/disable thermostat behavior (independent from maintenance)."""
         enabled = bool(enabled)
@@ -1251,6 +1330,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
             # HVAC enabled state (independent from maintenance).
             self.hvac_enabled = bool(conf.get(OPT_KEY_HVAC_ENABLED, True))
+            # Away mode flag (reduced activity)
+            self.away_active = bool(conf.get(OPT_KEY_AWAY_ACTIVE, False))
 
             # First run: migrate legacy timer options (best effort)
             await self.async_migrate_legacy_timers()
@@ -2264,7 +2345,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
             # Start calendar-driven bathing: if event is ongoing, ensure manual timer active
             # (in Wartung deaktiviert)
-            if (not maintenance_active) and cal_ongoing.get("start") and cal_ongoing.get("end"):
+            if (not maintenance_active) and (not self.away_active) and cal_ongoing.get("start") and cal_ongoing.get("end"):
                 if now >= cal_ongoing["start"] and now < cal_ongoing["end"]:
                     remaining_min = max(1, int((cal_ongoing["end"] - now).total_seconds() / 60))
                     if (not pause_active) and (not manual_active) and (not event_rain_blocked):
@@ -2363,6 +2444,12 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 is_manual_filter = self.manual_timer_type == "filter"
                 is_manual_heat = self.manual_timer_type in ("bathing", "chlorine", "filter")
 
+            # Away mode: suppress non-filter manual modes
+            if self.away_active and self.manual_timer_type in ("bathing", "chlorine"):
+                is_bathing = False
+                is_chlorinating = False
+                is_manual_heat = False
+
             # PV-based run should stop once target is reached (with same hysteresis).
             try:
                 if water_temp is not None and float(water_temp) >= float(self.target_temp):
@@ -2378,10 +2465,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             except Exception:
                 pv_heat_demand = bool(self._pv_heat_demand)
             self._pv_heat_demand = pv_heat_demand
-            pv_run = bool(enable_pv and pv_allows and (not in_quiet) and (not maintenance_active) and (pv_heat_demand))
+            pv_run = bool(enable_pv and pv_allows and (not in_quiet) and (not maintenance_active) and (not self.away_active) and (pv_heat_demand))
 
             # Optimiert: manuelle Timer erzwingen "heat"-Modus
-            manual_heat_run = is_manual_heat
+            manual_heat_run = is_manual_heat and (not self.away_active)
 
 
             # "Preheat" ist nur die Phase VOR einem Kalender-Event, in der wir bereits starten dürfen.
@@ -2391,12 +2478,13 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 and cal_next.get("start")
                 and now < cal_next["start"]
                 and (not event_rain_blocked)
+                and (not self.away_active)
             )
 
 
             # Thermostat behavior: if PV optimization is disabled, allow heating to maintain target temperature
             # (similar to a normal climate entity), gated by hvac_enabled.
-            thermostat_run = bool((not enable_pv) and getattr(self, "hvac_enabled", True))
+            thermostat_run = bool((not enable_pv) and (not self.away_active) and getattr(self, "hvac_enabled", True))
 
             # NEU: heat_allowed auch bei manueller Filterung/Chloring
             heat_allowed = (not maintenance_active) and (not pause_active) and (not in_quiet) and (
@@ -2481,6 +2569,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             data = {
                 "sanitizer_mode": sanitizer_mode,
                 "maintenance_active": maintenance_active,
+                "away_active": bool(self.away_active),
                 "run_reason": run_reason,
                 "heat_reason": heat_reason,
                 "run_credit_source": self._credit_streak_source if self._credit_streak_source else None,

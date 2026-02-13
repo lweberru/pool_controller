@@ -13,3 +13,4 @@ __pycache__/
 .venv/
 *.json.bak
 brands/
+pool_controller.code-workspace

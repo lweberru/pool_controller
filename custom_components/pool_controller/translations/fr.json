@@ -85,6 +85,7 @@
                 "submit": "Suivant",
                 "data": {
                     "target_temp": "Température cible initiale",
+                    "away_temperature": "Température d'absence",
                     "min_temp": "Température minimum",
                     "max_temp": "Température maximum",
                     "target_temp_step": "Pas de température",
@@ -95,6 +96,7 @@
                 },
                 "data_description": {
                     "target_temp": "Température cible (consigne) initiale ; ensuite la consigne est enregistrée",
+                    "away_temperature": "Température cible utilisée en mode Absence",
                     "min_temp": "Consigne minimale disponible",
                     "max_temp": "Consigne maximale disponible",
                     "target_temp_step": "Pas pour régler la température cible",
@@ -353,6 +355,7 @@
                 "submit": "Suivant",
                 "data": {
                     "target_temp": "Température cible initiale",
+                    "away_temperature": "Température d'absence",
                     "min_temp": "Température minimum",
                     "max_temp": "Température maximum",
                     "target_temp_step": "Pas de température",
@@ -363,6 +366,7 @@
                 },
                 "data_description": {
                     "target_temp": "Température cible (consigne) initiale ; ensuite la consigne est enregistrée",
+                    "away_temperature": "Température cible utilisée en mode Absence",
                     "min_temp": "Consigne minimale disponible",
                     "max_temp": "Consigne maximale disponible",
                     "target_temp_step": "Pas pour régler la température cible",
@@ -535,6 +539,9 @@
             "maintenance_active": {
                 "name": "Mode maintenance"
             },
+            "away_active": {
+                "name": "Absence"
+            },
             "is_we_holiday": {
                 "name": "Week-end/Férié"
             },
@@ -593,6 +600,12 @@
             },
             "chlorine_5": {
                 "name": "Chloration rapide 5 min"
+            },
+            "away_start": {
+                "name": "Mode absence activé"
+            },
+            "away_stop": {
+                "name": "Mode absence désactivé"
             }
         },
         "sensor": {
@@ -794,7 +807,8 @@
                     "normal": "Normal",
                     "paused": "Pause",
                     "frost_protection": "Protection antigel",
-                    "maintenance": "Maintenance"
+                    "maintenance": "Maintenance",
+                    "away": "Absence"
                 }
             },
             "run_reason": {

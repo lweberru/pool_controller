@@ -85,6 +85,7 @@
                 "submit": "Weiter",
                 "data": {
                     "target_temp": "Initiale Zieltemperatur",
+                    "away_temperature": "Abwesenheits-Temperatur",
                     "min_temp": "Minimum-Temperatur",
                     "max_temp": "Maximum-Temperatur",
                     "target_temp_step": "Schrittweite",
@@ -95,6 +96,7 @@
                 },
                 "data_description": {
                     "target_temp": "Initiale Zieltemperatur (Sollwert) beim ersten Start; danach wird der Sollwert gespeichert",
+                    "away_temperature": "Zieltemperatur, die im Abwesenheitsmodus gilt",
                     "min_temp": "Minimaler einstellbarer Sollwert",
                     "max_temp": "Maximaler einstellbarer Sollwert",
                     "target_temp_step": "Schrittweite für das Setzen der Zieltemperatur",
@@ -353,6 +355,7 @@
                 "submit": "Weiter",
                 "data": {
                     "target_temp": "Initiale Zieltemperatur",
+                    "away_temperature": "Abwesenheits-Temperatur",
                     "min_temp": "Minimum-Temperatur",
                     "max_temp": "Maximum-Temperatur",
                     "target_temp_step": "Schrittweite",
@@ -363,6 +366,7 @@
                 },
                 "data_description": {
                     "target_temp": "Initiale Zieltemperatur (Sollwert) beim ersten Start; danach wird der Sollwert gespeichert",
+                    "away_temperature": "Zieltemperatur, die im Abwesenheitsmodus gilt",
                     "min_temp": "Minimaler einstellbarer Sollwert",
                     "max_temp": "Maximaler einstellbarer Sollwert",
                     "target_temp_step": "Schrittweite für das Setzen der Zieltemperatur",
@@ -535,6 +539,9 @@
             "maintenance_active": {
                 "name": "Wartung aktiv"
             },
+            "away_active": {
+                "name": "Abwesend"
+            },
             "is_we_holiday": {
                 "name": "Wochenende/Feiertag"
             },
@@ -593,6 +600,12 @@
             },
             "chlorine_5": {
                 "name": "Stoßchlorung 5 min"
+            },
+            "away_start": {
+                "name": "Abwesend ein"
+            },
+            "away_stop": {
+                "name": "Abwesend aus"
             }
         },
         "sensor": {
@@ -794,7 +807,8 @@
                     "normal": "Normal",
                     "paused": "Pause",
                     "frost_protection": "Frostschutz",
-                    "maintenance": "Wartung"
+                    "maintenance": "Wartung",
+                    "away": "Abwesend"
                 }
             },
             "run_reason": {

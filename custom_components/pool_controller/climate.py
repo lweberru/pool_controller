@@ -53,7 +53,8 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
     PRESET_CHLORINE = "Chloren"
     PRESET_FILTER = "Filtern"
     PRESET_MAINTENANCE = "Wartung"
-    _attr_preset_modes = [PRESET_AUTO, PRESET_BATHING, PRESET_CHLORINE, PRESET_FILTER, PRESET_MAINTENANCE]
+    PRESET_AWAY = "Abwesend"
+    _attr_preset_modes = [PRESET_AUTO, PRESET_BATHING, PRESET_CHLORINE, PRESET_FILTER, PRESET_AWAY, PRESET_MAINTENANCE]
 
     def __init__(self, coordinator):
         super().__init__(coordinator)
@@ -110,9 +111,12 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
     def hvac_mode(self):
         # hvac_mode zeigt aktives Heizen an:
         # - OFF bei Wartung
+        # - OFF bei Away
         # - OFF wenn HVAC deaktiviert
         # - HEAT bei Frostlauf, manuellem Heizen, PV, Preheat, Thermostat
         if bool(getattr(self.coordinator, "maintenance_active", False)):
+            return HVACMode.OFF
+        if bool(getattr(self.coordinator, "away_active", False)):
             return HVACMode.OFF
         if not bool(getattr(self.coordinator, "hvac_enabled", True)):
             return HVACMode.OFF
@@ -148,6 +152,8 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
     def preset_mode(self):
         if bool(getattr(self.coordinator, "maintenance_active", False)):
             return self.PRESET_MAINTENANCE
+        if bool(getattr(self.coordinator, "away_active", False)):
+            return self.PRESET_AWAY
         if self.coordinator.data.get("manual_timer_active"):
             t = (self.coordinator.manual_timer_type or "").lower()
             if t == "bathing":
@@ -174,12 +180,19 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
     async def async_set_preset_mode(self, preset_mode: str):
         mode = (preset_mode or "").strip()
         if mode == self.PRESET_MAINTENANCE:
+            await self.coordinator.set_away(False)
             await self.coordinator.set_maintenance(True)
             await self.coordinator.async_request_refresh()
             return
+        if mode == self.PRESET_AWAY:
+            await self.coordinator.set_maintenance(False)
+            await self.coordinator.set_away(True)
+            await self.coordinator.async_request_refresh()
+            return
 
-        # Any non-maintenance preset disables Wartung first
+        # Any other preset disables Wartung/Away first
         await self.coordinator.set_maintenance(False)
+        await self.coordinator.set_away(False)
 
         if mode == self.PRESET_AUTO:
             # Back to automation: stop manual timer + pause

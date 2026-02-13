@@ -47,6 +47,9 @@
                     "ph_sensor": "Sensor de pH",
                     "chlorine_sensor": "Sensor de cloro (redox)",
                     "salt_sensor": "Sensor de sal",
+            "away_active": {
+                "name": "Ausente"
+            }
                     "tds_sensor": "Sensor de conductividad"
                 },
                 "data_description": {
@@ -85,6 +88,7 @@
                 "submit": "Siguiente",
                 "data": {
                     "target_temp": "Temperatura objetivo inicial",
+                    "away_temperature": "Temperatura de ausencia",
                     "min_temp": "Temperatura mínima",
                     "max_temp": "Temperatura máxima",
                     "target_temp_step": "Paso de temperatura",
@@ -95,6 +99,7 @@
                 },
                 "data_description": {
                     "target_temp": "Temperatura objetivo (consigna) inicial; después se guarda automáticamente",
+                    "away_temperature": "Temperatura objetivo usada durante el modo Ausente",
                     "min_temp": "Consigna mínima disponible",
                     "max_temp": "Consigna máxima disponible",
                     "target_temp_step": "Paso para ajustar la temperatura objetivo",
@@ -261,6 +266,12 @@
                     "climate": "Control de temperatura",
                     "frost": "Protección contra heladas",
                     "calendars": "Calendarios y horas de silencio",
+            "away_start": {
+                "name": "Modo ausente activado"
+            },
+            "away_stop": {
+                "name": "Modo ausente desactivado"
+            }
                     "filter": "Filtrado",
                     "durations": "Duraciones",
                     "pv": "Excedente FV",
@@ -353,6 +364,7 @@
                 "submit": "Siguiente",
                 "data": {
                     "target_temp": "Temperatura objetivo inicial",
+                    "away_temperature": "Temperatura de ausencia",
                     "min_temp": "Temperatura mínima",
                     "max_temp": "Temperatura máxima",
                     "target_temp_step": "Paso de temperatura",
@@ -363,6 +375,7 @@
                 },
                 "data_description": {
                     "target_temp": "Temperatura objetivo (consigna) inicial; después se guarda automáticamente",
+                    "away_temperature": "Temperatura objetivo usada durante el modo Ausente",
                     "min_temp": "Consigna mínima disponible",
                     "max_temp": "Consigna máxima disponible",
                     "target_temp_step": "Paso para ajustar la temperatura objetivo",
@@ -794,7 +807,8 @@
                     "normal": "Normal",
                     "paused": "Pausa",
                     "frost_protection": "Protección contra heladas",
-                    "maintenance": "Mantenimiento"
+                    "maintenance": "Mantenimiento",
+                    "away": "Ausente"
                 }
             },
             "run_reason": {

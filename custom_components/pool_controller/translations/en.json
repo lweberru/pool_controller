@@ -85,6 +85,7 @@
         "submit": "Continue",
         "data": {
           "target_temp": "Initial target temperature",
+          "away_temperature": "Away temperature",
           "min_temp": "Minimum temperature",
           "max_temp": "Maximum temperature",
           "target_temp_step": "Temperature step",
@@ -95,6 +96,7 @@
         },
         "data_description": {
           "target_temp": "Initial target temperature (setpoint) used on first start; later the setpoint is persisted",
+          "away_temperature": "Target temperature used while Away mode is active",
           "min_temp": "Minimum setpoint available",
           "max_temp": "Maximum setpoint available",
           "target_temp_step": "Step size for setting the target temperature",
@@ -353,6 +355,7 @@
         "submit": "Continue",
         "data": {
           "target_temp": "Initial target temperature",
+          "away_temperature": "Away temperature",
           "min_temp": "Minimum temperature",
           "max_temp": "Maximum temperature",
           "target_temp_step": "Temperature step",
@@ -363,6 +366,7 @@
         },
         "data_description": {
           "target_temp": "Initial target temperature (setpoint) used on first start; later the setpoint is persisted",
+          "away_temperature": "Target temperature used while Away mode is active",
           "min_temp": "Minimum setpoint available",
           "max_temp": "Maximum setpoint available",
           "target_temp_step": "Step size for setting the target temperature",
@@ -525,6 +529,7 @@
     },
     "binary_sensor": {
       "maintenance_active": { "name": "Maintenance mode" },
+      "away_active": { "name": "Away mode" },
       "is_we_holiday": { "name": "Weekend/Holiday" },
       "frost_danger": { "name": "Frost danger" },
       "frost_active": { "name": "Frost protection active" },
@@ -545,7 +550,9 @@
       "pause_60": { "name": "Pause 60 min" },
       "bath_60": { "name": "Bath 60 min" },
       "filter_30": { "name": "Filter 30 min" },
-      "chlorine_5": { "name": "Quick chlorine 5 min" }
+      "chlorine_5": { "name": "Quick chlorine 5 min" },
+      "away_start": { "name": "Away mode on" },
+      "away_stop": { "name": "Away mode off" }
     },
     "sensor": {
       "status": { "name": "Status" },
@@ -620,7 +627,8 @@
           "normal": "Normal",
           "paused": "Paused",
           "frost_protection": "Frost protection",
-          "maintenance": "Maintenance"
+          "maintenance": "Maintenance",
+          "away": "Away"
         }
       },
       "run_reason": {

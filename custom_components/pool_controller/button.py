@@ -9,6 +9,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
         Filter30Button(coordinator),
         Chlorine5Button(coordinator),
         Pause60Button(coordinator),
+        AwayStartButton(coordinator),
+        AwayStopButton(coordinator),
     ])
 
 class PoolButton(CoordinatorEntity, ButtonEntity):
@@ -61,4 +63,26 @@ class Chlorine5Button(PoolButton):
         self._attr_unique_id = f"{coordinator.entry.entry_id}_chlorine_5"
     async def async_press(self):
         await self.coordinator.activate_manual_timer(timer_type="chlorine", minutes=5)
+        await self.coordinator.async_request_refresh()
+
+
+class AwayStartButton(PoolButton):
+    _attr_translation_key = "away_start"
+    _attr_icon = "mdi:home-export-outline"
+    def __init__(self, coordinator):
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.entry.entry_id}_away_start"
+    async def async_press(self):
+        await self.coordinator.set_away(True)
+        await self.coordinator.async_request_refresh()
+
+
+class AwayStopButton(PoolButton):
+    _attr_translation_key = "away_stop"
+    _attr_icon = "mdi:home-import-outline"
+    def __init__(self, coordinator):
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.entry.entry_id}_away_stop"
+    async def async_press(self):
+        await self.coordinator.set_away(False)
         await self.coordinator.async_request_refresh()

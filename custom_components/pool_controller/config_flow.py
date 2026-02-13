@@ -70,6 +70,7 @@ def _climate_schema(curr: dict | None = None):
     c = curr or {}
     return vol.Schema({
         vol.Optional(CONF_TARGET_TEMP, default=c.get(CONF_TARGET_TEMP, DEFAULT_TARGET_TEMP)): vol.Coerce(float),
+        vol.Optional(CONF_AWAY_TEMP, default=c.get(CONF_AWAY_TEMP, DEFAULT_AWAY_TEMP)): vol.Coerce(float),
         vol.Optional(CONF_MIN_TEMP, default=c.get(CONF_MIN_TEMP, DEFAULT_MIN_TEMP)): vol.Coerce(float),
         vol.Optional(CONF_MAX_TEMP, default=c.get(CONF_MAX_TEMP, DEFAULT_MAX_TEMP)): vol.Coerce(float),
         vol.Optional(CONF_TARGET_TEMP_STEP, default=c.get(CONF_TARGET_TEMP_STEP, DEFAULT_TARGET_TEMP_STEP)): vol.Coerce(float),

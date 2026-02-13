@@ -131,6 +131,7 @@ class PoolStatusSensor(PoolBaseSensor):
     @property
     def native_value(self):
         if self.coordinator.data.get("maintenance_active"): return "maintenance"
+        if self.coordinator.data.get("away_active"): return "away"
         if self.coordinator.data.get("frost_danger"): return "frost_protection"
         if self.coordinator.data.get("pause_timer_active"): return "paused"
         return "normal"
