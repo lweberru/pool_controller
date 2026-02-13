@@ -2195,20 +2195,27 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 if water_temp is not None:
                     # Update loss coefficient while pool is OFF (no pump, no aux heat)
                     if (not pump_switch_on) and (not aux_heating_switch_on):
-                        if self._last_temp_ts and self._last_temp_value is not None and outdoor_temp is not None and vol_l:
+                        if self._last_temp_ts is None or self._last_temp_value is None:
+                            self._last_temp_ts = now
+                            self._last_temp_value = float(water_temp)
+                        else:
                             dt_min = max(0.0, (now - self._last_temp_ts).total_seconds() / 60.0)
                             # Use a longer window to handle sparse sensor updates (often 15–30 min).
                             # This avoids zero-delta samples from short intervals.
                             if dt_min >= 60:
-                                dtemp = float(water_temp) - float(self._last_temp_value)
-                                if dtemp < 0:
-                                    cooling_rate = abs(dtemp) / dt_min  # °C/min
-                                    delta = max(0.1, float(water_temp) - float(outdoor_temp))
-                                    loss_w = float(vol_l) * 1.16 * float(cooling_rate) * 60.0
-                                    est_w_per_c = max(0.0, loss_w / delta)
-                                    # EMA smoothing
-                                    alpha = 0.2
-                                    self.heat_loss_w_per_c = max(0.0, (1 - alpha) * float(self.heat_loss_w_per_c) + alpha * est_w_per_c)
+                                if outdoor_temp is not None and vol_l:
+                                    dtemp = float(water_temp) - float(self._last_temp_value)
+                                    if dtemp < 0:
+                                        cooling_rate = abs(dtemp) / dt_min  # °C/min
+                                        delta = max(0.1, float(water_temp) - float(outdoor_temp))
+                                        loss_w = float(vol_l) * 1.16 * float(cooling_rate) * 60.0
+                                        est_w_per_c = max(0.0, loss_w / delta)
+                                        # EMA smoothing
+                                        alpha = 0.2
+                                        self.heat_loss_w_per_c = max(0.0, (1 - alpha) * float(self.heat_loss_w_per_c) + alpha * est_w_per_c)
+                                # refresh baseline after a full window
+                                self._last_temp_ts = now
+                                self._last_temp_value = float(water_temp)
 
                     # Update startup offset based on how long it takes to see first warming
                     # Use the physical aux heater switch state to avoid relying on heat_reason
@@ -2254,15 +2261,6 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                                 pass
             except Exception:
                 pass
-
-            # Track last temp sample for adaptive tuning
-            try:
-                if water_temp is not None:
-                    self._last_temp_ts = now
-                    self._last_temp_value = float(water_temp)
-            except Exception:
-                pass
-
 
             # Start calendar-driven bathing: if event is ongoing, ensure manual timer active
             # (in Wartung deaktiviert)
