@@ -1106,6 +1106,24 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         """
         if not self.entry:
             return
+        # Preserve sticky config keys (calendar/weather guard) when updating options.
+        try:
+            merged = {**(self.entry.data or {}), **(self.entry.options or {})}
+            for key in (
+                CONF_ENABLE_EVENT_WEATHER_GUARD,
+                CONF_EVENT_WEATHER_ENTITY,
+                CONF_EVENT_RAIN_PROBABILITY,
+                CONF_POOL_CALENDAR,
+                CONF_HOLIDAY_CALENDAR,
+                CONF_QUIET_START,
+                CONF_QUIET_END,
+                CONF_QUIET_START_WEEKEND,
+                CONF_QUIET_END_WEEKEND,
+            ):
+                if key in merged and key not in options:
+                    options[key] = merged.get(key)
+        except Exception:
+            pass
         res = self.hass.config_entries.async_update_entry(self.entry, options=options)
         if inspect.isawaitable(res):
             await res
