@@ -2,6 +2,9 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.3.24] - 2026-02-25
+- Fix options-flow behavior in the PV step: when opened via settings (gear), saving now closes the dialog instead of opening the next costs step.
+
 ## [2.3.23] - 2026-02-25
 - Add optional `pv_house_load_sensor` to compute effective PV surplus internally without templates.
 - Improve net-cost calculation fallback when no `solar_energy_entity_daily` is set by integrating PV overlap from power sensors.

@@ -771,6 +771,8 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             try:
                 self.options.update(user_input)
+                if self._menu_mode:
+                    return self.async_create_entry(title="", data=self.options)
                 return await self.async_step_costs()
             except Exception:
                 _LOGGER.exception("Fehler im Options Flow (Zahnrad)")
