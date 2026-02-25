@@ -15,6 +15,7 @@ from .const import (
     OPT_KEY_AUTO_FILTER_DURATION,
     OPT_KEY_PAUSE_UNTIL,
     OPT_KEY_PAUSE_DURATION,
+    OPT_KEY_BATHING_BLOCK_UNTIL,
     OPT_KEY_FILTER_NEXT,
     OPT_KEY_FILTER_CREDIT_MINUTES,
     OPT_KEY_FILTER_CREDIT_EXPIRES_AT,
@@ -92,6 +93,7 @@ _TRANSIENT_OPTION_KEYS = {
     OPT_KEY_AUTO_FILTER_DURATION,
     OPT_KEY_PAUSE_UNTIL,
     OPT_KEY_PAUSE_DURATION,
+    OPT_KEY_BATHING_BLOCK_UNTIL,
     OPT_KEY_FILTER_NEXT,
     OPT_KEY_FILTER_CREDIT_MINUTES,
     OPT_KEY_FILTER_CREDIT_EXPIRES_AT,
@@ -287,7 +289,7 @@ def _ensure_services_registered(hass: HomeAssistant):
         if not coordinator:
             _warn_no_target("stop_bathing", call)
             return
-        await coordinator.deactivate_manual_timer(only_type="bathing")
+        await coordinator.stop_bathing_for_current_event()
         await coordinator.async_request_refresh()
 
     async def handle_start_filter(call):

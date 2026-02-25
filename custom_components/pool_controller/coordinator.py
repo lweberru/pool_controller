@@ -83,6 +83,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
         self.pause_until = None
         self.pause_duration = None
+        self.bathing_block_until = None
 
         # Frost-Timer (analog zu manual/auto_filter/pause)
         self.frost_timer_until = None
@@ -390,6 +391,13 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             except Exception:
                 self.pause_duration = None
 
+            bu = entry.options.get(OPT_KEY_BATHING_BLOCK_UNTIL)
+            if bu:
+                try:
+                    self.bathing_block_until = dt_util.parse_datetime(bu)
+                except Exception:
+                    self.bathing_block_until = None
+
             nf = entry.options.get(OPT_KEY_FILTER_NEXT)
             if nf:
                 try:
@@ -428,6 +436,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
             self.pause_until = None
             self.pause_duration = None
+            self.bathing_block_until = None
 
             self.frost_timer_until = None
             self.frost_timer_duration = None
@@ -1094,6 +1103,34 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
     async def stop_manual_heat(self):
         """Stops user-triggered heating (bathing timer only)."""
         await self.deactivate_manual_timer(only_type="bathing")
+
+    async def stop_bathing_for_current_event(self):
+        """Stop bathing now and suppress calendar auto-restart until current event end."""
+        await self.deactivate_manual_timer(only_type="bathing")
+
+        now = dt_util.now()
+        block_until = None
+        try:
+            conf = {**(self.entry.data or {}), **(self.entry.options or {})}
+            cal = await self._get_next_event(conf.get(CONF_POOL_CALENDAR))
+            cal_ongoing = (cal or {}).get("ongoing") or {}
+            start = cal_ongoing.get("start")
+            end = cal_ongoing.get("end")
+            if start and end and now >= start and now < end:
+                block_until = end
+        except Exception:
+            block_until = None
+
+        self.bathing_block_until = block_until
+        try:
+            new_opts = {**(self.entry.options or {})}
+            if block_until:
+                new_opts[OPT_KEY_BATHING_BLOCK_UNTIL] = block_until.isoformat()
+            else:
+                new_opts.pop(OPT_KEY_BATHING_BLOCK_UNTIL, None)
+            await self._async_update_entry_options(new_opts)
+        except Exception:
+            _LOGGER.exception("Fehler beim Speichern von bathing block")
 
     async def set_target_temperature(self, temperature: float):
         """Set and persist the target temperature (setpoint)."""
@@ -1925,6 +1962,18 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             cal_next = (cal or {}).get("next") or {}
             cal_ongoing = (cal or {}).get("ongoing") or {}
 
+            # Expire temporary suppression for calendar-driven bathing restarts.
+            try:
+                if self.bathing_block_until and now >= self.bathing_block_until:
+                    self.bathing_block_until = None
+                    new_opts = {**self.entry.options}
+                    new_opts.pop(OPT_KEY_BATHING_BLOCK_UNTIL, None)
+                    await self._async_update_entry_options(new_opts)
+            except Exception:
+                pass
+
+            bathing_block_active = bool(self.bathing_block_until and now < self.bathing_block_until)
+
             _LOGGER.debug(
                 "Calendar snapshot (%s) next=%s ongoing=%s",
                 getattr(self.entry, "entry_id", None),
@@ -2439,7 +2488,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             if (not maintenance_active) and (not self.away_active) and cal_ongoing.get("start") and cal_ongoing.get("end"):
                 if now >= cal_ongoing["start"] and now < cal_ongoing["end"]:
                     remaining_min = max(1, int((cal_ongoing["end"] - now).total_seconds() / 60))
-                    if (not pause_active) and (not manual_active) and (not event_rain_blocked):
+                    if (not pause_active) and (not manual_active) and (not event_rain_blocked) and (not bathing_block_active):
                         await self.activate_manual_timer(timer_type="bathing", minutes=remaining_min)
                         _LOGGER.debug(
                             "Calendar event started -> activate bathing timer (%s) remaining=%smin",
@@ -2739,32 +2788,30 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 # Stromversorgung an, wenn der Pool laufen muss (inkl. Frost) oder wenn die Pumpe laufen soll.
                 "should_pump_on": (
                     (not maintenance_active)
+                    and (not pause_active)
                     and (
                         frost_active
-                        or (not pause_active and (
-                            is_bathing
-                            or is_chlorinating
-                            or aux_heat_demand
-                            or (is_manual_filter and not in_quiet)
-                            or (auto_filter_active and not in_quiet)
-                            or (next_start_mins is not None and next_start_mins == 0)
-                            or pv_run
-                        ))
+                        or is_bathing
+                        or is_chlorinating
+                        or aux_heat_demand
+                        or (is_manual_filter and not in_quiet)
+                        or (auto_filter_active and not in_quiet)
+                        or (next_start_mins is not None and next_start_mins == 0)
+                        or pv_run
                     )
                 ),
                 "should_main_on": (
                     (not maintenance_active)
+                    and (not pause_active)
                     and (
                         frost_active
-                        or (not pause_active and (
-                            is_bathing
-                            or is_chlorinating
-                            or aux_heat_demand
-                            or (is_manual_filter and not in_quiet)
-                            or (auto_filter_active and not in_quiet)
-                            or (next_start_mins is not None and next_start_mins == 0)
-                            or pv_run
-                        ))
+                        or is_bathing
+                        or is_chlorinating
+                        or aux_heat_demand
+                        or (is_manual_filter and not in_quiet)
+                        or (auto_filter_active and not in_quiet)
+                        or (next_start_mins is not None and next_start_mins == 0)
+                        or pv_run
                     )
                 ),
                 # Aux-Heizung einschalten, wenn aktiviert UND Temperatur signifikant unter Ziel liegt
@@ -2841,8 +2888,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                             self._last_toggle_attempts[main_switch_id] = now
                             await self._async_turn_entity(main_switch_id, True)
                     else:
-                        # don't turn off main while bathing
-                        if (maintenance_active or not is_bathing) and not demo and main_switch_id and _can_attempt(main_switch_id):
+                        if not demo and main_switch_id and _can_attempt(main_switch_id):
                             self._last_toggle_attempts[main_switch_id] = now
                             await self._async_turn_entity(main_switch_id, False)
                     self._last_should_main_on = desired_main
@@ -2855,7 +2901,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                                 self._last_toggle_attempts[pump_switch_id] = now
                                 await self._async_turn_entity(pump_switch_id, True)
                         else:
-                            if (maintenance_active or not is_bathing) and not demo and _can_attempt(pump_switch_id):
+                            if not demo and _can_attempt(pump_switch_id):
                                 self._last_toggle_attempts[pump_switch_id] = now
                                 await self._async_turn_entity(pump_switch_id, False)
                         self._last_should_pump_on = desired_pump

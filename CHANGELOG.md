@@ -2,6 +2,10 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.3.25] - 2026-02-25
+- Make pause a true hard stop: while pause is active, main/pump are forced off and no run reasons can keep them running.
+- Update `stop_bathing` to also suppress calendar-driven reactivation for the currently ongoing event (pool stays off until event end unless started manually).
+
 ## [2.3.24] - 2026-02-25
 - Fix options-flow behavior in the PV step: when opened via settings (gear), saving now closes the dialog instead of opening the next costs step.
 

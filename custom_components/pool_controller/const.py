@@ -157,6 +157,9 @@ OPT_KEY_AUTO_FILTER_DURATION = "auto_filter_duration"  # minutes
 OPT_KEY_PAUSE_UNTIL = "pause_until"
 OPT_KEY_PAUSE_DURATION = "pause_duration"  # minutes
 
+# Temporary suppression for calendar-driven bathing auto-restart
+OPT_KEY_BATHING_BLOCK_UNTIL = "bathing_block_until"
+
 # Next scheduled auto-filter start
 OPT_KEY_FILTER_NEXT = "next_filter_start"
 
