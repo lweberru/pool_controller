@@ -250,6 +250,7 @@ def _pv_schema(curr: dict | None = None):
     return vol.Schema({
         vol.Optional(CONF_ENABLE_PV_OPTIMIZATION, default=c.get(CONF_ENABLE_PV_OPTIMIZATION, False)): bool,
         vol.Optional(CONF_PV_SURPLUS_SENSOR, default=c.get(CONF_PV_SURPLUS_SENSOR, DEFAULT_PV_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+        vol.Optional(CONF_PV_HOUSE_LOAD_SENSOR, default=c.get(CONF_PV_HOUSE_LOAD_SENSOR)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="power")),
         vol.Optional(CONF_PV_ON_THRESHOLD, default=c.get(CONF_PV_ON_THRESHOLD, DEFAULT_PV_ON)): vol.Coerce(int),
         vol.Optional(CONF_PV_OFF_THRESHOLD, default=c.get(CONF_PV_OFF_THRESHOLD, DEFAULT_PV_OFF)): vol.Coerce(int),
         # PV smoothing/stability/min-run tuning (user-exposed)

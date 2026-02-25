@@ -205,6 +205,7 @@
                 "data": {
                     "enable_pv_optimization": "Activar optimización FV",
                     "pv_surplus_sensor": "Sensor de potencia FV",
+                    "pv_house_load_sensor": "Sensor de carga de la casa (W, opcional)",
                     "pv_on_threshold": "Umbral FV ENC (W)",
                     "pv_off_threshold": "Umbral FV APAG (W)",
                     "pv_smooth_window_seconds": "Ventana de suavizado FV (s)",
@@ -214,6 +215,7 @@
                 "data_description": {
                     "enable_pv_optimization": "Solo ejecutar bomba/calefacción con excedente FV",
                     "pv_surplus_sensor": "Sensor que informa excedente/producción en vatios",
+                    "pv_house_load_sensor": "Carga actual opcional de la casa en vatios. Si se configura, la potencia FV se interpreta como producción y el excedente disponible se calcula internamente como producción - (carga de la casa - carga de la piscina).",
                     "pv_on_threshold": "Enciende la bomba principal cuando FV >= este valor (predeterminado: 1000)",
                     "pv_off_threshold": "Apaga la bomba principal cuando FV <= este valor (predeterminado: 500)",
                     "pv_smooth_window_seconds": "Ventana en segundos usada para el suavizado exponencial del valor FV. 0 desactiva el suavizado.",
@@ -475,6 +477,7 @@
                 "data": {
                     "enable_pv_optimization": "Activar optimización FV",
                     "pv_surplus_sensor": "Sensor de excedente FV",
+                    "pv_house_load_sensor": "Sensor de carga de la casa (W, opcional)",
                     "pv_on_threshold": "Umbral FV ENCENDER (W)",
                     "pv_off_threshold": "Umbral FV APAGAR (W)",
                     "pv_smooth_window_seconds": "Ventana de suavizado PV (s)",
@@ -484,6 +487,7 @@
                 "data_description": {
                     "enable_pv_optimization": "Usa excedente FV para controlar bomba/calefacción",
                     "pv_surplus_sensor": "Sensor de excedente / exportación FV en W",
+                    "pv_house_load_sensor": "Carga actual opcional de la casa en vatios. Si se configura, la potencia FV se interpreta como producción y el excedente disponible se calcula internamente como producción - (carga de la casa - carga de la piscina).",
                     "pv_on_threshold": "Encender por encima de este valor (por defecto: 1000W)",
                     "pv_off_threshold": "Apagar por debajo de este valor (por defecto: 500W)",
                     "pv_smooth_window_seconds": "Ventana en segundos usada para el suavizado exponencial del valor PV. 0 desactiva el suavizado.",

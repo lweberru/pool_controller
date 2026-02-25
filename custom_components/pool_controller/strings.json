@@ -203,6 +203,7 @@
         "data": {
           "enable_pv_optimization": "Enable PV optimization",
           "pv_surplus_sensor": "PV power sensor",
+          "pv_house_load_sensor": "House load sensor (W, optional)",
           "pv_on_threshold": "PV ON threshold (W)",
           "pv_off_threshold": "PV OFF threshold (W)",
           "pv_smooth_window_seconds": "PV smoothing window (s)",
@@ -212,6 +213,7 @@
         "data_description": {
           "enable_pv_optimization": "Only run pump/heating when PV surplus is available",
           "pv_surplus_sensor": "Sensor reporting PV surplus/production in watts",
+          "pv_house_load_sensor": "Optional current house load in watts. If set, PV power is treated as production and internal surplus is calculated as production - (house load - pool load).",
           "pv_on_threshold": "Turns main pump ON when PV power >= this value (default: 1000)",
           "pv_off_threshold": "Turns main pump OFF when PV power <= this value (default: 500)",
           "pv_smooth_window_seconds": "Window in seconds used for exponential smoothing of the PV value. Set 0 to disable smoothing.",
@@ -471,6 +473,7 @@
         "data": {
           "enable_pv_optimization": "Enable PV optimization",
           "pv_surplus_sensor": "PV power sensor",
+          "pv_house_load_sensor": "House load sensor (W, optional)",
           "pv_on_threshold": "PV ON threshold (W)",
           "pv_off_threshold": "PV OFF threshold (W)",
           "pv_smooth_window_seconds": "PV smoothing window (s)",
@@ -480,6 +483,7 @@
         "data_description": {
           "enable_pv_optimization": "Only run pump/heating when PV surplus is available",
           "pv_surplus_sensor": "Sensor reporting PV surplus/production in watts",
+          "pv_house_load_sensor": "Optional current house load in watts. If set, PV power is treated as production and internal surplus is calculated as production - (house load - pool load).",
           "pv_on_threshold": "Turns main pump ON when PV power >= this value (default: 1000)",
           "pv_off_threshold": "Turns main pump OFF when PV power <= this value (default: 500)",
           "pv_smooth_window_seconds": "Window in seconds used for exponential smoothing of the PV value. Set 0 to disable smoothing.",

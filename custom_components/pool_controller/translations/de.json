@@ -205,6 +205,7 @@
                 "data": {
                     "enable_pv_optimization": "PV-Optimierung aktivieren",
                     "pv_surplus_sensor": "PV-Leistungssensor",
+                    "pv_house_load_sensor": "Hauslastsensor (W, optional)",
                     "pv_on_threshold": "PV EIN-Schwelle (W)",
                     "pv_off_threshold": "PV AUS-Schwelle (W)",
                     "pv_smooth_window_seconds": "PV-Glättungsfenster (s)",
@@ -214,6 +215,7 @@
                 "data_description": {
                     "enable_pv_optimization": "Nutzt PV-Überschuss für intelligente Pumpen-/Heizungssteuerung (nur bei ausreichend Solarproduktion)",
                     "pv_surplus_sensor": "Sensor für PV-Überschuss bzw. Einspeisung in Watt (negativ = Bezug, positiv = Einspeisung)",
+                    "pv_house_load_sensor": "Optionale aktuelle Hauslast in Watt. Wenn gesetzt, wird der PV-Leistungssensor als Produktion interpretiert und der verfügbare Überschuss intern als Produktion - (Hauslast - Poollast) berechnet.",
                     "pv_on_threshold": "Pumpe einschalten bei Überschuss über diesem Wert (Standard: 1000W)",
                     "pv_off_threshold": "Pumpe ausschalten bei Überschuss unter diesem Wert (Standard: 500W, Hysterese)",
                     "pv_smooth_window_seconds": "Zeitfenster in Sekunden, das für die exponentielle Glättung des PV-Werts verwendet wird. 0 deaktiviert die Glättung.",
@@ -475,6 +477,7 @@
                 "data": {
                     "enable_pv_optimization": "PV-Optimierung aktivieren",
                     "pv_surplus_sensor": "PV-Leistungssensor",
+                    "pv_house_load_sensor": "Hauslastsensor (W, optional)",
                     "pv_on_threshold": "PV EIN-Schwelle (W)",
                     "pv_off_threshold": "PV AUS-Schwelle (W)",
                     "pv_smooth_window_seconds": "PV-Glättungsfenster (s)",
@@ -484,6 +487,7 @@
                 "data_description": {
                     "enable_pv_optimization": "Nutzt PV-Überschuss für intelligente Pumpen-/Heizungssteuerung (nur bei ausreichend Solarproduktion)",
                     "pv_surplus_sensor": "Sensor für PV-Überschuss bzw. Einspeisung in Watt (negativ = Bezug, positiv = Einspeisung)",
+                    "pv_house_load_sensor": "Optionale aktuelle Hauslast in Watt. Wenn gesetzt, wird der PV-Leistungssensor als Produktion interpretiert und der verfügbare Überschuss intern als Produktion - (Hauslast - Poollast) berechnet.",
                     "pv_on_threshold": "Pumpe einschalten bei Überschuss über diesem Wert (Standard: 1000W)",
                     "pv_off_threshold": "Pumpe ausschalten bei Überschuss unter diesem Wert (Standard: 500W, Hysterese)",
                     "pv_smooth_window_seconds": "Zeitfenster in Sekunden, das für die exponentielle Glättung des PV-Werts verwendet wird. 0 deaktiviert die Glättung.",

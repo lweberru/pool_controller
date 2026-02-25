@@ -2,6 +2,11 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.3.23] - 2026-02-25
+- Add optional `pv_house_load_sensor` to compute effective PV surplus internally without templates.
+- Improve net-cost calculation fallback when no `solar_energy_entity_daily` is set by integrating PV overlap from power sensors.
+- Keep new PV credit state persistent across restarts and update translations/docs accordingly.
+
 ## [2.3.7] - 2026-01-31
 - Add pool-specific energy inputs for costs (use pool kWh instead of whole-house sensors).
 

@@ -139,6 +139,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self._cost_daily_date = None
         self._cost_daily_accum = 0.0
         self._cost_daily_feed_in_loss_accum = 0.0
+        self._cost_daily_pv_credit_accum = 0.0
+        self._cost_last_tick_at = None
         # Net daily cost tracking (non-decreasing within day)
         self._cost_net_daily_last_value = None
         self._cost_net_daily_date = None
@@ -260,6 +262,11 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     self._cost_daily_feed_in_loss_accum = float(entry.options.get(OPT_KEY_COST_DAILY_FEED_IN_LOSS_ACCUM))
             except Exception:
                 self._cost_daily_feed_in_loss_accum = 0.0
+            try:
+                if entry.options.get(OPT_KEY_COST_DAILY_PV_CREDIT_ACCUM) is not None:
+                    self._cost_daily_pv_credit_accum = float(entry.options.get(OPT_KEY_COST_DAILY_PV_CREDIT_ACCUM))
+            except Exception:
+                self._cost_daily_pv_credit_accum = 0.0
 
             # Derived cost aggregation (best effort)
             try:
@@ -461,8 +468,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             self._cost_daily_date = None
             self._cost_daily_accum = 0.0
             self._cost_daily_feed_in_loss_accum = 0.0
+            self._cost_daily_pv_credit_accum = 0.0
             self._cost_persist_last_saved = None
             self._cost_persist_snapshot = None
+            self._cost_last_tick_at = None
             self._cost_net_daily_last_value = None
             self._cost_net_daily_date = None
 
@@ -614,6 +623,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             self._cost_daily_date,
             self._cost_daily_accum,
             self._cost_daily_feed_in_loss_accum,
+            self._cost_daily_pv_credit_accum,
         )
         if self._cost_persist_snapshot == snapshot:
             return
@@ -631,6 +641,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         opts[OPT_KEY_COST_DAILY_DATE] = self._cost_daily_date
         opts[OPT_KEY_COST_DAILY_ACCUM] = self._cost_daily_accum
         opts[OPT_KEY_COST_DAILY_FEED_IN_LOSS_ACCUM] = self._cost_daily_feed_in_loss_accum
+        opts[OPT_KEY_COST_DAILY_PV_CREDIT_ACCUM] = self._cost_daily_pv_credit_accum
 
         await self._async_update_entry_options(opts)
         self._cost_persist_last_saved = now
@@ -1492,6 +1503,29 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             load_kwh_monthly = None
             load_kwh_yearly = None
 
+            # Effective PV surplus for pool usage (W):
+            # - default: pv_surplus_sensor already reports surplus/export in W
+            # - if pv_house_load_sensor is configured: treat pv_surplus_sensor as PV production in W
+            #   and compute surplus as production - (house_load - pool_load)
+            pv_power_raw = self._get_float(conf.get(CONF_PV_SURPLUS_SENSOR))
+            pv_house_load_w = self._get_float(conf.get(CONF_PV_HOUSE_LOAD_SENSOR))
+            total_pool_power_w = None
+            if main_power is not None or aux_power is not None:
+                total_pool_power_w = float(main_power or 0.0) + float(aux_power or 0.0)
+            pv_surplus_for_pool_w = None
+            if pv_power_raw is not None:
+                try:
+                    pv_input_w = float(pv_power_raw)
+                    if pv_house_load_w is not None:
+                        house_wo_pool_w = max(0.0, float(pv_house_load_w))
+                        if total_pool_power_w is not None:
+                            house_wo_pool_w = max(0.0, house_wo_pool_w - float(total_pool_power_w))
+                        pv_surplus_for_pool_w = max(0.0, pv_input_w - house_wo_pool_w)
+                    else:
+                        pv_surplus_for_pool_w = max(0.0, pv_input_w)
+                except Exception:
+                    pv_surplus_for_pool_w = None
+
             # Derive month/year totals from daily sensors when not provided
             derived_changed = False
             if load_kwh_daily is not None and (load_kwh_monthly is None or load_kwh_yearly is None):
@@ -1549,8 +1583,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             if last_date != today:
                 self._cost_daily_accum = 0.0
                 self._cost_daily_feed_in_loss_accum = 0.0
+                self._cost_daily_pv_credit_accum = 0.0
                 self._cost_daily_date = today.strftime("%Y-%m-%d")
                 self._cost_daily_last_grid_kwh = cost_kwh_value
+                self._cost_last_tick_at = now
                 cost_daily_changed = True
 
             if cost_kwh_value is not None and self._cost_daily_last_grid_kwh is None:
@@ -1575,6 +1611,38 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     cost_daily_changed = True
                 self._cost_daily_last_grid_kwh = cost_kwh_value
 
+            # Fallback PV credit/feed-in-loss integration from instantaneous power.
+            # This is used when no dedicated daily solar kWh sensor is configured.
+            try:
+                last_tick = getattr(self, "_cost_last_tick_at", None)
+                elapsed_h = 0.0
+                if last_tick is not None:
+                    elapsed_h = max(0.0, (now - last_tick).total_seconds() / 3600.0)
+                self._cost_last_tick_at = now
+
+                if elapsed_h > 0.0:
+                    total_power_w_for_cost = None
+                    if main_power is not None or aux_power is not None:
+                        total_power_w_for_cost = float(main_power or 0.0) + float(aux_power or 0.0)
+
+                    if total_power_w_for_cost is not None and total_power_w_for_cost > 0.0:
+                        pv_surplus_w = max(0.0, float(pv_surplus_for_pool_w or 0.0))
+                        overlap_w = min(float(total_power_w_for_cost), pv_surplus_w)
+
+                        if overlap_w > 0.0:
+                            if electricity_price is not None:
+                                pv_credit_inc = (overlap_w / 1000.0) * float(electricity_price) * elapsed_h
+                                if pv_credit_inc > 0.0:
+                                    self._cost_daily_pv_credit_accum = float(self._cost_daily_pv_credit_accum or 0.0) + pv_credit_inc
+                                    cost_daily_changed = True
+                            if feed_in_tariff is not None:
+                                feed_in_loss_inc = (overlap_w / 1000.0) * float(feed_in_tariff) * elapsed_h
+                                if feed_in_loss_inc > 0.0:
+                                    self._cost_daily_feed_in_loss_accum = float(self._cost_daily_feed_in_loss_accum or 0.0) + feed_in_loss_inc
+                                    cost_daily_changed = True
+            except Exception:
+                pass
+
             if self._cost_daily_date is not None:
                 try:
                     energy_cost_daily = float(self._cost_daily_accum or 0.0)
@@ -1593,6 +1661,11 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                                 )
                         except Exception:
                             energy_cost_net_daily = float(energy_cost_daily or 0.0) + float(energy_feed_in_loss_daily or 0.0)
+                    elif electricity_price is not None:
+                        energy_cost_net_daily = max(
+                            0.0,
+                            float(energy_cost_daily or 0.0) - float(self._cost_daily_pv_credit_accum or 0.0),
+                        )
                     else:
                         energy_cost_net_daily = float(energy_cost_daily or 0.0) + float(energy_feed_in_loss_daily or 0.0)
                 except Exception:
@@ -1925,7 +1998,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
             # PV sensor logic
             enable_pv = conf.get(CONF_ENABLE_PV_OPTIMIZATION, False)
-            pv_raw = self._get_float(conf.get(CONF_PV_SURPLUS_SENSOR))
+            pv_raw = pv_surplus_for_pool_w
             pv_val = pv_raw if enable_pv else None
 
             # Net cost and feed-in loss (best effort). pv_raw is treated as surplus (exportable) power in W.

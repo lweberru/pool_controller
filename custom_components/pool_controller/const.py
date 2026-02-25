@@ -21,6 +21,7 @@ CONF_CHLORINE_SENSOR = "chlorine_sensor"
 CONF_SALT_SENSOR = "salt_sensor"
 CONF_TDS_SENSOR = "tds_sensor"
 CONF_PV_SURPLUS_SENSOR = "pv_surplus_sensor"
+CONF_PV_HOUSE_LOAD_SENSOR = "pv_house_load_sensor"
 CONF_POOL_CALENDAR = "pool_calendar"
 CONF_HOLIDAY_CALENDAR = "holiday_calendar"
 # Weather guard for calendar events
@@ -272,6 +273,7 @@ OPT_KEY_COST_DAILY_LAST_SOLAR_KWH = "cost_daily_last_solar_kwh"
 OPT_KEY_COST_DAILY_DATE = "cost_daily_date"
 OPT_KEY_COST_DAILY_ACCUM = "cost_daily_accum"
 OPT_KEY_COST_DAILY_FEED_IN_LOSS_ACCUM = "cost_daily_feed_in_loss_accum"
+OPT_KEY_COST_DAILY_PV_CREDIT_ACCUM = "cost_daily_pv_credit_accum"
 
 # Derived cost aggregation (month/year from daily cost)
 OPT_KEY_DERIVED_COST_DAILY_LAST_VALUE = "derived_cost_daily_last_value"
