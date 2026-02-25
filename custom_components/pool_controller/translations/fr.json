@@ -199,7 +199,7 @@
                 }
             },
             "pv": {
-                "title": "Surplus PV",
+                "title": "Puissance PV",
                 "description": "Configurer l’optimisation PV.",
                 "submit": "Terminer",
                 "data": {
@@ -213,9 +213,9 @@
                     "pv_min_run_minutes": "Durée minimale PV (min)"
                 },
                 "data_description": {
-                    "enable_pv_optimization": "N’exécuter pompe/chauffage que lorsque le surplus PV est disponible",
-                    "pv_surplus_sensor": "Capteur indiquant le surplus/production PV en watts",
-                    "pv_house_load_sensor": "Charge actuelle de la maison en watts (optionnelle). Si renseignée, la puissance PV est interprétée comme la production et le surplus disponible est calculé en interne comme production - (charge maison - charge piscine).",
+                    "enable_pv_optimization": "Utiliser la production PV pour piloter pompe/chauffage",
+                    "pv_surplus_sensor": "Capteur indiquant la production PV actuelle en watts",
+                    "pv_house_load_sensor": "Charge actuelle de la maison en watts (optionnelle). Si renseignée, le surplus disponible est calculé en interne comme production - (charge maison - charge piscine).",
                     "pv_on_threshold": "Allume la pompe principale quand PV >= cette valeur (défaut : 1000)",
                     "pv_off_threshold": "Éteint la pompe principale quand PV <= cette valeur (défaut : 500)",
                     "pv_smooth_window_seconds": "Fenêtre en secondes utilisée pour le lissage exponentiel de la valeur PV. 0 désactive le lissage.",
@@ -267,7 +267,7 @@
                     "calendars": "Calendriers & heures calmes",
                     "filter": "Filtration",
                     "durations": "Durées",
-                    "pv": "Surplus PV",
+                    "pv": "Puissance PV",
                     "costs": "Coûts d’électricité",
                     "all": "Configuration guidée (toutes les étapes)"
                 }
@@ -471,7 +471,7 @@
                 }
             },
             "pv": {
-                "title": "Surplus PV",
+                "title": "Puissance PV",
                 "description": "Configuration de l'optimisation PV.",
                 "submit": "Enregistrer",
                 "data": {
@@ -485,9 +485,9 @@
                     "pv_min_run_minutes": "Durée minimale PV (min)"
                 },
                 "data_description": {
-                    "enable_pv_optimization": "Utilise le surplus PV pour contrôler pompe/chauffage",
-                    "pv_surplus_sensor": "Capteur du surplus / injection réseau en W",
-                    "pv_house_load_sensor": "Charge actuelle de la maison en watts (optionnelle). Si renseignée, la puissance PV est interprétée comme la production et le surplus disponible est calculé en interne comme production - (charge maison - charge piscine).",
+                    "enable_pv_optimization": "Utiliser la production PV pour piloter pompe/chauffage",
+                    "pv_surplus_sensor": "Capteur indiquant la production PV actuelle en watts",
+                    "pv_house_load_sensor": "Charge actuelle de la maison en watts (optionnelle). Si renseignée, le surplus disponible est calculé en interne comme production - (charge maison - charge piscine).",
                     "pv_on_threshold": "Allumer au-dessus de cette valeur (par défaut : 1000W)",
                     "pv_off_threshold": "Éteindre en dessous de cette valeur (par défaut : 500W)",
                     "pv_smooth_window_seconds": "Fenêtre en secondes utilisée pour lisser le signal PV (exponentiel). 0 désactive le lissage.",

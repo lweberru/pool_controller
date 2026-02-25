@@ -197,8 +197,8 @@
         }
       },
       "pv": {
-        "title": "PV surplus",
-        "description": "Optional PV optimization: run pump/heating when PV surplus is available. Use ON/OFF thresholds as hysteresis.",
+        "title": "PV power",
+        "description": "Optional PV optimization: use PV production for pump/heating control. If house load is set, available surplus is calculated internally.",
         "submit": "Finish",
         "data": {
           "enable_pv_optimization": "Enable PV optimization",
@@ -211,8 +211,8 @@
           "pv_min_run_minutes": "PV minimum run (min)"
         },
         "data_description": {
-          "enable_pv_optimization": "Only run pump/heating when PV surplus is available",
-          "pv_surplus_sensor": "Sensor reporting PV surplus/production in watts",
+          "enable_pv_optimization": "Use PV production for pump/heating control",
+          "pv_surplus_sensor": "Sensor reporting current PV production in watts",
           "pv_house_load_sensor": "Optional current house load in watts. If set, PV power is treated as production and internal surplus is calculated as production - (house load - pool load).",
           "pv_on_threshold": "Turns main pump ON when PV power >= this value (default: 1000)",
           "pv_off_threshold": "Turns main pump OFF when PV power <= this value (default: 500)",
@@ -265,7 +265,7 @@
           "calendars": "Calendars & quiet times",
           "filter": "Filter settings",
           "durations": "Durations",
-          "pv": "PV surplus",
+          "pv": "PV power",
           "costs": "Electricity costs",
           "all": "Guided setup (all steps)"
         }
@@ -467,7 +467,7 @@
         }
       },
       "pv": {
-        "title": "PV surplus",
+        "title": "PV power",
         "description": "PV optimization settings.",
         "submit": "Save",
         "data": {
@@ -481,8 +481,8 @@
           "pv_min_run_minutes": "PV minimum run (min)"
         },
         "data_description": {
-          "enable_pv_optimization": "Only run pump/heating when PV surplus is available",
-          "pv_surplus_sensor": "Sensor reporting PV surplus/production in watts",
+          "enable_pv_optimization": "Use PV production for pump/heating control",
+          "pv_surplus_sensor": "Sensor reporting current PV production in watts",
           "pv_house_load_sensor": "Optional current house load in watts. If set, PV power is treated as production and internal surplus is calculated as production - (house load - pool load).",
           "pv_on_threshold": "Turns main pump ON when PV power >= this value (default: 1000)",
           "pv_off_threshold": "Turns main pump OFF when PV power <= this value (default: 500)",

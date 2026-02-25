@@ -199,7 +199,7 @@
                 }
             },
             "pv": {
-                "title": "PV-Überschuss",
+                "title": "PV-Leistung",
                 "description": "PV-Optimierung konfigurieren.",
                 "submit": "Speichern",
                 "data": {
@@ -213,9 +213,9 @@
                     "pv_min_run_minutes": "PV Mindestlaufzeit (min)"
                 },
                 "data_description": {
-                    "enable_pv_optimization": "Nutzt PV-Überschuss für intelligente Pumpen-/Heizungssteuerung (nur bei ausreichend Solarproduktion)",
-                    "pv_surplus_sensor": "Sensor für PV-Überschuss bzw. Einspeisung in Watt (negativ = Bezug, positiv = Einspeisung)",
-                    "pv_house_load_sensor": "Optionale aktuelle Hauslast in Watt. Wenn gesetzt, wird der PV-Leistungssensor als Produktion interpretiert und der verfügbare Überschuss intern als Produktion - (Hauslast - Poollast) berechnet.",
+                    "enable_pv_optimization": "Nutzt PV-Produktion für intelligente Pumpen-/Heizungssteuerung",
+                    "pv_surplus_sensor": "Sensor für aktuelle PV-Produktion in Watt",
+                    "pv_house_load_sensor": "Optionale aktuelle Hauslast in Watt. Wenn gesetzt, wird der verfügbare Überschuss intern als Produktion - (Hauslast - Poollast) berechnet.",
                     "pv_on_threshold": "Pumpe einschalten bei Überschuss über diesem Wert (Standard: 1000W)",
                     "pv_off_threshold": "Pumpe ausschalten bei Überschuss unter diesem Wert (Standard: 500W, Hysterese)",
                     "pv_smooth_window_seconds": "Zeitfenster in Sekunden, das für die exponentielle Glättung des PV-Werts verwendet wird. 0 deaktiviert die Glättung.",
@@ -267,7 +267,7 @@
                     "calendars": "Kalender & Ruhezeiten",
                     "filter": "Filter",
                     "durations": "Dauern",
-                    "pv": "PV-Überschuss",
+                    "pv": "PV-Leistung",
                     "costs": "Stromkosten",
                     "all": "Geführtes Setup (alle Schritte)"
                 }
@@ -471,7 +471,7 @@
                 }
             },
             "pv": {
-                "title": "PV-Überschuss",
+                "title": "PV-Leistung",
                 "description": "PV-Optimierung konfigurieren.",
                 "submit": "Speichern",
                 "data": {
@@ -485,9 +485,9 @@
                     "pv_min_run_minutes": "PV Mindestlaufzeit (min)"
                 },
                 "data_description": {
-                    "enable_pv_optimization": "Nutzt PV-Überschuss für intelligente Pumpen-/Heizungssteuerung (nur bei ausreichend Solarproduktion)",
-                    "pv_surplus_sensor": "Sensor für PV-Überschuss bzw. Einspeisung in Watt (negativ = Bezug, positiv = Einspeisung)",
-                    "pv_house_load_sensor": "Optionale aktuelle Hauslast in Watt. Wenn gesetzt, wird der PV-Leistungssensor als Produktion interpretiert und der verfügbare Überschuss intern als Produktion - (Hauslast - Poollast) berechnet.",
+                    "enable_pv_optimization": "Nutzt PV-Produktion für intelligente Pumpen-/Heizungssteuerung",
+                    "pv_surplus_sensor": "Sensor für aktuelle PV-Produktion in Watt",
+                    "pv_house_load_sensor": "Optionale aktuelle Hauslast in Watt. Wenn gesetzt, wird der verfügbare Überschuss intern als Produktion - (Hauslast - Poollast) berechnet.",
                     "pv_on_threshold": "Pumpe einschalten bei Überschuss über diesem Wert (Standard: 1000W)",
                     "pv_off_threshold": "Pumpe ausschalten bei Überschuss unter diesem Wert (Standard: 500W, Hysterese)",
                     "pv_smooth_window_seconds": "Zeitfenster in Sekunden, das für die exponentielle Glättung des PV-Werts verwendet wird. 0 deaktiviert die Glättung.",

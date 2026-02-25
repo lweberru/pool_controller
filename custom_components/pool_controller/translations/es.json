@@ -199,7 +199,7 @@
                 }
             },
             "pv": {
-                "title": "Excedente FV",
+                "title": "Potencia FV",
                 "description": "Configura la optimización FV.",
                 "submit": "Finalizar",
                 "data": {
@@ -213,9 +213,9 @@
                     "pv_min_run_minutes": "Tiempo mínimo FV (min)"
                 },
                 "data_description": {
-                    "enable_pv_optimization": "Solo ejecutar bomba/calefacción con excedente FV",
-                    "pv_surplus_sensor": "Sensor que informa excedente/producción en vatios",
-                    "pv_house_load_sensor": "Carga actual opcional de la casa en vatios. Si se configura, la potencia FV se interpreta como producción y el excedente disponible se calcula internamente como producción - (carga de la casa - carga de la piscina).",
+                    "enable_pv_optimization": "Usar la producción FV para controlar bomba/calefacción",
+                    "pv_surplus_sensor": "Sensor que informa la producción FV actual en vatios",
+                    "pv_house_load_sensor": "Carga actual opcional de la casa en vatios. Si se configura, el excedente disponible se calcula internamente como producción - (carga de la casa - carga de la piscina).",
                     "pv_on_threshold": "Enciende la bomba principal cuando FV >= este valor (predeterminado: 1000)",
                     "pv_off_threshold": "Apaga la bomba principal cuando FV <= este valor (predeterminado: 500)",
                     "pv_smooth_window_seconds": "Ventana en segundos usada para el suavizado exponencial del valor FV. 0 desactiva el suavizado.",
@@ -267,7 +267,7 @@
                     "calendars": "Calendarios y horas de silencio",
                     "filter": "Filtrado",
                     "durations": "Duraciones",
-                    "pv": "Excedente FV",
+                    "pv": "Potencia FV",
                     "costs": "Costes eléctricos",
                     "all": "Configuración guiada (todos los pasos)"
                 }
@@ -471,7 +471,7 @@
                 }
             },
             "pv": {
-                "title": "Excedente FV",
+                "title": "Potencia FV",
                 "description": "Configuración de optimización FV.",
                 "submit": "Guardar",
                 "data": {
@@ -485,9 +485,9 @@
                     "pv_min_run_minutes": "Duración mínima PV (min)"
                 },
                 "data_description": {
-                    "enable_pv_optimization": "Usa excedente FV para controlar bomba/calefacción",
-                    "pv_surplus_sensor": "Sensor de excedente / exportación FV en W",
-                    "pv_house_load_sensor": "Carga actual opcional de la casa en vatios. Si se configura, la potencia FV se interpreta como producción y el excedente disponible se calcula internamente como producción - (carga de la casa - carga de la piscina).",
+                    "enable_pv_optimization": "Usar la producción FV para controlar bomba/calefacción",
+                    "pv_surplus_sensor": "Sensor que informa la producción FV actual en vatios",
+                    "pv_house_load_sensor": "Carga actual opcional de la casa en vatios. Si se configura, el excedente disponible se calcula internamente como producción - (carga de la casa - carga de la piscina).",
                     "pv_on_threshold": "Encender por encima de este valor (por defecto: 1000W)",
                     "pv_off_threshold": "Apagar por debajo de este valor (por defecto: 500W)",
                     "pv_smooth_window_seconds": "Ventana en segundos usada para el suavizado exponencial del valor PV. 0 desactiva el suavizado.",

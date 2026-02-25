@@ -50,8 +50,9 @@ For cost calculation, the integration prefers daily kWh sensors (if configured).
 - **Gross cost**: grid energy × price (no PV credit applied).
 - **Net cost**: gross minus PV share (if `solar_energy_entity_daily` is configured).
 
-If `pv_house_load_sensor` is set, `pv_surplus_sensor` is interpreted as PV production power and the integration computes
-available PV surplus internally as `production - (house_load - pool_load)`.
+`pv_surplus_sensor` is interpreted as current PV production power (W).
+If `pv_house_load_sensor` is also set, the integration computes available PV surplus internally as
+`production - (house_load - pool_load)`.
 
 **Fallbacks:**
 - If `solar_energy_entity_daily` is not configured, net daily cost uses a time-weighted PV credit derived from instantaneous overlap between

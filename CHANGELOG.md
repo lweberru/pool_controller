@@ -2,6 +2,11 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.3.26] - 2026-02-25
+- Clarify PV configuration semantics in config/options UI and docs: `pv_surplus_sensor` is treated as current PV production.
+- Keep `pv_house_load_sensor` as optional input to compute available surplus internally as `production - (house_load - pool_load)`.
+- Harmonize PV section labels across translations from "PV surplus" to "PV power".
+
 ## [2.3.25] - 2026-02-25
 - Make pause a true hard stop: while pause is active, main/pump are forced off and no run reasons can keep them running.
 - Update `stop_bathing` to also suppress calendar-driven reactivation for the currently ongoing event (pool stays off until event end unless started manually).
