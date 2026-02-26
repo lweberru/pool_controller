@@ -2,6 +2,10 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.3.27] - 2026-02-26
+- Release refresh for HACS distribution.
+- No functional code changes; carries forward the PV sensor semantics clarification from `2.3.26`.
+
 ## [2.3.26] - 2026-02-25
 - Clarify PV configuration semantics in config/options UI and docs: `pv_surplus_sensor` is treated as current PV production.
 - Keep `pv_house_load_sensor` as optional input to compute available surplus internally as `production - (house_load - pool_load)`.
