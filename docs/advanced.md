@@ -189,6 +189,33 @@ When connected to solar:
 - Heating stops when excess drops below OFF threshold
 - Maximizes self-consumption of solar energy
 
+## Power-Saving Mode (Stromsparen)
+
+Power-saving mode is a dedicated operating strategy for **cost-first** pool control.
+It keeps safety/maintenance constraints intact (e.g., frost protection), but shifts normal runtime decisions toward lower-cost windows with better PV availability.
+
+### How the mode works
+
+- Activation: via climate preset (`Stromsparen`) or services (`start_power_saving` / `stop_power_saving`).
+- Availability: only offered when required sensors/signals are available; it auto-disables if required input disappears.
+- Runtime strategy:
+	- Prioritize pump/heating stages when PV conditions are sufficient.
+	- If an auto-filter run is due but PV is currently insufficient, the run can be deferred.
+	- Deferred run is forced at/after the configured deadline hour (`power_saving_filter_deadline_hour`, default `16`).
+
+### Power-Saving vs Auto mode
+
+**Main advantage of Power-Saving mode:**
+- Usually the **lowest net operating cost**, because runtime is shifted away from low-PV/high-grid-cost periods whenever possible.
+
+**Main disadvantage vs Auto mode:**
+- Runtime timing is less strict and can be deferred; this can reduce predictability compared to Auto mode, which follows regular scheduling more directly.
+
+### When to use which mode
+
+- Use **Power-Saving** when minimizing energy cost and maximizing PV self-consumption are top priority.
+- Use **Auto** when you prefer steady, predictable timing behavior over maximum cost optimization.
+
 ## Quiet Hours
 
 Prevents noisy operations during sensitive times:

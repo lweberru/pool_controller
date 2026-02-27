@@ -4,6 +4,19 @@ This section explains how the integration calculates costs, which sensors are re
 
 The goal of this part of the integration is to make the pool’s (sometimes significant) electricity costs visible and to quantify the impact of a PV system and PV‑aligned pool operation. The credit system contributes to cost reduction by merging and shifting runs, while scheduled bathing with preheat still ensures the desired target temperature is reached on time.
 
+## Cost Tip: Use Power-Saving Mode for Lowest Running Cost
+
+If your priority is **minimum operating cost**, prefer the **power-saving mode** (`Stromsparen`) for daily operation.
+
+Why it is usually the cheapest mode:
+- It prioritizes runtime when PV is available.
+- It defers automatic filter runs while PV is insufficient.
+- Deferred filter runs are only forced at/after the configured deadline hour (`power_saving_filter_deadline_hour`), reducing expensive grid-powered runtime during high-price windows.
+
+Practical recommendation:
+- Use **Auto mode** when comfort and strict timing are more important.
+- Use **Power-saving mode** when cost minimization and PV self-consumption are more important.
+
 ## Basics
 
 Costs are based on **energy (kWh)** × **electricity price (€/kWh)**. The price can be **fixed** or **dynamic**:
