@@ -78,6 +78,7 @@ pool_controller:
 - **Max Merged Run**: Upper limit for merged runs
 - **Minimum Credit**: Runs shorter than this do **not** count as credit
 - **Credit Sources**: Which run reasons count as credit (filter/bathing/chlorine/preheat/pv/frost/thermostat)
+- **Power-saving filter deadline hour**: Hour of day (0-23) when deferred auto-filter runs are forced in power-saving mode (default: 16)
 
 ### Step 9: PV Solar Integration
 - **PV Surplus Sensor**: Entity measuring excess solar production (W)
@@ -110,6 +111,7 @@ pool_controller:
 | Max Merged Run | 40 | 5-360 min | Upper limit for a merged run |
 | Minimum Credit | 5 | 0-60 min | Runs shorter than this do not count as credit |
 | Credit Sources | bathing, filter, frost, preheat, pv, thermostat, chlorine | list | Which run reasons contribute credit |
+| Power-saving Filter Deadline Hour | 16 | 0-23 | In power-saving mode, deferred auto-filter runs are forced at/after this hour |
 | Bathing Duration | 60 | 5-480 min | Default bathing session length |
 | Pause Duration | 60 | 5-480 min | Default pause duration |
 | Frost Start Temp | 2°C | -20 to 10°C | Below this outdoor temperature `frost_danger` can become active |

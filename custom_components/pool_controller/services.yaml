@@ -127,3 +127,21 @@ stop_maintenance:
       integration: pool_controller
     entity:
       domain: climate
+
+start_power_saving:
+  name: Start Power Saving
+  description: Enable PV-prioritized power-saving mode
+  target:
+    device:
+      integration: pool_controller
+    entity:
+      domain: climate
+
+stop_power_saving:
+  name: Stop Power Saving
+  description: Disable PV-prioritized power-saving mode
+  target:
+    device:
+      integration: pool_controller
+    entity:
+      domain: climate

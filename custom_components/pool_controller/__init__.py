@@ -44,6 +44,7 @@ from .const import (
     OPT_KEY_TARGET_TEMP,
     OPT_KEY_AWAY_ACTIVE,
     OPT_KEY_AWAY_PREV_TARGET,
+    OPT_KEY_POWER_SAVING_ACTIVE,
     OPT_KEY_DERIVED_COST_DAILY_LAST_VALUE,
     OPT_KEY_DERIVED_COST_DAILY_LAST_DATE,
     OPT_KEY_DERIVED_COST_MONTH_TOTAL,
@@ -85,6 +86,7 @@ _LAST_OPTIONS_KEY = "__last_options"
 _TRANSIENT_OPTION_KEYS = {
     OPT_KEY_AWAY_ACTIVE,
     OPT_KEY_AWAY_PREV_TARGET,
+    OPT_KEY_POWER_SAVING_ACTIVE,
     OPT_KEY_TARGET_TEMP,
     OPT_KEY_MANUAL_UNTIL,
     OPT_KEY_MANUAL_TYPE,
@@ -167,6 +169,8 @@ SERVICE_START_MAINTENANCE = "start_maintenance"
 SERVICE_STOP_MAINTENANCE = "stop_maintenance"
 SERVICE_START_AWAY = "start_away"
 SERVICE_STOP_AWAY = "stop_away"
+SERVICE_START_POWER_SAVING = "start_power_saving"
+SERVICE_STOP_POWER_SAVING = "stop_power_saving"
 
 
 # Korrektes Schema: target wird von HA automatisch hinzugefügt, nicht im Schema definieren!
@@ -358,6 +362,22 @@ def _ensure_services_registered(hass: HomeAssistant):
         await coordinator.set_away(False)
         await coordinator.async_request_refresh()
 
+    async def handle_start_power_saving(call):
+        coordinator = _resolve_coordinator(hass, call)
+        if not coordinator:
+            _warn_no_target("start_power_saving", call)
+            return
+        await coordinator.set_power_saving(True)
+        await coordinator.async_request_refresh()
+
+    async def handle_stop_power_saving(call):
+        coordinator = _resolve_coordinator(hass, call)
+        if not coordinator:
+            _warn_no_target("stop_power_saving", call)
+            return
+        await coordinator.set_power_saving(False)
+        await coordinator.async_request_refresh()
+
     hass.services.async_register(
         DOMAIN,
         SERVICE_START_PAUSE,
@@ -430,6 +450,19 @@ def _ensure_services_registered(hass: HomeAssistant):
         DOMAIN,
         SERVICE_STOP_AWAY,
         handle_stop_away,
+        schema=STOP_SCHEMA,
+    )
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_START_POWER_SAVING,
+        handle_start_power_saving,
+        schema=STOP_SCHEMA,
+    )
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_STOP_POWER_SAVING,
+        handle_stop_power_saving,
         schema=STOP_SCHEMA,
     )
 

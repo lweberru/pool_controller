@@ -114,6 +114,28 @@ data:
     entity_id: climate.my_pool
 ```
 
+## Power-saving mode
+
+```yaml
+# Enable power-saving mode (PV-prioritized operation)
+action: pool_controller.start_power_saving
+data:
+  target:
+    entity_id: climate.my_pool
+
+# Disable power-saving mode
+action: pool_controller.stop_power_saving
+data:
+  target:
+    entity_id: climate.my_pool
+```
+
+**Behavior**:
+- Keeps frost protection and required safety behavior active.
+- Prioritizes operation when PV power is sufficient.
+- Automatic filter cycles can be deferred and are forced at the configured deadline hour.
+- Availability is sensor-dependent; mode is hidden/disabled when required signals are missing.
+
 ## Alternative: target by device_id
 
 ```yaml

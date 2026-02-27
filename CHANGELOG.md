@@ -2,6 +2,13 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.3.28] - 2026-02-27
+- Add new `Stromsparen` (power-saving) operation mode with climate preset integration and dedicated start/stop services.
+- Add `power_saving_active` and `power_saving_available` binary sensors for dashboard/automation visibility.
+- Add configurable `power_saving_filter_deadline_hour` to filter settings (setup/options), default `16`.
+- In power-saving mode, defer auto-filter runs while PV is insufficient and force the run at/after the configured deadline.
+- Update translations (de/en/es/fr) and documentation for the new mode and filter deadline option.
+
 ## [2.3.27] - 2026-02-26
 - Release refresh for HACS distribution.
 - No functional code changes; carries forward the PV sensor semantics clarification from `2.3.26`.

@@ -172,7 +172,8 @@
                     "min_gap_minutes": "Separación mínima entre ciclos (minutos)",
                     "max_merge_run_minutes": "Máximo ciclo combinado (minutos)",
                     "min_credit_minutes": "Crédito mínimo (minutos)",
-                    "credit_sources": "Fuentes de crédito"
+                    "credit_sources": "Fuentes de crédito",
+                    "power_saving_filter_deadline_hour": "Hora límite de filtrado en ahorro energético (0-23)"
                 },
                 "data_description": {
                     "enable_auto_filter": "Inicia automáticamente los ciclos de filtrado según el intervalo",
@@ -182,7 +183,8 @@
                     "min_gap_minutes": "Tiempo mínimo de descanso entre dos ciclos (excepto heladas severas).",
                     "max_merge_run_minutes": "Límite superior para un ciclo combinado.",
                     "min_credit_minutes": "Los ciclos más cortos que este valor no cuentan como crédito.",
-                    "credit_sources": "Qué motivos de funcionamiento generan crédito para reducir o desplazar ciclos futuros."
+                    "credit_sources": "Qué motivos de funcionamiento generan crédito para reducir o desplazar ciclos futuros.",
+                    "power_saving_filter_deadline_hour": "Hora del día (0-23) a la que se fuerza un ciclo de filtrado aplazado en modo ahorro energético si la FV sigue siendo insuficiente."
                 }
             },
             "durations": {
@@ -444,7 +446,8 @@
                     "min_gap_minutes": "Separación mínima entre ciclos (minutos)",
                     "max_merge_run_minutes": "Máximo ciclo combinado (minutos)",
                     "min_credit_minutes": "Crédito mínimo (minutos)",
-                    "credit_sources": "Fuentes de crédito"
+                    "credit_sources": "Fuentes de crédito",
+                    "power_saving_filter_deadline_hour": "Hora límite de filtrado en ahorro energético (0-23)"
                 },
                 "data_description": {
                     "enable_auto_filter": "Inicia ciclos de filtración automáticamente según el intervalo",
@@ -454,7 +457,8 @@
                     "min_gap_minutes": "Tiempo mínimo de descanso entre ciclos (excepto heladas severas).",
                     "max_merge_run_minutes": "Límite superior para un ciclo combinado.",
                     "min_credit_minutes": "Ciclos más cortos que este valor no generan crédito.",
-                    "credit_sources": "Qué motivos de funcionamiento generan crédito para reducir/posponer ciclos."
+                    "credit_sources": "Qué motivos de funcionamiento generan crédito para reducir/posponer ciclos.",
+                    "power_saving_filter_deadline_hour": "Hora del día (0-23) a la que se fuerza un ciclo de filtrado aplazado en modo ahorro energético si la FV sigue siendo insuficiente."
                 }
             },
             "durations": {
@@ -545,6 +549,12 @@
             },
             "away_active": {
                 "name": "Ausente"
+            },
+            "power_saving_active": {
+                "name": "Ahorro energético activo"
+            },
+            "power_saving_available": {
+                "name": "Ahorro energético disponible"
             },
             "is_we_holiday": {
                 "name": "Fin de semana/feriado"
@@ -822,6 +832,7 @@
                     "chlorine": "Cloro",
                     "filter": "Filtrando",
                     "preheat": "Precalentamiento",
+                    "power_saving": "Ahorro energético",
                     "pv": "FV",
                     "frost": "Protección contra heladas",
                     "pause": "Pausa",
@@ -834,6 +845,7 @@
                     "disabled": "Desactivado",
                     "bathing": "Baño",
                     "preheat": "Precalentamiento",
+                    "power_saving": "Ahorro energético",
                     "pv": "FV"
                 }
             },

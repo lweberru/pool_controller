@@ -14,6 +14,8 @@ Entity IDs depend on your instance name, but the integration uses stable suffix 
 | `binary_sensor.<pool>_in_quiet` | Quiet hours active |
 | `binary_sensor.<pool>_pv_allows` | PV surplus available for operation |
 | `binary_sensor.<pool>_away_active` | Away mode active |
+| `binary_sensor.<pool>_power_saving_active` | Power-saving mode active |
+| `binary_sensor.<pool>_power_saving_available` | Power-saving mode available (required sensors/signals present) |
 | `binary_sensor.<pool>_should_main_on` | Power supply should be on |
 | `binary_sensor.<pool>_should_pump_on` | Circulation pump should be on |
 | `binary_sensor.<pool>_main_switch_on` | Physical main switch is currently ON (mirrors the configured external switch state) |
@@ -29,9 +31,9 @@ Entity IDs depend on your instance name, but the integration uses stable suffix 
 
 | Entity | Type | Description |
 |--------|------|-------------|
-| `sensor.<pool>_status` | Enum | Current state: `normal`, `paused`, `frost_protection`, `maintenance`, `away` |
-| `sensor.<pool>_run_reason` | Enum | Why the pool is running right now: `idle`, `bathing`, `chlorine`, `filter`, `preheat`, `pv`, `frost`, `pause`, `maintenance` |
-| `sensor.<pool>_heat_reason` | Enum | Why heating is allowed/active: `off`, `disabled`, `bathing`, `preheat`, `pv` |
+| `sensor.<pool>_status` | Enum | Current state: `normal`, `paused`, `frost_protection`, `maintenance`, `away`, `power_saving` |
+| `sensor.<pool>_run_reason` | Enum | Why the pool is running right now: `idle`, `bathing`, `chlorine`, `filter`, `preheat`, `pv`, `frost`, `pause`, `maintenance`, `power_saving` |
+| `sensor.<pool>_heat_reason` | Enum | Why heating is allowed/active: `off`, `disabled`, `bathing`, `preheat`, `pv`, `power_saving` |
 | `sensor.<pool>_run_credit_source` | Enum | Current credit source (if a streak is active) |
 | `sensor.<pool>_run_credit_minutes` | Integer | Minutes credited from the current streak |
 | `sensor.<pool>_filter_credit_minutes` | Integer | Effective filter credit minutes |
@@ -126,7 +128,7 @@ All three timer sensors use **minutes remaining** as their state (unit: `min`).
 
 | Entity | Description |
 |--------|-------------|
-| `climate.<pool>_*` | Pool heater thermostat entity (select this as the controller entity in automations and the dashboard card). Presets: Auto, Baden, Chloren, Filtern, Abwesend, Wartung |
+| `climate.<pool>_*` | Pool heater thermostat entity (select this as the controller entity in automations and the dashboard card). Presets: Auto, Baden, Chloren, Filtern, Abwesend, Wartung, Stromsparen |
 
 ## Buttons & Manual Controls
 

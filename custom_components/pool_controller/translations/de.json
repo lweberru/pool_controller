@@ -168,6 +168,7 @@
                     "enable_auto_filter": "Automatische Filterzyklen",
                     "filter_interval_minutes": "Filter-Intervall (Minuten)",
                     "filter_minutes": "Filterdauer (Minuten)",
+                    "power_saving_filter_deadline_hour": "Stromsparen Filter-Deadline Stunde (0-23)",
                     "merge_window_minutes": "Merge-Fenster (Minuten)",
                     "min_gap_minutes": "Mindestabstand zwischen Läufen (Minuten)",
                     "max_merge_run_minutes": "Max. Merge-Lauf (Minuten)",
@@ -178,6 +179,7 @@
                     "enable_auto_filter": "Startet automatisch Filterzyklen basierend auf dem Intervall",
                     "filter_interval_minutes": "Zeit zwischen automatischen Filterzyklen (60..10080 min)",
                     "filter_minutes": "Standarddauer für einen Filterlauf (Minuten). Bereich: 5–120.",
+                    "power_saving_filter_deadline_hour": "Uhrzeit (0-23), ab der ein verschobener Filterlauf im Stromsparmodus auch ohne ausreichende PV erzwungen wird.",
                     "merge_window_minutes": "Wenn ein Frostlauf innerhalb dieses Fensters liegt, werden beide Läufe zusammengelegt.",
                     "min_gap_minutes": "Mindest-Ruhezeit zwischen zwei Läufen (außer bei starkem Frost).",
                     "max_merge_run_minutes": "Obergrenze für einen zusammengelegten Lauf.",
@@ -440,6 +442,7 @@
                     "enable_auto_filter": "Automatische Filterzyklen",
                     "filter_interval_minutes": "Filter-Intervall (Minuten)",
                     "filter_minutes": "Filterdauer (Minuten)",
+                    "power_saving_filter_deadline_hour": "Stromsparen Filter-Deadline Stunde (0-23)",
                     "merge_window_minutes": "Merge-Fenster (Minuten)",
                     "min_gap_minutes": "Mindestabstand zwischen Läufen (Minuten)",
                     "max_merge_run_minutes": "Max. Merge-Lauf (Minuten)",
@@ -450,6 +453,7 @@
                     "enable_auto_filter": "Startet automatisch Filterzyklen basierend auf dem Intervall",
                     "filter_interval_minutes": "Zeit zwischen automatischen Filterzyklen (60..10080 min)",
                     "filter_minutes": "Standarddauer für einen Filterlauf (Minuten). Bereich: 5–120.",
+                    "power_saving_filter_deadline_hour": "Uhrzeit (0-23), ab der ein verschobener Filterlauf im Stromsparmodus auch ohne ausreichende PV erzwungen wird.",
                     "merge_window_minutes": "Wenn ein Frostlauf innerhalb dieses Fensters liegt, werden beide Läufe zusammengelegt.",
                     "min_gap_minutes": "Mindest-Ruhezeit zwischen zwei Läufen (außer bei starkem Frost).",
                     "max_merge_run_minutes": "Obergrenze für einen zusammengelegten Lauf.",
@@ -545,6 +549,12 @@
             },
             "away_active": {
                 "name": "Abwesend"
+            },
+            "power_saving_active": {
+                "name": "Stromsparmodus aktiv"
+            },
+            "power_saving_available": {
+                "name": "Stromsparmodus verfügbar"
             },
             "is_we_holiday": {
                 "name": "Wochenende/Feiertag"
@@ -822,6 +832,7 @@
                     "chlorine": "Chloren",
                     "filter": "Filtern",
                     "preheat": "Vorheizen",
+                    "power_saving": "Stromsparen",
                     "pv": "PV",
                     "frost": "Frostschutz",
                     "pause": "Pause",
@@ -834,6 +845,7 @@
                     "disabled": "Deaktiviert",
                     "bathing": "Baden",
                     "preheat": "Vorheizen",
+                    "power_saving": "Stromsparen",
                     "pv": "PV"
                 }
             },

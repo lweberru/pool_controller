@@ -52,6 +52,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         # Away mode (reduced activity)
         self.away_active = False
         self.away_temp = DEFAULT_AWAY_TEMP
+        # Power-saving mode (PV-prioritized operation)
+        self.power_saving_active = False
+        self._power_save_last_main_power_w = None
+        self._power_save_last_aux_power_w = None
         if entry:
             try:
                 merged = {**(entry.data or {}), **(entry.options or {})}
@@ -170,6 +174,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             self.maintenance_active = bool(entry.options.get(OPT_KEY_MAINTENANCE_ACTIVE, False))
             self.hvac_enabled = bool(entry.options.get(OPT_KEY_HVAC_ENABLED, True))
             self.away_active = bool(entry.options.get(OPT_KEY_AWAY_ACTIVE, False))
+            self.power_saving_active = bool(entry.options.get(OPT_KEY_POWER_SAVING_ACTIVE, False))
             # Adaptive tuning persisted values (best effort)
             try:
                 if entry.options.get(OPT_KEY_HEAT_LOSS_W_PER_C) is not None:
@@ -452,6 +457,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             self.hvac_enabled = True
             self.away_active = False
             self.away_temp = DEFAULT_AWAY_TEMP
+            self.power_saving_active = False
             self.heat_loss_w_per_c = DEFAULT_HEAT_LOSS_W_PER_C
             self.heat_startup_offset_minutes = DEFAULT_HEAT_STARTUP_OFFSET_MINUTES
 
@@ -977,6 +983,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 # Maintenance is a hard lockout: disable HVAC + clear timers so we don't auto-resume.
                 self.hvac_enabled = False
                 new_opts[OPT_KEY_HVAC_ENABLED] = False
+                self.power_saving_active = False
+                new_opts.pop(OPT_KEY_POWER_SAVING_ACTIVE, None)
 
                 # Clear any running timers (manual, pause, auto-filter) best effort.
                 self.manual_timer_until = None
@@ -1035,6 +1043,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 self.maintenance_active = False
                 new_opts.pop(OPT_KEY_MAINTENANCE_ACTIVE, None)
 
+                # Away and power-saving are mutually exclusive.
+                self.power_saving_active = False
+                new_opts.pop(OPT_KEY_POWER_SAVING_ACTIVE, None)
+
                 # Store previous target temp for restore.
                 if self.target_temp is not None:
                     new_opts[OPT_KEY_AWAY_PREV_TARGET] = float(self.target_temp)
@@ -1070,6 +1082,41 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             await self._async_update_entry_options(new_opts)
         except Exception:
             _LOGGER.exception("Fehler beim Speichern von Away-Modus")
+
+    def _power_saving_config_ready(self, conf: dict) -> bool:
+        """Check if required sensor configuration for power-saving mode exists."""
+        return bool(
+            conf.get(CONF_PV_SURPLUS_SENSOR)
+            and conf.get(CONF_PV_HOUSE_LOAD_SENSOR)
+            and conf.get(CONF_MAIN_POWER_SENSOR)
+            and conf.get(CONF_AUX_POWER_SENSOR)
+        )
+
+    async def set_power_saving(self, active: bool):
+        """Enable/disable power-saving mode and persist state."""
+        active = bool(active)
+        if active == bool(getattr(self, "power_saving_active", False)):
+            return
+
+        merged = {**(self.entry.data or {}), **(self.entry.options or {})}
+        if active and (not self._power_saving_config_ready(merged)):
+            _LOGGER.warning("Power-saving mode cannot be enabled: required sensors not configured")
+            return
+
+        self.power_saving_active = active
+        try:
+            new_opts = {**self.entry.options}
+            if active:
+                self.maintenance_active = False
+                self.away_active = False
+                new_opts.pop(OPT_KEY_MAINTENANCE_ACTIVE, None)
+                new_opts.pop(OPT_KEY_AWAY_ACTIVE, None)
+                new_opts[OPT_KEY_POWER_SAVING_ACTIVE] = True
+            else:
+                new_opts.pop(OPT_KEY_POWER_SAVING_ACTIVE, None)
+            await self._async_update_entry_options(new_opts)
+        except Exception:
+            _LOGGER.exception("Fehler beim Speichern von power_saving")
 
     async def set_hvac_enabled(self, enabled: bool):
         """Enable/disable thermostat behavior (independent from maintenance)."""
@@ -1398,6 +1445,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             self.hvac_enabled = bool(conf.get(OPT_KEY_HVAC_ENABLED, True))
             # Away mode flag (reduced activity)
             self.away_active = bool(conf.get(OPT_KEY_AWAY_ACTIVE, False))
+            # Power-saving mode flag (PV-prioritized operation)
+            self.power_saving_active = bool(conf.get(OPT_KEY_POWER_SAVING_ACTIVE, False))
 
             # First run: migrate legacy timer options (best effort)
             await self.async_migrate_legacy_timers()
@@ -1562,6 +1611,49 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                         pv_surplus_for_pool_w = max(0.0, pv_input_w)
                 except Exception:
                     pv_surplus_for_pool_w = None
+
+            # Power-saving mode (PV-prioritized): availability + dynamic thresholds
+            power_saving_available = bool(
+                self._power_saving_config_ready(conf)
+                and (pv_power_raw is not None)
+                and (pv_house_load_w is not None)
+                and (main_power is not None)
+                and (aux_power is not None)
+            )
+
+            try:
+                if main_power is not None and float(main_power) > 10.0:
+                    self._power_save_last_main_power_w = float(main_power)
+            except Exception:
+                pass
+            try:
+                if aux_power is not None and float(aux_power) > 10.0:
+                    self._power_save_last_aux_power_w = float(aux_power)
+            except Exception:
+                pass
+
+            try:
+                main_fallback_w = float(conf.get(CONF_HEATER_BASE_POWER_W, DEFAULT_HEATER_BASE_POWER_W) or DEFAULT_HEATER_BASE_POWER_W)
+            except Exception:
+                main_fallback_w = float(DEFAULT_HEATER_BASE_POWER_W)
+            try:
+                aux_fallback_w = float(conf.get(CONF_HEATER_AUX_POWER_W, DEFAULT_HEATER_AUX_POWER_W) or DEFAULT_HEATER_AUX_POWER_W)
+            except Exception:
+                aux_fallback_w = float(DEFAULT_HEATER_AUX_POWER_W)
+
+            main_known_w = float(self._power_save_last_main_power_w or main_fallback_w or 0.0)
+            aux_known_w = float(self._power_save_last_aux_power_w or aux_fallback_w or 0.0)
+            power_saving_reserve_w = 100.0
+            power_saving_pump_threshold_w = max(100.0, main_known_w + power_saving_reserve_w)
+            power_saving_aux_threshold_w = max(
+                power_saving_pump_threshold_w + 100.0,
+                main_known_w + aux_known_w + power_saving_reserve_w,
+            )
+
+            if self.power_saving_active and (not power_saving_available):
+                _LOGGER.warning("Power-saving mode disabled automatically: required sensors unavailable")
+                await self.set_power_saving(False)
+                self.power_saving_active = False
 
             # Derive month/year totals from daily sensors when not provided
             derived_changed = False
@@ -2278,6 +2370,26 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
             in_quiet = _in_quiet_period(conf)
 
+            pv_surplus_now_w = max(0.0, float(pv_surplus_for_pool_w or 0.0))
+            power_saving_pump_allows = bool(
+                self.power_saving_active
+                and power_saving_available
+                and (not in_quiet)
+                and (not maintenance_active)
+                and (not pause_active)
+                and (not self.away_active)
+                and (pv_surplus_now_w >= float(power_saving_pump_threshold_w))
+            )
+            power_saving_aux_allows = bool(
+                self.power_saving_active
+                and power_saving_available
+                and (not in_quiet)
+                and (not maintenance_active)
+                and (not pause_active)
+                and (not self.away_active)
+                and (pv_surplus_now_w >= float(power_saving_aux_threshold_w))
+            )
+
             # Enforce minimum gap between runs (unless severe frost)
             min_gap_remaining = 0
             try:
@@ -2554,22 +2666,55 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                         except Exception:
                             _LOGGER.exception("Fehler beim Umplanen von next_filter_start (min gap)")
                 else:
+                    deadline_reached = False
+                    if self.power_saving_active and power_saving_available and (not power_saving_pump_allows):
+                        now_local = dt_util.as_local(now)
+                        try:
+                            deadline_hour = int(conf.get(CONF_POWER_SAVING_FILTER_DEADLINE_HOUR, DEFAULT_POWER_SAVING_FILTER_DEADLINE_HOUR))
+                        except Exception:
+                            deadline_hour = DEFAULT_POWER_SAVING_FILTER_DEADLINE_HOUR
+                        deadline_hour = max(0, min(23, deadline_hour))
+                        deadline = now_local.replace(
+                            hour=int(deadline_hour),
+                            minute=0,
+                            second=0,
+                            microsecond=0,
+                        )
+                        deadline_reached = now_local >= deadline
+                        if not deadline_reached:
+                            shifted = now + timedelta(minutes=int(DEFAULT_POWER_SAVING_FILTER_DEFER_MINUTES))
+                            if shifted != self.next_filter_start:
+                                self.next_filter_start = shifted
+                                try:
+                                    new_opts = {**self.entry.options, OPT_KEY_FILTER_NEXT: shifted.isoformat()}
+                                    await self._async_update_entry_options(new_opts)
+                                except Exception:
+                                    _LOGGER.exception("Fehler beim Verschieben von next_filter_start (power saving)")
+                            # defer cycle until next check/deadline
+                            next_filter_mins = max(0, round((self.next_filter_start - now).total_seconds() / 60))
+                            auto_filter_active = False
+                            auto_filter_mins = 0
+                        else:
+                            _LOGGER.info("Power-saving deadline reached; starting filter cycle without sufficient PV")
+
                     # Always start auto-filter when due (PV should not block filtering)
                     # Apply credit: only run missing minutes; if none missing, skip cycle.
-                    if filter_missing_minutes <= 0:
-                        try:
-                            next_start = now + timedelta(minutes=self.filter_interval)
-                            self.next_filter_start = next_start
-                            self._filter_credit_minutes = 0.0
-                            self._filter_credit_expires_at = next_start
-                            new_opts = {**self.entry.options, OPT_KEY_FILTER_NEXT: next_start.isoformat()}
-                            await self._async_update_entry_options(new_opts)
-                        except Exception:
-                            _LOGGER.exception("Fehler beim Überspringen von Filterlauf (Credit)")
-                    else:
-                        await self._start_auto_filter(minutes=filter_missing_minutes)
-                        auto_filter_active = self.auto_filter_until is not None and now < self.auto_filter_until
-                        auto_filter_mins = _mins_left(self.auto_filter_until) if auto_filter_active else 0
+                    if (not self.power_saving_active) or power_saving_pump_allows or deadline_reached:
+                        if filter_missing_minutes <= 0:
+                            try:
+                                next_start = now + timedelta(minutes=self.filter_interval)
+                                self.next_filter_start = next_start
+                                self._filter_credit_minutes = 0.0
+                                self._filter_credit_expires_at = next_start
+                                new_opts = {**self.entry.options, OPT_KEY_FILTER_NEXT: next_start.isoformat()}
+                                await self._async_update_entry_options(new_opts)
+                            except Exception:
+                                _LOGGER.exception("Fehler beim Überspringen von Filterlauf (Credit)")
+                        else:
+                            await self._start_auto_filter(minutes=filter_missing_minutes)
+                            auto_filter_active = self.auto_filter_until is not None and now < self.auto_filter_until
+                            auto_filter_mins = _mins_left(self.auto_filter_until) if auto_filter_active else 0
+                    
 
             # Convenience booleans for logic
 
@@ -2606,6 +2751,14 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 pv_heat_demand = bool(self._pv_heat_demand)
             self._pv_heat_demand = pv_heat_demand
             pv_run = bool(enable_pv and pv_allows and (not in_quiet) and (not maintenance_active) and (not self.away_active) and (pv_heat_demand))
+            if self.power_saving_active:
+                pv_run = False
+
+            power_saving_pump_run = bool(
+                self.power_saving_active
+                and power_saving_available
+                and power_saving_pump_allows
+            )
 
             # Optimiert: manuelle Timer erzwingen "heat"-Modus
             manual_heat_run = is_manual_heat and (not self.away_active)
@@ -2625,6 +2778,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             # Thermostat behavior: if PV optimization is disabled, allow heating to maintain target temperature
             # (similar to a normal climate entity), gated by hvac_enabled.
             thermostat_run = bool((not enable_pv) and (not self.away_active) and getattr(self, "hvac_enabled", True))
+            if self.power_saving_active:
+                thermostat_run = False
 
             # NEU: heat_allowed auch bei manueller Filterung/Chloring
             heat_allowed = (not maintenance_active) and (not pause_active) and (not in_quiet) and (
@@ -2679,6 +2834,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 run_reason = "filter"
             elif preheat_active:
                 run_reason = "preheat"
+            elif power_saving_pump_run:
+                run_reason = "power_saving"
             elif pv_run:
                 run_reason = "pv"
             else:
@@ -2697,6 +2854,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     heat_reason = "chlorine"
                 elif preheat_active:
                     heat_reason = "preheat"
+                elif self.power_saving_active and power_saving_aux_allows:
+                    heat_reason = "power_saving"
                 elif pv_run:
                     heat_reason = "pv"
                 elif thermostat_run:
@@ -2710,6 +2869,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "sanitizer_mode": sanitizer_mode,
                 "maintenance_active": maintenance_active,
                 "away_active": bool(self.away_active),
+                "power_saving_active": bool(self.power_saving_active),
+                "power_saving_available": bool(power_saving_available),
                 "run_reason": run_reason,
                 "heat_reason": heat_reason,
                 "run_credit_source": self._credit_streak_source if self._credit_streak_source else None,
@@ -2797,6 +2958,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                         or (is_manual_filter and not in_quiet)
                         or (auto_filter_active and not in_quiet)
                         or (next_start_mins is not None and next_start_mins == 0)
+                        or power_saving_pump_run
                         or pv_run
                     )
                 ),
@@ -2811,6 +2973,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                         or (is_manual_filter and not in_quiet)
                         or (auto_filter_active and not in_quiet)
                         or (next_start_mins is not None and next_start_mins == 0)
+                        or power_saving_pump_run
                         or pv_run
                     )
                 ),
@@ -2819,6 +2982,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     (not maintenance_active)
                     and conf.get(CONF_ENABLE_AUX_HEATING, False)
                     and aux_heat_demand
+                    and ((not self.power_saving_active) or power_saving_aux_allows)
                 ),
 
                 # Physical switch states (mirror the configured external switches).

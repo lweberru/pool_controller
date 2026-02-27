@@ -100,6 +100,7 @@ CONF_MIN_GAP_MINUTES = "min_gap_minutes"
 CONF_MAX_MERGE_RUN_MINUTES = "max_merge_run_minutes"
 CONF_MIN_CREDIT_MINUTES = "min_credit_minutes"
 CONF_CREDIT_SOURCES = "credit_sources"
+CONF_POWER_SAVING_FILTER_DEADLINE_HOUR = "power_saving_filter_deadline_hour"
 
 # Bathing timer
 CONF_BATH_DURATION = "bathing_minutes"
@@ -127,6 +128,10 @@ DEFAULT_PV_SMOOTH_WINDOW_SECONDS = 60
 DEFAULT_PV_STABILITY_SECONDS = 120
 DEFAULT_PV_MIN_RUN_MINUTES = 10
 
+# Power-saving scheduler defaults
+DEFAULT_POWER_SAVING_FILTER_DEFER_MINUTES = 15
+DEFAULT_POWER_SAVING_FILTER_DEADLINE_HOUR = 16
+
 # Toggle debounce (seconds): minimaler Abstand zwischen Schaltversuchen für externe Entities
 # Verhindert schnelle Retry-Loops wenn eine Entity nach dem Schalten kurzzeitig unavailable ist.
 CONF_TOGGLE_DEBOUNCE_SECONDS = "toggle_debounce_seconds"
@@ -144,6 +149,9 @@ OPT_KEY_TARGET_TEMP = "target_temp"
 # Away mode (reduced activity)
 OPT_KEY_AWAY_ACTIVE = "away_active"
 OPT_KEY_AWAY_PREV_TARGET = "away_prev_target"
+
+# Power-saving mode (PV-prioritized operation)
+OPT_KEY_POWER_SAVING_ACTIVE = "power_saving_active"
 
 # Adaptive heating tuning (stored in options)
 OPT_KEY_HEAT_LOSS_W_PER_C = "heat_loss_w_per_c"

@@ -224,6 +224,8 @@ def _filter_schema(curr: dict | None = None, lang: str | None = None):
             vol.All(vol.Coerce(int), vol.Range(min=60, max=7 * 24 * 60)),
         vol.Required(CONF_FILTER_DURATION, default=c.get(CONF_FILTER_DURATION, DEFAULT_FILTER_DURATION)):
             vol.All(vol.Coerce(int), vol.Range(min=1, max=c.get(CONF_FILTER_INTERVAL, DEFAULT_FILTER_INTERVAL))),
+        vol.Optional(CONF_POWER_SAVING_FILTER_DEADLINE_HOUR, default=c.get(CONF_POWER_SAVING_FILTER_DEADLINE_HOUR, DEFAULT_POWER_SAVING_FILTER_DEADLINE_HOUR)):
+            selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=23, step=1, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="h")),
         vol.Optional(CONF_MERGE_WINDOW_MINUTES, default=c.get(CONF_MERGE_WINDOW_MINUTES, DEFAULT_MERGE_WINDOW_MINUTES)):
             selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=12 * 60, step=5, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="min")),
         vol.Optional(CONF_MIN_GAP_MINUTES, default=c.get(CONF_MIN_GAP_MINUTES, DEFAULT_MIN_GAP_MINUTES)):
@@ -455,9 +457,15 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             # Filterdauer darf nicht länger als das Intervall sein
             interval = int(user_input.get(CONF_FILTER_INTERVAL, DEFAULT_FILTER_INTERVAL))
             filter_duration = int(user_input.get(CONF_FILTER_DURATION, DEFAULT_FILTER_DURATION))
+            deadline_hour = int(user_input.get(CONF_POWER_SAVING_FILTER_DEADLINE_HOUR, DEFAULT_POWER_SAVING_FILTER_DEADLINE_HOUR))
             if filter_duration > interval:
                 filter_duration = interval
                 user_input[CONF_FILTER_DURATION] = filter_duration
+            if deadline_hour < 0:
+                deadline_hour = 0
+            if deadline_hour > 23:
+                deadline_hour = 23
+            user_input[CONF_POWER_SAVING_FILTER_DEADLINE_HOUR] = deadline_hour
             self.data.update(user_input)
             return await self.async_step_durations()
 
@@ -719,6 +727,13 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
             except Exception:
                 filter_duration = DEFAULT_FILTER_DURATION
                 errors[CONF_FILTER_DURATION] = "invalid_value"
+            try:
+                deadline_hour = int(user_input.get(CONF_POWER_SAVING_FILTER_DEADLINE_HOUR, DEFAULT_POWER_SAVING_FILTER_DEADLINE_HOUR))
+                if deadline_hour < 0 or deadline_hour > 23:
+                    raise ValueError("out_of_range")
+            except Exception:
+                deadline_hour = DEFAULT_POWER_SAVING_FILTER_DEADLINE_HOUR
+                errors[CONF_POWER_SAVING_FILTER_DEADLINE_HOUR] = "invalid_value"
 
             if filter_duration > interval:
                 filter_duration = interval
@@ -738,6 +753,7 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
             # Persist normalized values and continue
             user_input[CONF_FILTER_INTERVAL] = interval
             user_input[CONF_FILTER_DURATION] = filter_duration
+            user_input[CONF_POWER_SAVING_FILTER_DEADLINE_HOUR] = deadline_hour
             self.options.update(user_input)
             if self._menu_mode:
                 return self.async_create_entry(title="", data=self.options)
