@@ -562,7 +562,9 @@
       "filter_30": { "name": "Filter 30 min" },
       "chlorine_5": { "name": "Quick chlorine 5 min" },
       "away_start": { "name": "Away mode on" },
-      "away_stop": { "name": "Away mode off" }
+      "away_stop": { "name": "Away mode off" },
+      "power_saving_start": { "name": "Power saving mode on" },
+      "power_saving_stop": { "name": "Power saving mode off" }
     },
     "sensor": {
       "status": { "name": "Status" },

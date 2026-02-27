@@ -620,6 +620,12 @@
             },
             "away_stop": {
                 "name": "Abwesend aus"
+            },
+            "power_saving_start": {
+                "name": "Stromsparen ein"
+            },
+            "power_saving_stop": {
+                "name": "Stromsparen aus"
             }
         },
         "sensor": {

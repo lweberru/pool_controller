@@ -620,6 +620,12 @@
             },
             "away_stop": {
                 "name": "Modo ausente desactivado"
+            },
+            "power_saving_start": {
+                "name": "Modo ahorro energético activado"
+            },
+            "power_saving_stop": {
+                "name": "Modo ahorro energético desactivado"
             }
         },
         "sensor": {

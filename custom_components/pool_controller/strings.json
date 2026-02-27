@@ -556,7 +556,11 @@
       "pause_60": { "name": "Pause 60 min" },
       "bath_60": { "name": "Bath 60 min" },
       "filter_30": { "name": "Filter 30 min" },
-      "chlorine_5": { "name": "Quick chlorine 5 min" }
+      "chlorine_5": { "name": "Quick chlorine 5 min" },
+      "away_start": { "name": "Away on" },
+      "away_stop": { "name": "Away off" },
+      "power_saving_start": { "name": "Power saving on" },
+      "power_saving_stop": { "name": "Power saving off" }
     },
     "sensor": {
       "status": { "name": "Status" },

@@ -11,6 +11,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
         Pause60Button(coordinator),
         AwayStartButton(coordinator),
         AwayStopButton(coordinator),
+        PowerSavingStartButton(coordinator),
+        PowerSavingStopButton(coordinator),
     ])
 
 class PoolButton(CoordinatorEntity, ButtonEntity):
@@ -85,4 +87,26 @@ class AwayStopButton(PoolButton):
         self._attr_unique_id = f"{coordinator.entry.entry_id}_away_stop"
     async def async_press(self):
         await self.coordinator.set_away(False)
+        await self.coordinator.async_request_refresh()
+
+
+class PowerSavingStartButton(PoolButton):
+    _attr_translation_key = "power_saving_start"
+    _attr_icon = "mdi:leaf"
+    def __init__(self, coordinator):
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.entry.entry_id}_power_saving_start"
+    async def async_press(self):
+        await self.coordinator.set_power_saving(True)
+        await self.coordinator.async_request_refresh()
+
+
+class PowerSavingStopButton(PoolButton):
+    _attr_translation_key = "power_saving_stop"
+    _attr_icon = "mdi:leaf-off"
+    def __init__(self, coordinator):
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.entry.entry_id}_power_saving_stop"
+    async def async_press(self):
+        await self.coordinator.set_power_saving(False)
         await self.coordinator.async_request_refresh()

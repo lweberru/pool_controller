@@ -54,6 +54,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self.away_temp = DEFAULT_AWAY_TEMP
         # Power-saving mode (PV-prioritized operation)
         self.power_saving_active = False
+        self._power_saving_last_available = None
         self._power_save_last_main_power_w = None
         self._power_save_last_aux_power_w = None
         if entry:
@@ -1650,10 +1651,12 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 main_known_w + aux_known_w + power_saving_reserve_w,
             )
 
-            if self.power_saving_active and (not power_saving_available):
-                _LOGGER.warning("Power-saving mode disabled automatically: required sensors unavailable")
-                await self.set_power_saving(False)
-                self.power_saving_active = False
+            if self._power_saving_last_available is None or bool(self._power_saving_last_available) != bool(power_saving_available):
+                if self.power_saving_active and (not power_saving_available):
+                    _LOGGER.warning(
+                        "Power-saving mode temporarily unavailable (required live sensor values missing); mode remains active and resumes automatically when values return"
+                    )
+                self._power_saving_last_available = bool(power_saving_available)
 
             # Derive month/year totals from daily sensors when not provided
             derived_changed = False
@@ -1776,7 +1779,11 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 try:
                     energy_cost_daily = float(self._cost_daily_accum or 0.0)
                     energy_feed_in_loss_daily = float(self._cost_daily_feed_in_loss_accum or 0.0)
-                    # Net daily cost: prefer solar-adjusted net load if provided; otherwise fall back to gross+loss.
+                    # Net daily cost: prefer solar-adjusted net load if provided; otherwise
+                    # subtract PV credit when possible.
+                    # Economic net should include opportunity cost from lost feed-in revenue.
+                    # Formula target:
+                    #   net = gross - pv_credit + feed_in_loss
                     if pool_solar_kwh_daily is not None and electricity_price is not None:
                         try:
                             if net_load_kwh_daily is not None:
@@ -1789,14 +1796,25 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                                     float(energy_cost_daily or 0.0) - float(pool_solar_kwh_daily) * float(electricity_price),
                                 )
                         except Exception:
-                            energy_cost_net_daily = float(energy_cost_daily or 0.0) + float(energy_feed_in_loss_daily or 0.0)
+                            energy_cost_net_daily = float(energy_cost_daily or 0.0)
                     elif electricity_price is not None:
                         energy_cost_net_daily = max(
                             0.0,
                             float(energy_cost_daily or 0.0) - float(self._cost_daily_pv_credit_accum or 0.0),
                         )
                     else:
-                        energy_cost_net_daily = float(energy_cost_daily or 0.0) + float(energy_feed_in_loss_daily or 0.0)
+                        energy_cost_net_daily = float(energy_cost_daily or 0.0)
+
+                    # Add opportunity cost from foregone feed-in revenue.
+                    # This keeps feed_in_loss explicitly represented in economic net cost.
+                    energy_cost_net_daily = max(
+                        0.0,
+                        float(energy_cost_net_daily or 0.0) + float(energy_feed_in_loss_daily or 0.0),
+                    )
+
+                    # Safety invariant: net daily cost can never be higher than gross daily cost.
+                    if energy_cost_daily is not None and energy_cost_net_daily is not None:
+                        energy_cost_net_daily = min(float(energy_cost_net_daily), float(energy_cost_daily))
                 except Exception:
                     pass
 
@@ -1815,6 +1833,16 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                         self._cost_net_daily_last_value = current_net
                     else:
                         energy_cost_net_daily = float(self._cost_net_daily_last_value)
+            except Exception:
+                pass
+
+            # Hard post-condition (also corrects historical overshoots from previous logic):
+            # net must never exceed gross.
+            try:
+                if energy_cost_daily is not None and energy_cost_net_daily is not None:
+                    if float(energy_cost_net_daily) > float(energy_cost_daily):
+                        energy_cost_net_daily = float(energy_cost_daily)
+                        self._cost_net_daily_last_value = float(energy_cost_daily)
             except Exception:
                 pass
 

@@ -2,6 +2,12 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.3.29] - 2026-02-27
+- Fix power-saving mode stability: temporary missing live sensor values no longer auto-disable the mode; it resumes automatically when values return.
+- Add dedicated power-saving quick buttons (`power_saving_start`, `power_saving_stop`) analogous to away mode.
+- Improve frontend status visibility for power-saving with clear PV stage signaling (off / pump stage / aux-heater stage).
+- Fix daily cost logic so `energy_cost_net_daily` can never exceed `energy_cost_daily` while still accounting for feed-in opportunity cost.
+
 ## [2.3.28] - 2026-02-27
 - Add new `Stromsparen` (power-saving) operation mode with climate preset integration and dedicated start/stop services.
 - Add `power_saving_active` and `power_saving_available` binary sensors for dashboard/automation visibility.
