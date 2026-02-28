@@ -55,6 +55,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         # Power-saving mode (PV-prioritized operation)
         self.power_saving_active = False
         self._power_saving_last_available = None
+        self._power_saving_unavailable_since = None
         self._power_save_last_main_power_w = None
         self._power_save_last_aux_power_w = None
         if entry:
@@ -1651,6 +1652,11 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 main_known_w + aux_known_w + power_saving_reserve_w,
             )
 
+            if power_saving_available:
+                self._power_saving_unavailable_since = None
+            elif self.power_saving_active and self._power_saving_unavailable_since is None:
+                self._power_saving_unavailable_since = now
+
             if self._power_saving_last_available is None or bool(self._power_saving_last_available) != bool(power_saving_available):
                 if self.power_saving_active and (not power_saving_available):
                     _LOGGER.warning(
@@ -2399,6 +2405,14 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             in_quiet = _in_quiet_period(conf)
 
             pv_surplus_now_w = max(0.0, float(pv_surplus_for_pool_w or 0.0))
+
+            power_saving_unavailable_grace_active = False
+            try:
+                if self.power_saving_active and (not power_saving_available) and self._power_saving_unavailable_since is not None:
+                    power_saving_unavailable_grace_active = (now - self._power_saving_unavailable_since).total_seconds() <= 180
+            except Exception:
+                power_saving_unavailable_grace_active = False
+
             power_saving_pump_allows = bool(
                 self.power_saving_active
                 and power_saving_available
@@ -2417,6 +2431,11 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 and (not self.away_active)
                 and (pv_surplus_now_w >= float(power_saving_aux_threshold_w))
             )
+
+            # Hold current power-saving state for short sensor outages to avoid OFF/ON flapping.
+            if power_saving_unavailable_grace_active:
+                power_saving_pump_allows = bool(getattr(self, "_last_should_pump_on", False))
+                power_saving_aux_allows = bool(getattr(self, "_last_should_aux_on", False))
 
             # Enforce minimum gap between runs (unless severe frost)
             min_gap_remaining = 0
@@ -2869,6 +2888,31 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             else:
                 run_reason = "idle"
 
+            power_saving_stage = 0
+            power_saving_reason = "inactive"
+            if self.power_saving_active:
+                if maintenance_active:
+                    power_saving_reason = "maintenance"
+                elif pause_active:
+                    power_saving_reason = "pause"
+                elif self.away_active:
+                    power_saving_reason = "away"
+                elif in_quiet:
+                    power_saving_reason = "quiet"
+                elif power_saving_unavailable_grace_active:
+                    power_saving_reason = "sensor_hold"
+                    power_saving_stage = 2 if power_saving_aux_allows else (1 if power_saving_pump_allows else 0)
+                elif not power_saving_available:
+                    power_saving_reason = "sensors_missing"
+                elif power_saving_aux_allows:
+                    power_saving_reason = "stage2"
+                    power_saving_stage = 2
+                elif power_saving_pump_allows:
+                    power_saving_reason = "stage1"
+                    power_saving_stage = 1
+                else:
+                    power_saving_reason = "pv_low"
+
 
             # Transparenz: Warum darf/soll die Heizung laufen?
             if not conf.get(CONF_ENABLE_AUX_HEATING, False):
@@ -2899,6 +2943,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "away_active": bool(self.away_active),
                 "power_saving_active": bool(self.power_saving_active),
                 "power_saving_available": bool(power_saving_available),
+                "power_saving_stage": int(power_saving_stage),
+                "power_saving_reason": power_saving_reason,
                 "run_reason": run_reason,
                 "heat_reason": heat_reason,
                 "run_credit_source": self._credit_streak_source if self._credit_streak_source else None,
@@ -3073,7 +3119,9 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     return True
 
                 # Toggle main switch according to desired state
-                if desired_main != self._last_should_main_on:
+                # Reconcile not only on desired-state changes, but also on mismatch (desired != physical).
+                need_main_reconcile = (desired_main != self._last_should_main_on) or (bool(desired_main) != bool(main_switch_on))
+                if need_main_reconcile:
                     if desired_main:
                         if not demo and main_switch_id and _can_attempt(main_switch_id):
                             # record attempt timestamp to avoid immediate retries
@@ -3087,7 +3135,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
                 # Toggle pump switch (may be same as main switch)
                 if pump_switch_id and pump_switch_id != main_switch_id:
-                    if desired_pump != self._last_should_pump_on:
+                    need_pump_reconcile = (desired_pump != self._last_should_pump_on) or (bool(desired_pump) != bool(pump_switch_on))
+                    if need_pump_reconcile:
                         if desired_pump:
                             if not demo and _can_attempt(pump_switch_id):
                                 self._last_toggle_attempts[pump_switch_id] = now
@@ -3119,7 +3168,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     target_aux_id = aux_entity_id or aux_switch_id
                     allow_integration = bool(aux_entity_id)
 
-                    if physical_aux_should_be_on != self._last_should_aux_on:
+                    need_aux_reconcile = (physical_aux_should_be_on != self._last_should_aux_on) or (bool(physical_aux_should_be_on) != bool(aux_heating_switch_on))
+                    if need_aux_reconcile:
                         if physical_aux_should_be_on:
                             if not demo and _can_attempt(target_aux_id, allow_integration=allow_integration):
                                 self._last_toggle_attempts[target_aux_id] = now

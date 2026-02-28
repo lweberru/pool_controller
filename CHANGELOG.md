@@ -2,6 +2,12 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.3.30] - 2026-02-28
+- Improve power-saving runtime stability: short live-sensor dropouts no longer cause immediate OFF/ON flapping.
+- Improve runtime transparency: expose explicit power-saving stage/reason state for UI diagnostics.
+- Improve actuator reconciliation: desired-vs-physical switch mismatches (main/pump/aux) are actively corrected, not only on desired-state transitions.
+- Refine daily net cost behavior so net accounting remains economically consistent and never exceeds daily gross cost.
+
 ## [2.3.29] - 2026-02-27
 - Fix power-saving mode stability: temporary missing live sensor values no longer auto-disable the mode; it resumes automatically when values return.
 - Add dedicated power-saving quick buttons (`power_saving_start`, `power_saving_stop`) analogous to away mode.
