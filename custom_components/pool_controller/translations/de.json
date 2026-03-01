@@ -782,8 +782,20 @@
             "pv_power": {
                 "name": "PV-Leistung"
             },
+            "pv_house_load": {
+                "name": "Hauslast (konfigurierter Sensor)"
+            },
+            "pv_surplus_for_pool": {
+                "name": "PV-Überschuss für Pool"
+            },
             "pv_smoothed": {
                 "name": "PV (geglättet)"
+            },
+            "power_saving_pump_threshold": {
+                "name": "Stromsparen-Schwelle Pumpe"
+            },
+            "power_saving_aux_threshold": {
+                "name": "Stromsparen-Schwelle Zusatzheizung"
             },
             "pv_band_low": {
                 "name": "PV-Band unten"

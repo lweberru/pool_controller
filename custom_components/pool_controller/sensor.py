@@ -90,7 +90,11 @@ async def async_setup_entry(hass, entry, async_add_entities):
     # Power sensors
     entities.extend([
         PoolPowerSensor(coordinator, "pv_power", None),
+        PoolPowerSensor(coordinator, "pv_house_load", None),
+        PoolPowerSensor(coordinator, "pv_surplus_for_pool", None),
         PoolPowerSensor(coordinator, "pv_smoothed", None),
+        PoolPowerSensor(coordinator, "power_saving_pump_threshold", None),
+        PoolPowerSensor(coordinator, "power_saving_aux_threshold", None),
         PoolPowerSensor(coordinator, "pv_band_low", None),
         PoolPowerSensor(coordinator, "pv_band_mid_on", None),
         PoolPowerSensor(coordinator, "pv_band_mid_off", None),

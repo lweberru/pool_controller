@@ -2994,7 +2994,11 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "next_filter_mins": next_filter_mins,
                 # PV power reading (W) - used for UI display/more-info in the dashboard card
                 "pv_power": pv_raw,
+                "pv_house_load": round(float(pv_house_load_w), 1) if pv_house_load_w is not None else None,
+                "pv_surplus_for_pool": round(float(pv_surplus_for_pool_w), 1) if pv_surplus_for_pool_w is not None else None,
                 "pv_smoothed": round(pv_smoothed, 1) if pv_smoothed is not None else None,
+                "power_saving_pump_threshold": round(float(power_saving_pump_threshold_w), 1) if power_saving_pump_threshold_w is not None else None,
+                "power_saving_aux_threshold": round(float(power_saving_aux_threshold_w), 1) if power_saving_aux_threshold_w is not None else None,
                 # PV band sensors for chart coloring (low/mid/high)
                 "pv_band_low": pv_band_low,
                 "pv_band_mid_on": pv_band_mid_on,

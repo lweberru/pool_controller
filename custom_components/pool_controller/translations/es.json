@@ -782,8 +782,20 @@
             "pv_power": {
                 "name": "Potencia PV"
             },
+            "pv_house_load": {
+                "name": "Carga casa (sensor configurado)"
+            },
+            "pv_surplus_for_pool": {
+                "name": "Excedente PV para piscina"
+            },
             "pv_smoothed": {
                 "name": "PV (suavizado)"
+            },
+            "power_saving_pump_threshold": {
+                "name": "Umbral ahorro bomba"
+            },
+            "power_saving_aux_threshold": {
+                "name": "Umbral ahorro calefacción auxiliar"
             },
             "pv_band_low": {
                 "name": "Banda PV baja"

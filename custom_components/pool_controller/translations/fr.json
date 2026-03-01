@@ -782,8 +782,20 @@
             "pv_power": {
                 "name": "Puissance PV"
             },
+            "pv_house_load": {
+                "name": "Charge maison (capteur configuré)"
+            },
+            "pv_surplus_for_pool": {
+                "name": "Surplus PV pour piscine"
+            },
             "pv_smoothed": {
                 "name": "PV (lissé)"
+            },
+            "power_saving_pump_threshold": {
+                "name": "Seuil économie pompe"
+            },
+            "power_saving_aux_threshold": {
+                "name": "Seuil économie chauffage auxiliaire"
             },
             "pv_band_low": {
                 "name": "Bande PV basse"

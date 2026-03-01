@@ -2,6 +2,10 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.3.32] - 2026-03-01
+- Add PV/power-saving diagnostics for frontend charting: expose `pv_house_load`, `pv_surplus_for_pool`, `power_saving_pump_threshold`, and `power_saving_aux_threshold` as coordinator data and sensors.
+- Add translations (de/en/es/fr) for the new PV/power-saving diagnostic sensors.
+
 ## [2.3.31] - 2026-03-01
 - Improve climate HVAC display during power-saving pump-heating stage: show `HEAT` for stage-1 heating contribution (with compatibility fallback on run reason).
 - Expand power-saving documentation with explicit trade-offs: potentially longer runtime/noise windows and installation-dependent heat-up efficiency differences versus stronger auxiliary-heater usage.
