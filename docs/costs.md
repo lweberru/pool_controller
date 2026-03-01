@@ -17,6 +17,35 @@ Practical recommendation:
 - Use **Auto mode** when comfort and strict timing are more important.
 - Use **Power-saving mode** when cost minimization and PV self-consumption are more important.
 
+Important trade-offs in power-saving mode:
+- Automatic runs can be stretched or shifted, so total active runtime can increase (longer pump noise windows).
+- In some installations, pump-first heat-up can be less efficient than earlier/stronger auxiliary-heater usage.
+
+Quick estimation workflow (recommended):
+- Measure 3-7 comparable days in **Auto** and in **Power-saving**.
+- Record for each mode: daily pool energy (`kWh`), daily runtime (`minutes`), and approximate PV share of pool consumption (`0..1`).
+- Compute approximate net daily cost per mode with:
+
+```text
+cost_net ≈ E × (p_grid - PV_share × (p_grid - p_feed))
+```
+
+Where:
+- `E` = daily pool energy (`kWh/day`)
+- `p_grid` = average grid price (`€/kWh`)
+- `p_feed` = feed-in tariff (`€/kWh`)
+
+Then compare:
+
+```text
+savings_day ≈ cost_net_auto - cost_net_ps
+runtime_increase_% ≈ (runtime_ps - runtime_auto) / runtime_auto × 100
+```
+
+Rule of thumb:
+- Keep Power-saving as default if `savings_day` is positive and runtime increase/noise is acceptable.
+- Switch to Auto during periods where comfort timing or faster heat-up is more important.
+
 ## Basics
 
 Costs are based on **energy (kWh)** × **electricity price (€/kWh)**. The price can be **fixed** or **dynamic**:

@@ -2,6 +2,11 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.3.31] - 2026-03-01
+- Improve climate HVAC display during power-saving pump-heating stage: show `HEAT` for stage-1 heating contribution (with compatibility fallback on run reason).
+- Expand power-saving documentation with explicit trade-offs: potentially longer runtime/noise windows and installation-dependent heat-up efficiency differences versus stronger auxiliary-heater usage.
+- Add practical estimation guidance (formulas and comparison workflow) to quantify expected net-cost savings and runtime increase before choosing a default operating mode.
+
 ## [2.3.30] - 2026-02-28
 - Improve power-saving runtime stability: short live-sensor dropouts no longer cause immediate OFF/ON flapping.
 - Improve runtime transparency: expose explicit power-saving stage/reason state for UI diagnostics.

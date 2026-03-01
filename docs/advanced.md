@@ -210,6 +210,38 @@ It keeps safety/maintenance constraints intact (e.g., frost protection), but shi
 
 **Main disadvantage vs Auto mode:**
 - Runtime timing is less strict and can be deferred; this can reduce predictability compared to Auto mode, which follows regular scheduling more directly.
+- Runtime can become longer in weak-PV periods, which may increase perceived pump noise duration.
+- Depending on your hardware and temperature delta, heat-up in pump-first operation can be less efficient than using the auxiliary heater more aggressively.
+
+### Practical estimation before enabling Power-Saving
+
+Use a simple before/after estimate with your own measurements:
+
+- Let `E_auto` be average daily pool energy in Auto mode (kWh/day).
+- Let `PV_share_auto` and `PV_share_ps` be the average PV share of pool consumption in Auto vs Power-Saving (0..1).
+- Let `p_grid` be your average grid price (`€/kWh`) and `p_feed` your feed-in tariff (`€/kWh`).
+
+Approximate daily net operating cost:
+
+```text
+cost_net ≈ E × (p_grid - PV_share × (p_grid - p_feed))
+```
+
+Estimated daily savings of Power-Saving against Auto:
+
+```text
+savings_day ≈ cost_net_auto - cost_net_ps
+```
+
+For runtime/noise impact, compare measured runtime windows:
+
+```text
+runtime_increase_% ≈ (runtime_ps - runtime_auto) / runtime_auto × 100
+```
+
+Typical field tendency (site-dependent):
+- Net cost: often lower with Power-Saving when PV share increases noticeably.
+- Runtime duration: often higher on low-irradiance days due to deferred and stretched operation windows.
 
 ### When to use which mode
 
