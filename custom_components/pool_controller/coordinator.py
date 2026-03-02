@@ -2853,13 +2853,16 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             if self.power_saving_active:
                 thermostat_run = False
 
-            # NEU: heat_allowed auch bei manueller Filterung/Chloring
+            # Heat is allowed for explicit heating contexts.
+            # Important: in power-saving mode, stage2 (aux threshold reached) must also
+            # open the heating path; otherwise aux stage becomes unreachable.
             heat_allowed = (not maintenance_active) and (not pause_active) and (not in_quiet) and (
                 is_bathing
                 or preheat_active
                 or pv_run
                 or thermostat_run
                 or manual_heat_run
+                or (self.power_saving_active and power_saving_aux_allows)
             )
 
 

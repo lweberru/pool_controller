@@ -2,6 +2,11 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.3.36] - 2026-03-02
+- Fix power-saving stage-2 reachability: when `power_saving_aux_allows` is true, heating is now allowed to enter the aux-heating demand path.
+- Resolve logic gap where stage-2 thresholds could be met but `should_aux_on` stayed false because `heat_allowed` never opened in pure power-saving operation.
+- Keep existing safety gates (maintenance/pause/quiet/away/target temperature) intact.
+
 ## [2.3.35] - 2026-03-02
 - Fix consistency of `power_saving_preheat_use_aux_estimate`: in power-saving mode the toggle now controls both preheat estimation and actual auxiliary-heater usage during preheat.
 - Behavior with toggle `on`: preheat actively uses auxiliary heating and estimation includes aux power.
