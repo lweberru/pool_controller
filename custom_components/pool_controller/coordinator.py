@@ -148,7 +148,6 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self._cost_daily_feed_in_loss_accum = 0.0
         self._cost_daily_pv_credit_accum = 0.0
         self._cost_last_tick_at = None
-        # Net daily cost tracking (non-decreasing within day)
         self._cost_net_daily_last_value = None
         self._cost_net_daily_date = None
         self._cost_persist_last_saved = None
@@ -1696,7 +1695,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             energy_feed_in_loss_daily = None
             energy_feed_in_loss_monthly = None
             energy_feed_in_loss_yearly = None
-            energy_cost_net_daily = _calc_energy_costs(net_load_kwh_daily)
+            energy_cost_net_daily = None
             energy_cost_net_monthly = energy_cost_monthly
             energy_cost_net_yearly = energy_cost_yearly
 
@@ -1724,7 +1723,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 self._cost_daily_pv_credit_accum = 0.0
                 self._cost_daily_date = today.strftime("%Y-%m-%d")
                 self._cost_daily_last_grid_kwh = cost_kwh_value
+                self._cost_daily_last_solar_kwh = pool_solar_kwh_daily
                 self._cost_last_tick_at = now
+                self._cost_net_daily_date = today
+                self._cost_net_daily_last_value = None
                 cost_daily_changed = True
 
             if cost_kwh_value is not None and self._cost_daily_last_grid_kwh is None:
@@ -1749,98 +1751,90 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     cost_daily_changed = True
                 self._cost_daily_last_grid_kwh = cost_kwh_value
 
+            delta_solar = None
+            if pool_solar_kwh_daily is not None and self._cost_daily_last_solar_kwh is None:
+                self._cost_daily_last_solar_kwh = pool_solar_kwh_daily
+                cost_daily_changed = True
+
+            if pool_solar_kwh_daily is not None and self._cost_daily_last_solar_kwh is not None:
+                try:
+                    delta_solar = float(pool_solar_kwh_daily) - float(self._cost_daily_last_solar_kwh)
+                except Exception:
+                    delta_solar = None
+                if delta_solar is not None and delta_solar < 0:
+                    self._cost_daily_last_solar_kwh = pool_solar_kwh_daily
+                    delta_solar = 0.0
+                    cost_daily_changed = True
+
+            if delta_solar is not None:
+                if delta_solar > 0.0:
+                    if electricity_price is not None:
+                        pv_credit_inc = float(delta_solar) * float(electricity_price)
+                        if pv_credit_inc > 0.0:
+                            self._cost_daily_pv_credit_accum = float(self._cost_daily_pv_credit_accum or 0.0) + pv_credit_inc
+                            cost_daily_changed = True
+                    if feed_in_tariff is not None:
+                        feed_in_loss_inc = float(delta_solar) * float(feed_in_tariff)
+                        if feed_in_loss_inc > 0.0:
+                            self._cost_daily_feed_in_loss_accum = float(self._cost_daily_feed_in_loss_accum or 0.0) + feed_in_loss_inc
+                            cost_daily_changed = True
+                self._cost_daily_last_solar_kwh = pool_solar_kwh_daily
+
             # Fallback PV credit/feed-in-loss integration from instantaneous power.
             # This is used when no dedicated daily solar kWh sensor is configured.
-            try:
-                last_tick = getattr(self, "_cost_last_tick_at", None)
-                elapsed_h = 0.0
-                if last_tick is not None:
-                    elapsed_h = max(0.0, (now - last_tick).total_seconds() / 3600.0)
+            if pool_solar_kwh_daily is None:
+                try:
+                    last_tick = getattr(self, "_cost_last_tick_at", None)
+                    elapsed_h = 0.0
+                    if last_tick is not None:
+                        elapsed_h = max(0.0, (now - last_tick).total_seconds() / 3600.0)
+                    self._cost_last_tick_at = now
+
+                    if elapsed_h > 0.0:
+                        total_power_w_for_cost = None
+                        if main_power is not None or aux_power is not None:
+                            total_power_w_for_cost = float(main_power or 0.0) + float(aux_power or 0.0)
+
+                        if total_power_w_for_cost is not None and total_power_w_for_cost > 0.0:
+                            pv_surplus_w = max(0.0, float(pv_surplus_for_pool_w or 0.0))
+                            overlap_w = min(float(total_power_w_for_cost), pv_surplus_w)
+
+                            if overlap_w > 0.0:
+                                if electricity_price is not None:
+                                    pv_credit_inc = (overlap_w / 1000.0) * float(electricity_price) * elapsed_h
+                                    if pv_credit_inc > 0.0:
+                                        self._cost_daily_pv_credit_accum = float(self._cost_daily_pv_credit_accum or 0.0) + pv_credit_inc
+                                        cost_daily_changed = True
+                                if feed_in_tariff is not None:
+                                    feed_in_loss_inc = (overlap_w / 1000.0) * float(feed_in_tariff) * elapsed_h
+                                    if feed_in_loss_inc > 0.0:
+                                        self._cost_daily_feed_in_loss_accum = float(self._cost_daily_feed_in_loss_accum or 0.0) + feed_in_loss_inc
+                                        cost_daily_changed = True
+                except Exception:
+                    pass
+            else:
                 self._cost_last_tick_at = now
-
-                if elapsed_h > 0.0:
-                    total_power_w_for_cost = None
-                    if main_power is not None or aux_power is not None:
-                        total_power_w_for_cost = float(main_power or 0.0) + float(aux_power or 0.0)
-
-                    if total_power_w_for_cost is not None and total_power_w_for_cost > 0.0:
-                        pv_surplus_w = max(0.0, float(pv_surplus_for_pool_w or 0.0))
-                        overlap_w = min(float(total_power_w_for_cost), pv_surplus_w)
-
-                        if overlap_w > 0.0:
-                            if electricity_price is not None:
-                                pv_credit_inc = (overlap_w / 1000.0) * float(electricity_price) * elapsed_h
-                                if pv_credit_inc > 0.0:
-                                    self._cost_daily_pv_credit_accum = float(self._cost_daily_pv_credit_accum or 0.0) + pv_credit_inc
-                                    cost_daily_changed = True
-                            if feed_in_tariff is not None:
-                                feed_in_loss_inc = (overlap_w / 1000.0) * float(feed_in_tariff) * elapsed_h
-                                if feed_in_loss_inc > 0.0:
-                                    self._cost_daily_feed_in_loss_accum = float(self._cost_daily_feed_in_loss_accum or 0.0) + feed_in_loss_inc
-                                    cost_daily_changed = True
-            except Exception:
-                pass
 
             if self._cost_daily_date is not None:
                 try:
                     energy_cost_daily = float(self._cost_daily_accum or 0.0)
                     energy_feed_in_loss_daily = float(self._cost_daily_feed_in_loss_accum or 0.0)
-                    # Net daily cost: prefer solar-adjusted net load if provided; otherwise
-                    # subtract PV credit when possible.
-                    # Economic net should include opportunity cost from lost feed-in revenue.
-                    # Formula target:
-                    #   net = gross - pv_credit + feed_in_loss
-                    if pool_solar_kwh_daily is not None and electricity_price is not None:
-                        try:
-                            if net_load_kwh_daily is not None:
-                                energy_cost_net_daily = float(max(0.0, float(net_load_kwh_daily))) * float(electricity_price)
-                            else:
-                                # Fallback when only total energy sensors are available:
-                                # subtract daily solar kWh at current price from the gross daily cost.
-                                energy_cost_net_daily = max(
-                                    0.0,
-                                    float(energy_cost_daily or 0.0) - float(pool_solar_kwh_daily) * float(electricity_price),
-                                )
-                        except Exception:
-                            energy_cost_net_daily = float(energy_cost_daily or 0.0)
-                    elif electricity_price is not None:
-                        energy_cost_net_daily = max(
-                            0.0,
-                            float(energy_cost_daily or 0.0) - float(self._cost_daily_pv_credit_accum or 0.0),
-                        )
+                    pv_credit_daily = float(self._cost_daily_pv_credit_accum or 0.0)
+                    net_candidate = float(energy_cost_daily or 0.0) - pv_credit_daily + float(energy_feed_in_loss_daily or 0.0)
+                    net_candidate = max(0.0, net_candidate)
+                    net_candidate = min(net_candidate, float(energy_cost_daily or 0.0))
+
+                    if getattr(self, "_cost_net_daily_date", None) != today:
+                        self._cost_net_daily_date = today
+                        self._cost_net_daily_last_value = None
+
+                    if self._cost_net_daily_last_value is None:
+                        energy_cost_net_daily = net_candidate
                     else:
-                        energy_cost_net_daily = float(energy_cost_daily or 0.0)
-
-                    # Add opportunity cost from foregone feed-in revenue.
-                    # This keeps feed_in_loss explicitly represented in economic net cost.
-                    energy_cost_net_daily = max(
-                        0.0,
-                        float(energy_cost_net_daily or 0.0) + float(energy_feed_in_loss_daily or 0.0),
-                    )
-
-                    # Safety invariant: net daily cost can never be higher than gross daily cost.
-                    if energy_cost_daily is not None and energy_cost_net_daily is not None:
-                        energy_cost_net_daily = min(float(energy_cost_net_daily), float(energy_cost_daily))
+                        energy_cost_net_daily = max(float(self._cost_net_daily_last_value), net_candidate)
+                    self._cost_net_daily_last_value = float(energy_cost_net_daily)
                 except Exception:
                     pass
-
-            # Net daily cost should not decrease within a day (avoid drops when PV offsets rise).
-            try:
-                today = dt_util.as_local(now).date()
-                if getattr(self, "_cost_net_daily_date", None) != today:
-                    self._cost_net_daily_date = today
-                    self._cost_net_daily_last_value = None
-                if energy_cost_net_daily is None:
-                    if self._cost_net_daily_last_value is not None:
-                        energy_cost_net_daily = float(self._cost_net_daily_last_value)
-                else:
-                    current_net = float(energy_cost_net_daily)
-                    if self._cost_net_daily_last_value is None or current_net >= float(self._cost_net_daily_last_value):
-                        self._cost_net_daily_last_value = current_net
-                    else:
-                        energy_cost_net_daily = float(self._cost_net_daily_last_value)
-            except Exception:
-                pass
 
             # Hard post-condition (also corrects historical overshoots from previous logic):
             # net must never exceed gross.
@@ -1848,7 +1842,6 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 if energy_cost_daily is not None and energy_cost_net_daily is not None:
                     if float(energy_cost_net_daily) > float(energy_cost_daily):
                         energy_cost_net_daily = float(energy_cost_daily)
-                        self._cost_net_daily_last_value = float(energy_cost_daily)
             except Exception:
                 pass
 

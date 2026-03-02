@@ -2,6 +2,12 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.3.33] - 2026-03-02
+- Rework daily net-cost calculation to be accumulator-based only: `net_daily = gross_daily_accum - pv_credit_accum + feed_in_loss_accum` with safety clamps.
+- Remove direct daily net recalculation from `daily_kwh * current_price` to avoid artificial behavior during tariff/sensor dynamics.
+- Keep daily net monotonic (non-decreasing) without forcing jumps to gross; preserve `net <= gross` invariant.
+- When `solar_energy_entity_daily` is configured, integrate PV credit and feed-in-loss via daily solar deltas; keep instantaneous-overlap integration as fallback only when no daily solar sensor is present.
+
 ## [2.3.32] - 2026-03-01
 - Add PV/power-saving diagnostics for frontend charting: expose `pv_house_load`, `pv_surplus_for_pool`, `power_saving_pump_threshold`, and `power_saving_aux_threshold` as coordinator data and sensors.
 - Add translations (de/en/es/fr) for the new PV/power-saving diagnostic sensors.
