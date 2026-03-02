@@ -253,6 +253,9 @@ def _pv_schema(curr: dict | None = None):
         vol.Optional(CONF_ENABLE_PV_OPTIMIZATION, default=c.get(CONF_ENABLE_PV_OPTIMIZATION, False)): bool,
         vol.Optional(CONF_PV_SURPLUS_SENSOR, default=c.get(CONF_PV_SURPLUS_SENSOR, DEFAULT_PV_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
         vol.Optional(CONF_PV_HOUSE_LOAD_SENSOR, default=c.get(CONF_PV_HOUSE_LOAD_SENSOR)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="power")),
+        vol.Optional(CONF_POWER_SAVING_THRESHOLD_FACTOR_PERCENT, default=c.get(CONF_POWER_SAVING_THRESHOLD_FACTOR_PERCENT, DEFAULT_POWER_SAVING_THRESHOLD_FACTOR_PERCENT)):
+            selector.NumberSelector(selector.NumberSelectorConfig(min=50, max=150, step=1, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="%")),
+        vol.Optional(CONF_POWER_SAVING_PREHEAT_USE_AUX_ESTIMATE, default=c.get(CONF_POWER_SAVING_PREHEAT_USE_AUX_ESTIMATE, DEFAULT_POWER_SAVING_PREHEAT_USE_AUX_ESTIMATE)): bool,
         vol.Optional(CONF_PV_ON_THRESHOLD, default=c.get(CONF_PV_ON_THRESHOLD, DEFAULT_PV_ON)): vol.Coerce(int),
         vol.Optional(CONF_PV_OFF_THRESHOLD, default=c.get(CONF_PV_OFF_THRESHOLD, DEFAULT_PV_OFF)): vol.Coerce(int),
         # PV smoothing/stability/min-run tuning (user-exposed)
@@ -494,6 +497,18 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
         if user_input is not None:
             try:
+                factor = int(user_input.get(CONF_POWER_SAVING_THRESHOLD_FACTOR_PERCENT, DEFAULT_POWER_SAVING_THRESHOLD_FACTOR_PERCENT))
+                if factor < 50:
+                    factor = 50
+                if factor > 150:
+                    factor = 150
+                user_input[CONF_POWER_SAVING_THRESHOLD_FACTOR_PERCENT] = factor
+                user_input[CONF_POWER_SAVING_PREHEAT_USE_AUX_ESTIMATE] = bool(
+                    user_input.get(
+                        CONF_POWER_SAVING_PREHEAT_USE_AUX_ESTIMATE,
+                        DEFAULT_POWER_SAVING_PREHEAT_USE_AUX_ESTIMATE,
+                    )
+                )
                 self.data.update(user_input)
                 return await self.async_step_costs()
             except Exception:
@@ -786,6 +801,18 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
         errors = {}
         if user_input is not None:
             try:
+                factor = int(user_input.get(CONF_POWER_SAVING_THRESHOLD_FACTOR_PERCENT, DEFAULT_POWER_SAVING_THRESHOLD_FACTOR_PERCENT))
+                if factor < 50:
+                    factor = 50
+                if factor > 150:
+                    factor = 150
+                user_input[CONF_POWER_SAVING_THRESHOLD_FACTOR_PERCENT] = factor
+                user_input[CONF_POWER_SAVING_PREHEAT_USE_AUX_ESTIMATE] = bool(
+                    user_input.get(
+                        CONF_POWER_SAVING_PREHEAT_USE_AUX_ESTIMATE,
+                        DEFAULT_POWER_SAVING_PREHEAT_USE_AUX_ESTIMATE,
+                    )
+                )
                 self.options.update(user_input)
                 if self._menu_mode:
                     return self.async_create_entry(title="", data=self.options)

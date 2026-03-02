@@ -710,7 +710,13 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         setattr(self, "_derived_cost_last_saved", now)
         setattr(self, "_derived_cost_snapshot", snapshot)
 
-    def _effective_heating_power(self, conf: dict, water_temp: float | None, outdoor_temp: float | None) -> float:
+    def _effective_heating_power(
+        self,
+        conf: dict,
+        water_temp: float | None,
+        outdoor_temp: float | None,
+        include_aux: bool | None = None,
+    ) -> float:
         """Return effective heating power in W after subtracting estimated heat loss."""
         power_w = None
         try:
@@ -732,7 +738,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         except Exception:
             pass
 
-        enable_aux = bool(conf.get(CONF_ENABLE_AUX_HEATING, False))
+        enable_aux = bool(conf.get(CONF_ENABLE_AUX_HEATING, False)) if include_aux is None else bool(include_aux)
         power_w = base_w + (aux_w if enable_aux else 0)
         if not power_w or power_w <= 0:
             try:
@@ -1644,11 +1650,19 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
             main_known_w = float(self._power_save_last_main_power_w or main_fallback_w or 0.0)
             aux_known_w = float(self._power_save_last_aux_power_w or aux_fallback_w or 0.0)
-            power_saving_reserve_w = 100.0
-            power_saving_pump_threshold_w = max(100.0, main_known_w + power_saving_reserve_w)
+            try:
+                threshold_factor_percent = float(
+                    conf.get(CONF_POWER_SAVING_THRESHOLD_FACTOR_PERCENT, DEFAULT_POWER_SAVING_THRESHOLD_FACTOR_PERCENT)
+                )
+            except Exception:
+                threshold_factor_percent = float(DEFAULT_POWER_SAVING_THRESHOLD_FACTOR_PERCENT)
+            threshold_factor_percent = max(50.0, min(150.0, threshold_factor_percent))
+            threshold_factor = threshold_factor_percent / 100.0
+
+            power_saving_pump_threshold_w = max(100.0, main_known_w * threshold_factor)
             power_saving_aux_threshold_w = max(
-                power_saving_pump_threshold_w + 100.0,
-                main_known_w + aux_known_w + power_saving_reserve_w,
+                power_saving_pump_threshold_w,
+                (main_known_w + aux_known_w) * threshold_factor,
             )
 
             if power_saving_available:
@@ -2049,7 +2063,25 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             # 3. Kalender & Aufheizzeit
             # Heizleistung ist eine Konstante (W) und darf NICHT aus einem Live-Pumpen-Power-Sensor abgeleitet werden.
             # Sonst wird die Preheat-Berechnung massiv falsch und startet u.U. Tage zu früh.
-            power_w = self._effective_heating_power(conf, water_temp, outdoor_temp)
+            # Calendar preheat timing can be user-tuned in power-saving mode:
+            # - enabled  -> include aux heater power in the estimate (shorter preheat window)
+            # - disabled -> conservative estimate with base power only
+            # Outside power-saving mode we keep the normal behavior.
+            preheat_use_aux_in_power_saving = bool(
+                conf.get(
+                    CONF_POWER_SAVING_PREHEAT_USE_AUX_ESTIMATE,
+                    DEFAULT_POWER_SAVING_PREHEAT_USE_AUX_ESTIMATE,
+                )
+            )
+            include_aux_for_preheat = (
+                preheat_use_aux_in_power_saving if self.power_saving_active else None
+            )
+            power_w = self._effective_heating_power(
+                conf,
+                water_temp,
+                outdoor_temp,
+                include_aux=include_aux_for_preheat,
+            )
 
             # Temperaturdifferenz (DeltaT).
             # Wenn Wassertemperatur fehlt, konservativer Default 20°C (statt Fehler)

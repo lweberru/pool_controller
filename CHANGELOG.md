@@ -2,6 +2,12 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.3.34] - 2026-03-02
+- Replace fixed power-saving reserve behavior with configurable threshold scaling via `power_saving_threshold_factor_percent` (50–150%, default 105%).
+- Add a new PV/options toggle `power_saving_preheat_use_aux_estimate` (default: enabled) so users can choose whether preheat estimation in power-saving mode includes auxiliary heater power.
+- Keep calendar preheat/event behavior intact while making preheat timing strategy user-configurable for better trade-off between cost and target-temperature reliability.
+- Update translations (de/en/es/fr) and docs for the new power-saving settings.
+
 ## [2.3.33] - 2026-03-02
 - Rework daily net-cost calculation to be accumulator-based only: `net_daily = gross_daily_accum - pv_credit_accum + feed_in_loss_accum` with safety clamps.
 - Remove direct daily net recalculation from `daily_kwh * current_price` to avoid artificial behavior during tariff/sensor dynamics.

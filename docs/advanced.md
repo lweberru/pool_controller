@@ -200,6 +200,13 @@ It keeps safety/maintenance constraints intact (e.g., frost protection), but shi
 - Availability: only offered when required sensors/signals are available; it auto-disables if required input disappears.
 - Runtime strategy:
 	- Prioritize pump/heating stages when PV conditions are sufficient.
+	- Stage thresholds are scaled by `power_saving_threshold_factor_percent` (default `105%`):
+		- `100%` starts stages at estimated pool demand.
+		- `>100%` is more conservative and keeps more PV for other household loads.
+		- `<100%` starts earlier and can accept short grid-import peaks.
+	- Preheat estimation in power-saving mode can optionally include auxiliary heater power (`power_saving_preheat_use_aux_estimate`, default `on`).
+		- `on`: shorter estimated preheat lead time.
+		- `off`: conservative estimate with base power only (earlier preheat start).
 	- If an auto-filter run is due but PV is currently insufficient, the run can be deferred.
 	- Deferred run is forced at/after the configured deadline hour (`power_saving_filter_deadline_hour`, default `16`).
 

@@ -101,6 +101,8 @@ CONF_MAX_MERGE_RUN_MINUTES = "max_merge_run_minutes"
 CONF_MIN_CREDIT_MINUTES = "min_credit_minutes"
 CONF_CREDIT_SOURCES = "credit_sources"
 CONF_POWER_SAVING_FILTER_DEADLINE_HOUR = "power_saving_filter_deadline_hour"
+CONF_POWER_SAVING_THRESHOLD_FACTOR_PERCENT = "power_saving_threshold_factor_percent"
+CONF_POWER_SAVING_PREHEAT_USE_AUX_ESTIMATE = "power_saving_preheat_use_aux_estimate"
 
 # Bathing timer
 CONF_BATH_DURATION = "bathing_minutes"
@@ -131,6 +133,8 @@ DEFAULT_PV_MIN_RUN_MINUTES = 10
 # Power-saving scheduler defaults
 DEFAULT_POWER_SAVING_FILTER_DEFER_MINUTES = 15
 DEFAULT_POWER_SAVING_FILTER_DEADLINE_HOUR = 16
+DEFAULT_POWER_SAVING_THRESHOLD_FACTOR_PERCENT = 105
+DEFAULT_POWER_SAVING_PREHEAT_USE_AUX_ESTIMATE = True
 
 # Toggle debounce (seconds): minimaler Abstand zwischen Schaltversuchen für externe Entities
 # Verhindert schnelle Retry-Loops wenn eine Entity nach dem Schalten kurzzeitig unavailable ist.

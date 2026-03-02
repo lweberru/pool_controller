@@ -82,6 +82,11 @@ pool_controller:
 
 ### Step 9: PV Solar Integration
 - **PV Surplus Sensor**: Entity measuring excess solar production (W)
+- **Power-Saving Threshold Factor (%)**: Multiplier for power-saving stage thresholds (default: 105%).
+  - `100%`: stage starts at estimated pool demand.
+  - `>100%`: more conservative, leaves PV reserve for other loads.
+  - `<100%`: earlier starts, potentially short grid-import peaks.
+- **Estimate Preheat with Aux Heater (Power-Saving)**: If enabled (default), preheat estimation in power-saving mode includes auxiliary heater power. If disabled, estimation uses base power only (conservative, earlier start).
 - **PV ON Threshold**: Turns pump/heating on when PV power >= threshold (default: 1000W)
 - **PV OFF Threshold**: Turns pump/heating off when PV power <= threshold (default: 500W)
 - **PV Smoothing Window**: Exponential smoothing window (seconds)
@@ -131,6 +136,8 @@ pool_controller:
 | Quick Chlorine Duration | 5 | 1-30 min | Duration of chlorine boost |
 | PV ON Threshold | 1000 | 0-20000 W | Enable PV operation above this surplus |
 | PV OFF Threshold | 500 | 0-20000 W | Disable PV operation below this surplus |
+| Power-Saving Threshold Factor | 105 | 50-150 % | Multiplier for pump/aux stage thresholds in power-saving mode |
+| Power-Saving Preheat Uses Aux Estimate | on | on/off | Include aux power in preheat time estimate while power-saving is active |
 | PV Smoothing Window | 60 | 0-3600 s | Exponential smoothing window (0 disables) |
 | PV Stability Window | 120 | 0-86400 s | Required stability before a state change |
 | PV Minimum Run | 10 | 0-1440 min | Minimum run time after PV start |
