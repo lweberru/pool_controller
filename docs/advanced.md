@@ -204,9 +204,9 @@ It keeps safety/maintenance constraints intact (e.g., frost protection), but shi
 		- `100%` starts stages at estimated pool demand.
 		- `>100%` is more conservative and keeps more PV for other household loads.
 		- `<100%` starts earlier and can accept short grid-import peaks.
-	- Preheat estimation in power-saving mode can optionally include auxiliary heater power (`power_saving_preheat_use_aux_estimate`, default `on`).
-		- `on`: shorter estimated preheat lead time.
-		- `off`: conservative estimate with base power only (earlier preheat start).
+	- Preheat behavior in power-saving mode can be configured via `power_saving_preheat_use_aux_estimate` (default `on`).
+		- `on`: preheat actively uses the auxiliary heater and the estimate includes that power (shorter lead time).
+		- `off`: auxiliary heater stays PV-stage-gated and the estimate uses base power only (conservative, earlier start).
 	- If an auto-filter run is due but PV is currently insufficient, the run can be deferred.
 	- Deferred run is forced at/after the configured deadline hour (`power_saving_filter_deadline_hour`, default `16`).
 

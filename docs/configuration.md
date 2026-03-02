@@ -86,7 +86,7 @@ pool_controller:
   - `100%`: stage starts at estimated pool demand.
   - `>100%`: more conservative, leaves PV reserve for other loads.
   - `<100%`: earlier starts, potentially short grid-import peaks.
-- **Estimate Preheat with Aux Heater (Power-Saving)**: If enabled (default), preheat estimation in power-saving mode includes auxiliary heater power. If disabled, estimation uses base power only (conservative, earlier start).
+- **Run Preheat with Aux Heater (Power-Saving)**: If enabled (default), preheat in power-saving mode actively uses auxiliary heating and estimation includes that power. If disabled, auxiliary heating is only used when PV stage allows it and estimation uses base power only (conservative, earlier start).
 - **PV ON Threshold**: Turns pump/heating on when PV power >= threshold (default: 1000W)
 - **PV OFF Threshold**: Turns pump/heating off when PV power <= threshold (default: 500W)
 - **PV Smoothing Window**: Exponential smoothing window (seconds)
@@ -137,7 +137,7 @@ pool_controller:
 | PV ON Threshold | 1000 | 0-20000 W | Enable PV operation above this surplus |
 | PV OFF Threshold | 500 | 0-20000 W | Disable PV operation below this surplus |
 | Power-Saving Threshold Factor | 105 | 50-150 % | Multiplier for pump/aux stage thresholds in power-saving mode |
-| Power-Saving Preheat Uses Aux Estimate | on | on/off | Include aux power in preheat time estimate while power-saving is active |
+| Power-Saving Preheat Uses Aux | on | on/off | If on, preheat in power-saving uses aux heater and matching estimate; if off, aux remains PV-stage-gated and estimate is conservative |
 | PV Smoothing Window | 60 | 0-3600 s | Exponential smoothing window (0 disables) |
 | PV Stability Window | 120 | 0-86400 s | Required stability before a state change |
 | PV Minimum Run | 10 | 0-1440 min | Minimum run time after PV start |

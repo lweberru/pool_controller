@@ -2938,6 +2938,12 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 else:
                     power_saving_reason = "pv_low"
 
+            preheat_force_aux_in_power_saving = bool(
+                self.power_saving_active
+                and preheat_active
+                and preheat_use_aux_in_power_saving
+            )
+
 
             # Transparenz: Warum darf/soll die Heizung laufen?
             if not conf.get(CONF_ENABLE_AUX_HEATING, False):
@@ -3085,7 +3091,11 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     (not maintenance_active)
                     and conf.get(CONF_ENABLE_AUX_HEATING, False)
                     and aux_heat_demand
-                    and ((not self.power_saving_active) or power_saving_aux_allows)
+                    and (
+                        (not self.power_saving_active)
+                        or power_saving_aux_allows
+                        or preheat_force_aux_in_power_saving
+                    )
                 ),
 
                 # Physical switch states (mirror the configured external switches).

@@ -2,6 +2,12 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.3.35] - 2026-03-02
+- Fix consistency of `power_saving_preheat_use_aux_estimate`: in power-saving mode the toggle now controls both preheat estimation and actual auxiliary-heater usage during preheat.
+- Behavior with toggle `on`: preheat actively uses auxiliary heating and estimation includes aux power.
+- Behavior with toggle `off`: auxiliary heating remains PV-stage-gated and preheat estimation stays conservative (base power only).
+- Update translations (de/en/es/fr) and docs to reflect the execution + estimation coupling.
+
 ## [2.3.34] - 2026-03-02
 - Replace fixed power-saving reserve behavior with configurable threshold scaling via `power_saving_threshold_factor_percent` (50–150%, default 105%).
 - Add a new PV/options toggle `power_saving_preheat_use_aux_estimate` (default: enabled) so users can choose whether preheat estimation in power-saving mode includes auxiliary heater power.
