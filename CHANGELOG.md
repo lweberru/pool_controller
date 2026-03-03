@@ -2,6 +2,10 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.3.37] - 2026-03-03
+- Fix power-saving stage-1 runtime behavior: pump/main run now requires active heating demand and no longer continues indefinitely after target temperature is reached.
+- Keep stage-2/aux safety behavior unchanged; auxiliary heating remains demand-gated and turns off at/above target temperature.
+
 ## [2.3.36] - 2026-03-02
 - Fix power-saving stage-2 reachability: when `power_saving_aux_allows` is true, heating is now allowed to enter the aux-heating demand path.
 - Resolve logic gap where stage-2 thresholds could be met but `should_aux_on` stayed false because `heat_allowed` never opened in pure power-saving operation.

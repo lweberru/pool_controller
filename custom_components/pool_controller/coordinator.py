@@ -2826,10 +2826,13 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             if self.power_saving_active:
                 pv_run = False
 
+            # Stage 1 (pump) in power-saving is still a heating context.
+            # Do not keep running indefinitely once target temperature is reached.
             power_saving_pump_run = bool(
                 self.power_saving_active
                 and power_saving_available
                 and power_saving_pump_allows
+                and pv_heat_demand
             )
 
             # Optimiert: manuelle Timer erzwingen "heat"-Modus
