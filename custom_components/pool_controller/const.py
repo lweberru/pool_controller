@@ -103,6 +103,7 @@ CONF_CREDIT_SOURCES = "credit_sources"
 CONF_POWER_SAVING_FILTER_DEADLINE_HOUR = "power_saving_filter_deadline_hour"
 CONF_POWER_SAVING_THRESHOLD_FACTOR_PERCENT = "power_saving_threshold_factor_percent"
 CONF_POWER_SAVING_PREHEAT_USE_AUX_ESTIMATE = "power_saving_preheat_use_aux_estimate"
+CONF_POWER_SAVING_MIN_RUN_MINUTES = "power_saving_min_run_minutes"
 
 # Bathing timer
 CONF_BATH_DURATION = "bathing_minutes"
@@ -135,6 +136,7 @@ DEFAULT_POWER_SAVING_FILTER_DEFER_MINUTES = 15
 DEFAULT_POWER_SAVING_FILTER_DEADLINE_HOUR = 16
 DEFAULT_POWER_SAVING_THRESHOLD_FACTOR_PERCENT = 105
 DEFAULT_POWER_SAVING_PREHEAT_USE_AUX_ESTIMATE = True
+DEFAULT_POWER_SAVING_MIN_RUN_MINUTES = 10
 
 # Toggle debounce (seconds): minimaler Abstand zwischen Schaltversuchen für externe Entities
 # Verhindert schnelle Retry-Loops wenn eine Entity nach dem Schalten kurzzeitig unavailable ist.

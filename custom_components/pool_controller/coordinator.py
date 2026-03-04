@@ -56,6 +56,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self.power_saving_active = False
         self._power_saving_last_available = None
         self._power_saving_unavailable_since = None
+        self._power_saving_stage_active = 0
+        self._power_saving_stage_since = None
         self._power_save_last_main_power_w = None
         self._power_save_last_aux_power_w = None
         if entry:
@@ -2429,7 +2431,14 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
             in_quiet = _in_quiet_period(conf)
 
-            pv_surplus_now_w = max(0.0, float(pv_surplus_for_pool_w or 0.0))
+            # Use smoothed PV surplus for power-saving stage thresholds to avoid
+            # reacting to very short PV spikes/dips. Fall back to raw surplus
+            # until a smoothed value is available.
+            try:
+                pv_surplus_for_stage_w = pv_smoothed if pv_smoothed is not None else pv_surplus_for_pool_w
+                pv_surplus_now_w = max(0.0, float(pv_surplus_for_stage_w or 0.0))
+            except Exception:
+                pv_surplus_now_w = max(0.0, float(pv_surplus_for_pool_w or 0.0))
 
             power_saving_unavailable_grace_active = False
             try:
@@ -2461,6 +2470,55 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             if power_saving_unavailable_grace_active:
                 power_saving_pump_allows = bool(getattr(self, "_last_should_pump_on", False))
                 power_saving_aux_allows = bool(getattr(self, "_last_should_aux_on", False))
+
+            # Optional anti-flapping hold: keep current power-saving stage for a minimum runtime
+            # before allowing automatic downshifts caused by transient PV dips.
+            try:
+                min_runtime_minutes = int(
+                    conf.get(
+                        CONF_POWER_SAVING_MIN_RUN_MINUTES,
+                        DEFAULT_POWER_SAVING_MIN_RUN_MINUTES,
+                    )
+                )
+            except Exception:
+                min_runtime_minutes = int(DEFAULT_POWER_SAVING_MIN_RUN_MINUTES)
+            min_runtime_minutes = max(0, min(24 * 60, min_runtime_minutes))
+            min_runtime_seconds = float(min_runtime_minutes) * 60.0
+
+            desired_stage = 2 if power_saving_aux_allows else (1 if power_saving_pump_allows else 0)
+            stage_active = int(getattr(self, "_power_saving_stage_active", 0) or 0)
+            stage_since = getattr(self, "_power_saving_stage_since", None)
+
+            stage_hold_blocked = bool(
+                (not self.power_saving_active)
+                or maintenance_active
+                or pause_active
+                or self.away_active
+                or in_quiet
+                or (not power_saving_available)
+            )
+
+            effective_stage = desired_stage
+            if stage_hold_blocked:
+                effective_stage = desired_stage
+            elif (
+                min_runtime_seconds > 0
+                and stage_active > 0
+                and desired_stage < stage_active
+                and stage_since is not None
+            ):
+                elapsed = max(0.0, (now - stage_since).total_seconds())
+                if elapsed < min_runtime_seconds:
+                    effective_stage = stage_active
+
+            if effective_stage != stage_active:
+                self._power_saving_stage_active = int(effective_stage)
+                self._power_saving_stage_since = now if effective_stage > 0 else None
+            elif effective_stage > 0 and stage_since is None:
+                self._power_saving_stage_since = now
+
+            power_saving_pump_allows = effective_stage >= 1
+            power_saving_aux_allows = effective_stage >= 2
 
             # Enforce minimum gap between runs (unless severe frost)
             min_gap_remaining = 0

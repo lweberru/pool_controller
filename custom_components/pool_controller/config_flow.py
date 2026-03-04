@@ -256,6 +256,8 @@ def _pv_schema(curr: dict | None = None):
         vol.Optional(CONF_POWER_SAVING_THRESHOLD_FACTOR_PERCENT, default=c.get(CONF_POWER_SAVING_THRESHOLD_FACTOR_PERCENT, DEFAULT_POWER_SAVING_THRESHOLD_FACTOR_PERCENT)):
             selector.NumberSelector(selector.NumberSelectorConfig(min=50, max=150, step=1, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="%")),
         vol.Optional(CONF_POWER_SAVING_PREHEAT_USE_AUX_ESTIMATE, default=c.get(CONF_POWER_SAVING_PREHEAT_USE_AUX_ESTIMATE, DEFAULT_POWER_SAVING_PREHEAT_USE_AUX_ESTIMATE)): bool,
+        vol.Optional(CONF_POWER_SAVING_MIN_RUN_MINUTES, default=c.get(CONF_POWER_SAVING_MIN_RUN_MINUTES, DEFAULT_POWER_SAVING_MIN_RUN_MINUTES)):
+            selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=24 * 60, step=1, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="min")),
         vol.Optional(CONF_PV_ON_THRESHOLD, default=c.get(CONF_PV_ON_THRESHOLD, DEFAULT_PV_ON)): vol.Coerce(int),
         vol.Optional(CONF_PV_OFF_THRESHOLD, default=c.get(CONF_PV_OFF_THRESHOLD, DEFAULT_PV_OFF)): vol.Coerce(int),
         # PV smoothing/stability/min-run tuning (user-exposed)
@@ -509,6 +511,12 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         DEFAULT_POWER_SAVING_PREHEAT_USE_AUX_ESTIMATE,
                     )
                 )
+                min_runtime = int(user_input.get(CONF_POWER_SAVING_MIN_RUN_MINUTES, DEFAULT_POWER_SAVING_MIN_RUN_MINUTES))
+                if min_runtime < 0:
+                    min_runtime = 0
+                if min_runtime > 24 * 60:
+                    min_runtime = 24 * 60
+                user_input[CONF_POWER_SAVING_MIN_RUN_MINUTES] = min_runtime
                 self.data.update(user_input)
                 return await self.async_step_costs()
             except Exception:
@@ -813,6 +821,12 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
                         DEFAULT_POWER_SAVING_PREHEAT_USE_AUX_ESTIMATE,
                     )
                 )
+                min_runtime = int(user_input.get(CONF_POWER_SAVING_MIN_RUN_MINUTES, DEFAULT_POWER_SAVING_MIN_RUN_MINUTES))
+                if min_runtime < 0:
+                    min_runtime = 0
+                if min_runtime > 24 * 60:
+                    min_runtime = 24 * 60
+                user_input[CONF_POWER_SAVING_MIN_RUN_MINUTES] = min_runtime
                 self.options.update(user_input)
                 if self._menu_mode:
                     return self.async_create_entry(title="", data=self.options)

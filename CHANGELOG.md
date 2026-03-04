@@ -2,6 +2,10 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.3.38] - 2026-03-04
+- Add configurable power-saving stage minimum runtime (`power_saving_min_run_minutes`) in PV setup/options to reduce stage flapping during short PV drops.
+- Use smoothed PV surplus (`pv_smoothed`) instead of raw surplus for power-saving stage threshold decisions, with safe fallback to raw value while smoothing initializes.
+
 ## [2.3.37] - 2026-03-03
 - Fix power-saving stage-1 runtime behavior: pump/main run now requires active heating demand and no longer continues indefinitely after target temperature is reached.
 - Keep stage-2/aux safety behavior unchanged; auxiliary heating remains demand-gated and turns off at/above target temperature.
