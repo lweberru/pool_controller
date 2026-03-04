@@ -1,0 +1,113 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "HACS: Release backend+frontend",
+      "type": "shell",
+      "command": "python3 ${workspaceFolder}/tools/release_hacs.py --target both --release-type minor",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "HACS: Release backend+frontend (major/feature)",
+      "type": "shell",
+      "command": "python3 ${workspaceFolder}/tools/release_hacs.py --target both --release-type major",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "HACS: Release backend only",
+      "type": "shell",
+      "command": "python3 ${workspaceFolder}/tools/release_hacs.py --target backend --release-type minor",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "HACS: Release backend only (major/feature)",
+      "type": "shell",
+      "command": "python3 ${workspaceFolder}/tools/release_hacs.py --target backend --release-type major",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "HACS: Release frontend only",
+      "type": "shell",
+      "command": "python3 ${workspaceFolder}/tools/release_hacs.py --target frontend --release-type minor",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "HACS: Release frontend only (major/feature)",
+      "type": "shell",
+      "command": "python3 ${workspaceFolder}/tools/release_hacs.py --target frontend --release-type major",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "HACS: Prepare only (no publish)",
+      "type": "shell",
+      "command": "python3 ${workspaceFolder}/tools/release_hacs.py --apply-only --target both --release-type minor",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "HACS: Prepare only (major/feature)",
+      "type": "shell",
+      "command": "python3 ${workspaceFolder}/tools/release_hacs.py --apply-only --target both --release-type major",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "HACS: Prepare backend only",
+      "type": "shell",
+      "command": "python3 ${workspaceFolder}/tools/release_hacs.py --apply-only --target backend --release-type minor",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "HACS: Prepare backend only (major/feature)",
+      "type": "shell",
+      "command": "python3 ${workspaceFolder}/tools/release_hacs.py --apply-only --target backend --release-type major",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "HACS: Prepare frontend only",
+      "type": "shell",
+      "command": "python3 ${workspaceFolder}/tools/release_hacs.py --apply-only --target frontend --release-type minor",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "HACS: Prepare frontend only (major/feature)",
+      "type": "shell",
+      "command": "python3 ${workspaceFolder}/tools/release_hacs.py --apply-only --target frontend --release-type major",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ]
+}
