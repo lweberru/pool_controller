@@ -98,6 +98,32 @@ def prompt_multiline(title: str, assume_yes: bool) -> list[str]:
     return lines
 
 
+def _resolve_path(path_str: str | None, base_dir: Path) -> Path | None:
+    if not path_str:
+        return None
+    p = Path(path_str).expanduser()
+    if not p.is_absolute():
+        p = (base_dir / p).resolve()
+    return p
+
+
+def read_notes_file(path: Path | None) -> list[str]:
+    if path is None:
+        return []
+    if not path.exists():
+        raise RuntimeError(f"Notes file not found: {path}")
+    text = path.read_text(encoding="utf-8")
+    lines: list[str] = []
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        line = re.sub(r"^[-*]\s*", "", line)
+        if line:
+            lines.append(line)
+    return lines
+
+
 def default_version_for_release_type(current: str, release_type: str) -> str:
     if release_type == "minor":
         return bump_patch(current)
@@ -173,6 +199,13 @@ def main() -> None:
     )
     parser.add_argument("--backend-version", help="Override backend version")
     parser.add_argument("--frontend-version", help="Override frontend version")
+    parser.add_argument("--backend-commit-message", help="Override backend commit message")
+    parser.add_argument("--frontend-commit-message", help="Override frontend commit message")
+    parser.add_argument("--backend-release-title", help="Override backend release title")
+    parser.add_argument("--frontend-release-title", help="Override frontend release title")
+    parser.add_argument("--notes-file", help="Use one notes file for both backend/frontend release notes")
+    parser.add_argument("--backend-notes-file", help="Use notes file for backend release notes")
+    parser.add_argument("--frontend-notes-file", help="Use notes file for frontend release notes")
     args = parser.parse_args()
 
     backend_root = Path(__file__).resolve().parents[1]
@@ -213,10 +246,15 @@ def main() -> None:
 
     backend_notes: list[str] = []
     frontend_notes: list[str] = []
+
+    notes_file_all = _resolve_path(args.notes_file, backend_root)
+    backend_notes_file = _resolve_path(args.backend_notes_file, backend_root) or notes_file_all
+    frontend_notes_file = _resolve_path(args.frontend_notes_file, backend_root) or notes_file_all
+
     if include_backend:
-        backend_notes = prompt_multiline("Backend Release Notes", args.yes)
+        backend_notes = read_notes_file(backend_notes_file) if backend_notes_file else prompt_multiline("Backend Release Notes", args.yes)
     if include_frontend:
-        frontend_notes = prompt_multiline("Frontend Release Notes", args.yes)
+        frontend_notes = read_notes_file(frontend_notes_file) if frontend_notes_file else prompt_multiline("Frontend Release Notes", args.yes)
 
     if include_backend:
         write_backend_version(paths.backend_manifest, backend_version)
@@ -239,11 +277,13 @@ def main() -> None:
 
     if include_backend:
         run(["git", "add", "-A"], paths.backend_root)
-        run(["git", "commit", "-m", f"release: v{backend_version}"], paths.backend_root)
+        backend_commit_message = args.backend_commit_message or f"release: v{backend_version}"
+        run(["git", "commit", "-m", backend_commit_message], paths.backend_root)
 
     if include_frontend:
         run(["git", "add", "-A"], paths.frontend_root)
-        run(["git", "commit", "-m", f"release: v{frontend_version}"], paths.frontend_root)
+        frontend_commit_message = args.frontend_commit_message or f"release: v{frontend_version}"
+        run(["git", "commit", "-m", frontend_commit_message], paths.frontend_root)
 
     if include_backend:
         run(["git", "push", "origin", "main"], paths.backend_root)
@@ -252,16 +292,18 @@ def main() -> None:
 
     backend_tag = f"v{backend_version}" if include_backend else None
     frontend_tag = f"v{frontend_version}" if include_frontend else None
+    backend_release_title = args.backend_release_title or backend_tag
+    frontend_release_title = args.frontend_release_title or frontend_tag
 
     if include_backend:
         if not release_exists("lweberru/pool_controller", backend_tag, paths.backend_root):
-            create_release("lweberru/pool_controller", backend_tag, backend_tag, backend_notes, paths.backend_root)
+            create_release("lweberru/pool_controller", backend_tag, backend_release_title, backend_notes, paths.backend_root)
         else:
             print(f"Backend release already exists: {backend_tag}")
 
     if include_frontend:
         if not release_exists("lweberru/pool_controller_dashboard_frontend", frontend_tag, paths.backend_root):
-            create_release("lweberru/pool_controller_dashboard_frontend", frontend_tag, frontend_tag, frontend_notes, paths.backend_root)
+            create_release("lweberru/pool_controller_dashboard_frontend", frontend_tag, frontend_release_title, frontend_notes, paths.backend_root)
         else:
             print(f"Frontend release already exists: {frontend_tag}")
 

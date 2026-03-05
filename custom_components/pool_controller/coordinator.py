@@ -1796,9 +1796,12 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                             cost_daily_changed = True
                 self._cost_daily_last_solar_kwh = pool_solar_kwh_daily
 
-            # Fallback PV credit/feed-in-loss integration from instantaneous power.
-            # This is used when no dedicated daily solar kWh sensor is configured.
-            if pool_solar_kwh_daily is None:
+            # Fallback integration from instantaneous power:
+            # - gross daily cost when no pool kWh sensor is configured
+            # - PV credit/feed-in-loss when no dedicated daily solar kWh sensor is configured
+            needs_power_gross_fallback = cost_kwh_value is None
+            needs_power_pv_fallback = pool_solar_kwh_daily is None
+            if needs_power_gross_fallback or needs_power_pv_fallback:
                 try:
                     last_tick = getattr(self, "_cost_last_tick_at", None)
                     elapsed_h = 0.0
@@ -1812,20 +1815,27 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                             total_power_w_for_cost = float(main_power or 0.0) + float(aux_power or 0.0)
 
                         if total_power_w_for_cost is not None and total_power_w_for_cost > 0.0:
-                            pv_surplus_w = max(0.0, float(pv_surplus_for_pool_w or 0.0))
-                            overlap_w = min(float(total_power_w_for_cost), pv_surplus_w)
+                            if needs_power_gross_fallback and electricity_price is not None:
+                                gross_cost_inc = (float(total_power_w_for_cost) / 1000.0) * float(electricity_price) * elapsed_h
+                                if gross_cost_inc > 0.0:
+                                    self._cost_daily_accum = float(self._cost_daily_accum or 0.0) + gross_cost_inc
+                                    cost_daily_changed = True
 
-                            if overlap_w > 0.0:
-                                if electricity_price is not None:
-                                    pv_credit_inc = (overlap_w / 1000.0) * float(electricity_price) * elapsed_h
-                                    if pv_credit_inc > 0.0:
-                                        self._cost_daily_pv_credit_accum = float(self._cost_daily_pv_credit_accum or 0.0) + pv_credit_inc
-                                        cost_daily_changed = True
-                                if feed_in_tariff is not None:
-                                    feed_in_loss_inc = (overlap_w / 1000.0) * float(feed_in_tariff) * elapsed_h
-                                    if feed_in_loss_inc > 0.0:
-                                        self._cost_daily_feed_in_loss_accum = float(self._cost_daily_feed_in_loss_accum or 0.0) + feed_in_loss_inc
-                                        cost_daily_changed = True
+                            if needs_power_pv_fallback:
+                                pv_surplus_w = max(0.0, float(pv_surplus_for_pool_w or 0.0))
+                                overlap_w = min(float(total_power_w_for_cost), pv_surplus_w)
+
+                                if overlap_w > 0.0:
+                                    if electricity_price is not None:
+                                        pv_credit_inc = (overlap_w / 1000.0) * float(electricity_price) * elapsed_h
+                                        if pv_credit_inc > 0.0:
+                                            self._cost_daily_pv_credit_accum = float(self._cost_daily_pv_credit_accum or 0.0) + pv_credit_inc
+                                            cost_daily_changed = True
+                                    if feed_in_tariff is not None:
+                                        feed_in_loss_inc = (overlap_w / 1000.0) * float(feed_in_tariff) * elapsed_h
+                                        if feed_in_loss_inc > 0.0:
+                                            self._cost_daily_feed_in_loss_accum = float(self._cost_daily_feed_in_loss_accum or 0.0) + feed_in_loss_inc
+                                            cost_daily_changed = True
                 except Exception:
                     pass
             else:
