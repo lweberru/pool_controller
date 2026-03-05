@@ -641,6 +641,7 @@
       "pv_band_high": { "name": "PV band high" },
       "main_power": { "name": "Main power" },
       "aux_power": { "name": "Aux power" },
+      "power": { "name": "Pool power (total)" },
       "pv_on_threshold": { "name": "PV ON threshold" },
       "pv_off_threshold": { "name": "PV OFF threshold" },
       "filter_minutes": { "name": "Configured filter duration (min)" },

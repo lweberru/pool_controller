@@ -827,6 +827,9 @@
             "aux_power": {
                 "name": "Zusatzheizung Leistung"
             },
+            "power": {
+                "name": "Pool-Leistung (gesamt)"
+            },
             "pv_on_threshold": {
                 "name": "PV-Einschalt-Schwelle"
             },

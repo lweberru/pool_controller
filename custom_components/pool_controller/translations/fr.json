@@ -827,6 +827,9 @@
             "aux_power": {
                 "name": "Puissance auxiliaire"
             },
+            "power": {
+                "name": "Puissance totale piscine"
+            },
             "pv_on_threshold": {
                 "name": "Seuil PV marche"
             },

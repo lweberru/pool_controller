@@ -827,6 +827,9 @@
             "aux_power": {
                 "name": "Potencia auxiliar"
             },
+            "power": {
+                "name": "Potencia total de la piscina"
+            },
             "pv_on_threshold": {
                 "name": "Umbral PV encendido"
             },

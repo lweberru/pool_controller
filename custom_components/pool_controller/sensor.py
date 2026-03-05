@@ -101,6 +101,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolPowerSensor(coordinator, "pv_band_high", None),
         PoolPowerSensor(coordinator, "main_power", None),
         PoolPowerSensor(coordinator, "aux_power", None),
+        PoolPowerSensor(coordinator, "power", None),
     ])
     async_add_entities(entities)
 

@@ -3113,6 +3113,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "in_quiet": in_quiet,
                 "main_power": round(main_power, 1) if main_power is not None else None,
                 "aux_power": round(aux_power, 1) if aux_power is not None else None,
+                "power": round(float(total_power_w), 1) if total_power_w is not None else None,
                 "electricity_price": round(float(electricity_price), 4) if electricity_price is not None else None,
                 "feed_in_tariff": round(float(feed_in_tariff), 4) if feed_in_tariff is not None else None,
                 "power_cost_per_hour": round(float(power_cost_per_hour), 4) if power_cost_per_hour is not None else None,

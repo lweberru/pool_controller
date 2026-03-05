@@ -44,7 +44,11 @@
         "options": {
             "cwd": "${workspaceFolder}"
         },
-        "problemMatcher": []
+        "problemMatcher": [],
+        "group": {
+            "kind": "build",
+            "isDefault": true
+        }
     },
     {
         "label": "HACS: Release frontend only (major/feature)",
