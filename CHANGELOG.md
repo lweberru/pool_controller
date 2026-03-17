@@ -2,6 +2,10 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.3.41] - 2026-03-17
+- Release update.
+
+
 ## [2.3.40] - 2026-03-05
 - Wrong Power Mapping and new Power Sensor as a sum of all power sources. Fix for pv card.
 

@@ -1732,6 +1732,12 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     last_date = None
 
             cost_kwh_value = load_kwh_daily if load_kwh_daily is not None else load_kwh
+            # When no dedicated daily kWh sensor is configured, cumulative kWh sensors
+            # can be too coarse/laggy for smooth daily costs. In that case, prefer
+            # power*time accumulation for gross daily cost to keep daily sensors responsive.
+            use_power_gross_mode = bool(
+                load_kwh_daily is None and (main_power is not None or aux_power is not None)
+            )
 
             if last_date != today:
                 self._cost_daily_accum = 0.0
@@ -1762,7 +1768,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     cost_daily_changed = True
 
             if delta_grid is not None:
-                if electricity_price is not None and delta_grid > 0:
+                if (not use_power_gross_mode) and electricity_price is not None and delta_grid > 0:
                     self._cost_daily_accum = float(self._cost_daily_accum or 0.0) + float(delta_grid) * float(electricity_price)
                     cost_daily_changed = True
                 self._cost_daily_last_grid_kwh = cost_kwh_value
@@ -1799,7 +1805,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             # Fallback integration from instantaneous power:
             # - gross daily cost when no pool kWh sensor is configured
             # - PV credit/feed-in-loss when no dedicated daily solar kWh sensor is configured
-            needs_power_gross_fallback = cost_kwh_value is None
+            needs_power_gross_fallback = (cost_kwh_value is None) or use_power_gross_mode
             needs_power_pv_fallback = pool_solar_kwh_daily is None
             if needs_power_gross_fallback or needs_power_pv_fallback:
                 try:
