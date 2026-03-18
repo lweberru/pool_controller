@@ -76,6 +76,14 @@ def bump_minor(version: str) -> str:
     return f"{major}.{minor + 1}.0"
 
 
+def bump_major(version: str) -> str:
+    parts = version.split(".")
+    if len(parts) != 3:
+        raise ValueError(f"Invalid semver: {version}")
+    major, _minor, _patch = [int(p) for p in parts]
+    return f"{major + 1}.0.0"
+
+
 def prompt_with_default(label: str, default: str, assume_yes: bool) -> str:
     if assume_yes:
         return default
@@ -125,10 +133,12 @@ def read_notes_file(path: Path | None) -> list[str]:
 
 
 def default_version_for_release_type(current: str, release_type: str) -> str:
-    if release_type == "minor":
-        return bump_patch(current)
     if release_type == "major":
+        return bump_major(current)
+    if release_type == "minor":
         return bump_minor(current)
+    if release_type in ("patch", "fix"):
+        return bump_patch(current)
     if release_type == "manual":
         return current
     raise ValueError(f"Unsupported release type: {release_type}")
@@ -193,9 +203,9 @@ def main() -> None:
     parser.add_argument("--target", choices=["backend", "frontend", "both"], default="both", help="Select release target")
     parser.add_argument(
         "--release-type",
-        choices=["minor", "major", "manual"],
+        choices=["minor", "major", "manual", "patch", "fix"],
         default="minor",
-        help="Version bump strategy: minor=fix (x.y.z -> x.y.z+1), major=feature (x.y.z -> x.(y+1).0), manual=enter explicit version",
+        help="Version bump strategy: major (x.y.z -> (x+1).0.0), minor (x.y.z -> x.(y+1).0), patch/fix (x.y.z -> x.y.(z+1)), manual=enter explicit version",
     )
     parser.add_argument("--backend-version", help="Override backend version")
     parser.add_argument("--frontend-version", help="Override frontend version")

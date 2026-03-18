@@ -1732,12 +1732,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     last_date = None
 
             cost_kwh_value = load_kwh_daily if load_kwh_daily is not None else load_kwh
-            # When no dedicated daily kWh sensor is configured, cumulative kWh sensors
-            # can be too coarse/laggy for smooth daily costs. In that case, prefer
-            # power*time accumulation for gross daily cost to keep daily sensors responsive.
-            use_power_gross_mode = bool(
-                load_kwh_daily is None and (main_power is not None or aux_power is not None)
-            )
+            # Gross daily cost should follow live load behavior. Therefore, whenever
+            # power is available we prefer power*time integration for daily gross cost
+            # and keep kWh-delta mode as fallback only when live power is unavailable.
+            use_power_gross_mode = bool(main_power is not None or aux_power is not None)
 
             if last_date != today:
                 self._cost_daily_accum = 0.0
