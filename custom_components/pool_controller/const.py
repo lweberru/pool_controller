@@ -291,6 +291,7 @@ OPT_KEY_COST_DAILY_DATE = "cost_daily_date"
 OPT_KEY_COST_DAILY_ACCUM = "cost_daily_accum"
 OPT_KEY_COST_DAILY_FEED_IN_LOSS_ACCUM = "cost_daily_feed_in_loss_accum"
 OPT_KEY_COST_DAILY_PV_CREDIT_ACCUM = "cost_daily_pv_credit_accum"
+OPT_KEY_COST_DAILY_NET_ACCUM = "cost_daily_net_accum"
 
 # Derived cost aggregation (month/year from daily cost)
 OPT_KEY_DERIVED_COST_DAILY_LAST_VALUE = "derived_cost_daily_last_value"

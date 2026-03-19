@@ -2,6 +2,10 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.3.43] - 2026-03-19
+- Release update.
+
+
 ## [2.3.42] - 2026-03-18
 - Release update.
 
