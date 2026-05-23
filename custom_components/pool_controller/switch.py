@@ -56,6 +56,17 @@ class PoolPumpSwitch(PoolBaseSwitch):
         super().__init__(coordinator)
         self._attr_unique_id = f"{coordinator.entry.entry_id}_pump"
 
+    def _pump_target(self):
+        # Merge data + options so option overrides win.
+        cfg = {**self.coordinator.entry.data, **self.coordinator.entry.options}
+        pump = cfg.get(CONF_PUMP_SWITCH)
+        main = cfg.get(CONF_MAIN_SWITCH)
+        # Fall back to main switch if pump_switch is unset or refers to a
+        # non-existing entity (e.g. legacy hardcoded default "switch.whirlpool").
+        if pump and self.hass.states.get(pump) is not None:
+            return pump
+        return main
+
     @property
     def is_on(self):
         return self.coordinator.data.get("should_pump_on")
@@ -64,7 +75,9 @@ class PoolPumpSwitch(PoolBaseSwitch):
         demo = self.coordinator.entry.data.get(CONF_DEMO_MODE, False)
         if demo:
             return
-        entity_id = self.coordinator.entry.data.get(CONF_PUMP_SWITCH) or self.coordinator.entry.data.get(CONF_MAIN_SWITCH)
+        entity_id = self._pump_target()
+        if not entity_id:
+            return
         await self.hass.services.async_call("switch", "turn_on", {"entity_id": entity_id})
 
     async def async_turn_off(self, **kwargs):
@@ -74,7 +87,9 @@ class PoolPumpSwitch(PoolBaseSwitch):
             return
         if demo:
             return
-        entity_id = self.coordinator.entry.data.get(CONF_PUMP_SWITCH) or self.coordinator.entry.data.get(CONF_MAIN_SWITCH)
+        entity_id = self._pump_target()
+        if not entity_id:
+            return
         await self.hass.services.async_call("switch", "turn_off", {"entity_id": entity_id})
 
 class PoolAuxSwitch(PoolBaseSwitch):

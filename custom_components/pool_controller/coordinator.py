@@ -1442,10 +1442,26 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             self.aux_enabled = self.aux_allowed
 
             # Physical switch entity IDs (may be external entities). Used for state mirroring.
-            main_switch_id = conf.get(CONF_MAIN_SWITCH)
-            pump_switch_id = conf.get(CONF_PUMP_SWITCH) or main_switch_id
-            aux_switch_id = conf.get(CONF_AUX_HEATING_SWITCH)
+            main_switch_id = conf.get(CONF_MAIN_SWITCH) or None
+            pump_switch_raw = conf.get(CONF_PUMP_SWITCH) or None
+            aux_switch_id = conf.get(CONF_AUX_HEATING_SWITCH) or None
             demo = conf.get(CONF_DEMO_MODE, False)
+
+            # Fall back to main switch when pump_switch is unset OR points to a
+            # non-existing entity. Protects against legacy configs that stored
+            # hardcoded defaults like "switch.whirlpool" (entity does not exist
+            # on this system) and prevents bogus service calls in reconcile.
+            pump_switch_id = pump_switch_raw
+            if pump_switch_id and self.hass.states.get(pump_switch_id) is None:
+                if not getattr(self, "_pump_fallback_warned", False):
+                    _LOGGER.warning(
+                        "Configured pump_switch '%s' does not exist; falling back to main_switch '%s'",
+                        pump_switch_id, main_switch_id,
+                    )
+                    self._pump_fallback_warned = True
+                pump_switch_id = main_switch_id
+            elif not pump_switch_id:
+                pump_switch_id = main_switch_id
 
             # Mirror physical switch states (best-effort; unknown/unavailable -> False).
             main_sw_state = self.hass.states.get(main_switch_id) if main_switch_id else None

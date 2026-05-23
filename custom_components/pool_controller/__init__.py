@@ -8,6 +8,9 @@ from homeassistant.helpers import entity_registry as er
 
 from .const import (
     DOMAIN,
+    LEGACY_DEFAULT_ENTITY_IDS,
+    CONF_MAIN_SWITCH,
+    CONF_PUMP_SWITCH,
     OPT_KEY_MANUAL_UNTIL,
     OPT_KEY_MANUAL_TYPE,
     OPT_KEY_MANUAL_DURATION,
@@ -524,9 +527,76 @@ async def _migrate_aux_allowed_switch_unique_id(hass: HomeAssistant, entry: Conf
     except Exception:
         _LOGGER.debug("Aux switch unique_id migration skipped for %s", entry.entry_id)
 
+def _sanitize_legacy_defaults(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """One-shot migration: drop stored values that match a hardcoded legacy default.
+
+    Older versions injected dev-setup entity IDs (e.g. ``switch.whirlpool``,
+    ``sensor.esp32_5_cd41d8_whirlpool_temperature``) via ``vol.Optional(default=...)``
+    in the config flow. On systems where those entities do not exist, the
+    integration silently misbehaved (e.g. reporting "Pump Off" while power was
+    being drawn). This migration removes such ghosts from the persisted entry
+    so the runtime fallback can take effect.
+    """
+    new_data = dict(entry.data or {})
+    new_opts = dict(entry.options or {})
+    changed = False
+
+    main_switch = new_data.get(CONF_MAIN_SWITCH) or new_opts.get(CONF_MAIN_SWITCH)
+
+    # Prefer entity registry presence; fall back to states. Either positive
+    # signal means "this entity exists on this system, keep it".
+    try:
+        reg = er.async_get(hass)
+    except Exception:
+        reg = None
+
+    def _entity_exists(eid: str) -> bool:
+        if reg is not None:
+            try:
+                if reg.async_get(eid) is not None:
+                    return True
+            except Exception:
+                pass
+        return hass.states.get(eid) is not None
+
+    for key, legacy_values in LEGACY_DEFAULT_ENTITY_IDS.items():
+        for bucket_name, bucket in (("data", new_data), ("options", new_opts)):
+            val = bucket.get(key)
+            if not val or val not in legacy_values:
+                continue
+            # pump_switch == main_switch is harmless at runtime (same fallback target),
+            # but the redundant value silently disables "leave empty to use main" UX.
+            # Strip it so the field is truly empty going forward.
+            if key == CONF_PUMP_SWITCH and val == main_switch:
+                bucket.pop(key, None)
+                changed = True
+                _LOGGER.info(
+                    "Removed redundant %s=%s (same as main_switch) from %s for %s",
+                    key, val, bucket_name, entry.entry_id,
+                )
+                continue
+            if not _entity_exists(val):
+                bucket.pop(key, None)
+                changed = True
+                _LOGGER.warning(
+                    "Removed stale legacy default %s=%s (entity not present) from %s for %s",
+                    key, val, bucket_name, entry.entry_id,
+                )
+
+    if changed:
+        hass.config_entries.async_update_entry(entry, data=new_data, options=new_opts)
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Setup der Integration."""
     _LOGGER.info("Setting up pool_controller entry %s", entry.entry_id)
+
+    # One-shot cleanup of legacy hardcoded defaults that polluted user configs.
+    try:
+        _sanitize_legacy_defaults(hass, entry)
+    except Exception:
+        _LOGGER.exception("Legacy default sanitization failed for %s", entry.entry_id)
+
     coordinator = PoolControllerDataCoordinator(hass, entry)
     
     # Den ersten Datenabruf triggern
