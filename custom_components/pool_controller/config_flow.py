@@ -8,6 +8,23 @@ from .const import *
 _LOGGER = logging.getLogger(__name__)
 
 
+def _opt_key(curr: dict, key: str):
+    """Build a vol.Optional marker without injecting a hardcoded default.
+
+    Returns vol.Optional(key, default=existing) only when the user has
+    previously stored a truthy value. Otherwise returns a bare
+    vol.Optional(key), so an empty selector really means "unset" and the
+    integration's runtime fallback (e.g. pump_switch -> main_switch) can
+    take effect. This prevents the historic bug where DEFAULT_* constants
+    silently persisted dev-setup entity IDs like "switch.whirlpool" into
+    every new install.
+    """
+    existing = (curr or {}).get(key)
+    if existing:
+        return vol.Optional(key, default=existing)
+    return vol.Optional(key)
+
+
 # Shared schema builders to avoid duplication between ConfigFlow and OptionsFlow
 def _init_schema(curr: dict | None = None):
     c = curr or {}
@@ -19,24 +36,37 @@ def _init_schema(curr: dict | None = None):
 
 def _switches_schema(curr: dict | None = None):
     c = curr or {}
+    # MAIN switch stays Required: the user must always pick something.
+    main_default = c.get(CONF_MAIN_SWITCH)
+    main_marker = (
+        vol.Required(CONF_MAIN_SWITCH, default=main_default)
+        if main_default
+        else vol.Required(CONF_MAIN_SWITCH)
+    )
     return vol.Schema({
-        vol.Required(CONF_MAIN_SWITCH, default=c.get(CONF_MAIN_SWITCH, DEFAULT_MAIN_SW)): selector.EntitySelector(selector.EntitySelectorConfig(domain="switch")),
-        vol.Optional(CONF_PUMP_SWITCH, default=c.get(CONF_PUMP_SWITCH, DEFAULT_PUMP_SW)): selector.EntitySelector(selector.EntitySelectorConfig(domain="switch")),
-        vol.Optional(CONF_FILTER_SWITCH, default=c.get(CONF_FILTER_SWITCH, "")): str,
+        main_marker: selector.EntitySelector(selector.EntitySelectorConfig(domain="switch")),
+        _opt_key(c, CONF_PUMP_SWITCH): selector.EntitySelector(selector.EntitySelectorConfig(domain="switch")),
+        _opt_key(c, CONF_FILTER_SWITCH): selector.EntitySelector(selector.EntitySelectorConfig(domain="switch")),
         vol.Optional(CONF_ENABLE_AUX_HEATING, default=c.get(CONF_ENABLE_AUX_HEATING, False)): bool,
-        vol.Optional(CONF_AUX_HEATING_SWITCH, default=c.get(CONF_AUX_HEATING_SWITCH, DEFAULT_AUX_SW)): selector.EntitySelector(selector.EntitySelectorConfig(domain="switch")),
-        vol.Optional(CONF_MAIN_POWER_SENSOR, default=c.get(CONF_MAIN_POWER_SENSOR, DEFAULT_MAIN_POWER_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="power")),
-        vol.Optional(CONF_AUX_POWER_SENSOR, default=c.get(CONF_AUX_POWER_SENSOR, DEFAULT_AUX_POWER_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="power")),
+        _opt_key(c, CONF_AUX_HEATING_SWITCH): selector.EntitySelector(selector.EntitySelectorConfig(domain="switch")),
+        _opt_key(c, CONF_MAIN_POWER_SENSOR): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="power")),
+        _opt_key(c, CONF_AUX_POWER_SENSOR): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="power")),
     })
 
 def _water_quality_schema(curr: dict | None = None):
     c = curr or {}
+    water_default = c.get(CONF_TEMP_WATER)
+    water_marker = (
+        vol.Required(CONF_TEMP_WATER, default=water_default)
+        if water_default
+        else vol.Required(CONF_TEMP_WATER)
+    )
     return vol.Schema({
-        vol.Required(CONF_TEMP_WATER, default=c.get(CONF_TEMP_WATER, DEFAULT_TEMP_WATER)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="temperature")),
-        vol.Optional(CONF_PH_SENSOR, default=c.get(CONF_PH_SENSOR, DEFAULT_PH_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
-        vol.Optional(CONF_CHLORINE_SENSOR, default=c.get(CONF_CHLORINE_SENSOR, DEFAULT_CHLOR_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
-        vol.Optional(CONF_SALT_SENSOR, default=c.get(CONF_SALT_SENSOR, DEFAULT_SALT_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
-        vol.Optional(CONF_TDS_SENSOR, default=c.get(CONF_TDS_SENSOR, DEFAULT_TDS_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+        water_marker: selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="temperature")),
+        _opt_key(c, CONF_PH_SENSOR): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+        _opt_key(c, CONF_CHLORINE_SENSOR): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+        _opt_key(c, CONF_SALT_SENSOR): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+        _opt_key(c, CONF_TDS_SENSOR): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
     })
 
 def _sanitizer_schema(default_mode):
@@ -184,7 +214,7 @@ def _frost_schema(curr: dict | None = None):
     c = curr or {}
     return vol.Schema({
         vol.Optional(CONF_ENABLE_FROST_PROTECTION, default=c.get(CONF_ENABLE_FROST_PROTECTION, True)): bool,
-        vol.Optional(CONF_TEMP_OUTDOOR, default=c.get(CONF_TEMP_OUTDOOR, DEFAULT_TEMP_OUTDOOR)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="temperature")),
+        _opt_key(c, CONF_TEMP_OUTDOOR): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="temperature")),
         vol.Optional(CONF_FROST_START_TEMP, default=c.get(CONF_FROST_START_TEMP, DEFAULT_FROST_START_TEMP)):
             selector.NumberSelector(selector.NumberSelectorConfig(min=-20, max=10, step=0.5, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="°C")),
         vol.Optional(CONF_FROST_SEVERE_TEMP, default=c.get(CONF_FROST_SEVERE_TEMP, DEFAULT_FROST_SEVERE_TEMP)):
@@ -204,10 +234,10 @@ def _frost_schema(curr: dict | None = None):
 def _calendars_schema(curr: dict | None = None):
     c = curr or {}
     return vol.Schema({
-        vol.Optional(CONF_POOL_CALENDAR, default=c.get(CONF_POOL_CALENDAR, DEFAULT_CAL_POOL)): selector.EntitySelector(selector.EntitySelectorConfig(domain="calendar")),
-        vol.Optional(CONF_HOLIDAY_CALENDAR, default=c.get(CONF_HOLIDAY_CALENDAR, DEFAULT_CAL_HOLIDAY)): selector.EntitySelector(selector.EntitySelectorConfig(domain="calendar")),
+        _opt_key(c, CONF_POOL_CALENDAR): selector.EntitySelector(selector.EntitySelectorConfig(domain="calendar")),
+        _opt_key(c, CONF_HOLIDAY_CALENDAR): selector.EntitySelector(selector.EntitySelectorConfig(domain="calendar")),
         vol.Optional(CONF_ENABLE_EVENT_WEATHER_GUARD, default=c.get(CONF_ENABLE_EVENT_WEATHER_GUARD, False)): bool,
-        vol.Optional(CONF_EVENT_WEATHER_ENTITY, default=c.get(CONF_EVENT_WEATHER_ENTITY, "")): selector.EntitySelector(selector.EntitySelectorConfig(domain="weather")),
+        _opt_key(c, CONF_EVENT_WEATHER_ENTITY): selector.EntitySelector(selector.EntitySelectorConfig(domain="weather")),
         vol.Optional(CONF_EVENT_RAIN_PROBABILITY, default=c.get(CONF_EVENT_RAIN_PROBABILITY, DEFAULT_EVENT_RAIN_PROBABILITY)):
             selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=100, step=5, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="%")),
         vol.Required(CONF_QUIET_START, default=c.get(CONF_QUIET_START, DEFAULT_Q_START)): str,
@@ -251,7 +281,7 @@ def _pv_schema(curr: dict | None = None):
     c = curr or {}
     return vol.Schema({
         vol.Optional(CONF_ENABLE_PV_OPTIMIZATION, default=c.get(CONF_ENABLE_PV_OPTIMIZATION, False)): bool,
-        vol.Optional(CONF_PV_SURPLUS_SENSOR, default=c.get(CONF_PV_SURPLUS_SENSOR, DEFAULT_PV_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+        _opt_key(c, CONF_PV_SURPLUS_SENSOR): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
         vol.Optional(CONF_PV_HOUSE_LOAD_SENSOR, default=c.get(CONF_PV_HOUSE_LOAD_SENSOR)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="power")),
         vol.Optional(CONF_POWER_SAVING_THRESHOLD_FACTOR_PERCENT, default=c.get(CONF_POWER_SAVING_THRESHOLD_FACTOR_PERCENT, DEFAULT_POWER_SAVING_THRESHOLD_FACTOR_PERCENT)):
             selector.NumberSelector(selector.NumberSelectorConfig(min=50, max=150, step=1, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="%")),
@@ -350,8 +380,12 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             self.data.update(user_input)
             return await self.async_step_switches()
+        # IMPORTANT: step_id must match the method suffix ("user") for the
+        # initial config-flow step. Using step_id="init" here breaks first-time
+        # installation in newer Home Assistant versions because the frontend
+        # cannot resolve the form / translation strings.
         return self.async_show_form(
-            step_id="init",
+            step_id="user",
             errors=errors,
             data_schema=_init_schema({}),
             last_step=False

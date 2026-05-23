@@ -188,21 +188,44 @@ OPT_KEY_HVAC_ENABLED = "hvac_enabled"
 # Alle Standardwerte (Defaults)
 DEFAULT_NAME = "Whirlpool Demo"
 DEFAULT_VOL = 1000
-DEFAULT_MAIN_SW = "switch.whirlpool"
-# Default: if not explicitly configured, the pump switch equals main switch.
-DEFAULT_PUMP_SW = DEFAULT_MAIN_SW
-DEFAULT_AUX_SW = "switch.whirlpool_heizung"
-DEFAULT_TEMP_WATER = "sensor.esp32_5_cd41d8_whirlpool_temperature"
-DEFAULT_TEMP_OUTDOOR = "sensor.hue_outdoor_motion_sensor_1_temperatur"
-DEFAULT_MAIN_POWER_SENS = "sensor.whirlpool_leistung"
-DEFAULT_AUX_POWER_SENS = "sensor.whirlpool_heizung_leistung"
-DEFAULT_PH_SENS = "sensor.esp32_5_cd41d8_whirlpool_ph"
-DEFAULT_CHLOR_SENS = "sensor.esp32_5_cd41d8_whirlpool_chlor"
-DEFAULT_SALT_SENS = "sensor.esp32_5_cd41d8_whirlpool_salt"
-DEFAULT_TDS_SENS = "sensor.esp32_5_cd41d8_whirlpool_conductivity"
-DEFAULT_PV_SENS = "sensor.scb_solar_power" 
-DEFAULT_CAL_POOL = "calendar.whirlpool"
-DEFAULT_CAL_HOLIDAY = "calendar.deutschland_bw"
+# Hardcoded entity defaults removed: previous values leaked dev-setup IDs
+# (e.g. "switch.whirlpool") into every new install and persisted them via
+# vol.Optional(default=...), causing silent breakage when those entities did
+# not exist on the user's system. Optional fields must remain truly optional
+# (empty => runtime fallback or feature disabled).
+DEFAULT_MAIN_SW = ""
+DEFAULT_PUMP_SW = ""
+DEFAULT_AUX_SW = ""
+DEFAULT_TEMP_WATER = ""
+DEFAULT_TEMP_OUTDOOR = ""
+DEFAULT_MAIN_POWER_SENS = ""
+DEFAULT_AUX_POWER_SENS = ""
+DEFAULT_PH_SENS = ""
+DEFAULT_CHLOR_SENS = ""
+DEFAULT_SALT_SENS = ""
+DEFAULT_TDS_SENS = ""
+DEFAULT_PV_SENS = ""
+DEFAULT_CAL_POOL = ""
+DEFAULT_CAL_HOLIDAY = ""
+
+# Legacy hardcoded defaults that may still be persisted in existing config
+# entries. Used by the migration in __init__.py to clean up stale references.
+LEGACY_DEFAULT_ENTITY_IDS = {
+    CONF_PUMP_SWITCH: {"switch.whirlpool"},
+    CONF_FILTER_SWITCH: {"switch.whirlpool"},
+    CONF_AUX_HEATING_SWITCH: {"switch.whirlpool_heizung"},
+    CONF_TEMP_WATER: {"sensor.esp32_5_cd41d8_whirlpool_temperature"},
+    CONF_TEMP_OUTDOOR: {"sensor.hue_outdoor_motion_sensor_1_temperatur"},
+    CONF_MAIN_POWER_SENSOR: {"sensor.whirlpool_leistung"},
+    CONF_AUX_POWER_SENSOR: {"sensor.whirlpool_heizung_leistung"},
+    CONF_PH_SENSOR: {"sensor.esp32_5_cd41d8_whirlpool_ph"},
+    CONF_CHLORINE_SENSOR: {"sensor.esp32_5_cd41d8_whirlpool_chlor"},
+    CONF_SALT_SENSOR: {"sensor.esp32_5_cd41d8_whirlpool_salt"},
+    CONF_TDS_SENSOR: {"sensor.esp32_5_cd41d8_whirlpool_conductivity"},
+    CONF_PV_SURPLUS_SENSOR: {"sensor.scb_solar_power"},
+    CONF_POOL_CALENDAR: {"calendar.whirlpool"},
+    CONF_HOLIDAY_CALENDAR: {"calendar.deutschland_bw"},
+}
 DEFAULT_Q_START = "22:00"
 DEFAULT_Q_END = "08:00"
 DEFAULT_Q_START_WE = "22:00"
