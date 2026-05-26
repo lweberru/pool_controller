@@ -75,6 +75,11 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self._pv_allows_effective = False
         self._pv_candidate_since = None
         self._pv_last_start = None
+        # Battery-first PV gate state. True while the gate is closed (PV blocked
+        # because house battery SOC is below threshold). Carries hysteresis: once
+        # open, the gate only closes again when SOC drops below
+        # (threshold - DEFAULT_BATTERY_SOC_HYSTERESIS).
+        self._battery_first_blocked = False
         # Weather forecast cache (for calendar weather guard)
         self._weather_forecast_cache = {
             "entity_id": None,
@@ -2355,6 +2360,50 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     # desired == pv_allows -> clear candidate if any
                     self._pv_candidate_since = None
 
+            # ---- Battery-first PV gate ---------------------------------------
+            # Optional: hold back PV-triggered pool runs until the house battery
+            # has reached a configurable State-of-Charge. PV surplus charges the
+            # battery first; only the *excess above* the threshold is offered to
+            # the pool. Hysterese verhindert Pulsieren um die Schwelle.
+            #
+            # Safety: failure modes (sensor unavailable, NaN, out-of-range) are
+            # fail-open — they never block the pool. The gate also does NOT
+            # affect scheduled / mandatory filter runs; only PV-triggered ones.
+            battery_first_blocking = False
+            if pv_allows and bool(conf.get(CONF_ENABLE_BATTERY_FIRST, False)):
+                soc_entity = conf.get(CONF_BATTERY_SOC_SENSOR)
+                if soc_entity:
+                    soc_val = self._get_float(soc_entity)
+                    if soc_val is not None and 0.0 <= soc_val <= 100.0:
+                        try:
+                            threshold = float(conf.get(CONF_BATTERY_SOC_THRESHOLD, DEFAULT_BATTERY_SOC_THRESHOLD))
+                        except Exception:
+                            threshold = float(DEFAULT_BATTERY_SOC_THRESHOLD)
+                        hysteresis = float(DEFAULT_BATTERY_SOC_HYSTERESIS)
+                        if getattr(self, "_battery_first_blocked", False):
+                            # Currently blocked: only unblock when SOC reaches full threshold
+                            effective_threshold = threshold
+                        else:
+                            # Currently open: only re-block when SOC drops below (threshold - hysteresis)
+                            effective_threshold = max(0.0, threshold - hysteresis)
+                        if soc_val < effective_threshold:
+                            battery_first_blocking = True
+                            pv_allows = False
+                            self._battery_first_blocked = True
+                            _LOGGER.debug(
+                                "Battery-first gate: blocking PV trigger (SOC %.0f%% < %.0f%%)",
+                                soc_val, effective_threshold,
+                            )
+                        else:
+                            self._battery_first_blocked = False
+                    else:
+                        # Invalid / unavailable SOC: fail-open
+                        self._battery_first_blocked = False
+                        _LOGGER.debug(
+                            "Battery-first gate: SOC sensor '%s' unavailable, fail-open",
+                            soc_entity,
+                        )
+
             # PV band sensors for chart coloring (low/mid/high based on thresholds + pv_allows hysteresis)
             pv_band_low = None
             pv_band_mid_on = None
@@ -3152,6 +3201,11 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "pv_band_mid_off": pv_band_mid_off,
                 "pv_band_high": pv_band_high,
                 "pv_allows": pv_allows,
+                # battery-first: True when PV would otherwise trigger a run, but
+                # the gate is closed because house battery SOC is below threshold.
+                # Diagnostic value — useful to expose as a binary_sensor for users
+                # to see *why* the pump isn't running despite PV surplus.
+                "battery_first_blocking": battery_first_blocking,
                 "in_quiet": in_quiet,
                 "main_power": round(main_power, 1) if main_power is not None else None,
                 "aux_power": round(aux_power, 1) if aux_power is not None else None,

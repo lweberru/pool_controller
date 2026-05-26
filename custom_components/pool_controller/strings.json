@@ -210,7 +210,10 @@
           "pv_off_threshold": "PV OFF threshold (W)",
           "pv_smooth_window_seconds": "PV smoothing window (s)",
           "pv_stability_seconds": "PV stability window (s)",
-          "pv_min_run_minutes": "PV minimum run (min)"
+          "pv_min_run_minutes": "PV minimum run (min)",
+          "enable_battery_first": "Charge house battery first",
+          "battery_soc_sensor": "House battery SOC sensor",
+          "battery_soc_threshold": "House battery SOC threshold (%)"
         },
         "data_description": {
           "enable_pv_optimization": "Use PV production for pump/heating control",
@@ -220,7 +223,10 @@
           "pv_off_threshold": "Turns main pump OFF when PV power <= this value (default: 500)",
           "pv_smooth_window_seconds": "Window in seconds used for exponential smoothing of the PV value. Set 0 to disable smoothing.",
           "pv_stability_seconds": "How long a changed, smoothed PV value must persist before the change is committed (seconds).",
-          "pv_min_run_minutes": "Minimum automatic run time in minutes before an automatic OFF is allowed. Prevents immediate stop after a short ON period."
+          "pv_min_run_minutes": "Minimum automatic run time in minutes before an automatic OFF is allowed. Prevents immediate stop after a short ON period.",
+          "enable_battery_first": "Block PV-triggered pool runs until the house battery reaches its SOC threshold. Mandatory filter cycles are unaffected.",
+          "battery_soc_sensor": "Sensor reporting the house battery State-of-Charge in % (e.g. sensor.battery_level for Sungrow). Leave empty to disable.",
+          "battery_soc_threshold": "Minimum house battery SOC (in %) before PV surplus is offered to the pool. Default: 80%. Hysteresis: 2 percentage points."
         }
       },
       "costs": {
@@ -482,7 +488,10 @@
           "pv_off_threshold": "PV OFF threshold (W)",
           "pv_smooth_window_seconds": "PV smoothing window (s)",
           "pv_stability_seconds": "PV stability window (s)",
-          "pv_min_run_minutes": "PV minimum run (min)"
+          "pv_min_run_minutes": "PV minimum run (min)",
+          "enable_battery_first": "Charge house battery first",
+          "battery_soc_sensor": "House battery SOC sensor",
+          "battery_soc_threshold": "House battery SOC threshold (%)"
         },
         "data_description": {
           "enable_pv_optimization": "Use PV production for pump/heating control",
@@ -492,7 +501,10 @@
           "pv_off_threshold": "Turns main pump OFF when PV power <= this value (default: 500)",
           "pv_smooth_window_seconds": "Window in seconds used for exponential smoothing of the PV value. Set 0 to disable smoothing.",
           "pv_stability_seconds": "How long a changed, smoothed PV value must persist before the change is committed (seconds).",
-          "pv_min_run_minutes": "Minimum automatic run time in minutes before an automatic OFF is allowed. Prevents immediate stop after a short ON period."
+          "pv_min_run_minutes": "Minimum automatic run time in minutes before an automatic OFF is allowed. Prevents immediate stop after a short ON period.",
+          "enable_battery_first": "Block PV-triggered pool runs until the house battery reaches its SOC threshold. Mandatory filter cycles are unaffected.",
+          "battery_soc_sensor": "Sensor reporting the house battery State-of-Charge in % (e.g. sensor.battery_level for Sungrow). Leave empty to disable.",
+          "battery_soc_threshold": "Minimum house battery SOC (in %) before PV surplus is offered to the pool. Default: 80%. Hysteresis: 2 percentage points."
         }
       },
       "costs": {
@@ -542,6 +554,7 @@
       "aux_present": { "name": "Auxiliary heater configured" },
       "in_quiet": { "name": "Quiet hours active" },
       "pv_allows": { "name": "PV surplus allowed" },
+      "battery_first_blocking": { "name": "Battery-first blocking PV" },
       "should_main_on": { "name": "Power required" },
       "should_pump_on": { "name": "Pump required" },
       "low_chlor": { "name": "Low chlorine" },

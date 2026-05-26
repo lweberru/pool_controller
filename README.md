@@ -158,6 +158,36 @@ data:
 
 Mehr unter [docs/troubleshooting.md](docs/troubleshooting.md).
 
+## Hausakku-Vorrang vor PV-Pool-Nutzung (Fork-Feature)
+
+Optionales Gate für PV-Optimierung: PV-getriggerte Pool-Läufe werden zurückgehalten, bis der Hausakku einen konfigurierbaren Ladestand erreicht hat. Damit lädt sich die Haus-Batterie zuerst aus dem PV-Überschuss; erst was darüber hinaus übrig ist, geht in den Pool.
+
+**Aktivieren:** Settings → Devices & Services → Pool Controller → CONFIGURE → PV
+
+Drei neue Felder:
+
+- **Hausakku zuerst laden** (Toggle) — Master-Schalter für die Funktion
+- **Akku-SOC-Sensor** (EntitySelector, Device-Class `battery`) — z.B. `sensor.battery_level` bei Sungrow, oder beliebiger anderer SOC-Sensor in %
+- **Akku-SOC-Schwelle** (0–100 %) — bis zu welchem Stand der Akku geschützt wird. Default: **80 %**
+
+**Verhalten:**
+
+```
+PV-Überschuss > Einschaltschwelle?
+  └── nein → Pumpe aus
+  └── ja → Akku-Vorrang aktiv?
+       └── nein → Pumpe an (alte Logik)
+       └── ja → Akku-SOC ≥ Schwelle?
+            ├── ja → Pumpe an
+            └── nein → blockiert (binary_sensor.<pool>_battery_first_blocking = on)
+```
+
+**Hysterese:** sobald das Gate geöffnet hat (SOC ≥ Schwelle), schließt es erst wieder, wenn der SOC unter (Schwelle − 2 %) fällt. Verhindert Pulsieren um die Schwelle.
+
+**Sicher per Default:** wenn der SOC-Sensor `unavailable`/`unknown`/außerhalb 0–100 ist, fällt das Gate transparent zurück auf die alte Logik (fail-open). Pflicht-Filterzyklen sind von dem Gate **nicht** betroffen — die laufen immer durch.
+
+**Diagnose-Sensor:** `binary_sensor.<pool>_battery_first_blocking` zeigt live, ob PV-Überschuss da wäre, das Gate ihn aber gerade blockt — praktisch für die Frage "warum läuft die Pumpe nicht obwohl PV verfügbar ist?".
+
 ## Unterschiede zum Upstream-Repo
 
 Dieser Fork enthält folgende Fixes (siehe [PR #1](https://github.com/DJ3vil/pool_controller/pull/1) im Fork):
@@ -166,6 +196,7 @@ Dieser Fork enthält folgende Fixes (siehe [PR #1](https://github.com/DJ3vil/poo
 2. **Keine Geister-Defaults mehr** — Entity-IDs aus dem Original-Setup des Entwicklers (`switch.whirlpool`, `sensor.esp32_5_cd41d8_whirlpool_*`, `calendar.whirlpool`) werden nicht mehr automatisch in jede Neuinstallation kopiert.
 3. **Pump-Switch-Fallback robuster** — wenn `pump_switch` auf eine nicht existierende Entity zeigt, wird zur Laufzeit auf den Hauptschalter zurückgefallen statt "Pumpe aus" zu melden.
 4. **Migration für Bestands-Konfigurationen** — `_sanitize_legacy_defaults()` läuft einmalig beim Setup und entfernt veraltete Geister-Werte aus bestehenden Config-Entries.
+5. **Hausakku-Vorrang vor PV-Pool-Nutzung** (siehe Sektion oben) — PV-getriggerte Pool-Läufe können optional zurückgehalten werden, bis der Hausakku eine SOC-Schwelle erreicht hat.
 
 ## Mitwirken
 

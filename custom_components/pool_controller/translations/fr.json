@@ -215,7 +215,10 @@
                     "pv_off_threshold": "Seuil PV OFF (W)",
                     "pv_smooth_window_seconds": "Fenêtre de lissage PV (s)",
                     "pv_stability_seconds": "Fenêtre de stabilité PV (s)",
-                    "pv_min_run_minutes": "Durée minimale PV (min)"
+                    "pv_min_run_minutes": "Durée minimale PV (min)",
+                    "enable_battery_first": "Charger d'abord la batterie domestique",
+                    "battery_soc_sensor": "Capteur SOC batterie",
+                    "battery_soc_threshold": "Seuil SOC batterie (%)"
                 },
                 "data_description": {
                     "enable_pv_optimization": "Utiliser la production PV pour piloter pompe/chauffage",
@@ -228,7 +231,10 @@
                     "pv_off_threshold": "Éteint la pompe principale quand PV <= cette valeur (défaut : 500)",
                     "pv_smooth_window_seconds": "Fenêtre en secondes utilisée pour le lissage exponentiel de la valeur PV. 0 désactive le lissage.",
                     "pv_stability_seconds": "Durée pendant laquelle une valeur PV modifiée et lissée doit persister avant d’être appliquée (secondes).",
-                    "pv_min_run_minutes": "Durée minimale automatique en minutes avant d’autoriser l’arrêt. Évite un arrêt immédiat après démarrage."
+                    "pv_min_run_minutes": "Durée minimale automatique en minutes avant d’autoriser l’arrêt. Évite un arrêt immédiat après démarrage.",
+                    "enable_battery_first": "Bloque les démarrages PV de la piscine jusqu'à ce que la batterie domestique atteigne son seuil SOC. Les cycles de filtration obligatoires ne sont pas affectés.",
+                    "battery_soc_sensor": "Capteur indiquant l'état de charge de la batterie en % (par ex. sensor.battery_level pour Sungrow). Laisser vide pour désactiver.",
+                    "battery_soc_threshold": "SOC minimum de la batterie (en %) avant d'offrir l'excédent PV à la piscine. Par défaut : 80 %. Hystérésis : 2 points de pourcentage."
                 }
             },
             "costs": {
@@ -495,7 +501,10 @@
                     "pv_off_threshold": "Seuil PV OFF (W)",
                     "pv_smooth_window_seconds": "Fenêtre de lissage PV (s)",
                     "pv_stability_seconds": "Fenêtre de stabilité PV (s)",
-                    "pv_min_run_minutes": "Durée minimale PV (min)"
+                    "pv_min_run_minutes": "Durée minimale PV (min)",
+                    "enable_battery_first": "Charger d'abord la batterie domestique",
+                    "battery_soc_sensor": "Capteur SOC batterie",
+                    "battery_soc_threshold": "Seuil SOC batterie (%)"
                 },
                 "data_description": {
                     "enable_pv_optimization": "Utiliser la production PV pour piloter pompe/chauffage",
@@ -508,7 +517,10 @@
                     "pv_off_threshold": "Éteindre en dessous de cette valeur (par défaut : 500W)",
                     "pv_smooth_window_seconds": "Fenêtre en secondes utilisée pour lisser le signal PV (exponentiel). 0 désactive le lissage.",
                     "pv_stability_seconds": "Durée minimale (en secondes) pendant laquelle un état candidat PV doit persister avant d'être appliqué.",
-                    "pv_min_run_minutes": "Durée minimale d'exécution automatique (en minutes) avant de permettre un arrêt automatique ; évite les arrêts immédiats après un démarrage court."
+                    "pv_min_run_minutes": "Durée minimale d'exécution automatique (en minutes) avant de permettre un arrêt automatique ; évite les arrêts immédiats après un démarrage court.",
+                    "enable_battery_first": "Bloque les démarrages PV de la piscine jusqu'à ce que la batterie domestique atteigne son seuil SOC. Les cycles de filtration obligatoires ne sont pas affectés.",
+                    "battery_soc_sensor": "Capteur indiquant l'état de charge de la batterie en % (par ex. sensor.battery_level pour Sungrow). Laisser vide pour désactiver.",
+                    "battery_soc_threshold": "SOC minimum de la batterie (en %) avant d'offrir l'excédent PV à la piscine. Par défaut : 80 %. Hystérésis : 2 points de pourcentage."
                 }
             },
             "costs": {
@@ -585,6 +597,9 @@
             },
             "pv_allows": {
                 "name": "Excédent PV disponible"
+            },
+            "battery_first_blocking": {
+                "name": "Priorité batterie bloque PV"
             },
             "should_main_on": {
                 "name": "Alimentation requise"

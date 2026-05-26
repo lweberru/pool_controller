@@ -215,7 +215,10 @@
                     "pv_off_threshold": "Umbral FV APAG (W)",
                     "pv_smooth_window_seconds": "Ventana de suavizado FV (s)",
                     "pv_stability_seconds": "Ventana de estabilidad FV (s)",
-                    "pv_min_run_minutes": "Tiempo mínimo FV (min)"
+                    "pv_min_run_minutes": "Tiempo mínimo FV (min)",
+                    "enable_battery_first": "Cargar primero la batería de la casa",
+                    "battery_soc_sensor": "Sensor SOC de la batería",
+                    "battery_soc_threshold": "Umbral SOC de la batería (%)"
                 },
                 "data_description": {
                     "enable_pv_optimization": "Usar la producción FV para controlar bomba/calefacción",
@@ -228,7 +231,10 @@
                     "pv_off_threshold": "Apaga la bomba principal cuando FV <= este valor (predeterminado: 500)",
                     "pv_smooth_window_seconds": "Ventana en segundos usada para el suavizado exponencial del valor FV. 0 desactiva el suavizado.",
                     "pv_stability_seconds": "Cuánto tiempo debe mantenerse un valor FV cambiado y suavizado antes de aplicarlo (segundos).",
-                    "pv_min_run_minutes": "Tiempo mínimo automático en minutos antes de permitir el apagado. Evita detenerse justo después de encender."
+                    "pv_min_run_minutes": "Tiempo mínimo automático en minutos antes de permitir el apagado. Evita detenerse justo después de encender.",
+                    "enable_battery_first": "Bloquea las ejecuciones de piscina activadas por FV hasta que la batería doméstica alcance su umbral SOC. Los ciclos de filtrado obligatorios no se ven afectados.",
+                    "battery_soc_sensor": "Sensor con el estado de carga de la batería en % (p.ej. sensor.battery_level en Sungrow). Dejar vacío para desactivar.",
+                    "battery_soc_threshold": "SOC mínimo de la batería (en %) antes de ofrecer excedente FV a la piscina. Predeterminado: 80%. Histéresis: 2 puntos porcentuales."
                 }
             },
             "costs": {
@@ -495,7 +501,10 @@
                     "pv_off_threshold": "Umbral FV APAGAR (W)",
                     "pv_smooth_window_seconds": "Ventana de suavizado PV (s)",
                     "pv_stability_seconds": "Ventana de estabilidad PV (s)",
-                    "pv_min_run_minutes": "Duración mínima PV (min)"
+                    "pv_min_run_minutes": "Duración mínima PV (min)",
+                    "enable_battery_first": "Cargar primero la batería de la casa",
+                    "battery_soc_sensor": "Sensor SOC de la batería",
+                    "battery_soc_threshold": "Umbral SOC de la batería (%)"
                 },
                 "data_description": {
                     "enable_pv_optimization": "Usar la producción FV para controlar bomba/calefacción",
@@ -508,7 +517,10 @@
                     "pv_off_threshold": "Apagar por debajo de este valor (por defecto: 500W)",
                     "pv_smooth_window_seconds": "Ventana en segundos usada para el suavizado exponencial del valor PV. 0 desactiva el suavizado.",
                     "pv_stability_seconds": "Cuánto tiempo debe persistir un valor PV suavizado antes de que se aplique el cambio (segundos).",
-                    "pv_min_run_minutes": "Tiempo mínimo de ejecución automática en minutos antes de permitir un apagado automático. Evita paradas inmediatas tras un encendido breve."
+                    "pv_min_run_minutes": "Tiempo mínimo de ejecución automática en minutos antes de permitir un apagado automático. Evita paradas inmediatas tras un encendido breve.",
+                    "enable_battery_first": "Bloquea las ejecuciones de piscina activadas por FV hasta que la batería doméstica alcance su umbral SOC. Los ciclos de filtrado obligatorios no se ven afectados.",
+                    "battery_soc_sensor": "Sensor con el estado de carga de la batería en % (p.ej. sensor.battery_level en Sungrow). Dejar vacío para desactivar.",
+                    "battery_soc_threshold": "SOC mínimo de la batería (en %) antes de ofrecer excedente FV a la piscina. Predeterminado: 80%. Histéresis: 2 puntos porcentuales."
                 }
             },
             "costs": {
@@ -585,6 +597,9 @@
             },
             "pv_allows": {
                 "name": "Excedente FV disponible"
+            },
+            "battery_first_blocking": {
+                "name": "Prioridad batería bloquea FV"
             },
             "should_main_on": {
                 "name": "Alimentación requerida"

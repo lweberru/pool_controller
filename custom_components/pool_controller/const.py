@@ -131,6 +131,20 @@ DEFAULT_PV_SMOOTH_WINDOW_SECONDS = 60
 DEFAULT_PV_STABILITY_SECONDS = 120
 DEFAULT_PV_MIN_RUN_MINUTES = 10
 
+# Battery-first PV gating: optionally block PV-triggered pool runs until a
+# configurable house-battery State-of-Charge threshold is reached. Lets the
+# household battery charge from PV surplus first before the pool consumes it.
+# Safety/pflicht-Filterläufe sind davon unberührt; nur PV-getriggerte Läufe
+# werden zurückgehalten.
+CONF_ENABLE_BATTERY_FIRST = "enable_battery_first"
+CONF_BATTERY_SOC_SENSOR = "battery_soc_sensor"
+CONF_BATTERY_SOC_THRESHOLD = "battery_soc_threshold"
+DEFAULT_BATTERY_SOC_THRESHOLD = 80
+# Hysterese in Prozentpunkten: wenn der Gate aktuell *offen* ist (SOC ≥ Schwelle),
+# muss der SOC erst unter (Schwelle - Hysterese) fallen, bevor er wieder schließt.
+# Verhindert Flackern, wenn der SOC um die Schwelle pendelt.
+DEFAULT_BATTERY_SOC_HYSTERESIS = 2
+
 # Power-saving scheduler defaults
 DEFAULT_POWER_SAVING_FILTER_DEFER_MINUTES = 15
 DEFAULT_POWER_SAVING_FILTER_DEADLINE_HOUR = 16

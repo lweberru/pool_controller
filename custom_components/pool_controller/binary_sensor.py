@@ -15,6 +15,9 @@ async def async_setup_entry(hass, entry, async_add_entities):
         # Derived / template-like binary sensors provided by the integration
         PoolBinary(coordinator, "in_quiet", "Ruhemodus aktiv", None),
         PoolBinary(coordinator, "pv_allows", "PV Überschuss verfügbar", None),
+        # Diagnostic: PV surplus is there, but the battery-first gate is blocking
+        # the pool until the house battery reaches its SOC threshold.
+        PoolBinary(coordinator, "battery_first_blocking", "Akku-Vorrang blockiert PV", None),
         PoolBinary(coordinator, "should_main_on", "Hauptstrom erforderlich", None),
         PoolBinary(coordinator, "should_pump_on", "Pumpe erforderlich", None),
         # Physical switch state mirrors (configured external switches)

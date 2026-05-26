@@ -297,6 +297,12 @@ def _pv_schema(curr: dict | None = None):
             selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=86400, step=1, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="s")),
         vol.Optional(CONF_PV_MIN_RUN_MINUTES, default=c.get(CONF_PV_MIN_RUN_MINUTES, DEFAULT_PV_MIN_RUN_MINUTES)):
             selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=24 * 60, step=1, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="min")),
+        # Battery-first PV gate: block PV-triggered runs until house battery has charged
+        vol.Optional(CONF_ENABLE_BATTERY_FIRST, default=c.get(CONF_ENABLE_BATTERY_FIRST, False)): bool,
+        _opt_key(c, CONF_BATTERY_SOC_SENSOR):
+            selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor", device_class="battery")),
+        vol.Optional(CONF_BATTERY_SOC_THRESHOLD, default=c.get(CONF_BATTERY_SOC_THRESHOLD, DEFAULT_BATTERY_SOC_THRESHOLD)):
+            selector.NumberSelector(selector.NumberSelectorConfig(min=0, max=100, step=1, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="%")),
     })
 
 

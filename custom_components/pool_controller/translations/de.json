@@ -215,7 +215,10 @@
                     "pv_off_threshold": "PV AUS-Schwelle (W)",
                     "pv_smooth_window_seconds": "PV-Glättungsfenster (s)",
                     "pv_stability_seconds": "PV-Stabilitätsfenster (s)",
-                    "pv_min_run_minutes": "PV Mindestlaufzeit (min)"
+                    "pv_min_run_minutes": "PV Mindestlaufzeit (min)",
+                    "enable_battery_first": "Hausakku zuerst laden",
+                    "battery_soc_sensor": "Akku-SOC-Sensor",
+                    "battery_soc_threshold": "Akku-SOC-Schwelle (%)"
                 },
                 "data_description": {
                     "enable_pv_optimization": "Nutzt PV-Produktion für intelligente Pumpen-/Heizungssteuerung",
@@ -228,7 +231,10 @@
                     "pv_off_threshold": "Pumpe ausschalten bei Überschuss unter diesem Wert (Standard: 500W, Hysterese)",
                     "pv_smooth_window_seconds": "Zeitfenster in Sekunden, das für die exponentielle Glättung des PV-Werts verwendet wird. 0 deaktiviert die Glättung.",
                     "pv_stability_seconds": "Wie lange ein geänderter, geglätteter PV-Wert bestehen muss, bevor die Änderung übernommen wird (Sekunden).",
-                    "pv_min_run_minutes": "Minimale automatische Laufzeit in Minuten, bevor ein automatisches Abschalten erlaubt ist. Verhindert sofortiges Stoppen nach kurzem Einschalten."
+                    "pv_min_run_minutes": "Minimale automatische Laufzeit in Minuten, bevor ein automatisches Abschalten erlaubt ist. Verhindert sofortiges Stoppen nach kurzem Einschalten.",
+                    "enable_battery_first": "PV-getriggerte Pool-Läufe zurückhalten, bis der Hausakku die SOC-Schwelle erreicht hat. Pflicht-Filterzyklen sind davon unberührt.",
+                    "battery_soc_sensor": "Sensor mit dem Hausakku-Ladestand in % (z.B. sensor.battery_level bei Sungrow). Leer lassen, um Funktion zu deaktivieren.",
+                    "battery_soc_threshold": "Mindest-Ladestand des Hausakkus (in %), bevor PV-Überschuss dem Pool angeboten wird. Standard: 80 %. Hysterese: 2 Prozentpunkte."
                 }
             },
             "costs": {
@@ -495,7 +501,10 @@
                     "pv_off_threshold": "PV AUS-Schwelle (W)",
                     "pv_smooth_window_seconds": "PV-Glättungsfenster (s)",
                     "pv_stability_seconds": "PV-Stabilitätsfenster (s)",
-                    "pv_min_run_minutes": "PV Mindestlaufzeit (min)"
+                    "pv_min_run_minutes": "PV Mindestlaufzeit (min)",
+                    "enable_battery_first": "Hausakku zuerst laden",
+                    "battery_soc_sensor": "Akku-SOC-Sensor",
+                    "battery_soc_threshold": "Akku-SOC-Schwelle (%)"
                 },
                 "data_description": {
                     "enable_pv_optimization": "Nutzt PV-Produktion für intelligente Pumpen-/Heizungssteuerung",
@@ -508,7 +517,10 @@
                     "pv_off_threshold": "Pumpe ausschalten bei Überschuss unter diesem Wert (Standard: 500W, Hysterese)",
                     "pv_smooth_window_seconds": "Zeitfenster in Sekunden, das für die exponentielle Glättung des PV-Werts verwendet wird. 0 deaktiviert die Glättung.",
                     "pv_stability_seconds": "Wie lange ein geänderter, geglätteter PV-Wert bestehen muss, bevor die Änderung übernommen wird (Sekunden).",
-                    "pv_min_run_minutes": "Minimale automatische Laufzeit in Minuten, bevor ein automatisches Abschalten erlaubt ist. Verhindert sofortiges Stoppen nach kurzem Einschalten."
+                    "pv_min_run_minutes": "Minimale automatische Laufzeit in Minuten, bevor ein automatisches Abschalten erlaubt ist. Verhindert sofortiges Stoppen nach kurzem Einschalten.",
+                    "enable_battery_first": "PV-getriggerte Pool-Läufe zurückhalten, bis der Hausakku die SOC-Schwelle erreicht hat. Pflicht-Filterzyklen sind davon unberührt.",
+                    "battery_soc_sensor": "Sensor mit dem Hausakku-Ladestand in % (z.B. sensor.battery_level bei Sungrow). Leer lassen, um Funktion zu deaktivieren.",
+                    "battery_soc_threshold": "Mindest-Ladestand des Hausakkus (in %), bevor PV-Überschuss dem Pool angeboten wird. Standard: 80 %. Hysterese: 2 Prozentpunkte."
                 }
             },
             "costs": {
@@ -585,6 +597,9 @@
             },
             "pv_allows": {
                 "name": "PV-Überschuss erlaubt"
+            },
+            "battery_first_blocking": {
+                "name": "Akku-Vorrang blockiert PV"
             },
             "should_main_on": {
                 "name": "Stromversorgung erforderlich"
