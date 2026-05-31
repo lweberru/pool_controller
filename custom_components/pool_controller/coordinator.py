@@ -118,6 +118,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self.heat_startup_offset_minutes = DEFAULT_HEAT_STARTUP_OFFSET_MINUTES
         self._last_temp_ts = None
         self._last_temp_value = None
+        # Robust online fit for P_loss ~= k * (T_water - T_outdoor)
+        # to avoid coefficient spikes when delta is small.
+        self._heat_loss_fit_sum_x2 = 0.0
+        self._heat_loss_fit_sum_xy = 0.0
         self._heat_start_ts = None
         self._heat_start_temp = None
         self._heat_start_reached = False
@@ -183,6 +187,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             try:
                 if entry.options.get(OPT_KEY_HEAT_LOSS_W_PER_C) is not None:
                     self.heat_loss_w_per_c = float(entry.options.get(OPT_KEY_HEAT_LOSS_W_PER_C))
+                    self.heat_loss_w_per_c = max(0.0, min(80.0, self.heat_loss_w_per_c))
             except Exception:
                 self.heat_loss_w_per_c = DEFAULT_HEAT_LOSS_W_PER_C
             try:
@@ -764,7 +769,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         try:
             if water_temp is not None and outdoor_temp is not None:
                 delta = max(0.0, float(water_temp) - float(outdoor_temp))
-                loss_w = max(0.0, float(self.heat_loss_w_per_c or 0.0) * float(delta))
+                loss_coeff = max(0.0, min(80.0, float(self.heat_loss_w_per_c or 0.0)))
+                loss_w = max(0.0, loss_coeff * float(delta))
         except Exception:
             loss_w = 0.0
         effective = max(1.0, float(power_w) - float(loss_w))
@@ -2706,12 +2712,30 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                                     dtemp = float(water_temp) - float(self._last_temp_value)
                                     if dtemp < 0:
                                         cooling_rate = abs(dtemp) / dt_min  # °C/min
-                                        delta = max(0.1, float(water_temp) - float(outdoor_temp))
-                                        loss_w = float(vol_l) * 1.16 * float(cooling_rate) * 60.0
-                                        est_w_per_c = max(0.0, loss_w / delta)
-                                        # EMA smoothing
-                                        alpha = 0.2
-                                        self.heat_loss_w_per_c = max(0.0, (1 - alpha) * float(self.heat_loss_w_per_c) + alpha * est_w_per_c)
+                                        delta = max(0.0, float(water_temp) - float(outdoor_temp))
+
+                                        # Guardrails for learning: require plausible cooling samples.
+                                        drop_per_hour = cooling_rate * 60.0
+                                        max_temp_drop_per_hour = 1.5
+                                        if 0.02 <= drop_per_hour <= max_temp_drop_per_hour and delta > 0.0:
+                                            # Convert observed cooling to equivalent heat loss power (W).
+                                            # dT/h = cooling_rate * 60
+                                            loss_w = float(vol_l) * 1.16 * float(cooling_rate) * 60.0
+                                            loss_w = max(0.0, min(6000.0, loss_w))
+
+                                            # Online linear fit with forgetting:
+                                            #   loss_w ~= k * delta
+                                            # This avoids per-sample division by tiny delta values.
+                                            decay = 0.995
+                                            self._heat_loss_fit_sum_x2 = decay * float(self._heat_loss_fit_sum_x2 or 0.0) + (delta * delta)
+                                            self._heat_loss_fit_sum_xy = decay * float(self._heat_loss_fit_sum_xy or 0.0) + (delta * loss_w)
+
+                                            if self._heat_loss_fit_sum_x2 >= 9.0:
+                                                est_w_per_c = float(self._heat_loss_fit_sum_xy) / float(self._heat_loss_fit_sum_x2)
+                                                est_w_per_c = max(0.0, min(80.0, est_w_per_c))
+                                                prev = float(self.heat_loss_w_per_c or DEFAULT_HEAT_LOSS_W_PER_C)
+                                                alpha = 0.12
+                                                self.heat_loss_w_per_c = (1.0 - alpha) * prev + alpha * est_w_per_c
                                 # refresh baseline after a full window
                                 self._last_temp_ts = now
                                 self._last_temp_value = float(water_temp)
@@ -2940,6 +2964,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 and cal_next.get("start")
                 and now < cal_next["start"]
                 and (not event_rain_blocked)
+                and (not in_quiet)
                 and (not self.away_active)
             )
 
@@ -3167,7 +3192,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                         or aux_heat_demand
                         or (is_manual_filter and not in_quiet)
                         or (auto_filter_active and not in_quiet)
-                        or (next_start_mins is not None and next_start_mins == 0)
+                        or preheat_active
                         or power_saving_pump_run
                         or pv_run
                     )
@@ -3182,7 +3207,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                         or aux_heat_demand
                         or (is_manual_filter and not in_quiet)
                         or (auto_filter_active and not in_quiet)
-                        or (next_start_mins is not None and next_start_mins == 0)
+                        or preheat_active
                         or power_saving_pump_run
                         or pv_run
                     )

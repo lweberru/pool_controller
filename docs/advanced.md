@@ -111,9 +111,11 @@ Two diagnostic sensors expose the learned values:
 
 **Heat loss coefficient (`heat_loss_w_per_c`)**
 - Updated only while the pool is **off** (pump OFF, aux heater OFF).
-- Uses at least **60 minutes** between samples to avoid zero‑delta from sparse sensor updates.
-- Based on cooling rate and outdoor temperature delta.
-- Smoothed with EMA (α = 0.2).
+- Uses at least **60 minutes** between samples to avoid noise from sparse updates.
+- Uses a **robust online fit** across many samples (`loss_w ~= k * ΔT_out`) instead of dividing by a single sample.
+- Learns only from plausible cooling samples (valid cooling rate window, positive outdoor delta).
+- Applies a light forgetting factor so old seasonal conditions fade out over time.
+- Internally constrained to a sane range to avoid runaway values from sensor outliers.
 
 **Startup offset (`heat_startup_offset_minutes`)**
 - Starts when heating becomes active.
@@ -134,8 +136,12 @@ Assume:
 
 ```
 loss_W = 1100 × 1.16 × 0.1 = 127.6 W
-heat_loss_w_per_c = 127.6 / 10 = 12.76 W/°C
+single_sample_k = 127.6 / 10 = 12.76 W/°C
 ```
+
+In runtime, the controller does **not** use this single-sample value directly.
+It updates `heat_loss_w_per_c` from a robust multi-sample fit, so short-term spikes
+(e.g., summer nights with small temperature gaps) do not cause extreme coefficients.
 
 **Old formula (no loss, no offset):**
 
@@ -150,6 +156,88 @@ P_eff = 3600 - (12.76 × 10) = 3472.4 W
 t_new = (1100 × 1.16 × 5) / 3472.4 × 60 ≈ 110.2 min
 t_est = 110.2 + 8 ≈ 118.2 min
 ```
+
+### Summer / Small Delta Behavior
+
+When outdoor temperature approaches or exceeds water temperature, a direct per-sample
+division (`loss / ΔT_out`) becomes numerically unstable. The robust fit avoids this by
+aggregating many samples and weighting them by signal strength, which keeps the
+coefficient stable even in hot weather operation.
+
+### Practical Comparison: Winter vs Summer
+
+The same configured heater power can behave very differently depending on `ΔT_out`.
+
+Assume for both examples:
+- Water volume: **1000 L**
+- Target delta to heat now: **ΔT = 4°C**
+- `P_base + P_aux = 3500 W`
+- Learned startup offset: **6 min**
+- Same learned `heat_loss_w_per_c = 9 W/°C` in both examples (intentionally fixed for comparison)
+
+#### Example A: Cold winter night (high relevance)
+
+- Water: **34°C**
+- Outdoor: **-2°C**
+- `ΔT_out = 36°C`
+- Learned `heat_loss_w_per_c = 9 W/°C`
+
+Effective power:
+
+```text
+P_eff = 3500 - (9 * 36) = 3176 W
+```
+
+Estimated heating time:
+
+```text
+t_min = (1000 * 1.16 * 4) / 3176 * 60 = 87.7 min
+t_est = 87.7 + 6 = 93.7 min
+```
+
+Interpretation: in winter, the coefficient has a noticeable impact because outdoor losses are significant.
+
+#### Example B: Hot summer day (low relevance)
+
+- Water: **30°C**
+- Outdoor: **31°C**
+- `ΔT_out = max(0, 30 - 31) = 0°C`
+- Learned `heat_loss_w_per_c = 9 W/°C`
+
+Effective power:
+
+```text
+P_eff = 3500 - (9 * 0) = 3500 W
+```
+
+Estimated heating time:
+
+```text
+t_min = (1000 * 1.16 * 4) / 3500 * 60 = 79.5 min
+t_est = 79.5 + 6 = 85.5 min
+```
+
+Interpretation: on very warm days, the loss coefficient is practically irrelevant because `ΔT_out` is near zero.
+
+### Special Case: Abrupt Target Increase (Away OFF)
+
+When Away mode is disabled, the target temperature can jump up quickly (e.g., from `25°C` back to `38°C`).
+This strongly increases heating demand (`ΔT = target - water_temp`) and can make preheat appear urgent.
+
+Example:
+- Current water: **31°C**
+- Target before Away OFF: **25°C** -> no heating demand
+- Target after Away OFF: **38°C** -> `ΔT = 7°C`
+
+With `P_eff = 3200 W` and startup offset `6 min`:
+
+```text
+t_min = (1000 * 1.16 * 7) / 3200 * 60 = 152.3 min
+t_est = 152.3 + 6 = 158.3 min
+```
+
+Interpretation: this is expected behavior from a larger target delta, not necessarily a bug in heat-loss learning.
+The optimized learning prevents unrealistic coefficient spikes, while the larger setpoint step still rightly increases estimated heat time.
 
 ### Temperature Control (Extended)
 

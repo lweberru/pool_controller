@@ -16,7 +16,7 @@ The integration uses a guided wizard (9–10 steps depending on sanitizer mode):
 - **Pump Switch**: Circulation pump (optional; if omitted, the integration uses the main switch)
 - **Auxiliary Heating Switch**: Secondary heater (optional)
 - **Power Sensors**:
-  - Main power sensor (W) for heating calculations
+  - Main power sensor (W) for runtime/power-saving diagnostics and cost tracking
   - Auxiliary power sensor (optional)
 
 ### Step 3: Water Quality Sensors (Optional)
@@ -152,3 +152,12 @@ pool_controller:
 | Solar Energy Daily | - | sensor | Daily solar kWh allocated to the pool |
 
 All duration settings can be overridden per operation via **Actions**.
+
+## Adaptive Heating Learning (Info)
+
+The learned diagnostics `heat_loss_w_per_c` and `heat_startup_offset_minutes` are
+auto-managed by the coordinator and are not user-config fields in the wizard.
+
+- `heat_loss_w_per_c` is learned from a robust multi-sample fit (not from single-sample division).
+- Learning happens only during pool-off cooling phases with plausibility checks.
+- This keeps preheat estimation stable in summer when outdoor temperature is close to water temperature.
