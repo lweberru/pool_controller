@@ -2,10 +2,34 @@ import logging
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
-from homeassistant.helpers import selector
+from homeassistant.helpers import selector, entity_registry as er
 from .const import *
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _is_pool_controller_switch_entity(hass, entity_id: str | None) -> bool:
+    if not entity_id:
+        return False
+    eid = str(entity_id)
+    if not eid.startswith("switch."):
+        return False
+    if eid.startswith("switch.pool_controller"):
+        return True
+    try:
+        ent = er.async_get(hass).async_get(eid)
+        return bool(ent and getattr(ent, "platform", None) == DOMAIN)
+    except Exception:
+        return False
+
+
+def _validate_switch_targets(hass, data: dict | None) -> dict:
+    errors = {}
+    payload = data or {}
+    for key in (CONF_MAIN_SWITCH, CONF_PUMP_SWITCH, CONF_AUX_HEATING_SWITCH):
+        if _is_pool_controller_switch_entity(hass, payload.get(key)):
+            errors[key] = "invalid_entity"
+    return errors
 
 
 # Shared schema builders to avoid duplication between ConfigFlow and OptionsFlow
@@ -358,12 +382,16 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
     async def async_step_switches(self, user_input=None):
         """Second step: switches and power sensors."""
+        errors = {}
         if user_input is not None:
-            self.data.update(user_input)
-            return await self.async_step_water_quality()
+            errors = _validate_switch_targets(self.hass, user_input)
+            if not errors:
+                self.data.update(user_input)
+                return await self.async_step_water_quality()
 
         return self.async_show_form(
             step_id="switches",
+            errors=errors,
             data_schema=_switches_schema({}),
             last_step=False
         )
@@ -616,15 +644,19 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_switches(self, user_input=None):
         """Second step: switches and power sensors."""
+        errors = {}
         if user_input is not None:
-            self.options.update(user_input)
-            if self._menu_mode:
-                return self.async_create_entry(title="", data=self.options)
-            return await self.async_step_water_quality()
+            errors = _validate_switch_targets(self.hass, user_input)
+            if not errors:
+                self.options.update(user_input)
+                if self._menu_mode:
+                    return self.async_create_entry(title="", data=self.options)
+                return await self.async_step_water_quality()
 
         curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
         return self.async_show_form(
             step_id="switches",
+            errors=errors,
             data_schema=_switches_schema(curr),
             last_step=False
         )

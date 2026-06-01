@@ -2,6 +2,10 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.4.2] - 2026-06-01
+- Pause action working fix
+
+
 ## [2.4.1] - 2026-05-31
 - Fix for calculation of heat_loss_w_per_c during summer. Not not a single messurement is used but a learning curve.
 - Prevent preheat to start the pool during quite hours

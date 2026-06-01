@@ -1442,15 +1442,47 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             now = dt_util.now()
             conf = {**self.entry.data, **self.entry.options}
 
+            try:
+                ent_reg = er.async_get(self.hass)
+            except Exception:
+                ent_reg = None
+
+            def _is_own_integration_entity(entity_id: str | None) -> bool:
+                if not entity_id or not ent_reg:
+                    return False
+                try:
+                    ent = ent_reg.async_get(entity_id)
+                    return bool(ent and ent.config_entry_id == getattr(self.entry, "entry_id", None))
+                except Exception:
+                    return False
+
+            def _resolve_actuator_entity(conf_key: str) -> str | None:
+                configured = conf.get(conf_key)
+                if configured and not _is_own_integration_entity(configured):
+                    return configured
+
+                # If options accidentally point to this integration's proxy switch,
+                # prefer the original setup value from entry.data when available.
+                fallback = (self.entry.data or {}).get(conf_key)
+                if fallback and (fallback != configured) and (not _is_own_integration_entity(fallback)):
+                    _LOGGER.warning(
+                        "Ignoring invalid %s=%s (pool_controller entity); using %s from setup data",
+                        conf_key,
+                        configured,
+                        fallback,
+                    )
+                    return fallback
+                return configured
+
             # Ensure aux_allowed is always a boolean (defensive)
             self.aux_allowed = bool(getattr(self, "aux_allowed", getattr(self, "aux_enabled", False)))
             # Keep legacy alias in sync
             self.aux_enabled = self.aux_allowed
 
             # Physical switch entity IDs (may be external entities). Used for state mirroring.
-            main_switch_id = conf.get(CONF_MAIN_SWITCH)
-            pump_switch_id = conf.get(CONF_PUMP_SWITCH) or main_switch_id
-            aux_switch_id = conf.get(CONF_AUX_HEATING_SWITCH)
+            main_switch_id = _resolve_actuator_entity(CONF_MAIN_SWITCH)
+            pump_switch_id = _resolve_actuator_entity(CONF_PUMP_SWITCH) or main_switch_id
+            aux_switch_id = _resolve_actuator_entity(CONF_AUX_HEATING_SWITCH)
             demo = conf.get(CONF_DEMO_MODE, False)
 
             # Mirror physical switch states (best-effort; unknown/unavailable -> False).
