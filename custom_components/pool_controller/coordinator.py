@@ -943,6 +943,13 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         except Exception:
             _LOGGER.exception("Fehler beim Speichern von pause timer")
 
+        # Pause is a hard lockout: try to switch all physical actuators off immediately
+        # so we do not depend solely on the next coordinator update tick.
+        try:
+            await self._async_force_pause_off()
+        except Exception:
+            _LOGGER.exception("Fehler beim sofortigen Ausschalten der Aktoren für Pause")
+
     async def deactivate_pause(self):
         self.pause_until = None
         self.pause_duration = None
@@ -1258,7 +1265,48 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         domain = str(entity_id).split(".", 1)[0]
         service = "turn_on" if turn_on else "turn_off"
         call_domain = domain if self.hass.services.has_service(domain, service) else "homeassistant"
-        await self.hass.services.async_call(call_domain, service, {"entity_id": entity_id})
+        await self.hass.services.async_call(call_domain, service, {"entity_id": entity_id}, blocking=True)
+
+    def _is_pool_controller_entity(self, entity_id: str | None) -> bool:
+        if not entity_id:
+            return False
+        try:
+            ent_reg = er.async_get(self.hass)
+            ent = ent_reg.async_get(str(entity_id)) if ent_reg else None
+            return bool(ent and getattr(ent, "platform", None) == DOMAIN)
+        except Exception:
+            return False
+
+    def _resolve_external_actuator_entity(self, conf: dict, key: str) -> str | None:
+        configured = conf.get(key)
+        if configured and not self._is_pool_controller_entity(configured):
+            return configured
+        fallback = (self.entry.data or {}).get(key)
+        if fallback and not self._is_pool_controller_entity(fallback):
+            return fallback
+        return configured
+
+    async def _async_force_pause_off(self) -> None:
+        conf = {**(self.entry.data or {}), **(self.entry.options or {})}
+        demo = bool(conf.get(CONF_DEMO_MODE, False))
+        if demo:
+            return
+
+        main_id = self._resolve_external_actuator_entity(conf, CONF_MAIN_SWITCH)
+        pump_id = self._resolve_external_actuator_entity(conf, CONF_PUMP_SWITCH) or main_id
+        aux_id = self._resolve_external_actuator_entity(conf, CONF_AUX_HEATING_SWITCH)
+
+        seen: set[str] = set()
+        for eid in (main_id, pump_id, aux_id):
+            if not eid or eid in seen:
+                continue
+            seen.add(eid)
+            if self._is_pool_controller_entity(eid):
+                continue
+            try:
+                await self._async_turn_entity(eid, False)
+            except Exception:
+                _LOGGER.exception("Fehler beim Pause-Hard-Off für %s", eid)
 
     def _thermostat_demand(self, current_temp: float | None, target_temp: float, cold_tolerance: float, hot_tolerance: float, prev_on: bool) -> bool:
         """Simple hysteresis: turn ON below (target-cold), turn OFF at/above (target+hot)."""

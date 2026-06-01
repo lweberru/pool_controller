@@ -2,6 +2,10 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.4.3] - 2026-06-01
+- pause still did not work.
+
+
 ## [2.4.2] - 2026-06-01
 - Pause action working fix
 
