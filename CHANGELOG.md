@@ -2,6 +2,10 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.5.2] - 2026-06-06
+- fix for debouncing off -> on and on -> off
+
+
 ## [2.5.1] - 2026-06-06
 - Boost did not activate switches fixed
 

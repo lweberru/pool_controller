@@ -3409,7 +3409,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     except Exception:
                         return False
 
-                def _can_attempt(entity_id: str, allow_integration: bool = False) -> bool:
+                def _can_attempt(entity_id: str, desired_on: bool, allow_integration: bool = False) -> bool:
                     # No entity configured -> nothing to attempt (caller should handle)
                     if not entity_id:
                         return True
@@ -3422,11 +3422,17 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                         _LOGGER.warning("Skipping toggle for %s: entity not available", entity_id)
                         return False
                     last = self._last_toggle_attempts.get(entity_id)
-                    if last and (now - last) < min_retry:
+                    if isinstance(last, tuple) and len(last) == 2:
+                        last_ts, last_state = last
+                    else:
+                        last_ts, last_state = last, None
+                    if last_ts and (now - last_ts) < min_retry and (
+                        last_state is None or bool(last_state) == bool(desired_on)
+                    ):
                         _LOGGER.warning(
                             "Skipping toggle for %s: last attempt %s seconds ago",
                             entity_id,
-                            int((now - last).total_seconds()),
+                            int((now - last_ts).total_seconds()),
                         )
                         return False
                     return True
@@ -3436,13 +3442,13 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 need_main_reconcile = (desired_main != self._last_should_main_on) or (bool(desired_main) != bool(main_switch_on))
                 if need_main_reconcile:
                     if desired_main:
-                        if not demo and main_switch_id and _can_attempt(main_switch_id):
+                        if not demo and main_switch_id and _can_attempt(main_switch_id, True):
                             # record attempt timestamp to avoid immediate retries
-                            self._last_toggle_attempts[main_switch_id] = now
+                            self._last_toggle_attempts[main_switch_id] = (now, True)
                             await self._async_turn_entity(main_switch_id, True)
                     else:
-                        if not demo and main_switch_id and _can_attempt(main_switch_id):
-                            self._last_toggle_attempts[main_switch_id] = now
+                        if not demo and main_switch_id and _can_attempt(main_switch_id, False):
+                            self._last_toggle_attempts[main_switch_id] = (now, False)
                             await self._async_turn_entity(main_switch_id, False)
                     self._last_should_main_on = desired_main
 
@@ -3451,12 +3457,12 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     need_pump_reconcile = (desired_pump != self._last_should_pump_on) or (bool(desired_pump) != bool(pump_switch_on))
                     if need_pump_reconcile:
                         if desired_pump:
-                            if not demo and _can_attempt(pump_switch_id):
-                                self._last_toggle_attempts[pump_switch_id] = now
+                            if not demo and _can_attempt(pump_switch_id, True):
+                                self._last_toggle_attempts[pump_switch_id] = (now, True)
                                 await self._async_turn_entity(pump_switch_id, True)
                         else:
-                            if not demo and _can_attempt(pump_switch_id):
-                                self._last_toggle_attempts[pump_switch_id] = now
+                            if not demo and _can_attempt(pump_switch_id, False):
+                                self._last_toggle_attempts[pump_switch_id] = (now, False)
                                 await self._async_turn_entity(pump_switch_id, False)
                         self._last_should_pump_on = desired_pump
                 else:
@@ -3484,12 +3490,12 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     need_aux_reconcile = (physical_aux_should_be_on != self._last_should_aux_on) or (bool(physical_aux_should_be_on) != bool(aux_heating_switch_on))
                     if need_aux_reconcile:
                         if physical_aux_should_be_on:
-                            if not demo and _can_attempt(target_aux_id, allow_integration=allow_integration):
-                                self._last_toggle_attempts[target_aux_id] = now
+                            if not demo and _can_attempt(target_aux_id, True, allow_integration=allow_integration):
+                                self._last_toggle_attempts[target_aux_id] = (now, True)
                                 await self._async_turn_entity(target_aux_id, True)
                         else:
-                            if not demo and _can_attempt(target_aux_id, allow_integration=allow_integration):
-                                self._last_toggle_attempts[target_aux_id] = now
+                            if not demo and _can_attempt(target_aux_id, False, allow_integration=allow_integration):
+                                self._last_toggle_attempts[target_aux_id] = (now, False)
                                 await self._async_turn_entity(target_aux_id, False)
                         self._last_should_aux_on = physical_aux_should_be_on
             except Exception:
