@@ -277,6 +277,15 @@ When connected to solar:
 - Heating stops when excess drops below OFF threshold
 - Maximizes self-consumption of solar energy
 
+## Boost Mode
+
+Boost mode is designed for fast reheating, typically after partial water replacement.
+
+- Activation: via climate preset (`Boost`).
+- Behavior: adds a dedicated heating context (`boost`) so the controller keeps heating demand active.
+- Stop condition: Boost ends automatically as soon as water temperature reaches the current target temperature.
+- Safety/comfort constraints: maintenance/pause constraints still apply, and quiet hours are respected.
+
 ## Power-Saving Mode (Stromsparen)
 
 Power-saving mode is a dedicated operating strategy for **cost-first** pool control.

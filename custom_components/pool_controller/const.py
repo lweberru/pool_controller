@@ -185,6 +185,11 @@ OPT_KEY_MAINTENANCE_ACTIVE = "maintenance_active"
 # This is independent from maintenance mode.
 OPT_KEY_HVAC_ENABLED = "hvac_enabled"
 
+# Boost mode (rapid heating to target after water change)
+# Heats continuously, ignores quiet hours, stops automatically at target temperature
+OPT_KEY_BOOST_ACTIVE = "boost_active"
+OPT_KEY_BOOST_UNTIL = "boost_until"
+
 # Alle Standardwerte (Defaults)
 DEFAULT_NAME = "Whirlpool Demo"
 DEFAULT_VOL = 1000

@@ -60,6 +60,9 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self._power_saving_stage_since = None
         self._power_save_last_main_power_w = None
         self._power_save_last_aux_power_w = None
+        # Boost mode (rapid heating after water change)
+        self.boost_active = False
+        self.boost_until = None
         if entry:
             try:
                 merged = {**(entry.data or {}), **(entry.options or {})}
@@ -183,6 +186,14 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             self.hvac_enabled = bool(entry.options.get(OPT_KEY_HVAC_ENABLED, True))
             self.away_active = bool(entry.options.get(OPT_KEY_AWAY_ACTIVE, False))
             self.power_saving_active = bool(entry.options.get(OPT_KEY_POWER_SAVING_ACTIVE, False))
+            self.boost_active = bool(entry.options.get(OPT_KEY_BOOST_ACTIVE, False))
+            # Restore boost timer if present
+            bu = entry.options.get(OPT_KEY_BOOST_UNTIL)
+            if bu:
+                try:
+                    self.boost_until = dt_util.parse_datetime(bu)
+                except Exception:
+                    self.boost_until = None
             # Adaptive tuning persisted values (best effort)
             try:
                 if entry.options.get(OPT_KEY_HEAT_LOSS_W_PER_C) is not None:
@@ -1016,6 +1027,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 new_opts[OPT_KEY_HVAC_ENABLED] = False
                 self.power_saving_active = False
                 new_opts.pop(OPT_KEY_POWER_SAVING_ACTIVE, None)
+                self.boost_active = False
+                new_opts.pop(OPT_KEY_BOOST_ACTIVE, None)
 
                 # Clear any running timers (manual, pause, auto-filter) best effort.
                 self.manual_timer_until = None
@@ -1039,6 +1052,9 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 )
             else:
                 new_opts.pop(OPT_KEY_MAINTENANCE_ACTIVE, None)
+                # Bug fix: Re-enable HVAC when exiting maintenance mode
+                self.hvac_enabled = True
+                new_opts[OPT_KEY_HVAC_ENABLED] = True
                 _LOGGER.info("Wartung deaktiviert (%s): Automatik läuft wieder.", self.entry.entry_id)
             await self._async_update_entry_options(new_opts)
         except Exception:
@@ -1148,6 +1164,41 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             await self._async_update_entry_options(new_opts)
         except Exception:
             _LOGGER.exception("Fehler beim Speichern von power_saving")
+
+    async def set_boost(self, active: bool):
+        """Enable/disable boost mode (rapid heating after water change) and persist state."""
+        active = bool(active)
+        if active == bool(getattr(self, "boost_active", False)):
+            return
+
+        self.boost_active = active
+        try:
+            new_opts = {**self.entry.options}
+            if active:
+                # Boost activates heating until target temperature is reached.
+                # Initialize boost_until as a sentinel (will be checked in _async_update_data).
+                # Use a far-future date; will be cleared when target is reached.
+                self.boost_until = dt_util.now() + timedelta(hours=12)
+                new_opts[OPT_KEY_BOOST_ACTIVE] = True
+                new_opts[OPT_KEY_BOOST_UNTIL] = self.boost_until.isoformat()
+                
+                # Boost implicitly disables other modes
+                self.maintenance_active = False
+                self.away_active = False
+                self.power_saving_active = False
+                new_opts.pop(OPT_KEY_MAINTENANCE_ACTIVE, None)
+                new_opts.pop(OPT_KEY_AWAY_ACTIVE, None)
+                new_opts.pop(OPT_KEY_POWER_SAVING_ACTIVE, None)
+                
+                _LOGGER.info("Boost mode aktiviert (%s): Kontinuierliches Aufheizen bis Zieltemperatur.", self.entry.entry_id)
+            else:
+                new_opts.pop(OPT_KEY_BOOST_ACTIVE, None)
+                new_opts.pop(OPT_KEY_BOOST_UNTIL, None)
+                self.boost_until = None
+                _LOGGER.info("Boost mode deaktiviert (%s).", self.entry.entry_id)
+            await self._async_update_entry_options(new_opts)
+        except Exception:
+            _LOGGER.exception("Fehler beim Speichern von boost mode")
 
     async def set_hvac_enabled(self, enabled: bool):
         """Enable/disable thermostat behavior (independent from maintenance)."""
@@ -1551,6 +1602,16 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             self.away_active = bool(conf.get(OPT_KEY_AWAY_ACTIVE, False))
             # Power-saving mode flag (PV-prioritized operation)
             self.power_saving_active = bool(conf.get(OPT_KEY_POWER_SAVING_ACTIVE, False))
+            # Boost mode flag (rapid heating after water change)
+            self.boost_active = bool(conf.get(OPT_KEY_BOOST_ACTIVE, False))
+            
+            # Restore boost timer if present
+            bu = conf.get(OPT_KEY_BOOST_UNTIL)
+            if bu:
+                try:
+                    self.boost_until = dt_util.parse_datetime(bu)
+                except Exception:
+                    self.boost_until = None
 
             # First run: migrate legacy timer options (best effort)
             await self.async_migrate_legacy_timers()
@@ -3064,6 +3125,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 or pv_run
                 or thermostat_run
                 or manual_heat_run
+                or self.boost_active
                 or (self.power_saving_active and power_saving_aux_allows)
             )
 
@@ -3154,7 +3216,9 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             if not conf.get(CONF_ENABLE_AUX_HEATING, False):
                 heat_reason = "disabled"
             elif heat_allowed:
-                if is_bathing:
+                if self.boost_active:
+                    heat_reason = "boost"
+                elif is_bathing:
                     heat_reason = "bathing"
                 elif is_manual_filter:
                     heat_reason = "filter"
@@ -3449,6 +3513,21 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             # Defensive: ensure critical boolean keys are present and normalized
             for _k in ("should_pump_on", "should_main_on", "should_aux_on"):
                 data[_k] = bool(data.get(_k))
+
+            # Boost mode auto-disable: stop boost when target temperature is reached
+            if self.boost_active:
+                water_temp = self._get_float(conf.get(CONF_TEMP_WATER))
+                target_temp = self.target_temp
+                if water_temp is not None and target_temp is not None:
+                    try:
+                        wt = float(water_temp)
+                        tt = float(target_temp)
+                        if wt >= tt:
+                            # Target temperature reached: disable boost
+                            _LOGGER.info("Boost mode beendet: Zieltemperatur %.1f°C erreicht.", wt)
+                            await self.set_boost(False)
+                    except Exception:
+                        pass
 
             # Cache last good data for fallback
             self.data = data

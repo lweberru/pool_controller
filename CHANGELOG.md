@@ -2,6 +2,11 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.5.0] - 2026-06-06
+- Bug deaktivating Maintanance fixed
+- Boost Mode added to allow heating without interruption after a total water exchange.
+
+
 ## [2.4.3] - 2026-06-01
 - pause still did not work.
 

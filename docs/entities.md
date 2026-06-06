@@ -128,7 +128,9 @@ All three timer sensors use **minutes remaining** as their state (unit: `min`).
 
 | Entity | Description |
 |--------|-------------|
-| `climate.<pool>_*` | Pool heater thermostat entity (select this as the controller entity in automations and the dashboard card). Presets: Auto, Baden, Chloren, Filtern, Abwesend, Wartung, Stromsparen |
+| `climate.<pool>_*` | Pool heater thermostat entity (select this as the controller entity in automations and the dashboard card). Presets: Auto, Baden, Chloren, Filtern, Abwesend, Wartung, Stromsparen, Boost |
+
+`Boost` is intended for rapid reheating (for example after a water change). It keeps heating demand active until the configured target temperature is reached, then exits Boost automatically. Quiet hours are still respected.
 
 ## Buttons & Manual Controls
 
@@ -147,8 +149,8 @@ The integration provides four quick-action buttons (one per topic, using the def
 - `sensor.pool_next_start_mins` - When next operation starts
 - `sensor.pool_next_frost_mins` - When the next frost protection duty-cycle run starts (minutes)
 - `sensor.pool_next_event` - Next calendar event
-- `sensor.pool_run_reason` - Why the pool is running (idle/bathing/filter/chlorine/preheat/pv/frost/...)
-- `sensor.pool_heat_reason` - Why heating is allowed (off/disabled/bathing/preheat/pv)
+- `sensor.pool_run_reason` - Why the pool is running (idle/bathing/filter/chlorine/preheat/pv/frost/boost/...)
+- `sensor.pool_heat_reason` - Why heating is allowed (off/disabled/bathing/preheat/pv/boost)
 - `sensor.pool_run_credit_source` - Current credit source (if any)
 - `sensor.pool_run_credit_minutes` - Current credited minutes
 - `sensor.pool_filter_credit_minutes` - Effective filter credit
