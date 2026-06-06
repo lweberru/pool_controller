@@ -3173,6 +3173,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 run_reason = "filter"
             elif preheat_active:
                 run_reason = "preheat"
+            elif self.boost_active and (not in_quiet):
+                run_reason = "boost"
             elif power_saving_pump_run:
                 run_reason = "power_saving"
             elif pv_run:
@@ -3331,6 +3333,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     and (not pause_active)
                     and (
                         frost_active
+                        or (self.boost_active and not in_quiet)
                         or is_bathing
                         or is_chlorinating
                         or aux_heat_demand
@@ -3346,6 +3349,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     and (not pause_active)
                     and (
                         frost_active
+                        or (self.boost_active and not in_quiet)
                         or is_bathing
                         or is_chlorinating
                         or aux_heat_demand

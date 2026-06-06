@@ -2,6 +2,10 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.5.1] - 2026-06-06
+- Boost did not activate switches fixed
+
+
 ## [2.5.0] - 2026-06-06
 - Bug deaktivating Maintanance fixed
 - Boost Mode added to allow heating without interruption after a total water exchange.
