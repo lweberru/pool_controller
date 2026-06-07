@@ -79,6 +79,25 @@
           "target_salt_g_l": "Used to compute recommendations when salt is too low"
         }
       },
+      "chemistry": {
+        "title": "Chemistry estimation",
+        "description": "Simple tuning for robust chemistry recommendations. Defaults are suitable for most pools.",
+        "submit": "Continue",
+        "data": {
+          "chem_target_tds_ppm": "Target TDS (ppm)",
+          "chem_target_alkalinity_ppm": "Target alkalinity (ppm)",
+          "chem_cooldown_minutes": "Cooldown after activity/chemical addition (min)",
+          "chem_history_lookback_minutes": "Stable history window (min)",
+          "chem_min_stable_samples": "Minimum stable samples"
+        },
+        "data_description": {
+          "chem_target_tds_ppm": "Target for dilution recommendation when TDS is high",
+          "chem_target_alkalinity_ppm": "Reference target for alkalinity recommendation",
+          "chem_cooldown_minutes": "No alkalinity action while water is likely still reacting/mixing",
+          "chem_history_lookback_minutes": "How far back stable samples are considered",
+          "chem_min_stable_samples": "Required stable samples before actionable recommendations"
+        }
+      },
       "climate": {
         "title": "Temperature control",
         "description": "Thermostat settings for the pool climate entity. The target temperature (setpoint) is persisted in the integration options once you change it.",
@@ -262,6 +281,7 @@
           "switches": "Switches & power",
           "water_quality": "Water quality",
           "sanitizer": "Sanitizer",
+          "chemistry": "Chemistry estimation",
           "climate": "Temperature control",
           "frost": "Frost protection",
           "calendars": "Calendars & quiet times",
@@ -349,6 +369,25 @@
         },
         "data_description": {
           "target_salt_g_l": "Used to compute recommendations when salt is too low"
+        }
+      },
+      "chemistry": {
+        "title": "Chemistry estimation",
+        "description": "Simple tuning for robust chemistry recommendations. Defaults are suitable for most pools.",
+        "submit": "Continue",
+        "data": {
+          "chem_target_tds_ppm": "Target TDS (ppm)",
+          "chem_target_alkalinity_ppm": "Target alkalinity (ppm)",
+          "chem_cooldown_minutes": "Cooldown after activity/chemical addition (min)",
+          "chem_history_lookback_minutes": "Stable history window (min)",
+          "chem_min_stable_samples": "Minimum stable samples"
+        },
+        "data_description": {
+          "chem_target_tds_ppm": "Target for dilution recommendation when TDS is high",
+          "chem_target_alkalinity_ppm": "Reference target for alkalinity recommendation",
+          "chem_cooldown_minutes": "No alkalinity action while water is likely still reacting/mixing",
+          "chem_history_lookback_minutes": "How far back stable samples are considered",
+          "chem_min_stable_samples": "Required stable samples before actionable recommendations"
         }
       },
       "climate": {
@@ -596,6 +635,17 @@
       "tds_val": { "name": "TDS" },
       "tds_effective": { "name": "TDS (excluding salt)" },
       "tds_status": { "name": "TDS status" },
+      "alkalinity_estimated_ppm": { "name": "Estimated alkalinity" },
+      "alkalinity_status": { "name": "Alkalinity status" },
+      "alkalinity_action": { "name": "Alkalinity action" },
+      "alkalinity_target_ppm": { "name": "Alkalinity target" },
+      "alkalinity_total_dose_g": { "name": "Alkalinity total dose (g)" },
+      "alkalinity_step_dose_g": { "name": "Alkalinity step dose (g)" },
+      "alkalinity_steps": { "name": "Alkalinity dose steps" },
+      "alkalinity_wait_minutes": { "name": "Wait before re-test (min)" },
+      "alkalinity_water_change_percent": { "name": "Water change before alkalinity correction (%)" },
+      "alkalinity_plus_g": { "name": "Increase alkalinity (g)" },
+      "alkalinity_minus_g": { "name": "Reduce alkalinity (g)" },
       "tds_water_change_liters": { "name": "Recommended water change (L)" },
       "tds_water_change_percent": { "name": "Recommended water change (%)" },
       "ph_minus_g": { "name": "Add pH- (g)" },
@@ -672,6 +722,25 @@
           "chlorine": "Chlorine",
           "saltwater": "Saltwater",
           "mixed": "Mixed"
+        }
+      },
+      "alkalinity_status": {
+        "state": {
+          "unknown": "Unknown",
+          "very_low": "Very low",
+          "low": "Low",
+          "optimal": "Optimal",
+          "high": "High",
+          "critical_high": "Critical high"
+        }
+      },
+      "alkalinity_action": {
+        "state": {
+          "measure_first": "Measure first",
+          "none": "No action",
+          "raise_bicarbonate": "Raise with bicarbonate (TA+)",
+          "lower_ph_minus": "Lower with pH-",
+          "water_change_then_adjust": "Do water change first, then adjust"
         }
       }
     }

@@ -71,6 +71,9 @@ recommendations in its **Maintenance** section.
 Note: All recommendations are heuristics and depend on correct inputs (pool volume, sensor calibration). Use your own
 judgement and chemical product instructions.
 
+Important: This is **not** a laboratory measurement. Pool Controller provides a robust, operation-oriented estimate to
+support daily operation decisions.
+
 ### Overview (recommendation sensors)
 
 Typical recommendation sensors (entity IDs depend on your instance name):
@@ -90,6 +93,14 @@ Related “context” sensors:
 - `sensor.<pool>_tds_status` – `optimal` | `good` | `high` | `critical` | `urgent`
 - `binary_sensor.<pool>_tds_high` – water change needed (based on thresholds)
 
+Additional chemistry context sensors:
+
+- `sensor.<pool>_alkalinity_estimated_ppm` – history-smoothed alkalinity estimate (ppm)
+- `sensor.<pool>_alkalinity_action` – action recommendation (`none`, `measure_first`, `raise_bicarbonate`, `lower_ph_minus`, `water_change_then_adjust`)
+- `sensor.<pool>_alkalinity_step_dose_g` – suggested dose per step (g)
+- `sensor.<pool>_alkalinity_steps` – recommended number of steps
+- `sensor.<pool>_alkalinity_wait_minutes` – wait time before re-test
+
 For the full entity list, see [Sensors, Entities & Controls](entities.md).
 
 ### Inputs used for calculations
@@ -100,6 +111,27 @@ For the full entity list, see [Sensors, Entities & Controls](entities.md).
 - Conductivity in µS/cm: `sensor` configured as `tds_sensor` (conductivity).
 - Salt concentration in g/L: `sensor` configured as `salt_sensor`.
 - Target salt level in g/L: option `target_salt_g_l` (saltwater/mixed).
+- Chemistry tuning options:
+  - `chem_target_tds_ppm`
+  - `chem_target_alkalinity_ppm`
+  - `chem_cooldown_minutes`
+  - `chem_history_lookback_minutes`
+  - `chem_min_stable_samples`
+
+## Robustness & History (why single measurements are not enough)
+
+To reduce false recommendations after bathing, dosing, or sudden sensor spikes, the integration uses a guarded
+history approach:
+
+- Recommendations are blocked during active disturbance windows (e.g. bathing/chlorination/boost/pause/maintenance).
+- A cooldown window is applied after relevant activity (`chem_cooldown_minutes`).
+- Sudden sensor jumps trigger temporary blocking.
+- Only **stable** samples are considered for actionable recommendations.
+- A recommendation is only considered actionable when at least `chem_min_stable_samples` stable values exist in the
+  configured history window (`chem_history_lookback_minutes`).
+- The estimate is based on the **median** of stable history values (robust against outliers).
+
+This history is persisted in config-entry options so HA restarts do not reset learning/history quality.
 
 ## pH Adjustment Dosage
 
@@ -206,7 +238,7 @@ Current backend thresholds:
 
 To estimate how much water needs to be replaced to bring TDS down, the integration uses a simple dilution model with a target TDS:
 
-- Target TDS: `1200 ppm`
+- Target TDS: `chem_target_tds_ppm` (default `1200 ppm`)
 
 Formula (uses the maintenance TDS value: effective when available, otherwise raw):
 
@@ -218,3 +250,37 @@ water_change_percent = round((water_change_liters / volume_L) × 100)
 These recommendations are exposed as:
 - `sensor.<pool>_tds_water_change_liters` (L)
 - `sensor.<pool>_tds_water_change_percent` (%)
+
+## Alkalinity estimation & actionable recommendations
+
+Pool Controller estimates alkalinity (ppm as CaCO3) from available chemistry context and then derives practical action
+steps.
+
+### 1) Raw estimate (heuristic)
+
+The raw alkalinity estimate is based on:
+
+- effective TDS (or raw TDS if no effective TDS is available)
+- pH offset around 7.2
+- optional ORP influence as a small correction
+
+The raw value is bounded to a practical range before history smoothing.
+
+### 2) History smoothing and validity gate
+
+- Raw values are recorded into chemistry history together with stability flags.
+- The median of stable history values is used as the final estimate.
+- If history quality is insufficient, action falls back to `measure_first`.
+
+### 3) Action mapping
+
+Using `chem_target_alkalinity_ppm` (default 110 ppm), the controller classifies and recommends:
+
+- `raise_bicarbonate`: alkalinity too low → add bicarbonate stepwise
+- `lower_ph_minus`: alkalinity too high → reduce stepwise with pH-minus
+- `water_change_then_adjust`: if TDS is high, water change first, then re-evaluate
+- `none`: no action needed
+- `measure_first`: not enough stable evidence yet
+
+Step outputs are provided via sensors (`total_dose`, `step_dose`, `steps`, `wait_minutes`) and are designed for
+incremental dosing with re-test pauses.

@@ -2,6 +2,7 @@ import logging
 import re
 import inspect
 import asyncio
+from statistics import median
 from datetime import timedelta, datetime
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
@@ -54,6 +55,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self.away_temp = DEFAULT_AWAY_TEMP
         # Power-saving mode (PV-prioritized operation)
         self.power_saving_active = False
+        self.manual_mode_active = False
         self._power_saving_last_available = None
         self._power_saving_unavailable_since = None
         self._power_saving_stage_active = 0
@@ -180,12 +182,20 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self._derived_cost_last_saved = None
         self._derived_cost_snapshot = None
 
+        # Chemistry history for robust dosing recommendations.
+        # Stored in entry.options to survive HA restarts.
+        self._chem_history = []
+        self._chem_history_last_saved = None
+        self._chem_history_snapshot = None
+        self.chem_block_until = None
+
         self._did_migrate_timers = False
         if entry and entry.options:
             self.maintenance_active = bool(entry.options.get(OPT_KEY_MAINTENANCE_ACTIVE, False))
             self.hvac_enabled = bool(entry.options.get(OPT_KEY_HVAC_ENABLED, True))
             self.away_active = bool(entry.options.get(OPT_KEY_AWAY_ACTIVE, False))
             self.power_saving_active = bool(entry.options.get(OPT_KEY_POWER_SAVING_ACTIVE, False))
+            self.manual_mode_active = bool(entry.options.get(OPT_KEY_MANUAL_MODE_ACTIVE, False))
             self.boost_active = bool(entry.options.get(OPT_KEY_BOOST_ACTIVE, False))
             # Restore boost timer if present
             bu = entry.options.get(OPT_KEY_BOOST_UNTIL)
@@ -194,6 +204,37 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     self.boost_until = dt_util.parse_datetime(bu)
                 except Exception:
                     self.boost_until = None
+
+            # Chemistry history persisted values (best effort)
+            try:
+                raw_chem_history = entry.options.get(OPT_KEY_CHEMISTRY_HISTORY) or []
+                if isinstance(raw_chem_history, list):
+                    cleaned = []
+                    for item in raw_chem_history[-160:]:
+                        if not isinstance(item, dict):
+                            continue
+                        ts = item.get("ts")
+                        if not ts:
+                            continue
+                        cleaned.append(
+                            {
+                                "ts": str(ts),
+                                "ph": item.get("ph"),
+                                "chlor": item.get("chlor"),
+                                "tds_effective": item.get("tds_effective"),
+                                "alk_raw": item.get("alk_raw"),
+                                "stable": bool(item.get("stable", False)),
+                                "reason": str(item.get("reason") or ""),
+                            }
+                        )
+                    self._chem_history = cleaned[-120:]
+            except Exception:
+                self._chem_history = []
+            try:
+                chem_block_raw = entry.options.get(OPT_KEY_CHEM_BLOCK_UNTIL)
+                self.chem_block_until = dt_util.parse_datetime(chem_block_raw) if chem_block_raw else None
+            except Exception:
+                self.chem_block_until = None
             # Adaptive tuning persisted values (best effort)
             try:
                 if entry.options.get(OPT_KEY_HEAT_LOSS_W_PER_C) is not None:
@@ -737,6 +778,142 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         setattr(self, "_derived_cost_last_saved", now)
         setattr(self, "_derived_cost_snapshot", snapshot)
 
+    def _chemistry_profile(self, sanitizer_mode: str, sanitizer_product: str) -> dict:
+        """Return product-aware chemistry stabilization profile."""
+        mode = (sanitizer_mode or "").strip().lower()
+        product = (sanitizer_product or "").strip().lower()
+        if mode == "saltwater" and not product:
+            product = "salt_cell"
+
+        settle_minutes = {
+            "dichlor": 90,
+            "trichlor": 180,
+            "cal_hypo": 120,
+            "liquid_chlorine": 75,
+            "salt_cell": 45,
+            "other": 120,
+        }.get(product, 120)
+        min_samples = {
+            "dichlor": 4,
+            "trichlor": 6,
+            "cal_hypo": 5,
+            "liquid_chlorine": 4,
+            "salt_cell": 3,
+            "other": 5,
+        }.get(product, 5)
+        # Window sufficiently larger than settle time to smooth out spikes.
+        lookback_minutes = max(180, int(settle_minutes * 4))
+        return {
+            "product": product or "other",
+            "settle_minutes": settle_minutes,
+            "min_samples": min_samples,
+            "lookback_minutes": lookback_minutes,
+        }
+
+    def _append_chem_history_sample(
+        self,
+        now: datetime,
+        ph_val: float | None,
+        chlor_val: float | None,
+        tds_effective: float | None,
+        alk_raw: int | None,
+        stable: bool,
+        reason: str,
+    ) -> None:
+        sample = {
+            "ts": now.isoformat(),
+            "ph": round(float(ph_val), 3) if ph_val is not None else None,
+            "chlor": round(float(chlor_val), 1) if chlor_val is not None else None,
+            "tds_effective": int(round(float(tds_effective))) if tds_effective is not None else None,
+            "alk_raw": int(alk_raw) if alk_raw is not None else None,
+            "stable": bool(stable),
+            "reason": str(reason or ""),
+        }
+        self._chem_history.append(sample)
+        if len(self._chem_history) > 120:
+            self._chem_history = self._chem_history[-120:]
+
+    def _recent_chem_samples(self, now: datetime, lookback_minutes: int, stable_only: bool = True) -> list[dict]:
+        out = []
+        for sample in list(self._chem_history or []):
+            if stable_only and not bool(sample.get("stable")):
+                continue
+            ts_raw = sample.get("ts")
+            if not ts_raw:
+                continue
+            try:
+                ts = dt_util.parse_datetime(str(ts_raw))
+                if ts is None:
+                    continue
+                age_s = (now - ts).total_seconds()
+                if age_s < 0:
+                    continue
+                if age_s <= float(lookback_minutes) * 60.0:
+                    out.append(sample)
+            except Exception:
+                continue
+        return out
+
+    def _history_median(self, samples: list[dict], key: str) -> float | None:
+        values = []
+        for sample in samples:
+            value = sample.get(key)
+            if value is None:
+                continue
+            try:
+                values.append(float(value))
+            except Exception:
+                continue
+        if not values:
+            return None
+        try:
+            return float(median(values))
+        except Exception:
+            return None
+
+    async def _maybe_persist_chemistry_history(self, now: datetime) -> None:
+        if not self.entry or self.entry.options is None:
+            return
+
+        snapshot = tuple(
+            (
+                sample.get("ts"),
+                sample.get("alk_raw"),
+                sample.get("stable"),
+                sample.get("reason"),
+            )
+            for sample in (self._chem_history or [])
+        )
+        if self._chem_history_snapshot == snapshot:
+            return
+
+        try:
+            last_saved = self._chem_history_last_saved
+            if last_saved and (now - last_saved).total_seconds() < 60:
+                return
+        except Exception:
+            pass
+
+        opts = {**self.entry.options}
+        opts[OPT_KEY_CHEMISTRY_HISTORY] = list(self._chem_history or [])
+        await self._async_update_entry_options(opts)
+        self._chem_history_last_saved = now
+        self._chem_history_snapshot = snapshot
+
+    async def _set_chem_block_until(self, until: datetime | None) -> None:
+        self.chem_block_until = until
+        if not self.entry:
+            return
+        try:
+            opts = {**(self.entry.options or {})}
+            if until is not None:
+                opts[OPT_KEY_CHEM_BLOCK_UNTIL] = until.isoformat()
+            else:
+                opts.pop(OPT_KEY_CHEM_BLOCK_UNTIL, None)
+            await self._async_update_entry_options(opts)
+        except Exception:
+            _LOGGER.exception("Fehler beim Speichern von chem_block_until")
+
     def _effective_heating_power(
         self,
         conf: dict,
@@ -899,6 +1076,18 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         timer_type = (timer_type or "").strip().lower()
         if timer_type not in ("bathing", "chlorine", "filter"):
             raise ValueError("invalid manual timer_type")
+
+        # While Boost is active, manual bathing/filter/chlorine timers are intentionally blocked.
+        # Boost already keeps the pool running/heating; stacking manual modes would create
+        # conflicting semantics for preset/mode transitions.
+        if bool(getattr(self, "boost_active", False)):
+            _LOGGER.info(
+                "Manual timer '%s' ignored: Boost mode is active (%s)",
+                timer_type,
+                getattr(self.entry, "entry_id", None),
+            )
+            return
+
         minutes = int(minutes)
         if minutes <= 0:
             await self.deactivate_manual_timer()
@@ -914,6 +1103,21 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         new_opts[OPT_KEY_MANUAL_UNTIL] = until.isoformat()
         new_opts[OPT_KEY_MANUAL_TYPE] = timer_type
         new_opts[OPT_KEY_MANUAL_DURATION] = minutes
+        if timer_type in ("bathing", "chlorine"):
+            try:
+                merged = {**(self.entry.data or {}), **(self.entry.options or {})}
+                cooldown_minutes = int(merged.get(CONF_CHEM_COOLDOWN_MINUTES, DEFAULT_CHEM_COOLDOWN_MINUTES))
+                sanitizer_mode = (merged.get(CONF_SANITIZER_MODE) or "").strip().lower()
+                sanitizer_product = (merged.get(CONF_SANITIZER_PRODUCT) or "").strip().lower()
+                settle_minutes = int(self._chemistry_profile(sanitizer_mode, sanitizer_product).get("settle_minutes", 0) or 0)
+            except Exception:
+                cooldown_minutes = DEFAULT_CHEM_COOLDOWN_MINUTES
+                settle_minutes = 0
+            cooldown_minutes = max(0, min(24 * 60, int(cooldown_minutes)))
+            effective_cooldown = max(cooldown_minutes, settle_minutes)
+            block_until = until + timedelta(minutes=effective_cooldown)
+            self.chem_block_until = block_until
+            new_opts[OPT_KEY_CHEM_BLOCK_UNTIL] = block_until.isoformat()
         if timer_type == "filter":
             next_start = now + timedelta(minutes=self.filter_interval)
             self.next_filter_start = next_start
@@ -1027,6 +1231,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 new_opts[OPT_KEY_HVAC_ENABLED] = False
                 self.power_saving_active = False
                 new_opts.pop(OPT_KEY_POWER_SAVING_ACTIVE, None)
+                self.manual_mode_active = False
+                new_opts.pop(OPT_KEY_MANUAL_MODE_ACTIVE, None)
                 self.boost_active = False
                 new_opts.pop(OPT_KEY_BOOST_ACTIVE, None)
 
@@ -1063,7 +1269,11 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
     async def set_away(self, active: bool):
         """Aktiviert/deaktiviert Away-Modus und persistiert den Zustand."""
         active = bool(active)
-        if active == bool(getattr(self, "away_active", False)):
+        # If Away is already active but Boost is still active (stale/edge state),
+        # continue to reconcile and clear Boost.
+        if active == bool(getattr(self, "away_active", False)) and not (
+            active and (bool(getattr(self, "boost_active", False)) or bool(getattr(self, "manual_mode_active", False)))
+        ):
             return
 
         self.away_active = active
@@ -1090,9 +1300,19 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 self.maintenance_active = False
                 new_opts.pop(OPT_KEY_MAINTENANCE_ACTIVE, None)
 
+                # Entering away explicitly exits manual read-only mode.
+                self.manual_mode_active = False
+                new_opts.pop(OPT_KEY_MANUAL_MODE_ACTIVE, None)
+
                 # Away and power-saving are mutually exclusive.
                 self.power_saving_active = False
                 new_opts.pop(OPT_KEY_POWER_SAVING_ACTIVE, None)
+
+                # Away explicitly ends Boost mode.
+                self.boost_active = False
+                self.boost_until = None
+                new_opts.pop(OPT_KEY_BOOST_ACTIVE, None)
+                new_opts.pop(OPT_KEY_BOOST_UNTIL, None)
 
                 # Store previous target temp for restore.
                 if self.target_temp is not None:
@@ -1142,7 +1362,11 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
     async def set_power_saving(self, active: bool):
         """Enable/disable power-saving mode and persist state."""
         active = bool(active)
-        if active == bool(getattr(self, "power_saving_active", False)):
+        # If power-saving is already active but Boost is still active (stale/edge state),
+        # continue to reconcile and clear Boost.
+        if active == bool(getattr(self, "power_saving_active", False)) and not (
+            active and (bool(getattr(self, "boost_active", False)) or bool(getattr(self, "manual_mode_active", False)))
+        ):
             return
 
         merged = {**(self.entry.data or {}), **(self.entry.options or {})}
@@ -1158,6 +1382,17 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 self.away_active = False
                 new_opts.pop(OPT_KEY_MAINTENANCE_ACTIVE, None)
                 new_opts.pop(OPT_KEY_AWAY_ACTIVE, None)
+
+                # Entering power-saving explicitly exits manual read-only mode.
+                self.manual_mode_active = False
+                new_opts.pop(OPT_KEY_MANUAL_MODE_ACTIVE, None)
+
+                # Power-saving explicitly ends Boost mode.
+                self.boost_active = False
+                self.boost_until = None
+                new_opts.pop(OPT_KEY_BOOST_ACTIVE, None)
+                new_opts.pop(OPT_KEY_BOOST_UNTIL, None)
+
                 new_opts[OPT_KEY_POWER_SAVING_ACTIVE] = True
             else:
                 new_opts.pop(OPT_KEY_POWER_SAVING_ACTIVE, None)
@@ -1165,10 +1400,45 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         except Exception:
             _LOGGER.exception("Fehler beim Speichern von power_saving")
 
+    async def set_manual_mode(self, active: bool):
+        """Enable/disable manual read-only mode and persist state.
+
+        When active, the integration keeps reading/deriving state but does not
+        automatically toggle actuators.
+        """
+        active = bool(active)
+        if active == bool(getattr(self, "manual_mode_active", False)):
+            return
+
+        self.manual_mode_active = active
+        try:
+            new_opts = {**self.entry.options}
+            if active:
+                # Manual mode is mutually exclusive with automation presets.
+                self.maintenance_active = False
+                self.away_active = False
+                self.power_saving_active = False
+                self.boost_active = False
+                self.boost_until = None
+                new_opts.pop(OPT_KEY_MAINTENANCE_ACTIVE, None)
+                new_opts.pop(OPT_KEY_AWAY_ACTIVE, None)
+                new_opts.pop(OPT_KEY_POWER_SAVING_ACTIVE, None)
+                new_opts.pop(OPT_KEY_BOOST_ACTIVE, None)
+                new_opts.pop(OPT_KEY_BOOST_UNTIL, None)
+                new_opts[OPT_KEY_MANUAL_MODE_ACTIVE] = True
+                _LOGGER.info("Manueller Read-Only-Modus aktiviert (%s)", self.entry.entry_id)
+            else:
+                new_opts.pop(OPT_KEY_MANUAL_MODE_ACTIVE, None)
+                _LOGGER.info("Manueller Read-Only-Modus deaktiviert (%s)", self.entry.entry_id)
+
+            await self._async_update_entry_options(new_opts)
+        except Exception:
+            _LOGGER.exception("Fehler beim Speichern von manual mode")
+
     async def set_boost(self, active: bool):
         """Enable/disable boost mode (rapid heating after water change) and persist state."""
         active = bool(active)
-        if active == bool(getattr(self, "boost_active", False)):
+        if active == bool(getattr(self, "boost_active", False)) and not (active and bool(getattr(self, "manual_mode_active", False))):
             return
 
         self.boost_active = active
@@ -1186,9 +1456,11 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 self.maintenance_active = False
                 self.away_active = False
                 self.power_saving_active = False
+                self.manual_mode_active = False
                 new_opts.pop(OPT_KEY_MAINTENANCE_ACTIVE, None)
                 new_opts.pop(OPT_KEY_AWAY_ACTIVE, None)
                 new_opts.pop(OPT_KEY_POWER_SAVING_ACTIVE, None)
+                new_opts.pop(OPT_KEY_MANUAL_MODE_ACTIVE, None)
                 
                 _LOGGER.info("Boost mode aktiviert (%s): Kontinuierliches Aufheizen bis Zieltemperatur.", self.entry.entry_id)
             else:
@@ -1386,6 +1658,9 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
     def _credit_source_from_reasons(self, run_reason: str | None, heat_reason: str | None) -> str | None:
         rr = (run_reason or "").strip().lower()
         hr = (heat_reason or "").strip().lower()
+        # Boost should contribute to filter credit by default.
+        if rr == "boost" or hr == "boost":
+            return "filter"
         if rr in ("bathing", "filter", "chlorine", "frost", "preheat", "pv"):
             return rr
         if hr in ("bathing", "filter", "chlorine", "preheat", "pv", "thermostat"):
@@ -1604,6 +1879,14 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             self.power_saving_active = bool(conf.get(OPT_KEY_POWER_SAVING_ACTIVE, False))
             # Boost mode flag (rapid heating after water change)
             self.boost_active = bool(conf.get(OPT_KEY_BOOST_ACTIVE, False))
+            self.manual_mode_active = bool(conf.get(OPT_KEY_MANUAL_MODE_ACTIVE, False))
+
+            # Expire persisted chemistry cooldown block.
+            try:
+                if self.chem_block_until and now >= self.chem_block_until:
+                    await self._set_chem_block_until(None)
+            except Exception:
+                pass
             
             # Restore boost timer if present
             bu = conf.get(OPT_KEY_BOOST_UNTIL)
@@ -1634,6 +1917,9 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             sanitizer_mode = (conf.get(CONF_SANITIZER_MODE) or "").strip().lower()
             if sanitizer_mode not in ("chlorine", "saltwater", "mixed"):
                 sanitizer_mode = "saltwater" if bool(conf.get(CONF_ENABLE_SALTWATER, False)) else DEFAULT_SANITIZER_MODE
+            sanitizer_product = (conf.get(CONF_SANITIZER_PRODUCT) or "").strip().lower()
+            if sanitizer_product not in ("dichlor", "trichlor", "cal_hypo", "liquid_chlorine", "salt_cell", "other"):
+                sanitizer_product = "salt_cell" if sanitizer_mode == "saltwater" else DEFAULT_SANITIZER_PRODUCT
             saltwater_mode = sanitizer_mode in ("saltwater", "mixed")
             try:
                 target_salt_g_l = float(conf.get(CONF_TARGET_SALT_G_L, DEFAULT_TARGET_SALT_G_L))
@@ -1672,10 +1958,60 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             tds_water_change_percent = 0
             tds_high = False
 
+            # Alkalinitäts-Schätzung (ppm als CaCO3):
+            # Heuristik aus effektivem TDS + pH (optional ORP-Korrektur).
+            # Ziel ist eine praktikable Orientierung, keine Labor-Analyse.
+            alkalinity_estimated_ppm = None
+            alkalinity_status = "unknown"
+            alkalinity_plus_g = 0
+            alkalinity_minus_g = 0
+            alkalinity_action = "measure_first"
+            alkalinity_total_dose_g = 0
+            alkalinity_step_dose_g = 0
+            alkalinity_steps = 0
+            alkalinity_wait_minutes = 30
+            alkalinity_water_change_percent = 0
+            alkalinity_target_ppm = 110
+            alkalinity_estimated_ppm_raw = None
+            alkalinity_measurement_valid = False
+            alkalinity_measurement_reason = "insufficient_history"
+            alkalinity_history_samples = 0
+
             # Use effective TDS for maintenance interpretation (see above).
             tds_for_maintenance = tds_effective if tds_effective is not None else tds_val
+            try:
+                target_tds = int(conf.get(CONF_CHEM_TARGET_TDS_PPM, DEFAULT_CHEM_TARGET_TDS_PPM))
+            except Exception:
+                target_tds = DEFAULT_CHEM_TARGET_TDS_PPM
+            target_tds = max(500, min(3500, int(target_tds)))
+
+            try:
+                alkalinity_target_ppm = int(conf.get(CONF_CHEM_TARGET_ALKALINITY_PPM, DEFAULT_CHEM_TARGET_ALKALINITY_PPM))
+            except Exception:
+                alkalinity_target_ppm = DEFAULT_CHEM_TARGET_ALKALINITY_PPM
+            alkalinity_target_ppm = max(70, min(160, int(alkalinity_target_ppm)))
+            alk_low_threshold = max(50, alkalinity_target_ppm - 30)
+            alk_high_threshold = min(220, alkalinity_target_ppm + 30)
+
+            try:
+                conf_min_samples = int(conf.get(CONF_CHEM_MIN_STABLE_SAMPLES, DEFAULT_CHEM_MIN_STABLE_SAMPLES))
+            except Exception:
+                conf_min_samples = DEFAULT_CHEM_MIN_STABLE_SAMPLES
+            conf_min_samples = max(2, min(12, int(conf_min_samples)))
+
+            try:
+                conf_lookback_minutes = int(conf.get(CONF_CHEM_HISTORY_LOOKBACK_MINUTES, DEFAULT_CHEM_HISTORY_LOOKBACK_MINUTES))
+            except Exception:
+                conf_lookback_minutes = DEFAULT_CHEM_HISTORY_LOOKBACK_MINUTES
+            conf_lookback_minutes = max(120, min(24 * 60, int(conf_lookback_minutes)))
+
+            try:
+                chem_cooldown_minutes = int(conf.get(CONF_CHEM_COOLDOWN_MINUTES, DEFAULT_CHEM_COOLDOWN_MINUTES))
+            except Exception:
+                chem_cooldown_minutes = DEFAULT_CHEM_COOLDOWN_MINUTES
+            chem_cooldown_minutes = max(0, min(24 * 60, int(chem_cooldown_minutes)))
+
             if tds_for_maintenance is not None:
-                target_tds = 1200  # Ziel-TDS (nicht-salzige gelöste Stoffe) in ppm
                 if tds_for_maintenance < 1500:
                     tds_status = "optimal"
                 elif tds_for_maintenance < 2000:
@@ -1694,6 +2030,167 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 if vol_l and tds_for_maintenance > target_tds:
                     tds_water_change_liters = round(vol_l * (tds_for_maintenance - target_tds) / tds_for_maintenance)
                     tds_water_change_percent = round((tds_water_change_liters / vol_l) * 100)
+
+            profile = self._chemistry_profile(sanitizer_mode, sanitizer_product)
+            profile["min_samples"] = max(int(profile.get("min_samples", 0) or 0), conf_min_samples)
+            profile["lookback_minutes"] = max(int(profile.get("lookback_minutes", 0) or 0), conf_lookback_minutes)
+            manual_active_now = bool(self.manual_timer_until and now < self.manual_timer_until)
+            manual_type_now = str(self.manual_timer_type or "")
+            pause_active_now = bool(self.pause_until and now < self.pause_until)
+            chem_block_active = bool(self.chem_block_until and now < self.chem_block_until)
+            chem_activity_active = bool(
+                maintenance_active
+                or self.manual_mode_active
+                or self.boost_active
+                or pause_active_now
+                or chem_block_active
+                or (manual_active_now and manual_type_now in ("bathing", "chlorine"))
+            )
+
+            sensor_jump = False
+            last_sample = (self._chem_history or [])[-1] if self._chem_history else None
+            if isinstance(last_sample, dict):
+                try:
+                    ts_last = dt_util.parse_datetime(str(last_sample.get("ts")))
+                    if ts_last and (now - ts_last).total_seconds() <= max(600, profile["settle_minutes"] * 60):
+                        last_ph = last_sample.get("ph")
+                        last_chlor = last_sample.get("chlor")
+                        last_tds = last_sample.get("tds_effective")
+                        if ph_val is not None and last_ph is not None and abs(float(ph_val) - float(last_ph)) > 0.22:
+                            sensor_jump = True
+                        if chlor_val is not None and last_chlor is not None and abs(float(chlor_val) - float(last_chlor)) > 130:
+                            sensor_jump = True
+                        if tds_for_maintenance is not None and last_tds is not None and abs(float(tds_for_maintenance) - float(last_tds)) > 250:
+                            sensor_jump = True
+                except Exception:
+                    sensor_jump = False
+
+            # Alkalinitäts-Heuristik (Rohwert):
+            # - Basis aus TDS (bzw. effective TDS in Salzbetrieb)
+            # - pH-Korrektur um den Arbeitspunkt 7.2
+            # - kleine ORP-Korrektur, um extremen Oxidationszustand zu berücksichtigen
+            try:
+                if tds_for_maintenance is not None:
+                    tds_ref = max(300.0, min(3000.0, float(tds_for_maintenance)))
+                    alk_base = 40.0 + (0.08 * tds_ref)
+                else:
+                    alk_base = 95.0
+
+                if ph_val is not None:
+                    alk_base += (float(ph_val) - 7.2) * 45.0
+
+                if chlor_val is not None:
+                    alk_base += (float(chlor_val) - 700.0) * 0.015
+
+                if (ph_val is not None) or (tds_for_maintenance is not None):
+                    alkalinity_estimated_ppm_raw = int(round(max(20.0, min(240.0, alk_base))))
+            except Exception:
+                alkalinity_estimated_ppm_raw = None
+
+            stable_now = bool((not chem_activity_active) and (not sensor_jump) and (alkalinity_estimated_ppm_raw is not None))
+            if chem_activity_active:
+                alkalinity_measurement_reason = "activity_cooldown" if chem_block_active else "activity"
+            elif sensor_jump:
+                alkalinity_measurement_reason = "sensor_jump"
+            elif alkalinity_estimated_ppm_raw is None:
+                alkalinity_measurement_reason = "missing_data"
+            else:
+                alkalinity_measurement_reason = "insufficient_history"
+
+            self._append_chem_history_sample(
+                now=now,
+                ph_val=ph_val,
+                chlor_val=chlor_val,
+                tds_effective=tds_for_maintenance,
+                alk_raw=alkalinity_estimated_ppm_raw,
+                stable=stable_now,
+                reason=("ok" if stable_now else alkalinity_measurement_reason),
+            )
+
+            try:
+                await self._maybe_persist_chemistry_history(now)
+            except Exception:
+                pass
+
+            stable_samples = self._recent_chem_samples(now, profile["lookback_minutes"], stable_only=True)
+            alk_stable_samples = [s for s in stable_samples if s.get("alk_raw") is not None]
+            alkalinity_history_samples = len(alk_stable_samples)
+            alk_hist_median = self._history_median(alk_stable_samples, "alk_raw")
+            alkalinity_estimated_ppm = int(round(alk_hist_median)) if alk_hist_median is not None else alkalinity_estimated_ppm_raw
+
+            if alkalinity_history_samples >= int(profile["min_samples"]) and stable_now and alkalinity_estimated_ppm is not None:
+                alkalinity_measurement_valid = True
+                alkalinity_measurement_reason = "ok"
+
+            if alkalinity_estimated_ppm is not None:
+                if alkalinity_estimated_ppm < max(60, alk_low_threshold - 20):
+                    alkalinity_status = "very_low"
+                elif alkalinity_estimated_ppm < alk_low_threshold:
+                    alkalinity_status = "low"
+                elif alkalinity_estimated_ppm <= alk_high_threshold:
+                    alkalinity_status = "optimal"
+                elif alkalinity_estimated_ppm <= min(220, alk_high_threshold + 40):
+                    alkalinity_status = "high"
+                else:
+                    alkalinity_status = "critical_high"
+
+                # Dosier-Hinweise (grobe Praxiswerte, in g):
+                # - Erhöhen mit Natriumhydrogencarbonat: ~18 g je m³ pro +10 ppm
+                # - Senken mit pH-Minus (Natriumbisulfat): ~15 g je m³ pro -10 ppm
+                try:
+                    volume_m3 = (float(vol_l) / 1000.0) if vol_l else 0.0
+                    if volume_m3 > 0:
+                        if alkalinity_estimated_ppm < alk_low_threshold:
+                            delta_up = max(0.0, float(alkalinity_target_ppm) - float(alkalinity_estimated_ppm))
+                            alkalinity_plus_g = int(round(volume_m3 * (delta_up / 10.0) * 18.0))
+                        elif alkalinity_estimated_ppm > alk_high_threshold:
+                            delta_down = max(0.0, float(alkalinity_estimated_ppm) - float(alkalinity_target_ppm))
+                            alkalinity_minus_g = int(round(volume_m3 * (delta_down / 10.0) * 15.0))
+                except Exception:
+                    alkalinity_plus_g = 0
+                    alkalinity_minus_g = 0
+
+            # Konkrete Handlungsempfehlung aus Alkalinitäts-/TDS-Lage ableiten.
+            # Empfehlung nur bei stabiler, historisch abgesicherter Messlage.
+            if not alkalinity_measurement_valid:
+                alkalinity_action = "measure_first"
+            elif tds_high and int(tds_water_change_percent or 0) >= 10:
+                alkalinity_action = "water_change_then_adjust"
+                alkalinity_water_change_percent = int(tds_water_change_percent or 0)
+            elif alkalinity_estimated_ppm < alk_low_threshold:
+                alkalinity_action = "raise_bicarbonate"
+                alkalinity_total_dose_g = int(alkalinity_plus_g or 0)
+                try:
+                    v_m3 = (float(vol_l) / 1000.0) if vol_l else 0.0
+                except Exception:
+                    v_m3 = 0.0
+                # Maximal ~20 g/m³ pro Schritt, damit Änderungen kontrollierbar bleiben.
+                step_cap = max(100, int(round(v_m3 * 20.0))) if v_m3 > 0 else 100
+                if alkalinity_total_dose_g > 0:
+                    alkalinity_steps = max(1, (alkalinity_total_dose_g + step_cap - 1) // step_cap)
+                    alkalinity_step_dose_g = max(1, (alkalinity_total_dose_g + alkalinity_steps - 1) // alkalinity_steps)
+            elif alkalinity_estimated_ppm > alk_high_threshold:
+                alkalinity_action = "lower_ph_minus"
+                alkalinity_total_dose_g = int(alkalinity_minus_g or 0)
+                try:
+                    v_m3 = (float(vol_l) / 1000.0) if vol_l else 0.0
+                except Exception:
+                    v_m3 = 0.0
+                # Maximal ~15 g/m³ pro Schritt, konservativ wegen pH-Untergrenze.
+                step_cap = max(80, int(round(v_m3 * 15.0))) if v_m3 > 0 else 80
+                if alkalinity_total_dose_g > 0:
+                    alkalinity_steps = max(1, (alkalinity_total_dose_g + step_cap - 1) // step_cap)
+                    alkalinity_step_dose_g = max(1, (alkalinity_total_dose_g + alkalinity_steps - 1) // alkalinity_steps)
+            else:
+                alkalinity_action = "none"
+
+            if sensor_jump and (not chem_block_active):
+                try:
+                    jump_block = now + timedelta(minutes=max(15, min(chem_cooldown_minutes, int(profile.get("settle_minutes", 30)))))
+                    await self._set_chem_block_until(jump_block)
+                    chem_block_active = True
+                except Exception:
+                    pass
             
             main_power = self._get_float(conf.get(CONF_MAIN_POWER_SENSOR))
             aux_power = self._get_float(conf.get(CONF_AUX_POWER_SENSOR))
@@ -3159,6 +3656,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             # Transparenz: Warum läuft der Pool (Main/Pumpe) gerade?
             if maintenance_active:
                 run_reason = "maintenance"
+            elif self.manual_mode_active:
+                run_reason = "manual"
             elif frost_active:
                 run_reason = "frost"
             elif pause_active:
@@ -3217,6 +3716,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             # Transparenz: Warum darf/soll die Heizung laufen?
             if not conf.get(CONF_ENABLE_AUX_HEATING, False):
                 heat_reason = "disabled"
+            elif self.manual_mode_active:
+                heat_reason = "off"
             elif heat_allowed:
                 if self.boost_active:
                     heat_reason = "boost"
@@ -3241,9 +3742,11 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
             data = {
                 "sanitizer_mode": sanitizer_mode,
+                "sanitizer_product": sanitizer_product,
                 "maintenance_active": maintenance_active,
                 "away_active": bool(self.away_active),
                 "power_saving_active": bool(self.power_saving_active),
+                "manual_mode_active": bool(self.manual_mode_active),
                 "power_saving_available": bool(power_saving_available),
                 "power_saving_stage": int(power_saving_stage),
                 "power_saving_reason": power_saving_reason,
@@ -3267,6 +3770,21 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "tds_high": tds_high,
                 "tds_water_change_liters": tds_water_change_liters,
                 "tds_water_change_percent": tds_water_change_percent,
+                "alkalinity_estimated_ppm": alkalinity_estimated_ppm,
+                "alkalinity_estimated_ppm_raw": alkalinity_estimated_ppm_raw,
+                "alkalinity_status": alkalinity_status,
+                "alkalinity_plus_g": alkalinity_plus_g,
+                "alkalinity_minus_g": alkalinity_minus_g,
+                "alkalinity_action": alkalinity_action,
+                "alkalinity_measurement_valid": alkalinity_measurement_valid,
+                "alkalinity_measurement_reason": alkalinity_measurement_reason,
+                "alkalinity_history_samples": alkalinity_history_samples,
+                "alkalinity_total_dose_g": alkalinity_total_dose_g,
+                "alkalinity_step_dose_g": alkalinity_step_dose_g,
+                "alkalinity_steps": alkalinity_steps,
+                "alkalinity_wait_minutes": alkalinity_wait_minutes,
+                "alkalinity_water_change_percent": alkalinity_water_change_percent,
+                "alkalinity_target_ppm": alkalinity_target_ppm,
                 "ph_minus_g": ph_minus,
                 "ph_plus_g": ph_plus,
                 "chlor_spoons": chlor_spoons,
@@ -3330,6 +3848,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 # Stromversorgung an, wenn der Pool laufen muss (inkl. Frost) oder wenn die Pumpe laufen soll.
                 "should_pump_on": (
                     (not maintenance_active)
+                    and (not self.manual_mode_active)
                     and (not pause_active)
                     and (
                         frost_active
@@ -3346,6 +3865,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 ),
                 "should_main_on": (
                     (not maintenance_active)
+                    and (not self.manual_mode_active)
                     and (not pause_active)
                     and (
                         frost_active
@@ -3363,6 +3883,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 # Aux-Heizung einschalten, wenn aktiviert UND Temperatur signifikant unter Ziel liegt
                 "should_aux_on": (
                     (not maintenance_active)
+                    and (not self.manual_mode_active)
                     and conf.get(CONF_ENABLE_AUX_HEATING, False)
                     and aux_heat_demand
                     and (
@@ -3384,58 +3905,69 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 desired_main = data.get("should_main_on")
                 desired_pump = data.get("should_pump_on")
                 desired_aux = data.get("should_aux_on")
-                # Debounce / retry guard: avoid rapid repeated attempts for the same entity
                 now = dt_util.now()
-                min_retry = timedelta(seconds=getattr(self, "toggle_debounce_seconds", DEFAULT_TOGGLE_DEBOUNCE_SECONDS))
 
-                # access entity registry once for source checks
-                try:
-                    ent_reg = er.async_get(self.hass)
-                except Exception:
+                if self.manual_mode_active:
+                    # Read-only mode: do not apply any automatic actuator toggles.
+                    self._last_should_main_on = desired_main
+                    self._last_should_pump_on = desired_pump
+                    self._last_should_aux_on = desired_aux
                     ent_reg = None
 
-                def _is_available(entity_id: str) -> bool:
-                    if not entity_id:
+                    def _can_attempt(entity_id: str, desired_on: bool, allow_integration: bool = False) -> bool:
                         return False
-                    st = self.hass.states.get(entity_id)
-                    return bool(st and st.state not in ("unknown", "unavailable"))
+                else:
+                    # Debounce / retry guard: avoid rapid repeated attempts for the same entity
+                    min_retry = timedelta(seconds=getattr(self, "toggle_debounce_seconds", DEFAULT_TOGGLE_DEBOUNCE_SECONDS))
 
-                def _is_integration_entity(entity_id: str) -> bool:
-                    if not entity_id or not ent_reg:
-                        return False
+                    # access entity registry once for source checks
                     try:
-                        ent = ent_reg.async_get(entity_id)
-                        return bool(ent and ent.config_entry_id == getattr(self.entry, "entry_id", None))
+                        ent_reg = er.async_get(self.hass)
                     except Exception:
-                        return False
+                        ent_reg = None
 
-                def _can_attempt(entity_id: str, desired_on: bool, allow_integration: bool = False) -> bool:
-                    # No entity configured -> nothing to attempt (caller should handle)
-                    if not entity_id:
+                    def _is_available(entity_id: str) -> bool:
+                        if not entity_id:
+                            return False
+                        st = self.hass.states.get(entity_id)
+                        return bool(st and st.state not in ("unknown", "unavailable"))
+
+                    def _is_integration_entity(entity_id: str) -> bool:
+                        if not entity_id or not ent_reg:
+                            return False
+                        try:
+                            ent = ent_reg.async_get(entity_id)
+                            return bool(ent and ent.config_entry_id == getattr(self.entry, "entry_id", None))
+                        except Exception:
+                            return False
+
+                    def _can_attempt(entity_id: str, desired_on: bool, allow_integration: bool = False) -> bool:
+                        # No entity configured -> nothing to attempt (caller should handle)
+                        if not entity_id:
+                            return True
+                        # Avoid toggling entities that were created by this integration (would cause feedback loops)
+                        if _is_integration_entity(entity_id) and not allow_integration:
+                            _LOGGER.debug("Skipping toggle for %s: entity created by this integration (avoid recursion)", entity_id)
+                            return False
+                        # Do not attempt when entity is unavailable/unknown
+                        if not _is_available(entity_id):
+                            _LOGGER.warning("Skipping toggle for %s: entity not available", entity_id)
+                            return False
+                        last = self._last_toggle_attempts.get(entity_id)
+                        if isinstance(last, tuple) and len(last) == 2:
+                            last_ts, last_state = last
+                        else:
+                            last_ts, last_state = last, None
+                        if last_ts and (now - last_ts) < min_retry and (
+                            last_state is None or bool(last_state) == bool(desired_on)
+                        ):
+                            _LOGGER.warning(
+                                "Skipping toggle for %s: last attempt %s seconds ago",
+                                entity_id,
+                                int((now - last_ts).total_seconds()),
+                            )
+                            return False
                         return True
-                    # Avoid toggling entities that were created by this integration (would cause feedback loops)
-                    if _is_integration_entity(entity_id) and not allow_integration:
-                        _LOGGER.debug("Skipping toggle for %s: entity created by this integration (avoid recursion)", entity_id)
-                        return False
-                    # Do not attempt when entity is unavailable/unknown
-                    if not _is_available(entity_id):
-                        _LOGGER.warning("Skipping toggle for %s: entity not available", entity_id)
-                        return False
-                    last = self._last_toggle_attempts.get(entity_id)
-                    if isinstance(last, tuple) and len(last) == 2:
-                        last_ts, last_state = last
-                    else:
-                        last_ts, last_state = last, None
-                    if last_ts and (now - last_ts) < min_retry and (
-                        last_state is None or bool(last_state) == bool(desired_on)
-                    ):
-                        _LOGGER.warning(
-                            "Skipping toggle for %s: last attempt %s seconds ago",
-                            entity_id,
-                            int((now - last_ts).total_seconds()),
-                        )
-                        return False
-                    return True
 
                 # Toggle main switch according to desired state
                 # Reconcile not only on desired-state changes, but also on mismatch (desired != physical).

@@ -80,7 +80,15 @@ CONF_ENABLE_FROST_PROTECTION = "enable_frost_protection"
 # Sanitizer / Desinfektion
 # NOTE: `CONF_ENABLE_SALTWATER` is kept for backward compatibility.
 CONF_SANITIZER_MODE = "sanitizer_mode"  # chlorine | saltwater | mixed
+CONF_SANITIZER_PRODUCT = "sanitizer_product"  # concrete product/chemistry profile
 CONF_TARGET_SALT_G_L = "target_salt_g_l"  # target salt level in g/L (only relevant for saltwater/mixed)
+
+# Chemistry estimation / recommendation tuning
+CONF_CHEM_TARGET_TDS_PPM = "chem_target_tds_ppm"
+CONF_CHEM_TARGET_ALKALINITY_PPM = "chem_target_alkalinity_ppm"
+CONF_CHEM_COOLDOWN_MINUTES = "chem_cooldown_minutes"
+CONF_CHEM_HISTORY_LOOKBACK_MINUTES = "chem_history_lookback_minutes"
+CONF_CHEM_MIN_STABLE_SAMPLES = "chem_min_stable_samples"
 
 # Frost protection (duty-cycle) tuning
 # Below CONF_FROST_START_TEMP the pump may run periodically to prevent freezing.
@@ -185,8 +193,11 @@ OPT_KEY_MAINTENANCE_ACTIVE = "maintenance_active"
 # This is independent from maintenance mode.
 OPT_KEY_HVAC_ENABLED = "hvac_enabled"
 
+# Manual mode (read-only): integration observes state but does not control actuators.
+OPT_KEY_MANUAL_MODE_ACTIVE = "manual_mode_active"
+
 # Boost mode (rapid heating to target after water change)
-# Heats continuously, ignores quiet hours, stops automatically at target temperature
+# Heats continuously (within normal constraints), stops automatically at target temperature
 OPT_KEY_BOOST_ACTIVE = "boost_active"
 OPT_KEY_BOOST_UNTIL = "boost_until"
 
@@ -238,8 +249,16 @@ DEFAULT_HEATER_AUX_POWER_W = DEFAULT_HEATER_POWER_W
 
 # Sanitizer defaults
 DEFAULT_SANITIZER_MODE = "chlorine"
+DEFAULT_SANITIZER_PRODUCT = "dichlor"
 # Typical saltwater chlorinator pools run ~3-5 g/L depending on the system.
 DEFAULT_TARGET_SALT_G_L = 4.0
+
+# Chemistry estimation defaults
+DEFAULT_CHEM_TARGET_TDS_PPM = 1200
+DEFAULT_CHEM_TARGET_ALKALINITY_PPM = 110
+DEFAULT_CHEM_COOLDOWN_MINUTES = 90
+DEFAULT_CHEM_HISTORY_LOOKBACK_MINUTES = 360
+DEFAULT_CHEM_MIN_STABLE_SAMPLES = 4
 
 # Thermostat-like tolerances (hysteresis)
 # Defaults preserve current behavior as close as possible, while allowing proper 'stop at target'.
@@ -273,6 +292,10 @@ OPT_KEY_FROST_CREDIT_MINUTES = "frost_credit_minutes"
 OPT_KEY_FROST_CREDIT_EXPIRES_AT = "frost_credit_expires_at"
 OPT_KEY_CREDIT_STREAK_SOURCE = "credit_streak_source"
 OPT_KEY_CREDIT_STREAK_MINUTES = "credit_streak_minutes"
+
+# Chemistry history (robust recommendations across HA restarts)
+OPT_KEY_CHEMISTRY_HISTORY = "chemistry_history"
+OPT_KEY_CHEM_BLOCK_UNTIL = "chem_block_until"
 
 # Derived energy aggregation (when only daily sensors are provided)
 OPT_KEY_DERIVED_GRID_DAILY_LAST_VALUE = "derived_grid_daily_last_value"

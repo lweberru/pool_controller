@@ -8,6 +8,16 @@ If you have multiple pool_controller instances, use the new **target** schema:
 - `target.entity_id` (climate entity of the pool)
 - or `target.device_id` (device created by the integration)
 
+Supported forms:
+- `target.entity_id` as string or list
+- `target.device_id` as string or list
+- legacy top-level `entity_id` / `device_id` are also accepted
+
+Resolution order:
+1. matching `entity_id` (preferred)
+2. matching `device_id`
+3. fallback only when exactly one pool_controller instance exists
+
 ## Pause Management
 
 ```yaml

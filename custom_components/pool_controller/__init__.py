@@ -23,6 +23,8 @@ from .const import (
     OPT_KEY_FROST_CREDIT_EXPIRES_AT,
     OPT_KEY_CREDIT_STREAK_SOURCE,
     OPT_KEY_CREDIT_STREAK_MINUTES,
+    OPT_KEY_CHEMISTRY_HISTORY,
+    OPT_KEY_CHEM_BLOCK_UNTIL,
     OPT_KEY_DERIVED_GRID_DAILY_LAST_VALUE,
     OPT_KEY_DERIVED_GRID_DAILY_LAST_DATE,
     OPT_KEY_DERIVED_GRID_MONTH_TOTAL,
@@ -46,6 +48,7 @@ from .const import (
     OPT_KEY_AWAY_ACTIVE,
     OPT_KEY_AWAY_PREV_TARGET,
     OPT_KEY_POWER_SAVING_ACTIVE,
+    OPT_KEY_MANUAL_MODE_ACTIVE,
     OPT_KEY_BOOST_ACTIVE,
     OPT_KEY_BOOST_UNTIL,
     OPT_KEY_DERIVED_COST_DAILY_LAST_VALUE,
@@ -75,6 +78,11 @@ from .const import (
     CONF_MAX_MERGE_RUN_MINUTES,
     CONF_MIN_CREDIT_MINUTES,
     CONF_CREDIT_SOURCES,
+    CONF_CHEM_TARGET_TDS_PPM,
+    CONF_CHEM_TARGET_ALKALINITY_PPM,
+    CONF_CHEM_COOLDOWN_MINUTES,
+    CONF_CHEM_HISTORY_LOOKBACK_MINUTES,
+    CONF_CHEM_MIN_STABLE_SAMPLES,
     OPT_KEY_HEAT_LOSS_W_PER_C,
     OPT_KEY_HEAT_STARTUP_OFFSET_MINUTES,
 )
@@ -90,6 +98,7 @@ _TRANSIENT_OPTION_KEYS = {
     OPT_KEY_AWAY_ACTIVE,
     OPT_KEY_AWAY_PREV_TARGET,
     OPT_KEY_POWER_SAVING_ACTIVE,
+    OPT_KEY_MANUAL_MODE_ACTIVE,
     OPT_KEY_BOOST_ACTIVE,
     OPT_KEY_BOOST_UNTIL,
     OPT_KEY_TARGET_TEMP,
@@ -108,6 +117,8 @@ _TRANSIENT_OPTION_KEYS = {
     OPT_KEY_FROST_CREDIT_EXPIRES_AT,
     OPT_KEY_CREDIT_STREAK_SOURCE,
     OPT_KEY_CREDIT_STREAK_MINUTES,
+    OPT_KEY_CHEMISTRY_HISTORY,
+    OPT_KEY_CHEM_BLOCK_UNTIL,
     OPT_KEY_DERIVED_GRID_DAILY_LAST_VALUE,
     OPT_KEY_DERIVED_GRID_DAILY_LAST_DATE,
     OPT_KEY_DERIVED_GRID_MONTH_TOTAL,
@@ -156,6 +167,11 @@ _NO_RELOAD_OPTION_KEYS = {
     CONF_MAX_MERGE_RUN_MINUTES,
     CONF_MIN_CREDIT_MINUTES,
     CONF_CREDIT_SOURCES,
+    CONF_CHEM_TARGET_TDS_PPM,
+    CONF_CHEM_TARGET_ALKALINITY_PPM,
+    CONF_CHEM_COOLDOWN_MINUTES,
+    CONF_CHEM_HISTORY_LOOKBACK_MINUTES,
+    CONF_CHEM_MIN_STABLE_SAMPLES,
     OPT_KEY_HEAT_LOSS_W_PER_C,
     OPT_KEY_HEAT_STARTUP_OFFSET_MINUTES,
 }
@@ -222,31 +238,60 @@ def _iter_coordinators(hass: HomeAssistant):
 
 
 def _resolve_coordinator(hass: HomeAssistant, call) -> PoolControllerDataCoordinator | None:
-    # Neues Target-Schema: entity_id oder device_id aus call.data["target"]
-    entity_id = None
-    device_id = None
-    target = call.data.get("target")
+    # Unterstützt sowohl target.entity_id/device_id als auch legacy entity_id/device_id,
+    # jeweils als String oder Liste.
+    entity_ids: list[str] = []
+    device_ids: list[str] = []
+
+    def _as_id_list(value) -> list[str]:
+        if value is None:
+            return []
+        if isinstance(value, str):
+            return [value]
+        if isinstance(value, (list, tuple, set)):
+            out: list[str] = []
+            for item in value:
+                if isinstance(item, str):
+                    out.append(item)
+            return out
+        return []
+
+    payload = call.data or {}
+    target = payload.get("target")
     if isinstance(target, dict):
-        entity_id = target.get("entity_id")
-        device_id = target.get("device_id")
-    elif "entity_id" in call.data:
-        entity_id = call.data["entity_id"]
-    elif "device_id" in call.data:
-        device_id = call.data["device_id"]
+        entity_ids.extend(_as_id_list(target.get("entity_id")))
+        device_ids.extend(_as_id_list(target.get("device_id")))
+
+    entity_ids.extend(_as_id_list(payload.get("entity_id")))
+    device_ids.extend(_as_id_list(payload.get("device_id")))
+
+    # Deduplicate while preserving order.
+    entity_ids = list(dict.fromkeys(entity_ids))
+    device_ids = list(dict.fromkeys(device_ids))
 
     ent_reg = er.async_get(hass)
-    # Falls device_id gesetzt ist, suche die zugehörige climate-Entity
-    if device_id:
-        # device_id kann mehrere Entities haben, wir nehmen die erste climate-Entity
-        for ent in ent_reg.entities.values():
-            if getattr(ent, "device_id", None) == device_id and getattr(ent, "platform", None) == "pool_controller":
-                entity_id = ent.entity_id
-                break
 
-    if entity_id:
+    # 1) Prefer explicit entity_id targets.
+    for entity_id in entity_ids:
         ent = ent_reg.async_get(entity_id)
-        if ent and ent.config_entry_id:
-            return hass.data.get(DOMAIN, {}).get(ent.config_entry_id)
+        if ent and ent.config_entry_id and getattr(ent, "platform", None) == DOMAIN:
+            coord = hass.data.get(DOMAIN, {}).get(ent.config_entry_id)
+            if isinstance(coord, PoolControllerDataCoordinator):
+                return coord
+
+    # 2) Resolve via device_id targets (first pool_controller entity on that device).
+    if device_ids:
+        device_set = set(device_ids)
+        for ent in ent_reg.entities.values():
+            if (
+                getattr(ent, "device_id", None) in device_set
+                and getattr(ent, "platform", None) == DOMAIN
+                and getattr(ent, "config_entry_id", None)
+            ):
+                coord = hass.data.get(DOMAIN, {}).get(ent.config_entry_id)
+                if isinstance(coord, PoolControllerDataCoordinator):
+                    return coord
+
     # Fallback: nur wenn genau eine Instanz existiert
     coords = list(_iter_coordinators(hass))
     if len(coords) == 1:

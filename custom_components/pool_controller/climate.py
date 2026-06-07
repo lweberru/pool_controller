@@ -56,7 +56,8 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
     PRESET_AWAY = "Abwesend"
     PRESET_POWER_SAVING = "Stromsparen"
     PRESET_BOOST = "Boost"
-    _attr_preset_modes = [PRESET_AUTO, PRESET_BATHING, PRESET_CHLORINE, PRESET_FILTER, PRESET_AWAY, PRESET_MAINTENANCE, PRESET_BOOST]
+    PRESET_MANUAL = "Manuell"
+    _attr_preset_modes = [PRESET_AUTO, PRESET_BATHING, PRESET_CHLORINE, PRESET_FILTER, PRESET_AWAY, PRESET_MAINTENANCE, PRESET_BOOST, PRESET_MANUAL]
 
     def __init__(self, coordinator):
         super().__init__(coordinator)
@@ -119,6 +120,8 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
         #   und auch bei Stromsparen-Stufe 1 (Pumpen-Heizbeitrag)
         if bool(getattr(self.coordinator, "maintenance_active", False)):
             return HVACMode.OFF
+        if bool(getattr(self.coordinator, "manual_mode_active", False)):
+            return HVACMode.OFF
         if bool(getattr(self.coordinator, "away_active", False)):
             return HVACMode.OFF
         if not bool(getattr(self.coordinator, "hvac_enabled", True)):
@@ -164,14 +167,16 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
 
     @property
     def preset_mode(self):
-        if bool(getattr(self.coordinator, "boost_active", False)):
-            return self.PRESET_BOOST
         if bool(getattr(self.coordinator, "maintenance_active", False)):
             return self.PRESET_MAINTENANCE
+        if bool(getattr(self.coordinator, "manual_mode_active", False)):
+            return self.PRESET_MANUAL
         if bool(getattr(self.coordinator, "away_active", False)):
             return self.PRESET_AWAY
         if bool(getattr(self.coordinator, "power_saving_active", False)):
             return self.PRESET_POWER_SAVING
+        if bool(getattr(self.coordinator, "boost_active", False)):
+            return self.PRESET_BOOST
         if self.coordinator.data.get("manual_timer_active"):
             t = (self.coordinator.manual_timer_type or "").lower()
             if t == "bathing":
@@ -190,12 +195,13 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
             self.PRESET_CHLORINE,
             self.PRESET_FILTER,
             self.PRESET_BOOST,
+            self.PRESET_MANUAL,
             self.PRESET_AWAY,
             self.PRESET_MAINTENANCE,
         ]
         data = getattr(self.coordinator, "data", {}) or {}
         if bool(data.get("power_saving_available")):
-            modes.insert(5, self.PRESET_POWER_SAVING)
+            modes.insert(6, self.PRESET_POWER_SAVING)
         return modes
 
     async def async_set_hvac_mode(self, hvac_mode):
@@ -213,13 +219,30 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
 
     async def async_set_preset_mode(self, preset_mode: str):
         mode = (preset_mode or "").strip()
+
+        # While Boost is active, manual presets must not take over.
+        if bool(getattr(self.coordinator, "boost_active", False)) and mode in (
+            self.PRESET_BATHING,
+            self.PRESET_CHLORINE,
+            self.PRESET_FILTER,
+        ):
+            _LOGGER.info("Preset '%s' ignored while Boost is active", mode)
+            await self.coordinator.async_request_refresh()
+            return
+
         if mode == self.PRESET_MAINTENANCE:
+            await self.coordinator.set_manual_mode(False)
             await self.coordinator.set_away(False)
             await self.coordinator.set_boost(False)
             await self.coordinator.set_maintenance(True)
             await self.coordinator.async_request_refresh()
             return
+        if mode == self.PRESET_MANUAL:
+            await self.coordinator.set_manual_mode(True)
+            await self.coordinator.async_request_refresh()
+            return
         if mode == self.PRESET_AWAY:
+            await self.coordinator.set_manual_mode(False)
             await self.coordinator.set_maintenance(False)
             await self.coordinator.set_boost(False)
             await self.coordinator.set_power_saving(False)
@@ -227,6 +250,7 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
             await self.coordinator.async_request_refresh()
             return
         if mode == self.PRESET_POWER_SAVING:
+            await self.coordinator.set_manual_mode(False)
             await self.coordinator.set_maintenance(False)
             await self.coordinator.set_away(False)
             await self.coordinator.set_boost(False)
@@ -234,6 +258,7 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
             await self.coordinator.async_request_refresh()
             return
         if mode == self.PRESET_BOOST:
+            await self.coordinator.set_manual_mode(False)
             await self.coordinator.set_maintenance(False)
             await self.coordinator.set_away(False)
             await self.coordinator.set_power_saving(False)
@@ -242,6 +267,7 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
             return
 
         # Any other preset disables Wartung/Away/Boost first
+        await self.coordinator.set_manual_mode(False)
         await self.coordinator.set_maintenance(False)
         await self.coordinator.set_away(False)
         await self.coordinator.set_boost(False)

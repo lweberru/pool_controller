@@ -4,7 +4,7 @@
 
 ## Configuration Flow
 
-The integration uses a guided wizard (9–10 steps depending on sanitizer mode):
+The integration uses a guided wizard (10–11 steps depending on sanitizer mode):
 
 ### Step 1: Basic Information
 - **Name**: Display name for your pool (e.g., "Whirlpool Demo")
@@ -32,6 +32,18 @@ Pool Controller supports different disinfection styles and adapts some water-qua
 
 - **Sanitizer Mode**: `chlorine`, `saltwater`, or `mixed` (salt + chlorine)
 - **Step 4b (Saltwater/Mixed only)**: **Target Salt (g/L)** (used as a baseline for effective TDS)
+
+### Step 4c: Chemistry Estimation (simple tuning)
+
+This step keeps chemistry recommendations practical without exposing too many expert-only controls:
+
+- **Target TDS (ppm)**: target value used for water-change recommendations when TDS is high
+- **Target Alkalinity (ppm)**: reference target used for alkalinity actions
+- **Cooldown after activity/chemical addition (min)**: blocks immediate recommendations while water is mixing/reacting
+- **Stable history window (min)**: how far back stable samples are considered
+- **Minimum stable samples**: required before actionable alkalinity recommendations are shown
+
+For most installations, defaults are sufficient.
 
 ### Step 5: Temperature Control (Thermostat)
 - **Target Temp**: Desired water temperature (persisted)
@@ -109,6 +121,11 @@ pool_controller:
 | Water Volume | 1000 | 100-10000 L | Used for pH/Chlorine dosing calculations |
 | Sanitizer Mode | chlorine | chlorine / saltwater / mixed | Affects how TDS is interpreted (effective TDS for saltwater/mixed) |
 | Target Salt (g/L) | 4.0 | 0-10 g/L | Only used for saltwater/mixed; baseline for effective TDS |
+| Chemistry Target TDS | 1200 | 500-3500 ppm | Used for TDS water-change recommendation |
+| Chemistry Target Alkalinity | 110 | 70-160 ppm | Reference target for alkalinity recommendations |
+| Chemistry Cooldown | 90 | 0-1440 min | Blocks alkalinity actions after activity/chemical input |
+| Chemistry History Lookback | 360 | 120-1440 min | Window used for stable-history median |
+| Chemistry Min Stable Samples | 4 | 2-12 | Minimum stable samples before actionable recommendation |
 | Filter Interval | 720 | 60-10080 min | Time between automatic filter cycles |
 | Filter Duration | 30 | 5-480 min | How long each filter cycle runs |
 | Merge Window | 90 | 0-720 min | If a frost run is within this window, runs may be merged |

@@ -286,6 +286,17 @@ Boost mode is designed for fast reheating, typically after partial water replace
 - Stop condition: Boost ends automatically as soon as water temperature reaches the current target temperature.
 - Safety/comfort constraints: maintenance/pause constraints still apply, and quiet hours are respected.
 
+## Manual Mode (Read-Only)
+
+Manual mode is a read-only operating mode.
+
+- Activation: via climate preset (`Manuell`).
+- Behavior: the integration still reads all entities and computes status/reasons, but it does not execute automatic actuator toggles.
+- Scope: no automatic ON/OFF switching for main supply, pump, or auxiliary heater while manual mode is active.
+- Visibility: live states (for example physical switch states, temperatures, status sensors) remain visible.
+- Mode transitions: selecting an active control mode (for example Away, Power-Saving, Boost) exits manual mode intentionally.
+- Note: direct manual switching in Home Assistant (outside this integration logic) remains possible.
+
 ## Power-Saving Mode (Stromsparen)
 
 Power-saving mode is a dedicated operating strategy for **cost-first** pool control.

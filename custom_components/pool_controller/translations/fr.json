@@ -68,6 +68,36 @@
           "sanitizer_mode": "Chlore = dosage classique, Eau salée = électrolyse, Mixte = les deux"
         }
       },
+      "sanitizer_product": {
+        "title": "Produit désinfectant",
+        "description": "Sélectionnez le produit chloré concret pour améliorer l'analyse/l'estimation.",
+        "submit": "Continuer",
+        "data": {
+          "sanitizer_product": "Produit chloré"
+        },
+        "data_description": {
+          "sanitizer_product": "Choisissez le produit principal utilisé (p. ex. dichlore, trichlore, hypochlorite de calcium, chlore liquide)."
+        }
+      },
+      "chemistry": {
+        "title": "Estimation chimique",
+        "description": "Réglages simples pour des recommandations chimiques robustes. Les valeurs par défaut conviennent à la plupart des piscines.",
+        "submit": "Continuer",
+        "data": {
+          "chem_target_tds_ppm": "TDS cible (ppm)",
+          "chem_target_alkalinity_ppm": "Alcalinité cible (ppm)",
+          "chem_cooldown_minutes": "Délai après activité/ajout chimique (min)",
+          "chem_history_lookback_minutes": "Fenêtre d'historique stable (min)",
+          "chem_min_stable_samples": "Échantillons stables minimum"
+        },
+        "data_description": {
+          "chem_target_tds_ppm": "Cible pour la recommandation de renouvellement d'eau quand le TDS est élevé",
+          "chem_target_alkalinity_ppm": "Cible de référence pour la recommandation d'alcalinité",
+          "chem_cooldown_minutes": "Aucune action d'alcalinité pendant le mélange/réaction de l'eau",
+          "chem_history_lookback_minutes": "Période de prise en compte des échantillons stables",
+          "chem_min_stable_samples": "Nombre d'échantillons stables requis avant recommandation"
+        }
+      },
       "sanitizer_salt": {
         "title": "Sel cible",
         "description": "Définissez le niveau de sel cible pour le mode eau salée ou mixte.",
@@ -270,6 +300,8 @@
           "switches": "Interrupteurs & puissance",
           "water_quality": "Qualité de l’eau",
           "sanitizer": "Désinfection",
+          "sanitizer_product": "Produit désinfectant",
+          "chemistry": "Estimation chimique",
           "climate": "Contrôle de température",
           "frost": "Protection antigel",
           "calendars": "Calendriers & heures calmes",
@@ -348,6 +380,17 @@
           "sanitizer_mode": "Chlore = dosage classique, Eau salée = électrolyseur au sel, Mixte = les deux"
         }
       },
+      "sanitizer_product": {
+        "title": "Produit désinfectant",
+        "description": "Sélectionne le produit chloré concret pour améliorer l'analyse/l'estimation.",
+        "submit": "Suivant",
+        "data": {
+          "sanitizer_product": "Produit chloré"
+        },
+        "data_description": {
+          "sanitizer_product": "Choisis le produit principal utilisé (p. ex. dichlore, trichlore, hypochlorite de calcium, chlore liquide)."
+        }
+      },
       "sanitizer_salt": {
         "title": "Objectif de sel",
         "description": "Définis le niveau de sel cible (g/L) pour eau salée ou mode mixte.",
@@ -357,6 +400,25 @@
         },
         "data_description": {
           "target_salt_g_l": "Utilisé pour calculer des recommandations quand il manque du sel"
+        }
+      },
+      "chemistry": {
+        "title": "Estimation chimique",
+        "description": "Réglages simples pour des recommandations chimiques robustes. Les valeurs par défaut conviennent à la plupart des piscines.",
+        "submit": "Suivant",
+        "data": {
+          "chem_target_tds_ppm": "TDS cible (ppm)",
+          "chem_target_alkalinity_ppm": "Alcalinité cible (ppm)",
+          "chem_cooldown_minutes": "Délai après activité/ajout chimique (min)",
+          "chem_history_lookback_minutes": "Fenêtre d'historique stable (min)",
+          "chem_min_stable_samples": "Échantillons stables minimum"
+        },
+        "data_description": {
+          "chem_target_tds_ppm": "Cible pour la recommandation de renouvellement d'eau quand le TDS est élevé",
+          "chem_target_alkalinity_ppm": "Cible de référence pour la recommandation d'alcalinité",
+          "chem_cooldown_minutes": "Aucune action d'alcalinité pendant le mélange/réaction de l'eau",
+          "chem_history_lookback_minutes": "Période de prise en compte des échantillons stables",
+          "chem_min_stable_samples": "Nombre d'échantillons stables requis avant recommandation"
         }
       },
       "climate": {
@@ -734,6 +796,39 @@
       "tds_val": {
         "name": "TDS"
       },
+      "alkalinity_estimated_ppm": {
+        "name": "Alcalinité estimée"
+      },
+      "alkalinity_status": {
+        "name": "État de l'alcalinité"
+      },
+      "alkalinity_action": {
+        "name": "Action alcalinité"
+      },
+      "alkalinity_target_ppm": {
+        "name": "Cible d'alcalinité"
+      },
+      "alkalinity_total_dose_g": {
+        "name": "Dose totale d'alcalinité (g)"
+      },
+      "alkalinity_step_dose_g": {
+        "name": "Dose par étape d'alcalinité (g)"
+      },
+      "alkalinity_steps": {
+        "name": "Étapes de dosage de l'alcalinité"
+      },
+      "alkalinity_wait_minutes": {
+        "name": "Attente avant re-mesure (min)"
+      },
+      "alkalinity_water_change_percent": {
+        "name": "Changement d'eau avant correction alcalinité (%)"
+      },
+      "alkalinity_plus_g": {
+        "name": "Augmenter l'alcalinité (g)"
+      },
+      "alkalinity_minus_g": {
+        "name": "Réduire l'alcalinité (g)"
+      },
       "tds_effective": {
         "name": "TDS (sans sel)"
       },
@@ -870,6 +965,7 @@
           "frost": "Protection antigel",
           "pause": "Pause",
           "maintenance": "Maintenance",
+          "manual": "Manuel",
           "boost": "Suralimentation"
         }
       },
@@ -889,6 +985,25 @@
           "chlorine": "Chlore",
           "saltwater": "Eau salée",
           "mixed": "Mixte"
+        }
+      },
+      "alkalinity_status": {
+        "state": {
+          "unknown": "Inconnu",
+          "very_low": "Très bas",
+          "low": "Bas",
+          "optimal": "Optimal",
+          "high": "Élevé",
+          "critical_high": "Critiquement élevé"
+        }
+      },
+      "alkalinity_action": {
+        "state": {
+          "measure_first": "Mesurer d'abord",
+          "none": "Aucune action",
+          "raise_bicarbonate": "Augmenter avec bicarbonate (TA+)",
+          "lower_ph_minus": "Réduire avec pH-",
+          "water_change_then_adjust": "Faire d'abord un changement d'eau, puis ajuster"
         }
       }
     }
