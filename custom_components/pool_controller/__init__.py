@@ -83,6 +83,23 @@ from .const import (
     CONF_CHEM_COOLDOWN_MINUTES,
     CONF_CHEM_HISTORY_LOOKBACK_MINUTES,
     CONF_CHEM_MIN_STABLE_SAMPLES,
+    CONF_ENABLE_DYNAMIC_TARGET,
+    CONF_DYNAMIC_TARGET_WEATHER_ENTITY,
+    CONF_DYNAMIC_TARGET_WINTER_OFFSET,
+    CONF_DYNAMIC_TARGET_SPRING_OFFSET,
+    CONF_DYNAMIC_TARGET_SUMMER_OFFSET,
+    CONF_DYNAMIC_TARGET_AUTUMN_OFFSET,
+    CONF_DYNAMIC_TARGET_MIN_OFFSET,
+    CONF_DYNAMIC_TARGET_MAX_OFFSET,
+    CONF_DYNAMIC_TARGET_WEATHER_MAX_OFFSET,
+    CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_TEMP,
+    CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_FEELS_LIKE,
+    CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_WIND,
+    CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_UV,
+    CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_CLOUD,
+    CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_FORECAST,
+    CONF_DYNAMIC_TARGET_EMA_ALPHA,
+    CONF_DYNAMIC_TARGET_MAX_STEP_PER_HOUR,
     OPT_KEY_HEAT_LOSS_W_PER_C,
     OPT_KEY_HEAT_STARTUP_OFFSET_MINUTES,
 )
@@ -172,6 +189,23 @@ _NO_RELOAD_OPTION_KEYS = {
     CONF_CHEM_COOLDOWN_MINUTES,
     CONF_CHEM_HISTORY_LOOKBACK_MINUTES,
     CONF_CHEM_MIN_STABLE_SAMPLES,
+    CONF_ENABLE_DYNAMIC_TARGET,
+    CONF_DYNAMIC_TARGET_WEATHER_ENTITY,
+    CONF_DYNAMIC_TARGET_WINTER_OFFSET,
+    CONF_DYNAMIC_TARGET_SPRING_OFFSET,
+    CONF_DYNAMIC_TARGET_SUMMER_OFFSET,
+    CONF_DYNAMIC_TARGET_AUTUMN_OFFSET,
+    CONF_DYNAMIC_TARGET_MIN_OFFSET,
+    CONF_DYNAMIC_TARGET_MAX_OFFSET,
+    CONF_DYNAMIC_TARGET_WEATHER_MAX_OFFSET,
+    CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_TEMP,
+    CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_FEELS_LIKE,
+    CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_WIND,
+    CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_UV,
+    CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_CLOUD,
+    CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_FORECAST,
+    CONF_DYNAMIC_TARGET_EMA_ALPHA,
+    CONF_DYNAMIC_TARGET_MAX_STEP_PER_HOUR,
     OPT_KEY_HEAT_LOSS_W_PER_C,
     OPT_KEY_HEAT_STARTUP_OFFSET_MINUTES,
 }
@@ -193,6 +227,8 @@ SERVICE_START_AWAY = "start_away"
 SERVICE_STOP_AWAY = "stop_away"
 SERVICE_START_POWER_SAVING = "start_power_saving"
 SERVICE_STOP_POWER_SAVING = "stop_power_saving"
+SERVICE_SET_DYNAMIC_TARGET = "set_dynamic_target"
+SERVICE_SET_OPTIONS = "set_options"
 
 
 # Korrektes Schema: target wird von HA automatisch hinzugefügt, nicht im Schema definieren!
@@ -225,6 +261,30 @@ START_CHLORINE_SCHEMA = vol.Schema(
 )
 
 STOP_SCHEMA = vol.Schema({}, extra=vol.ALLOW_EXTRA)
+SET_OPTIONS_SCHEMA = vol.Schema({}, extra=vol.ALLOW_EXTRA)
+
+SET_DYNAMIC_TARGET_SCHEMA = vol.Schema(
+    {
+        vol.Optional("enabled"): cv.boolean,
+        vol.Optional("weather_entity"): cv.entity_id,
+        vol.Optional("winter_offset"): vol.Coerce(float),
+        vol.Optional("spring_offset"): vol.Coerce(float),
+        vol.Optional("summer_offset"): vol.Coerce(float),
+        vol.Optional("autumn_offset"): vol.Coerce(float),
+        vol.Optional("min_offset"): vol.Coerce(float),
+        vol.Optional("max_offset"): vol.Coerce(float),
+        vol.Optional("weather_max_offset"): vol.Coerce(float),
+        vol.Optional("weight_temp"): vol.Coerce(float),
+        vol.Optional("weight_feels_like"): vol.Coerce(float),
+        vol.Optional("weight_wind"): vol.Coerce(float),
+        vol.Optional("weight_uv"): vol.Coerce(float),
+        vol.Optional("weight_cloud"): vol.Coerce(float),
+        vol.Optional("weight_forecast"): vol.Coerce(float),
+        vol.Optional("ema_alpha"): vol.Coerce(float),
+        vol.Optional("max_step_per_hour"): vol.Coerce(float),
+    },
+    extra=vol.ALLOW_EXTRA,
+)
 
 
 def _iter_coordinators(hass: HomeAssistant):
@@ -429,6 +489,66 @@ def _ensure_services_registered(hass: HomeAssistant):
         await coordinator.set_power_saving(False)
         await coordinator.async_request_refresh()
 
+    async def handle_set_dynamic_target(call):
+        coordinator = _resolve_coordinator(hass, call)
+        if not coordinator:
+            _warn_no_target("set_dynamic_target", call)
+            return
+
+        data = call.data or {}
+        key_map = {
+            "enabled": CONF_ENABLE_DYNAMIC_TARGET,
+            "weather_entity": CONF_DYNAMIC_TARGET_WEATHER_ENTITY,
+            "winter_offset": CONF_DYNAMIC_TARGET_WINTER_OFFSET,
+            "spring_offset": CONF_DYNAMIC_TARGET_SPRING_OFFSET,
+            "summer_offset": CONF_DYNAMIC_TARGET_SUMMER_OFFSET,
+            "autumn_offset": CONF_DYNAMIC_TARGET_AUTUMN_OFFSET,
+            "min_offset": CONF_DYNAMIC_TARGET_MIN_OFFSET,
+            "max_offset": CONF_DYNAMIC_TARGET_MAX_OFFSET,
+            "weather_max_offset": CONF_DYNAMIC_TARGET_WEATHER_MAX_OFFSET,
+            "weight_temp": CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_TEMP,
+            "weight_feels_like": CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_FEELS_LIKE,
+            "weight_wind": CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_WIND,
+            "weight_uv": CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_UV,
+            "weight_cloud": CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_CLOUD,
+            "weight_forecast": CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_FORECAST,
+            "ema_alpha": CONF_DYNAMIC_TARGET_EMA_ALPHA,
+            "max_step_per_hour": CONF_DYNAMIC_TARGET_MAX_STEP_PER_HOUR,
+        }
+
+        updates = {}
+        for in_key, opt_key in key_map.items():
+            if in_key in data:
+                updates[opt_key] = data[in_key]
+
+        if not updates:
+            _LOGGER.warning("pool_controller.set_dynamic_target called without update fields")
+            return
+
+        new_opts = {**(coordinator.entry.options or {})}
+        new_opts.update(updates)
+        await coordinator._async_update_entry_options(new_opts)
+        await coordinator.async_request_refresh()
+
+    async def handle_set_options(call):
+        coordinator = _resolve_coordinator(hass, call)
+        if not coordinator:
+            _warn_no_target("set_options", call)
+            return
+
+        data = dict(call.data or {})
+        for reserved in ("target", "entity_id", "device_id"):
+            data.pop(reserved, None)
+
+        if not data:
+            _LOGGER.warning("pool_controller.set_options called without option fields")
+            return
+
+        new_opts = {**(coordinator.entry.options or {})}
+        new_opts.update(data)
+        await coordinator._async_update_entry_options(new_opts)
+        await coordinator.async_request_refresh()
+
     hass.services.async_register(
         DOMAIN,
         SERVICE_START_PAUSE,
@@ -515,6 +635,20 @@ def _ensure_services_registered(hass: HomeAssistant):
         SERVICE_STOP_POWER_SAVING,
         handle_stop_power_saving,
         schema=STOP_SCHEMA,
+    )
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_SET_DYNAMIC_TARGET,
+        handle_set_dynamic_target,
+        schema=SET_DYNAMIC_TARGET_SCHEMA,
+    )
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_SET_OPTIONS,
+        handle_set_options,
+        schema=SET_OPTIONS_SCHEMA,
     )
 
     hass.data[DOMAIN][_SERVICES_REGISTERED_KEY] = True

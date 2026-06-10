@@ -2,6 +2,11 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.7.1] - 2026-06-10
+- service calls to modify settings
+- new default values for target temp settings
+
+
 ## [2.7.0] - 2026-06-10
 - Dynamic Target Temperature via Season and Weather
 

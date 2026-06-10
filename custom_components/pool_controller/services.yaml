@@ -145,3 +145,173 @@ stop_power_saving:
       integration: pool_controller
     entity:
       domain: climate
+
+set_dynamic_target:
+  name: Set Dynamic Target
+  description: Update dynamic target temperature settings for the selected pool
+  target:
+    device:
+      integration: pool_controller
+    entity:
+      domain: climate
+  fields:
+    enabled:
+      name: Enabled
+      description: Enable or disable dynamic target feature
+      selector:
+        boolean: {}
+    weather_entity:
+      name: Weather entity
+      description: Optional weather entity (for example weather.openweathermap)
+      selector:
+        entity:
+          domain: weather
+    winter_offset:
+      name: Winter offset
+      description: Seasonal winter offset in °C
+      selector:
+        number:
+          min: -10
+          max: 10
+          step: 0.1
+          mode: box
+    spring_offset:
+      name: Spring offset
+      description: Seasonal spring offset in °C
+      selector:
+        number:
+          min: -10
+          max: 10
+          step: 0.1
+          mode: box
+    summer_offset:
+      name: Summer offset
+      description: Seasonal summer offset in °C
+      selector:
+        number:
+          min: -10
+          max: 10
+          step: 0.1
+          mode: box
+    autumn_offset:
+      name: Autumn offset
+      description: Seasonal autumn offset in °C
+      selector:
+        number:
+          min: -10
+          max: 10
+          step: 0.1
+          mode: box
+    min_offset:
+      name: Minimum total offset
+      description: Lower clamp for total dynamic offset in °C
+      selector:
+        number:
+          min: -10
+          max: 10
+          step: 0.1
+          mode: box
+    max_offset:
+      name: Maximum total offset
+      description: Upper clamp for total dynamic offset in °C
+      selector:
+        number:
+          min: -10
+          max: 10
+          step: 0.1
+          mode: box
+    weather_max_offset:
+      name: Weather max offset
+      description: Absolute cap for weather contribution in °C
+      selector:
+        number:
+          min: 0
+          max: 10
+          step: 0.1
+          mode: box
+    weight_temp:
+      name: Weight temperature
+      description: Weight for outdoor temperature contribution
+      selector:
+        number:
+          min: 0
+          max: 2
+          step: 0.01
+          mode: box
+    weight_feels_like:
+      name: Weight feels-like
+      description: Weight for apparent temperature contribution
+      selector:
+        number:
+          min: 0
+          max: 2
+          step: 0.01
+          mode: box
+    weight_wind:
+      name: Weight wind
+      description: Weight for wind contribution
+      selector:
+        number:
+          min: 0
+          max: 2
+          step: 0.01
+          mode: box
+    weight_uv:
+      name: Weight UV
+      description: Weight for UV contribution
+      selector:
+        number:
+          min: 0
+          max: 2
+          step: 0.01
+          mode: box
+    weight_cloud:
+      name: Weight cloud
+      description: Weight for cloud coverage contribution
+      selector:
+        number:
+          min: 0
+          max: 2
+          step: 0.01
+          mode: box
+    weight_forecast:
+      name: Weight forecast
+      description: Weight for forecast temperature contribution
+      selector:
+        number:
+          min: 0
+          max: 2
+          step: 0.01
+          mode: box
+    ema_alpha:
+      name: EMA alpha
+      description: Smoothing factor between 0 and 1
+      selector:
+        number:
+          min: 0
+          max: 1
+          step: 0.01
+          mode: box
+    max_step_per_hour:
+      name: Max step per hour
+      description: Max offset change per hour in °C
+      selector:
+        number:
+          min: 0
+          max: 5
+          step: 0.1
+          mode: box
+
+set_options:
+  name: Set Options (Generic)
+  description: Generic option update for the selected pool_controller config entry. All additional fields are stored as options.
+  target:
+    device:
+      integration: pool_controller
+    entity:
+      domain: climate
+  fields:
+    example:
+      name: Example payload
+      description: "Use Developer Tools > Services with custom fields, e.g. enable_dynamic_target, dynamic_target_summer_offset, dynamic_target_min_offset"
+      example: "enable_dynamic_target: true"

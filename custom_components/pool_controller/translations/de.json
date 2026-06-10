@@ -1104,7 +1104,7 @@
             },
             "alkalinity_action": {
                 "state": {
-                    "measure_first": "Zuerst messen",
+                    "measure_first": "Kalibrierung läuft: auf stabile Samples warten",
                     "none": "Keine Aktion",
                     "raise_bicarbonate": "Mit Natriumhydrogencarbonat (TA+) anheben",
                     "lower_ph_minus": "Mit pH- senken",

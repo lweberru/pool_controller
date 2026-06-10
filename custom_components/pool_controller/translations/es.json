@@ -1104,7 +1104,7 @@
             },
             "alkalinity_action": {
                 "state": {
-                    "measure_first": "Medir primero",
+                    "measure_first": "Calibración en curso: esperar muestras estables",
                     "none": "Sin acción",
                     "raise_bicarbonate": "Subir con bicarbonato (TA+)",
                     "lower_ph_minus": "Bajar con pH-",

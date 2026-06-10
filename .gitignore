@@ -14,3 +14,4 @@ __pycache__/
 *.json.bak
 brands/
 pool_controller.code-workspace
+tools/.ha_api.local.json
