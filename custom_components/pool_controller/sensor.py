@@ -48,6 +48,12 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolChemSensor(coordinator, "energy_cost_net_yearly", None, "€", "mdi:currency-eur", state_class=SensorStateClass.TOTAL, entity_category=EntityCategory.DIAGNOSTIC),
         PoolChemSensor(coordinator, "heat_loss_w_per_c", None, "W/°C", "mdi:thermometer-lines", state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
         PoolChemSensor(coordinator, "heat_startup_offset_minutes", None, "min", "mdi:timer-outline", state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
+        PoolChemSensor(coordinator, "target_temp_base", None, UnitOfTemperature.CELSIUS, "mdi:target", device_class=SensorDeviceClass.TEMPERATURE, state_class=SensorStateClass.MEASUREMENT, entity_category=EntityCategory.DIAGNOSTIC),
+        PoolChemSensor(coordinator, "target_temp_effective", None, UnitOfTemperature.CELSIUS, "mdi:target-variant", device_class=SensorDeviceClass.TEMPERATURE, state_class=SensorStateClass.MEASUREMENT, entity_category=EntityCategory.DIAGNOSTIC),
+        PoolChemSensor(coordinator, "target_temp_offset", None, UnitOfTemperature.CELSIUS, "mdi:thermometer-chevron-up", state_class=SensorStateClass.MEASUREMENT, entity_category=EntityCategory.DIAGNOSTIC),
+        PoolChemSensor(coordinator, "target_temp_season_offset", None, UnitOfTemperature.CELSIUS, "mdi:weather-partly-snowy-rainy", state_class=SensorStateClass.MEASUREMENT, entity_category=EntityCategory.DIAGNOSTIC),
+        PoolChemSensor(coordinator, "target_temp_weather_offset", None, UnitOfTemperature.CELSIUS, "mdi:weather-windy", state_class=SensorStateClass.MEASUREMENT, entity_category=EntityCategory.DIAGNOSTIC),
+        PoolTextSensor(coordinator, "dynamic_target_profile", None),
         PoolSanitizerModeSensor(coordinator),
         # SensorDeviceClass.PH expects no unit_of_measurement.
         PoolChemSensor(coordinator, "ph_val", None, None, "mdi:ph", device_class=_DEVICE_CLASS_PH, state_class=SensorStateClass.MEASUREMENT),

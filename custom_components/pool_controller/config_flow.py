@@ -131,6 +131,28 @@ def _climate_schema(curr: dict | None = None):
         vol.Optional(CONF_HOT_TOLERANCE, default=c.get(CONF_HOT_TOLERANCE, DEFAULT_HOT_TOLERANCE)): vol.Coerce(float),
     })
 
+def _dynamic_target_schema(curr: dict | None = None):
+    c = curr or {}
+    return vol.Schema({
+        vol.Optional(CONF_ENABLE_DYNAMIC_TARGET, default=c.get(CONF_ENABLE_DYNAMIC_TARGET, DEFAULT_ENABLE_DYNAMIC_TARGET)): bool,
+        vol.Optional(CONF_DYNAMIC_TARGET_WEATHER_ENTITY, default=c.get(CONF_DYNAMIC_TARGET_WEATHER_ENTITY, c.get(CONF_EVENT_WEATHER_ENTITY, ""))): selector.EntitySelector(selector.EntitySelectorConfig(domain="weather")),
+        vol.Optional(CONF_DYNAMIC_TARGET_WINTER_OFFSET, default=c.get(CONF_DYNAMIC_TARGET_WINTER_OFFSET, DEFAULT_DYNAMIC_TARGET_WINTER_OFFSET)): vol.Coerce(float),
+        vol.Optional(CONF_DYNAMIC_TARGET_SPRING_OFFSET, default=c.get(CONF_DYNAMIC_TARGET_SPRING_OFFSET, DEFAULT_DYNAMIC_TARGET_SPRING_OFFSET)): vol.Coerce(float),
+        vol.Optional(CONF_DYNAMIC_TARGET_SUMMER_OFFSET, default=c.get(CONF_DYNAMIC_TARGET_SUMMER_OFFSET, DEFAULT_DYNAMIC_TARGET_SUMMER_OFFSET)): vol.Coerce(float),
+        vol.Optional(CONF_DYNAMIC_TARGET_AUTUMN_OFFSET, default=c.get(CONF_DYNAMIC_TARGET_AUTUMN_OFFSET, DEFAULT_DYNAMIC_TARGET_AUTUMN_OFFSET)): vol.Coerce(float),
+        vol.Optional(CONF_DYNAMIC_TARGET_MIN_OFFSET, default=c.get(CONF_DYNAMIC_TARGET_MIN_OFFSET, DEFAULT_DYNAMIC_TARGET_MIN_OFFSET)): vol.Coerce(float),
+        vol.Optional(CONF_DYNAMIC_TARGET_MAX_OFFSET, default=c.get(CONF_DYNAMIC_TARGET_MAX_OFFSET, DEFAULT_DYNAMIC_TARGET_MAX_OFFSET)): vol.Coerce(float),
+        vol.Optional(CONF_DYNAMIC_TARGET_WEATHER_MAX_OFFSET, default=c.get(CONF_DYNAMIC_TARGET_WEATHER_MAX_OFFSET, DEFAULT_DYNAMIC_TARGET_WEATHER_MAX_OFFSET)): vol.Coerce(float),
+        vol.Optional(CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_TEMP, default=c.get(CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_TEMP, DEFAULT_DYNAMIC_TARGET_WEATHER_WEIGHT_TEMP)): vol.Coerce(float),
+        vol.Optional(CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_FEELS_LIKE, default=c.get(CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_FEELS_LIKE, DEFAULT_DYNAMIC_TARGET_WEATHER_WEIGHT_FEELS_LIKE)): vol.Coerce(float),
+        vol.Optional(CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_WIND, default=c.get(CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_WIND, DEFAULT_DYNAMIC_TARGET_WEATHER_WEIGHT_WIND)): vol.Coerce(float),
+        vol.Optional(CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_UV, default=c.get(CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_UV, DEFAULT_DYNAMIC_TARGET_WEATHER_WEIGHT_UV)): vol.Coerce(float),
+        vol.Optional(CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_CLOUD, default=c.get(CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_CLOUD, DEFAULT_DYNAMIC_TARGET_WEATHER_WEIGHT_CLOUD)): vol.Coerce(float),
+        vol.Optional(CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_FORECAST, default=c.get(CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_FORECAST, DEFAULT_DYNAMIC_TARGET_WEATHER_WEIGHT_FORECAST)): vol.Coerce(float),
+        vol.Optional(CONF_DYNAMIC_TARGET_EMA_ALPHA, default=c.get(CONF_DYNAMIC_TARGET_EMA_ALPHA, DEFAULT_DYNAMIC_TARGET_EMA_ALPHA)): vol.Coerce(float),
+        vol.Optional(CONF_DYNAMIC_TARGET_MAX_STEP_PER_HOUR, default=c.get(CONF_DYNAMIC_TARGET_MAX_STEP_PER_HOUR, DEFAULT_DYNAMIC_TARGET_MAX_STEP_PER_HOUR)): vol.Coerce(float),
+    })
+
 def _costs_schema(curr: dict | None = None):
     c = curr or {}
     schema = {}
@@ -558,7 +580,7 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Thermostat-like settings for temperature control."""
         if user_input is not None:
             self.data.update(user_input)
-            return await self.async_step_frost()
+            return await self.async_step_dynamic_target()
 
         curr = {**self.data}
         errors = {}
@@ -566,6 +588,19 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="climate",
             errors=errors,
             data_schema=_climate_schema(curr),
+            last_step=False,
+        )
+
+    async def async_step_dynamic_target(self, user_input=None):
+        """Optional dynamic target setpoint based on season and weather."""
+        if user_input is not None:
+            self.data.update(user_input)
+            return await self.async_step_frost()
+
+        curr = {**self.data}
+        return self.async_show_form(
+            step_id="dynamic_target",
+            data_schema=_dynamic_target_schema(curr),
             last_step=False,
         )
 
@@ -726,6 +761,7 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
                 "sanitizer_product",
                 "chemistry",
                 "climate",
+                "dynamic_target",
                 "frost",
                 "calendars",
                 "filter",
@@ -885,12 +921,27 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
             self.options.update(user_input)
             if self._menu_mode:
                 return self.async_create_entry(title="", data=self.options)
-            return await self.async_step_frost()
+            return await self.async_step_dynamic_target()
 
         curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
         return self.async_show_form(
             step_id="climate",
             data_schema=_climate_schema(curr),
+            last_step=False,
+        )
+
+    async def async_step_dynamic_target(self, user_input=None):
+        """Optional dynamic target setpoint based on season and weather."""
+        if user_input is not None:
+            self.options.update(user_input)
+            if self._menu_mode:
+                return self.async_create_entry(title="", data=self.options)
+            return await self.async_step_frost()
+
+        curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
+        return self.async_show_form(
+            step_id="dynamic_target",
+            data_schema=_dynamic_target_schema(curr),
             last_step=False,
         )
 

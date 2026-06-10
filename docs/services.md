@@ -1,5 +1,7 @@
 # Actions
 
+**English** | [Deutsch](de/services.md)
+
 [← Back to README](../README.md)
 
 All actions support optional `duration_minutes` parameter for custom durations.

@@ -1,5 +1,7 @@
 # Water Quality Monitoring & Disinfection
 
+**English** | [Deutsch](de/water-quality.md)
+
 [← Back to README](../README.md)
 
 ## Water Quality Monitoring (ESP32 + Blueriiot)

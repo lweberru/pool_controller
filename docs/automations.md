@@ -1,5 +1,7 @@
 # Common Automations
 
+**English** | [Deutsch](de/automations.md)
+
 [← Back to README](../README.md)
 
 ## Example 1: Heat pool before weekend bathing

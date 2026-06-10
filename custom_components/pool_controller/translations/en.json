@@ -136,6 +136,49 @@
           "hot_tolerance": "Heater stops when water temperature is at or above target plus this value"
         }
       },
+      "dynamic_target": {
+        "title": "Dynamic target temperature",
+        "description": "Optional: adjusts the effective target temperature by season and weather.",
+        "submit": "Continue",
+        "data": {
+          "enable_dynamic_target": "Enable dynamic target",
+          "dynamic_target_weather_entity": "Weather entity",
+          "dynamic_target_winter_offset": "Winter offset (°C)",
+          "dynamic_target_spring_offset": "Spring offset (°C)",
+          "dynamic_target_summer_offset": "Summer offset (°C)",
+          "dynamic_target_autumn_offset": "Autumn offset (°C)",
+          "dynamic_target_min_offset": "Minimum offset (°C)",
+          "dynamic_target_max_offset": "Maximum offset (°C)",
+          "dynamic_target_weather_max_offset": "Max weather offset (°C)",
+          "dynamic_target_weather_weight_temp": "Weight: temperature",
+          "dynamic_target_weather_weight_feels_like": "Weight: feels-like",
+          "dynamic_target_weather_weight_wind": "Weight: wind",
+          "dynamic_target_weather_weight_uv": "Weight: UV",
+          "dynamic_target_weather_weight_cloud": "Weight: cloud coverage",
+          "dynamic_target_weather_weight_forecast": "Weight: forecast temperature",
+          "dynamic_target_ema_alpha": "Smoothing alpha",
+          "dynamic_target_max_step_per_hour": "Max offset change per hour (°C/h)"
+        },
+        "data_description": {
+          "enable_dynamic_target": "If disabled, effective target equals base target.",
+          "dynamic_target_weather_entity": "Weather entity used for weather contribution.",
+          "dynamic_target_winter_offset": "Seasonal offset anchor for winter.",
+          "dynamic_target_spring_offset": "Seasonal offset anchor for spring.",
+          "dynamic_target_summer_offset": "Seasonal offset anchor for summer.",
+          "dynamic_target_autumn_offset": "Seasonal offset anchor for autumn.",
+          "dynamic_target_min_offset": "Lower clamp for total dynamic offset.",
+          "dynamic_target_max_offset": "Upper clamp for total dynamic offset.",
+          "dynamic_target_weather_max_offset": "Absolute cap for weather contribution.",
+          "dynamic_target_weather_weight_temp": "Influence of measured outdoor temperature.",
+          "dynamic_target_weather_weight_feels_like": "Influence of feels-like temperature.",
+          "dynamic_target_weather_weight_wind": "Influence of wind speed.",
+          "dynamic_target_weather_weight_uv": "Influence of UV index.",
+          "dynamic_target_weather_weight_cloud": "Influence of cloud coverage.",
+          "dynamic_target_weather_weight_forecast": "Influence of short-term forecast average.",
+          "dynamic_target_ema_alpha": "EMA smoothing factor between 0 and 1.",
+          "dynamic_target_max_step_per_hour": "Rate limiter for offset changes."
+        }
+      },
       "frost": {
         "title": "Frost protection",
         "description": "Protects the pool system in cold weather by running the pump in a duty-cycle based on the outdoor temperature. Quiet hours are respected unless it is extremely cold.",
@@ -303,6 +346,7 @@
           "sanitizer_product": "Sanitizer product",
           "chemistry": "Chemistry estimation",
           "climate": "Temperature control",
+          "dynamic_target": "Dynamic target temperature",
           "frost": "Frost protection",
           "calendars": "Calendars & quiet times",
           "filter": "Filter settings",
@@ -446,6 +490,49 @@
           "heater_aux_power_w": "Aux heater rated power (watts). Used for preheat estimation when aux heating is enabled. Total = base + aux.",
           "cold_tolerance": "Heater starts when water temperature is below target minus this value",
           "hot_tolerance": "Heater stops when water temperature is at or above target plus this value"
+        }
+      },
+      "dynamic_target": {
+        "title": "Dynamic target temperature",
+        "description": "Optional: adjusts the effective target temperature by season and weather.",
+        "submit": "Continue",
+        "data": {
+          "enable_dynamic_target": "Enable dynamic target",
+          "dynamic_target_weather_entity": "Weather entity",
+          "dynamic_target_winter_offset": "Winter offset (°C)",
+          "dynamic_target_spring_offset": "Spring offset (°C)",
+          "dynamic_target_summer_offset": "Summer offset (°C)",
+          "dynamic_target_autumn_offset": "Autumn offset (°C)",
+          "dynamic_target_min_offset": "Minimum offset (°C)",
+          "dynamic_target_max_offset": "Maximum offset (°C)",
+          "dynamic_target_weather_max_offset": "Max weather offset (°C)",
+          "dynamic_target_weather_weight_temp": "Weight: temperature",
+          "dynamic_target_weather_weight_feels_like": "Weight: feels-like",
+          "dynamic_target_weather_weight_wind": "Weight: wind",
+          "dynamic_target_weather_weight_uv": "Weight: UV",
+          "dynamic_target_weather_weight_cloud": "Weight: cloud coverage",
+          "dynamic_target_weather_weight_forecast": "Weight: forecast temperature",
+          "dynamic_target_ema_alpha": "Smoothing alpha",
+          "dynamic_target_max_step_per_hour": "Max offset change per hour (°C/h)"
+        },
+        "data_description": {
+          "enable_dynamic_target": "If disabled, effective target equals base target.",
+          "dynamic_target_weather_entity": "Weather entity used for weather contribution.",
+          "dynamic_target_winter_offset": "Seasonal offset anchor for winter.",
+          "dynamic_target_spring_offset": "Seasonal offset anchor for spring.",
+          "dynamic_target_summer_offset": "Seasonal offset anchor for summer.",
+          "dynamic_target_autumn_offset": "Seasonal offset anchor for autumn.",
+          "dynamic_target_min_offset": "Lower clamp for total dynamic offset.",
+          "dynamic_target_max_offset": "Upper clamp for total dynamic offset.",
+          "dynamic_target_weather_max_offset": "Absolute cap for weather contribution.",
+          "dynamic_target_weather_weight_temp": "Influence of measured outdoor temperature.",
+          "dynamic_target_weather_weight_feels_like": "Influence of feels-like temperature.",
+          "dynamic_target_weather_weight_wind": "Influence of wind speed.",
+          "dynamic_target_weather_weight_uv": "Influence of UV index.",
+          "dynamic_target_weather_weight_cloud": "Influence of cloud coverage.",
+          "dynamic_target_weather_weight_forecast": "Influence of short-term forecast average.",
+          "dynamic_target_ema_alpha": "EMA smoothing factor between 0 and 1.",
+          "dynamic_target_max_step_per_hour": "Rate limiter for offset changes."
         }
       },
       "frost": {
@@ -939,6 +1026,24 @@
       },
       "bathing_minutes": {
         "name": "Configured bathing duration (min)"
+      },
+      "target_temp_base": {
+        "name": "Target temperature (base)"
+      },
+      "target_temp_effective": {
+        "name": "Target temperature (effective)"
+      },
+      "target_temp_offset": {
+        "name": "Target offset"
+      },
+      "target_temp_season_offset": {
+        "name": "Season offset"
+      },
+      "target_temp_weather_offset": {
+        "name": "Weather offset"
+      },
+      "dynamic_target_profile": {
+        "name": "Dynamic target profile"
       }
     }
   },
@@ -1004,6 +1109,15 @@
           "raise_bicarbonate": "Raise with bicarbonate (TA+)",
           "lower_ph_minus": "Lower with pH-",
           "water_change_then_adjust": "Do water change first, then adjust"
+        }
+      },
+      "dynamic_target_profile": {
+        "state": {
+          "off": "Off",
+          "winter": "Winter",
+          "spring": "Spring",
+          "summer": "Summer",
+          "autumn": "Autumn"
         }
       }
     }

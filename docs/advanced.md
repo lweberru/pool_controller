@@ -1,5 +1,7 @@
 # Advanced Features
 
+**English** | [Deutsch](de/advanced.md)
+
 [← Back to README](../README.md)
 
 ## Filtration Logic

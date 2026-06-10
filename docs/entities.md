@@ -1,5 +1,7 @@
 # Sensors, Entities & Controls
 
+**English** | [Deutsch](de/entities.md)
+
 [← Back to README](../README.md)
 
 Entity IDs depend on your instance name, but the integration uses stable suffix keys (translation_key / unique_id suffixes) as shown below.

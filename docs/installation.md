@@ -1,5 +1,7 @@
 # Installation & Setup
 
+**English** | [Deutsch](de/installation.md)
+
 [← Back to README](../README.md)
 
 ## Hardware Requirements

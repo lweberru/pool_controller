@@ -2,6 +2,10 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.7.0] - 2026-06-10
+- Dynamic Target Temperature via Season and Weather
+
+
 ## [2.6.0] - 2026-06-07
 - Stabilisiert Chemie-Empfehlungen mit historienbasierter Median-Logik statt Einzelmessungen
 - Blockiert Alkalinitäts-Aktionen während/kurz nach Baden, Chloren, Boost, Pause und bei Messsprung-Cooldown

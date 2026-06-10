@@ -1,5 +1,7 @@
 # Troubleshooting
 
+**English** | [Deutsch](de/troubleshooting.md)
+
 [← Back to README](../README.md)
 
 ## Language Support

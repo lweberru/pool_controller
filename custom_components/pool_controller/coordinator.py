@@ -2,6 +2,7 @@ import logging
 import re
 import inspect
 import asyncio
+import math
 from statistics import median
 from datetime import timedelta, datetime
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
@@ -26,6 +27,12 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     self.target_temp = float(merged.get(CONF_TARGET_TEMP))
             except Exception:
                 self.target_temp = DEFAULT_TARGET_TEMP
+        self.target_temp_offset = 0.0
+        self.target_temp_effective = float(self.target_temp)
+        self.target_temp_season_offset = 0.0
+        self.target_temp_weather_offset = 0.0
+        self.target_temp_profile = "off"
+        self._dynamic_target_last_calc = None
         self._last_should_main_on = None
         self._last_should_pump_on = None
         self._last_should_aux_on = None
@@ -914,6 +921,237 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         except Exception:
             _LOGGER.exception("Fehler beim Speichern von chem_block_until")
 
+    def _num_or_none(self, value):
+        if value is None:
+            return None
+        try:
+            return float(value)
+        except Exception:
+            pass
+        try:
+            s = str(value).strip().replace(",", ".")
+            s = re.sub(r"[^0-9eE+\-\.]", "", s)
+            return float(s) if s else None
+        except Exception:
+            return None
+
+    @staticmethod
+    def _clamp(value: float, low: float, high: float) -> float:
+        return max(low, min(high, value))
+
+    def _seasonal_dynamic_offset(self, now: datetime, winter: float, spring: float, summer: float, autumn: float) -> tuple[float, str]:
+        """Smoothly interpolate between 4 seasonal anchors over the year."""
+        day = int(now.timetuple().tm_yday)
+        # Mid-month anchors for smooth transitions.
+        points = [
+            (15, winter, "winter"),
+            (105, spring, "spring"),
+            (196, summer, "summer"),
+            (288, autumn, "autumn"),
+            (380, winter, "winter"),
+        ]
+        if day < points[0][0]:
+            day += 365
+
+        for idx in range(len(points) - 1):
+            d0, v0, p0 = points[idx]
+            d1, v1, _ = points[idx + 1]
+            if d0 <= day <= d1:
+                span = max(1.0, float(d1 - d0))
+                t = self._clamp((float(day) - float(d0)) / span, 0.0, 1.0)
+                s = (1.0 - math.cos(math.pi * t)) / 2.0
+                return (float(v0) + (float(v1) - float(v0)) * s, p0)
+        return (winter, "winter")
+
+    async def _compute_dynamic_target(self, conf: dict, water_temp: float | None, outdoor_temp: float | None, now: datetime) -> dict:
+        """Compute base/effective target temperature with optional season+weather offset."""
+        try:
+            min_t = float(conf.get(CONF_MIN_TEMP, DEFAULT_MIN_TEMP))
+        except Exception:
+            min_t = DEFAULT_MIN_TEMP
+        try:
+            max_t = float(conf.get(CONF_MAX_TEMP, DEFAULT_MAX_TEMP))
+        except Exception:
+            max_t = DEFAULT_MAX_TEMP
+        if max_t < min_t:
+            min_t, max_t = max_t, min_t
+
+        base = self._clamp(float(getattr(self, "target_temp", DEFAULT_TARGET_TEMP)), min_t, max_t)
+        enabled = bool(conf.get(CONF_ENABLE_DYNAMIC_TARGET, DEFAULT_ENABLE_DYNAMIC_TARGET))
+        if not enabled:
+            return {
+                "enabled": False,
+                "base": base,
+                "effective": base,
+                "offset": 0.0,
+                "season_offset": 0.0,
+                "weather_offset": 0.0,
+                "profile": "off",
+            }
+
+        try:
+            season_winter = float(conf.get(CONF_DYNAMIC_TARGET_WINTER_OFFSET, DEFAULT_DYNAMIC_TARGET_WINTER_OFFSET))
+            season_spring = float(conf.get(CONF_DYNAMIC_TARGET_SPRING_OFFSET, DEFAULT_DYNAMIC_TARGET_SPRING_OFFSET))
+            season_summer = float(conf.get(CONF_DYNAMIC_TARGET_SUMMER_OFFSET, DEFAULT_DYNAMIC_TARGET_SUMMER_OFFSET))
+            season_autumn = float(conf.get(CONF_DYNAMIC_TARGET_AUTUMN_OFFSET, DEFAULT_DYNAMIC_TARGET_AUTUMN_OFFSET))
+        except Exception:
+            season_winter = DEFAULT_DYNAMIC_TARGET_WINTER_OFFSET
+            season_spring = DEFAULT_DYNAMIC_TARGET_SPRING_OFFSET
+            season_summer = DEFAULT_DYNAMIC_TARGET_SUMMER_OFFSET
+            season_autumn = DEFAULT_DYNAMIC_TARGET_AUTUMN_OFFSET
+
+        season_offset, season_profile = self._seasonal_dynamic_offset(
+            now,
+            season_winter,
+            season_spring,
+            season_summer,
+            season_autumn,
+        )
+
+        try:
+            offset_min = float(conf.get(CONF_DYNAMIC_TARGET_MIN_OFFSET, DEFAULT_DYNAMIC_TARGET_MIN_OFFSET))
+        except Exception:
+            offset_min = DEFAULT_DYNAMIC_TARGET_MIN_OFFSET
+        try:
+            offset_max = float(conf.get(CONF_DYNAMIC_TARGET_MAX_OFFSET, DEFAULT_DYNAMIC_TARGET_MAX_OFFSET))
+        except Exception:
+            offset_max = DEFAULT_DYNAMIC_TARGET_MAX_OFFSET
+        if offset_max < offset_min:
+            offset_min, offset_max = offset_max, offset_min
+
+        try:
+            weather_limit = abs(float(conf.get(CONF_DYNAMIC_TARGET_WEATHER_MAX_OFFSET, DEFAULT_DYNAMIC_TARGET_WEATHER_MAX_OFFSET)))
+        except Exception:
+            weather_limit = DEFAULT_DYNAMIC_TARGET_WEATHER_MAX_OFFSET
+
+        weather_entity = conf.get(CONF_DYNAMIC_TARGET_WEATHER_ENTITY) or conf.get(CONF_EVENT_WEATHER_ENTITY)
+        weather_state = self.hass.states.get(weather_entity) if weather_entity else None
+        weather_attrs = weather_state.attributes if weather_state else {}
+
+        weather_temp = self._num_or_none(weather_attrs.get("temperature"))
+        weather_feels = self._num_or_none(weather_attrs.get("apparent_temperature"))
+        weather_wind = self._num_or_none(weather_attrs.get("wind_speed"))
+        weather_uv = self._num_or_none(weather_attrs.get("uv_index"))
+        weather_cloud = self._num_or_none(weather_attrs.get("cloud_coverage"))
+
+        forecast_temp = None
+        if weather_entity:
+            try:
+                forecast = await self._get_hourly_forecast(weather_entity)
+            except Exception:
+                forecast = None
+            if isinstance(forecast, list) and forecast:
+                vals = []
+                for item in forecast[:24]:
+                    if not isinstance(item, dict):
+                        continue
+                    v = self._num_or_none(item.get("temperature"))
+                    if v is not None:
+                        vals.append(float(v))
+                if vals:
+                    forecast_temp = float(sum(vals) / len(vals))
+
+        # Normalize factors to roughly [-1, 1]. Positive means "warmer preference".
+        def _norm_temp(v: float | None):
+            if v is None:
+                return None
+            return self._clamp((18.0 - float(v)) / 18.0, -1.0, 1.0)
+
+        def _norm_wind(v: float | None):
+            if v is None:
+                return None
+            return self._clamp((float(v) - 8.0) / 20.0, -1.0, 1.0)
+
+        def _norm_uv(v: float | None):
+            if v is None:
+                return None
+            return self._clamp((float(v) - 3.0) / 8.0, -1.0, 1.0)
+
+        def _norm_cloud(v: float | None):
+            if v is None:
+                return None
+            return self._clamp((float(v) - 50.0) / 50.0, -1.0, 1.0)
+
+        try:
+            w_temp = max(0.0, float(conf.get(CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_TEMP, DEFAULT_DYNAMIC_TARGET_WEATHER_WEIGHT_TEMP)))
+            w_feels = max(0.0, float(conf.get(CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_FEELS_LIKE, DEFAULT_DYNAMIC_TARGET_WEATHER_WEIGHT_FEELS_LIKE)))
+            w_wind = max(0.0, float(conf.get(CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_WIND, DEFAULT_DYNAMIC_TARGET_WEATHER_WEIGHT_WIND)))
+            w_uv = max(0.0, float(conf.get(CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_UV, DEFAULT_DYNAMIC_TARGET_WEATHER_WEIGHT_UV)))
+            w_cloud = max(0.0, float(conf.get(CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_CLOUD, DEFAULT_DYNAMIC_TARGET_WEATHER_WEIGHT_CLOUD)))
+            w_forecast = max(0.0, float(conf.get(CONF_DYNAMIC_TARGET_WEATHER_WEIGHT_FORECAST, DEFAULT_DYNAMIC_TARGET_WEATHER_WEIGHT_FORECAST)))
+        except Exception:
+            w_temp = DEFAULT_DYNAMIC_TARGET_WEATHER_WEIGHT_TEMP
+            w_feels = DEFAULT_DYNAMIC_TARGET_WEATHER_WEIGHT_FEELS_LIKE
+            w_wind = DEFAULT_DYNAMIC_TARGET_WEATHER_WEIGHT_WIND
+            w_uv = DEFAULT_DYNAMIC_TARGET_WEATHER_WEIGHT_UV
+            w_cloud = DEFAULT_DYNAMIC_TARGET_WEATHER_WEIGHT_CLOUD
+            w_forecast = DEFAULT_DYNAMIC_TARGET_WEATHER_WEIGHT_FORECAST
+
+        temp_input = outdoor_temp if outdoor_temp is not None else weather_temp
+        comp = []
+        n = _norm_temp(temp_input)
+        if n is not None and w_temp > 0:
+            comp.append((n, w_temp))
+        n = _norm_temp(weather_feels)
+        if n is not None and w_feels > 0:
+            comp.append((n, w_feels))
+        n = _norm_wind(weather_wind)
+        if n is not None and w_wind > 0:
+            comp.append((n, w_wind))
+        n = _norm_uv(weather_uv)
+        if n is not None and w_uv > 0:
+            comp.append((-n, w_uv))
+        n = _norm_cloud(weather_cloud)
+        if n is not None and w_cloud > 0:
+            comp.append((n, w_cloud))
+        n = _norm_temp(forecast_temp)
+        if n is not None and w_forecast > 0:
+            comp.append((n, w_forecast))
+
+        weather_offset = 0.0
+        if weather_limit > 0 and comp:
+            weight_sum = sum(w for _, w in comp)
+            if weight_sum > 0:
+                score = sum(v * w for v, w in comp) / weight_sum
+                weather_offset = self._clamp(score, -1.0, 1.0) * weather_limit
+
+        raw_total_offset = self._clamp(season_offset + weather_offset, offset_min, offset_max)
+
+        try:
+            alpha = float(conf.get(CONF_DYNAMIC_TARGET_EMA_ALPHA, DEFAULT_DYNAMIC_TARGET_EMA_ALPHA))
+        except Exception:
+            alpha = DEFAULT_DYNAMIC_TARGET_EMA_ALPHA
+        alpha = self._clamp(alpha, 0.0, 1.0)
+        try:
+            max_step_h = float(conf.get(CONF_DYNAMIC_TARGET_MAX_STEP_PER_HOUR, DEFAULT_DYNAMIC_TARGET_MAX_STEP_PER_HOUR))
+        except Exception:
+            max_step_h = DEFAULT_DYNAMIC_TARGET_MAX_STEP_PER_HOUR
+        max_step_h = max(0.0, max_step_h)
+
+        prev = self._num_or_none(getattr(self, "target_temp_offset", None))
+        if prev is None or self._dynamic_target_last_calc is None:
+            smooth_offset = raw_total_offset
+        else:
+            dt_s = max(1.0, float((now - self._dynamic_target_last_calc).total_seconds()))
+            ema = float(prev) + (alpha * (raw_total_offset - float(prev)))
+            if max_step_h > 0:
+                max_step = max_step_h * (dt_s / 3600.0)
+                ema = float(prev) + self._clamp((ema - float(prev)), -max_step, max_step)
+            smooth_offset = ema
+        smooth_offset = self._clamp(float(smooth_offset), offset_min, offset_max)
+
+        effective = self._clamp(base + smooth_offset, min_t, max_t)
+
+        return {
+            "enabled": True,
+            "base": round(base, 2),
+            "effective": round(effective, 2),
+            "offset": round(smooth_offset, 3),
+            "season_offset": round(season_offset, 3),
+            "weather_offset": round(weather_offset, 3),
+            "profile": season_profile,
+        }
+
     def _effective_heating_power(
         self,
         conf: dict,
@@ -973,7 +1211,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             vol_l = None
 
         try:
-            target_temp = float(getattr(self, "target_temp", DEFAULT_TARGET_TEMP))
+            target_temp = float(getattr(self, "target_temp_effective", getattr(self, "target_temp", DEFAULT_TARGET_TEMP)))
         except Exception:
             target_temp = DEFAULT_TARGET_TEMP
 
@@ -1902,6 +2140,18 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             # Sensoren
             water_temp = self._get_float(conf.get(CONF_TEMP_WATER))
             outdoor_temp = self._get_float(conf.get(CONF_TEMP_OUTDOOR))
+
+            dynamic_target = await self._compute_dynamic_target(conf, water_temp, outdoor_temp, now)
+            self.target_temp_effective = float(dynamic_target.get("effective", self.target_temp))
+            self.target_temp_offset = float(dynamic_target.get("offset", 0.0))
+            self.target_temp_season_offset = float(dynamic_target.get("season_offset", 0.0))
+            self.target_temp_weather_offset = float(dynamic_target.get("weather_offset", 0.0))
+            self.target_temp_profile = str(dynamic_target.get("profile") or "off")
+            self._dynamic_target_last_calc = now
+
+            target_temp_base = float(dynamic_target.get("base", self.target_temp))
+            target_temp_effective = float(dynamic_target.get("effective", self.target_temp))
+
             ph_val = self._get_float(conf.get(CONF_PH_SENSOR))
             chlor_val = self._get_float(conf.get(CONF_CHLORINE_SENSOR))
             salt_val = self._get_float(conf.get(CONF_SALT_SENSOR))
@@ -2768,7 +3018,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             # Temperaturdifferenz (DeltaT).
             # Wenn Wassertemperatur fehlt, konservativer Default 20°C (statt Fehler)
             measured_temp = water_temp if water_temp is not None else 20.0
-            delta_t = max(0.0, self.target_temp - measured_temp)
+            delta_t = max(0.0, target_temp_effective - measured_temp)
 
             # Thermostat-like tolerances (hysteresis)
             try:
@@ -3565,12 +3815,12 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
             # PV-based run should stop once target is reached (with same hysteresis).
             try:
-                if water_temp is not None and float(water_temp) >= float(self.target_temp):
+                if water_temp is not None and float(water_temp) >= float(target_temp_effective):
                     pv_heat_demand = False
                 else:
                     pv_heat_demand = self._thermostat_demand(
                         current_temp=water_temp,
-                        target_temp=self.target_temp,
+                        target_temp=target_temp_effective,
                         cold_tolerance=cold_tol,
                         hot_tolerance=hot_tol,
                         prev_on=bool(self._pv_heat_demand),
@@ -3633,12 +3883,12 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 # Aux heater is strictly for heating. Once target is reached, keep it OFF
                 # even if a manual timer (e.g. bathing/filter/chlorine) is active.
                 try:
-                    if water_temp is not None and float(water_temp) >= float(self.target_temp):
+                    if water_temp is not None and float(water_temp) >= float(target_temp_effective):
                         aux_heat_demand = False
                     else:
                         aux_heat_demand = self._thermostat_demand(
                             current_temp=water_temp,
-                            target_temp=self.target_temp,
+                            target_temp=target_temp_effective,
                             cold_tolerance=cold_tol,
                             hot_tolerance=hot_tol,
                             prev_on=bool(self._aux_heat_demand),
@@ -3750,6 +4000,13 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "power_saving_available": bool(power_saving_available),
                 "power_saving_stage": int(power_saving_stage),
                 "power_saving_reason": power_saving_reason,
+                "dynamic_target_enabled": bool(dynamic_target.get("enabled", False)),
+                "dynamic_target_profile": self.target_temp_profile,
+                "target_temp_base": round(target_temp_base, 2),
+                "target_temp_offset": round(self.target_temp_offset, 3),
+                "target_temp_season_offset": round(self.target_temp_season_offset, 3),
+                "target_temp_weather_offset": round(self.target_temp_weather_offset, 3),
+                "target_temp_effective": round(target_temp_effective, 2),
                 "run_reason": run_reason,
                 "heat_reason": heat_reason,
                 "run_credit_source": self._credit_streak_source if self._credit_streak_source else None,
@@ -4059,7 +4316,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             # Boost mode auto-disable: stop boost when target temperature is reached
             if self.boost_active:
                 water_temp = self._get_float(conf.get(CONF_TEMP_WATER))
-                target_temp = self.target_temp
+                target_temp = self.target_temp_effective
                 if water_temp is not None and target_temp is not None:
                     try:
                         wt = float(water_temp)

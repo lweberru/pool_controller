@@ -3,6 +3,8 @@
 ![Latest Version](https://img.shields.io/github/v/release/lweberru/pool_controller)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
+Language: **English** | [Deutsch](README.de.md)
+
 ## Overview
 
 **Pool Controller** is a Home Assistant custom integration designed to manage and automate your spa or pool when the device lacks built-in smart capabilities.
@@ -19,6 +21,8 @@ If your spa/pool is connected to a simple smart switch (on/off only), you lose a
 ## Documentation
 
 This repository’s documentation has been split into chapters for easier navigation:
+
+German translation: [README.de.md](README.de.md)
 
 - [Installation & Setup](docs/installation.md)
 - [Configuration](docs/configuration.md)

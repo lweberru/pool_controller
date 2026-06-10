@@ -1,5 +1,7 @@
 # Configuration
 
+**English** | [Deutsch](de/configuration.md)
+
 [← Back to README](../README.md)
 
 ## Configuration Flow

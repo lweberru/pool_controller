@@ -130,7 +130,8 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
         data = getattr(self.coordinator, "data", {}) or {}
         try:
             cur = float(self.current_temperature) if self.current_temperature is not None else None
-            tgt = float(self.target_temperature) if self.target_temperature is not None else None
+            tgt_raw = data.get("target_temp_effective", self.target_temperature)
+            tgt = float(tgt_raw) if tgt_raw is not None else None
         except Exception:
             cur, tgt = None, None
         heat_reason = str(data.get("heat_reason") or "").lower()
