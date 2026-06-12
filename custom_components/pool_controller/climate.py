@@ -112,12 +112,9 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
 
     @property
     def hvac_mode(self):
-        # hvac_mode zeigt aktives Heizen an:
-        # - OFF bei Wartung
-        # - OFF bei Away
-        # - OFF wenn HVAC deaktiviert
-        # - HEAT bei Frostlauf, manuellem Heizen, PV, Preheat, Thermostat,
-        #   und auch bei Stromsparen-Stufe 1 (Pumpen-Heizbeitrag)
+        # hvac_mode repräsentiert den Betriebszustand der Anlage:
+        # - OFF: Anlage deaktiviert / gesperrt
+        # - HEAT: Anlage aktiv (kann heizen oder idle sein)
         if bool(getattr(self.coordinator, "maintenance_active", False)):
             return HVACMode.OFF
         if bool(getattr(self.coordinator, "manual_mode_active", False)):
@@ -126,6 +123,12 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
             return HVACMode.OFF
         if not bool(getattr(self.coordinator, "hvac_enabled", True)):
             return HVACMode.OFF
+        return HVACMode.HEAT
+
+    @property
+    def hvac_action(self):
+        if self.hvac_mode == HVACMode.OFF:
+            return HVACAction.OFF
 
         data = getattr(self.coordinator, "data", {}) or {}
         try:
@@ -134,37 +137,30 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
             tgt = float(tgt_raw) if tgt_raw is not None else None
         except Exception:
             cur, tgt = None, None
+
         heat_reason = str(data.get("heat_reason") or "").lower()
         run_reason = str(data.get("run_reason") or "").lower()
         try:
             power_saving_stage = int(data.get("power_saving_stage") or 0)
         except Exception:
             power_saving_stage = 0
+
         wants_heat = heat_reason not in ("", "off", "disabled")
         temp_below_target = (cur is not None and tgt is not None and cur < tgt)
 
-        # Frostlauf: Wenn frost_timer_active, dann immer HEAT
+        heating_active = False
         if data.get("frost_timer_active"):
-            return HVACMode.HEAT
-
-        # Prefer explicit demand/switch state when available.
-        if bool(data.get("should_aux_on")) or bool(data.get("aux_heating_switch_on")):
-            return HVACMode.HEAT
-        # Power-saving stage 1 (pump-only heating contribution) should be shown as HEAT.
-        # Fallback to run_reason for backward compatibility if stage is not present.
-        if bool(data.get("should_pump_on")) and (
+            heating_active = True
+        elif bool(data.get("should_aux_on")) or bool(data.get("aux_heating_switch_on")):
+            heating_active = True
+        elif bool(data.get("should_pump_on")) and (
             power_saving_stage >= 1 or run_reason == "power_saving"
         ) and (temp_below_target or cur is None or tgt is None):
-            return HVACMode.HEAT
-        if wants_heat and temp_below_target and bool(data.get("should_pump_on")):
-            return HVACMode.HEAT
-        return HVACMode.OFF
+            heating_active = True
+        elif wants_heat and temp_below_target and bool(data.get("should_pump_on")):
+            heating_active = True
 
-    @property
-    def hvac_action(self):
-        if self.hvac_mode == HVACMode.OFF:
-            return HVACAction.OFF
-        return HVACAction.HEATING
+        return HVACAction.HEATING if heating_active else HVACAction.IDLE
 
     @property
     def preset_mode(self):
