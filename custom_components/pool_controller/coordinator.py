@@ -1840,11 +1840,23 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
     def _resolve_external_actuator_entity(self, conf: dict, key: str) -> str | None:
         configured = conf.get(key)
+        options = self.entry.options or {}
+        has_option_override = key in options
+
+        # If the user explicitly cleared an optional actuator in options,
+        # do not revive the original setup value from entry.data.
+        if has_option_override and (configured is None or str(configured).strip() == ""):
+            return None
+
         if configured and not self._is_pool_controller_entity(configured):
             return configured
-        fallback = (self.entry.data or {}).get(key)
-        if fallback and not self._is_pool_controller_entity(fallback):
-            return fallback
+
+        # Keep legacy fallback only when there is no explicit options override.
+        if not has_option_override:
+            fallback = (self.entry.data or {}).get(key)
+            if fallback and not self._is_pool_controller_entity(fallback):
+                return fallback
+
         return configured
 
     async def _async_force_pause_off(self) -> None:
@@ -2070,20 +2082,27 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
             def _resolve_actuator_entity(conf_key: str) -> str | None:
                 configured = conf.get(conf_key)
+                options = self.entry.options or {}
+                has_option_override = conf_key in options
+
+                if has_option_override and (configured is None or str(configured).strip() == ""):
+                    return None
+
                 if configured and not _is_own_integration_entity(configured):
                     return configured
 
                 # If options accidentally point to this integration's proxy switch,
                 # prefer the original setup value from entry.data when available.
-                fallback = (self.entry.data or {}).get(conf_key)
-                if fallback and (fallback != configured) and (not _is_own_integration_entity(fallback)):
-                    _LOGGER.warning(
-                        "Ignoring invalid %s=%s (pool_controller entity); using %s from setup data",
-                        conf_key,
-                        configured,
-                        fallback,
-                    )
-                    return fallback
+                if not has_option_override:
+                    fallback = (self.entry.data or {}).get(conf_key)
+                    if fallback and (fallback != configured) and (not _is_own_integration_entity(fallback)):
+                        _LOGGER.warning(
+                            "Ignoring invalid %s=%s (pool_controller entity); using %s from setup data",
+                            conf_key,
+                            configured,
+                            fallback,
+                        )
+                        return fallback
                 return configured
 
             # Ensure aux_allowed is always a boolean (defensive)
@@ -4261,32 +4280,40 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 # Toggle aux switch according to desired_aux AND aux_allowed
                 # aux_allowed ist der Master-Enable: wenn False, bleibt physischer Schalter immer aus
                 if aux_switch_id:
-                    physical_aux_should_be_on = desired_aux and self.aux_allowed
-                    # Prefer toggling the integration's aux switch if present (this calls the physical switch).
-                    aux_entity_id = None
-                    if ent_reg:
-                        try:
-                            cand = ent_reg.async_get_entity_id("switch", DOMAIN, f"{self.entry.entry_id}_aux")
-                            if cand:
-                                ent = ent_reg.async_get(cand)
-                                if ent and getattr(ent, "translation_key", None) == "aux":
-                                    aux_entity_id = cand
-                        except Exception:
-                            aux_entity_id = None
-                    target_aux_id = aux_entity_id or aux_switch_id
-                    allow_integration = bool(aux_entity_id)
+                    aux_aliases_primary = bool(aux_switch_id and (aux_switch_id == main_switch_id or aux_switch_id == pump_switch_id))
+                    if aux_aliases_primary:
+                        _LOGGER.debug(
+                            "Ignoring aux actuator toggles because %s is shared with main/pump switch",
+                            aux_switch_id,
+                        )
+                        self._last_should_aux_on = False
+                    else:
+                        physical_aux_should_be_on = desired_aux and self.aux_allowed
+                        # Prefer toggling the integration's aux switch if present (this calls the physical switch).
+                        aux_entity_id = None
+                        if ent_reg:
+                            try:
+                                cand = ent_reg.async_get_entity_id("switch", DOMAIN, f"{self.entry.entry_id}_aux")
+                                if cand:
+                                    ent = ent_reg.async_get(cand)
+                                    if ent and getattr(ent, "translation_key", None) == "aux":
+                                        aux_entity_id = cand
+                            except Exception:
+                                aux_entity_id = None
+                        target_aux_id = aux_entity_id or aux_switch_id
+                        allow_integration = bool(aux_entity_id)
 
-                    need_aux_reconcile = (physical_aux_should_be_on != self._last_should_aux_on) or (bool(physical_aux_should_be_on) != bool(aux_heating_switch_on))
-                    if need_aux_reconcile:
-                        if physical_aux_should_be_on:
-                            if not demo and _can_attempt(target_aux_id, True, allow_integration=allow_integration):
-                                self._last_toggle_attempts[target_aux_id] = (now, True)
-                                await self._async_turn_entity(target_aux_id, True)
-                        else:
-                            if not demo and _can_attempt(target_aux_id, False, allow_integration=allow_integration):
-                                self._last_toggle_attempts[target_aux_id] = (now, False)
-                                await self._async_turn_entity(target_aux_id, False)
-                        self._last_should_aux_on = physical_aux_should_be_on
+                        need_aux_reconcile = (physical_aux_should_be_on != self._last_should_aux_on) or (bool(physical_aux_should_be_on) != bool(aux_heating_switch_on))
+                        if need_aux_reconcile:
+                            if physical_aux_should_be_on:
+                                if not demo and _can_attempt(target_aux_id, True, allow_integration=allow_integration):
+                                    self._last_toggle_attempts[target_aux_id] = (now, True)
+                                    await self._async_turn_entity(target_aux_id, True)
+                            else:
+                                if not demo and _can_attempt(target_aux_id, False, allow_integration=allow_integration):
+                                    self._last_toggle_attempts[target_aux_id] = (now, False)
+                                    await self._async_turn_entity(target_aux_id, False)
+                            self._last_should_aux_on = physical_aux_should_be_on
             except Exception:
                 _LOGGER.exception("Fehler beim Anwenden der gewünschten Schaltzustände")
 

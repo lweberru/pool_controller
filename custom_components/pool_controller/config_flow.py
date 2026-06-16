@@ -481,7 +481,12 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             errors = _validate_switch_targets(self.hass, user_input)
             if not errors:
-                self.data.update(user_input)
+                normalized = dict(user_input)
+                # Persist explicit clear when aux heating is disabled so stale
+                # entry.data mappings cannot be revived via fallback logic.
+                if not bool(normalized.get(CONF_ENABLE_AUX_HEATING, False)):
+                    normalized[CONF_AUX_HEATING_SWITCH] = ""
+                self.data.update(normalized)
                 return await self.async_step_water_quality()
 
         return self.async_show_form(
@@ -798,7 +803,12 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             errors = _validate_switch_targets(self.hass, user_input)
             if not errors:
-                self.options.update(user_input)
+                normalized = dict(user_input)
+                # Persist explicit clear when aux heating is disabled so stale
+                # entry.data mappings cannot be revived via fallback logic.
+                if not bool(normalized.get(CONF_ENABLE_AUX_HEATING, False)):
+                    normalized[CONF_AUX_HEATING_SWITCH] = ""
+                self.options.update(normalized)
                 if self._menu_mode:
                     return self.async_create_entry(title="", data=self.options)
                 return await self.async_step_water_quality()

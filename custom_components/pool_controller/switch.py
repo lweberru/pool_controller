@@ -21,6 +21,16 @@ class PoolBaseSwitch(CoordinatorEntity, SwitchEntity):
         # do not provide a translation_key/original_name yet.
         if name:
             self._attr_name = name
+
+    def _merged_conf(self):
+        return {**(self.coordinator.entry.data or {}), **(self.coordinator.entry.options or {})}
+
+    def _resolved_switch(self, key: str, fallback_key: str | None = None) -> str | None:
+        conf = self._merged_conf()
+        entity_id = self.coordinator._resolve_external_actuator_entity(conf, key)
+        if not entity_id and fallback_key:
+            entity_id = self.coordinator._resolve_external_actuator_entity(conf, fallback_key)
+        return entity_id
     @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, self.coordinator.entry.entry_id)}, "name": self.coordinator.entry.data.get("name"), "manufacturer": MANUFACTURER}
@@ -38,7 +48,9 @@ class PoolMainSwitch(PoolBaseSwitch):
         demo = self.coordinator.entry.data.get(CONF_DEMO_MODE, False)
         if demo:
             return
-        await self.hass.services.async_call("switch", "turn_on", {"entity_id": self.coordinator.entry.data.get(CONF_MAIN_SWITCH)})
+        entity_id = self._resolved_switch(CONF_MAIN_SWITCH)
+        if entity_id:
+            await self.hass.services.async_call("switch", "turn_on", {"entity_id": entity_id})
     async def async_turn_off(self, **kwargs):
         demo = self.coordinator.entry.data.get(CONF_DEMO_MODE, False)
         # don't turn off main while bathing
@@ -46,7 +58,9 @@ class PoolMainSwitch(PoolBaseSwitch):
             return
         if demo:
             return
-        await self.hass.services.async_call("switch", "turn_off", {"entity_id": self.coordinator.entry.data.get(CONF_MAIN_SWITCH)})
+        entity_id = self._resolved_switch(CONF_MAIN_SWITCH)
+        if entity_id:
+            await self.hass.services.async_call("switch", "turn_off", {"entity_id": entity_id})
 
 
 class PoolPumpSwitch(PoolBaseSwitch):
@@ -64,8 +78,9 @@ class PoolPumpSwitch(PoolBaseSwitch):
         demo = self.coordinator.entry.data.get(CONF_DEMO_MODE, False)
         if demo:
             return
-        entity_id = self.coordinator.entry.data.get(CONF_PUMP_SWITCH) or self.coordinator.entry.data.get(CONF_MAIN_SWITCH)
-        await self.hass.services.async_call("switch", "turn_on", {"entity_id": entity_id})
+        entity_id = self._resolved_switch(CONF_PUMP_SWITCH, fallback_key=CONF_MAIN_SWITCH)
+        if entity_id:
+            await self.hass.services.async_call("switch", "turn_on", {"entity_id": entity_id})
 
     async def async_turn_off(self, **kwargs):
         demo = self.coordinator.entry.data.get(CONF_DEMO_MODE, False)
@@ -74,8 +89,9 @@ class PoolPumpSwitch(PoolBaseSwitch):
             return
         if demo:
             return
-        entity_id = self.coordinator.entry.data.get(CONF_PUMP_SWITCH) or self.coordinator.entry.data.get(CONF_MAIN_SWITCH)
-        await self.hass.services.async_call("switch", "turn_off", {"entity_id": entity_id})
+        entity_id = self._resolved_switch(CONF_PUMP_SWITCH, fallback_key=CONF_MAIN_SWITCH)
+        if entity_id:
+            await self.hass.services.async_call("switch", "turn_off", {"entity_id": entity_id})
 
 class PoolAuxSwitch(PoolBaseSwitch):
     _attr_translation_key = "aux"
@@ -85,7 +101,7 @@ class PoolAuxSwitch(PoolBaseSwitch):
 
     @property
     def is_on(self):
-        aux_switch_id = self.coordinator.entry.data.get(CONF_AUX_HEATING_SWITCH)
+        aux_switch_id = self._resolved_switch(CONF_AUX_HEATING_SWITCH)
         if not aux_switch_id:
             return False
         st = self.coordinator.hass.states.get(aux_switch_id)
@@ -95,7 +111,7 @@ class PoolAuxSwitch(PoolBaseSwitch):
         demo = self.coordinator.entry.data.get(CONF_DEMO_MODE, False)
         if demo:
             return
-        aux_switch_id = self.coordinator.entry.data.get(CONF_AUX_HEATING_SWITCH)
+        aux_switch_id = self._resolved_switch(CONF_AUX_HEATING_SWITCH)
         if aux_switch_id:
             await self.hass.services.async_call("switch", "turn_on", {"entity_id": aux_switch_id})
 
@@ -103,7 +119,7 @@ class PoolAuxSwitch(PoolBaseSwitch):
         demo = self.coordinator.entry.data.get(CONF_DEMO_MODE, False)
         if demo:
             return
-        aux_switch_id = self.coordinator.entry.data.get(CONF_AUX_HEATING_SWITCH)
+        aux_switch_id = self._resolved_switch(CONF_AUX_HEATING_SWITCH)
         if aux_switch_id:
             await self.hass.services.async_call("switch", "turn_off", {"entity_id": aux_switch_id})
 
@@ -126,7 +142,7 @@ class PoolAuxAllowedSwitch(PoolBaseSwitch):
         self.coordinator.aux_allowed = False
         self.coordinator.aux_enabled = False
         demo = self.coordinator.entry.data.get(CONF_DEMO_MODE, False)
-        aux_switch_id = self.coordinator.entry.data.get(CONF_AUX_HEATING_SWITCH)
+        aux_switch_id = self._resolved_switch(CONF_AUX_HEATING_SWITCH)
         if not demo and aux_switch_id:
             await self.hass.services.async_call("switch", "turn_off", {"entity_id": aux_switch_id})
         await self.coordinator.async_request_refresh()
