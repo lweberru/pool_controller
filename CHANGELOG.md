@@ -2,6 +2,14 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.8.1] - 2026-06-19
+- Release update.
+
+
+## [2.8.1] - 2026-06-19
+- Rate Limit one time ignore when activating dynamic target temp
+
+
 ## [2.8.0] - 2026-06-16
 - Stabilisiert Chemie-Empfehlungen mit historienbasierter Median-Logik statt Einzelmessungen
 - Blockiert Alkalinitäts-Aktionen während/kurz nach Baden, Chloren, Boost, Pause und bei Messsprung-Cooldown

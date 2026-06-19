@@ -33,6 +33,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self.target_temp_weather_offset = 0.0
         self.target_temp_profile = "off"
         self._dynamic_target_last_calc = None
+        self._dynamic_target_prev_enabled = False
         self._last_should_main_on = None
         self._last_should_pump_on = None
         self._last_should_aux_on = None
@@ -979,6 +980,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         base = self._clamp(float(getattr(self, "target_temp", DEFAULT_TARGET_TEMP)), min_t, max_t)
         enabled = bool(conf.get(CONF_ENABLE_DYNAMIC_TARGET, DEFAULT_ENABLE_DYNAMIC_TARGET))
         if not enabled:
+            self._dynamic_target_prev_enabled = False
             return {
                 "enabled": False,
                 "base": base,
@@ -1117,6 +1119,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
         raw_total_offset = self._clamp(season_offset + weather_offset, offset_min, offset_max)
 
+        # When dynamic target is re-enabled, apply the freshly computed offset immediately
+        # so the user sees the correct value without a long rate-limited ramp from 0.
+        re_enabled = not bool(getattr(self, "_dynamic_target_prev_enabled", False))
+
         try:
             alpha = float(conf.get(CONF_DYNAMIC_TARGET_EMA_ALPHA, DEFAULT_DYNAMIC_TARGET_EMA_ALPHA))
         except Exception:
@@ -1129,7 +1135,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         max_step_h = max(0.0, max_step_h)
 
         prev = self._num_or_none(getattr(self, "target_temp_offset", None))
-        if prev is None or self._dynamic_target_last_calc is None:
+        if re_enabled or prev is None or self._dynamic_target_last_calc is None:
             smooth_offset = raw_total_offset
         else:
             dt_s = max(1.0, float((now - self._dynamic_target_last_calc).total_seconds()))
@@ -1141,6 +1147,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         smooth_offset = self._clamp(float(smooth_offset), offset_min, offset_max)
 
         effective = self._clamp(base + smooth_offset, min_t, max_t)
+        self._dynamic_target_prev_enabled = True
 
         return {
             "enabled": True,
