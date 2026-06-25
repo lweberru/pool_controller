@@ -212,6 +212,10 @@ OPT_KEY_MAINTENANCE_ACTIVE = "maintenance_active"
 # This is independent from maintenance mode.
 OPT_KEY_HVAC_ENABLED = "hvac_enabled"
 
+# Runtime master-enable for auxiliary heating (toggle switch state).
+# Falls back to CONF_ENABLE_AUX_HEATING when absent.
+OPT_KEY_AUX_ALLOWED = "aux_allowed"
+
 # Manual mode (read-only): integration observes state but does not control actuators.
 OPT_KEY_MANUAL_MODE_ACTIVE = "manual_mode_active"
 

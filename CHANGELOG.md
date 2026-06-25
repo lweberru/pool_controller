@@ -2,6 +2,10 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.8.2] - 2026-06-25
+- Fix for auto enable of aux_allowed
+
+
 ## [2.8.1] - 2026-06-19
 - Release update.
 

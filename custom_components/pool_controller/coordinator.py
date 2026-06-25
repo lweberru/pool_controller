@@ -43,7 +43,12 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         # Master-Enable für Zusatzheizung (aux allowed): vom gemergten config/options lesen (default: False)
         try:
             merged = {**(entry.data or {}), **(entry.options or {})} if entry else {}
-            self.aux_allowed = bool(merged.get(CONF_ENABLE_AUX_HEATING, False))
+            aux_feature_enabled = bool(merged.get(CONF_ENABLE_AUX_HEATING, False))
+            persisted_aux_allowed = merged.get(OPT_KEY_AUX_ALLOWED)
+            if persisted_aux_allowed is None:
+                self.aux_allowed = aux_feature_enabled
+            else:
+                self.aux_allowed = aux_feature_enabled and bool(persisted_aux_allowed)
             # Backward-compatible alias (legacy internal name)
             self.aux_enabled = self.aux_allowed
         except Exception:
@@ -2112,8 +2117,18 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                         return fallback
                 return configured
 
-            # Ensure aux_allowed is always a boolean (defensive)
-            self.aux_allowed = bool(getattr(self, "aux_allowed", getattr(self, "aux_enabled", False)))
+            # Keep aux_allowed in sync with persisted options.
+            aux_feature_enabled = bool(
+                conf.get(
+                    CONF_ENABLE_AUX_HEATING,
+                    getattr(self, "aux_allowed", getattr(self, "aux_enabled", False)),
+                )
+            )
+            persisted_aux_allowed = conf.get(OPT_KEY_AUX_ALLOWED)
+            if persisted_aux_allowed is None:
+                self.aux_allowed = aux_feature_enabled
+            else:
+                self.aux_allowed = aux_feature_enabled and bool(persisted_aux_allowed)
             # Keep legacy alias in sync
             self.aux_enabled = self.aux_allowed
 

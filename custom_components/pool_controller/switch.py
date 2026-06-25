@@ -3,6 +3,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers import entity_registry as er
 from .const import DOMAIN, MANUFACTURER, CONF_MAIN_SWITCH, CONF_PUMP_SWITCH, CONF_AUX_HEATING_SWITCH
 from .const import CONF_DEMO_MODE
+from .const import OPT_KEY_AUX_ALLOWED
 
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
@@ -132,15 +133,28 @@ class PoolAuxAllowedSwitch(PoolBaseSwitch):
     def is_on(self):
         # Zeigt Master-Enable-Status, nicht den physischen Schalter
         return self.coordinator.aux_allowed
+
+    async def _async_persist_aux_allowed(self, allowed: bool) -> None:
+        try:
+            new_opts = {**(self.coordinator.entry.options or {})}
+            new_opts[OPT_KEY_AUX_ALLOWED] = bool(allowed)
+            await self.coordinator._async_update_entry_options(new_opts)
+        except Exception:
+            # Best effort: runtime state still changes even if persistence fails.
+            pass
+
     async def async_turn_on(self, **kwargs):
         # Aktiviere Master-Enable für Zusatzheizung
         self.coordinator.aux_allowed = True
         self.coordinator.aux_enabled = True
+        await self._async_persist_aux_allowed(True)
         await self.coordinator.async_request_refresh()
+
     async def async_turn_off(self, **kwargs):
         # Deaktiviere Master-Enable und schalte physischen Schalter sofort aus
         self.coordinator.aux_allowed = False
         self.coordinator.aux_enabled = False
+        await self._async_persist_aux_allowed(False)
         demo = self.coordinator.entry.data.get(CONF_DEMO_MODE, False)
         aux_switch_id = self._resolved_switch(CONF_AUX_HEATING_SWITCH)
         if not demo and aux_switch_id:
