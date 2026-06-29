@@ -1,0 +1,112 @@
+sequence:
+  - variables:
+      result:
+        whirlpool_status: >-
+          {% set climate = 'climate.whirlpool' %}
+          {% set run_reason = states('sensor.whirlpool_laufgrund') %}
+          {% set heat_reason = states('sensor.whirlpool_heizgrund') %}
+          {% set ph = states('sensor.whirlpool_ph') %}
+          {% set chlor = states('sensor.whirlpool_chlor_mv') %}
+          {% set tds_status = states('sensor.whirlpool_tds_status') %}
+          {% set tds_val = states('sensor.whirlpool_tds_2') %}
+          {% set manual_timer = states('sensor.whirlpool_manueller_timer_min') %}
+          {% set auto_filter_timer = states('sensor.whirlpool_auto_filter_timer_min') %}
+          {% set pause_timer = states('sensor.whirlpool_pause_timer_min') %}
+          {% set frost_timer = states('sensor.whirlpool_frost_timer_min') %}
+          {% set current_temp = state_attr(climate, 'current_temperature') %}
+          {% set target_temp_effective = states('sensor.whirlpool_target_temp_effective') %}
+          {% set target_temp = target_temp_effective if target_temp_effective not in ['unknown', 'unavailable', 'none', ''] else state_attr(climate, 'temperature') %}
+          {% set pump_on = is_state('binary_sensor.whirlpool_pumpe_an', 'on') or is_state('switch.whirlpool_pumpe', 'on') %}
+          {% set main_on = is_state('binary_sensor.whirlpool_hauptschalter_an', 'on') or is_state('switch.whirlpool_stromversorgung', 'on') %}
+          {% set ph_known = ph not in ['unknown', 'unavailable', 'none', ''] %}
+          {% set chlor_known = chlor not in ['unknown', 'unavailable', 'none', ''] %}
+          {% set ph_num = ph | float(0) %}
+          {% set chlor_num = chlor | float(0) %}
+
+          {% set reason_map = {
+            'idle': 'zurzeit kein aktiver Grund',
+            'bathing': 'wegen Baden',
+            'chlorine': 'wegen Chlorprogramm',
+            'filter': 'wegen Filterlauf',
+            'preheat': 'weil vorgeheizt wird',
+            'pv': 'weil genug Solarstrom da ist',
+            'frost': 'wegen Frostschutz',
+            'pause': 'wegen Pause',
+            'maintenance': 'wegen Wartung',
+            'power_saving': 'wegen Stromsparen'
+          } %}
+          {% set heat_map = {
+            'off': 'Heizung ist aus.',
+            'disabled': 'Heizung ist gesperrt.',
+            'bathing': 'Heizung läuft für Baden.',
+            'preheat': 'Heizung läuft zum Vorheizen.',
+            'pv': 'Heizung läuft mit Solarstrom.',
+            'power_saving': 'Heizung läuft im Stromsparmodus.'
+          } %}
+
+          {% if current_temp not in ['unknown', 'unavailable', 'none', ''] %}
+          Die Wassertemperatur ist {{ current_temp }} Grad{% if target_temp not in ['unknown', 'unavailable', 'none', ''] %}; das Ziel sind {{ target_temp }} Grad{% endif %}.
+          {% endif %}
+
+          {% if pump_on or main_on %}
+          Der Whirlpool ist gerade an.
+          {% if run_reason not in ['unknown', 'unavailable', 'none', 'idle', ''] %}
+          Er läuft {{ reason_map.get(run_reason, 'aus folgendem Grund: ' ~ run_reason) }}.
+          {% endif %}
+          {% else %}
+          Der Whirlpool ist gerade aus.
+          {% endif %}
+          {% if heat_reason not in ['unknown', 'unavailable', 'none', 'off', ''] %}
+          {{ heat_map.get(heat_reason, 'Heizgrund: ' ~ heat_reason ~ '.') }}
+          {% endif %}
+
+          Wasserwerte:
+          {% if not ph_known %}
+          Der pH-Wert ist derzeit nicht verfügbar.
+          {% elif ph_num < 6.8 %}
+          Der pH-Wert ist deutlich zu niedrig ({{ ph }}).
+          {% elif ph_num < 7.0 %}
+          Der pH-Wert ist leicht zu niedrig ({{ ph }}).
+          {% elif ph_num <= 7.4 %}
+          Der pH-Wert liegt im optimalen Bereich ({{ ph }}).
+          {% elif ph_num <= 7.6 %}
+          Der pH-Wert ist minimal erhöht ({{ ph }}).
+          {% else %}
+          Der pH-Wert ist deutlich erhöht ({{ ph }}).
+          {% endif %}
+
+          {% if not chlor_known %}
+          Der Chlorgehalt ist derzeit nicht verfügbar.
+          {% elif chlor_num < 400 %}
+          Der Chlorgehalt ist zu niedrig ({{ chlor }} mV).
+          {% elif chlor_num < 550 %}
+          Der Chlorgehalt ist etwas niedrig ({{ chlor }} mV).
+          {% elif chlor_num <= 750 %}
+          Der Chlorgehalt liegt im optimalen Bereich ({{ chlor }} mV).
+          {% elif chlor_num <= 850 %}
+          Der Chlorgehalt ist etwas erhöht ({{ chlor }} mV).
+          {% else %}
+          Der Chlorgehalt ist deutlich erhöht ({{ chlor }} mV).
+          {% endif %}
+
+          {% if tds_status not in ['unknown', 'unavailable', 'none', '', 'ok', 'good', 'normal', 'optimal', 'in_ordnung', 'in ordnung'] %}
+          TDS ist auffällig: {{ tds_status }}{% if tds_val not in ['unknown', 'unavailable', 'none', ''] %} ({{ tds_val }} ppm){% endif %}.
+          {% endif %}
+
+          {% if manual_timer not in ['unknown', 'unavailable', 'none', '0', 0, ''] and (manual_timer | int(0)) > 0 %}
+          Es läuft noch ein manueller Timer für {{ manual_timer }} Minuten.
+          {% endif %}
+          {% if auto_filter_timer not in ['unknown', 'unavailable', 'none', '0', 0, ''] and (auto_filter_timer | int(0)) > 0 %}
+          Es läuft noch der automatische Filter-Timer für {{ auto_filter_timer }} Minuten.
+          {% endif %}
+          {% if pause_timer not in ['unknown', 'unavailable', 'none', '0', 0, ''] and (pause_timer | int(0)) > 0 %}
+          Es läuft noch ein Pausen-Timer für {{ pause_timer }} Minuten.
+          {% endif %}
+          {% if frost_timer not in ['unknown', 'unavailable', 'none', '0', 0, ''] and (frost_timer | int(0)) > 0 %}
+          Es läuft noch der Frostschutz für {{ frost_timer }} Minuten.
+          {% endif %}
+  - stop: ""
+    response_variable: result
+alias: LLM Script zur Ermittlung des Zustands des Whirlpools
+description: Ermittelt den aktuellen Zustand des Whirlpools in einfacher Sprache
+icon: mdi:pool-thermometer

@@ -19,7 +19,7 @@ target_effective = target_base + offset_total
 offset_total = clamp(offset_season + offset_weather, min_offset, max_offset)
 ```
 
-The implementation is intentionally conservative and disabled by default:
+The implementation is intentionally balanced and disabled by default:
 
 - `enable_dynamic_target = false`
 - Behavior is unchanged when disabled.
@@ -41,12 +41,12 @@ Defaults:
 - Spring: `+2.0°C`
 - Summer: `-4.5°C`
 - Autumn: `+1.0°C`
-- Total clamp: `[-4.5°C, +4.0°C]`
+- Total clamp: `[-6.5°C, +5.0°C]`
 
 ### 2. Weather contribution
 
 If a weather entity is configured, a weather-based correction is added.
-The contribution is limited by `dynamic_target_weather_max_offset` (default `±2.0°C`).
+The contribution is limited by `dynamic_target_weather_max_offset` (default `±3.0°C`).
 
 Supported weighted inputs:
 
@@ -59,8 +59,8 @@ Supported weighted inputs:
 
 Default weights:
 
-- Temp: `0.45`
-- Feels-like: `0.20`
+- Temp: `0.55`
+- Feels-like: `0.30`
 - Wind: `0.15`
 - UV: `0.10`
 - Cloud: `0.10`
@@ -70,7 +70,7 @@ Default weights:
 
 To avoid aggressive jumps:
 
-- EMA smoothing with `dynamic_target_ema_alpha` (default `0.12`)
+- EMA smoothing with `dynamic_target_ema_alpha` (default `0.20`)
 - Rate limit with `dynamic_target_max_step_per_hour` (default `1.0°C/h`)
 
 This keeps UI and actuator behavior stable even with noisy weather feeds.

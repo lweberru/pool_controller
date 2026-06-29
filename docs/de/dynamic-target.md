@@ -19,7 +19,7 @@ target_effective = target_base + offset_total
 offset_total = clamp(offset_season + offset_weather, min_offset, max_offset)
 ```
 
-Das Feature ist bewusst konservativ und standardmäßig deaktiviert:
+Das Feature ist bewusst ausgewogen und standardmäßig deaktiviert:
 
 - `enable_dynamic_target = false`
 - Bei deaktiviertem Feature bleibt das bisherige Verhalten erhalten.
@@ -41,12 +41,12 @@ Defaults:
 - Frühling: `+2.0°C`
 - Sommer: `-4.5°C`
 - Herbst: `+1.0°C`
-- Gesamtgrenzen: `[-4.5°C, +4.0°C]`
+- Gesamtgrenzen: `[-6.5°C, +5.0°C]`
 
 ### 2. Wetteranteil
 
 Wenn eine Wetter-Entity gesetzt ist, wird ein zusätzlicher wetterbasierter Korrekturwert berechnet.
-Der Wetteranteil wird über `dynamic_target_weather_max_offset` begrenzt (Default `±2.0°C`).
+Der Wetteranteil wird über `dynamic_target_weather_max_offset` begrenzt (Default `±3.0°C`).
 
 Unterstützte gewichtete Eingänge:
 
@@ -59,8 +59,8 @@ Unterstützte gewichtete Eingänge:
 
 Default-Gewichte:
 
-- Temperatur: `0.45`
-- Gefühlt: `0.20`
+- Temperatur: `0.55`
+- Gefühlt: `0.30`
 - Wind: `0.15`
 - UV: `0.10`
 - Wolken: `0.10`
@@ -70,7 +70,7 @@ Default-Gewichte:
 
 Zur Vermeidung harter Sprünge:
 
-- EMA-Glättung mit `dynamic_target_ema_alpha` (Default `0.12`)
+- EMA-Glättung mit `dynamic_target_ema_alpha` (Default `0.20`)
 - Änderungsbegrenzung mit `dynamic_target_max_step_per_hour` (Default `1.0°C/h`)
 
 Damit bleiben UI und Aktorverhalten auch bei unruhigen Wetterdaten stabil.

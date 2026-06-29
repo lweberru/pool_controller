@@ -2,6 +2,10 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.8.3] - 2026-06-29
+- Fix for effective targeting defaults and docu
+
+
 ## [2.8.2] - 2026-06-25
 - Fix for auto enable of aux_allowed
 
