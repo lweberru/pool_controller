@@ -357,6 +357,7 @@
                     "basic": "Base",
                     "switches": "Interrupteurs & puissance",
                     "water_quality": "Qualité de l’eau",
+                    "sensor_health": "Disponibilité des capteurs",
                     "sanitizer": "Désinfection",
                     "sanitizer_product": "Produit désinfectant",
                     "chemistry": "Estimation chimique",
@@ -426,6 +427,21 @@
                     "chlorine_sensor": "Capteur redox pour la mesure du chlore (mV)",
                     "salt_sensor": "Capteur du taux de sel",
                     "tds_sensor": "Capteur TDS / conductivité"
+                }
+            },
+            "sensor_health": {
+                "title": "Surveillance de disponibilité des capteurs",
+                "description": "Optionnel : surveille si l'infrastructure de mesure est joignable. Laissez désactivé si votre installation n'en a pas besoin.",
+                "submit": "Suivant",
+                "data": {
+                    "enable_sensor_health": "Activer la surveillance des capteurs",
+                    "sensor_health_esp32_device": "Appareil ESP32",
+                    "sensor_health_water_sensor": "Disponibilité du capteur d'eau"
+                },
+                "data_description": {
+                    "enable_sensor_health": "Affiche un problème lorsque l'ESP32 ou le capteur d'eau configuré n'est pas joignable.",
+                    "sensor_health_esp32_device": "Appareil optionnel qui fournit les mesures de la piscine. Il est considéré comme joignable lorsqu'au moins une entité de cet appareil est disponible.",
+                    "sensor_health_water_sensor": "Binary sensor optionnel allumé lorsque le capteur d'eau (par exemple BlueRiiot) est joignable."
                 }
             },
             "sanitizer": {

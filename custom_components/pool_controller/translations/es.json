@@ -357,6 +357,7 @@
                     "basic": "Básico",
                     "switches": "Interruptores y potencia",
                     "water_quality": "Calidad del agua",
+                    "sensor_health": "Disponibilidad de sensores",
                     "sanitizer": "Desinfección",
                     "sanitizer_product": "Producto desinfectante",
                     "chemistry": "Estimación química",
@@ -426,6 +427,21 @@
                     "chlorine_sensor": "Sensor redox para medición de cloro (mV)",
                     "salt_sensor": "Sensor de nivel de sal",
                     "tds_sensor": "Sensor de TDS / conductividad"
+                }
+            },
+            "sensor_health": {
+                "title": "Supervisión de disponibilidad de sensores",
+                "description": "Opcional: supervisa si la infraestructura de medición está disponible. Déjalo desactivado si tu instalación no lo necesita.",
+                "submit": "Siguiente",
+                "data": {
+                    "enable_sensor_health": "Activar supervisión de sensores",
+                    "sensor_health_esp32_device": "Dispositivo ESP32",
+                    "sensor_health_water_sensor": "Disponibilidad del sensor de agua"
+                },
+                "data_description": {
+                    "enable_sensor_health": "Muestra un problema cuando el ESP32 o el sensor de agua configurado no está disponible.",
+                    "sensor_health_esp32_device": "Dispositivo opcional que proporciona las mediciones de la piscina. Se considera disponible cuando al menos una entidad de este dispositivo está disponible.",
+                    "sensor_health_water_sensor": "Binary sensor opcional que está encendido cuando el sensor de agua (por ejemplo BlueRiiot) está disponible."
                 }
             },
             "sanitizer": {

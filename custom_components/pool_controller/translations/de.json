@@ -357,6 +357,7 @@
                     "basic": "Basis",
                     "switches": "Schalter & Leistung",
                     "water_quality": "Wasserqualität",
+                    "sensor_health": "Sensor-Erreichbarkeit",
                     "sanitizer": "Desinfektion",
                     "sanitizer_product": "Desinfektionsmittel",
                     "chemistry": "Chemie-Schätzung",
@@ -426,6 +427,21 @@
                     "chlorine_sensor": "Redox-Sensor für Chlor-Messung in mV",
                     "salt_sensor": "Salzgehalt-Sensor für Salzwasserpools",
                     "tds_sensor": "Leitfähigkeits-Sensor (TDS) für Wasserqualität"
+                }
+            },
+            "sensor_health": {
+                "title": "Überwachung der Sensor-Erreichbarkeit",
+                "description": "Optional: überwacht, ob die Mess-Infrastruktur erreichbar ist. Deaktiviert lassen, wenn dein Setup das nicht benötigt.",
+                "submit": "Weiter",
+                "data": {
+                    "enable_sensor_health": "Sensor-Erreichbarkeit überwachen",
+                    "sensor_health_esp32_device": "ESP32-Gerät",
+                    "sensor_health_water_sensor": "Erreichbarkeit des Wassersensors"
+                },
+                "data_description": {
+                    "enable_sensor_health": "Zeigt eine Störung, wenn der konfigurierte ESP32 oder Wassersensor nicht erreichbar ist.",
+                    "sensor_health_esp32_device": "Optionales Gerät, das die Pool-Messwerte bereitstellt. Es gilt als erreichbar, wenn mindestens eine Entity dieses Geräts verfügbar ist.",
+                    "sensor_health_water_sensor": "Optionaler Binary-Sensor, der eingeschaltet ist, wenn der Wassersensor (z.B. BlueRiiot) erreichbar ist."
                 }
             },
             "sanitizer": {

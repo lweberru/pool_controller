@@ -338,6 +338,7 @@
           "basic": "Basic settings",
           "switches": "Switches & power",
           "water_quality": "Water quality",
+          "sensor_health": "Sensor reachability",
           "sanitizer": "Sanitizer",
           "chemistry": "Chemistry estimation",
           "climate": "Temperature control",
@@ -406,6 +407,21 @@
           "chlorine_sensor": "Redox sensor for chlorine measurement in mV",
           "salt_sensor": "Salt content sensor for saltwater pools",
           "tds_sensor": "Conductivity sensor (TDS) for water quality"
+        }
+      },
+      "sensor_health": {
+        "title": "Sensor reachability monitoring",
+        "description": "Optional: monitors whether the measurement infrastructure is reachable. Leave disabled if your setup does not need it.",
+        "submit": "Continue",
+        "data": {
+          "enable_sensor_health": "Enable sensor reachability monitoring",
+          "sensor_health_esp32_device": "ESP32 device",
+          "sensor_health_water_sensor": "Water sensor reachability"
+        },
+        "data_description": {
+          "enable_sensor_health": "Shows a problem when the configured ESP32 or water sensor is unreachable.",
+          "sensor_health_esp32_device": "Optional device that provides the pool measurement values. The integration treats it as reachable when at least one entity of this device is available.",
+          "sensor_health_water_sensor": "Optional binary sensor that is on when the water sensor (for example BlueRiiot) is reachable."
         }
       },
       "sanitizer": {
