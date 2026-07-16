@@ -18,6 +18,9 @@ Die konkreten Entity-IDs hängen vom Namen deiner Instanz ab. Die Integration ve
 | `binary_sensor.<pool>_away_active` | Away-Modus aktiv |
 | `binary_sensor.<pool>_power_saving_active` | Stromsparmodus aktiv |
 | `binary_sensor.<pool>_power_saving_available` | Stromsparmodus verfügbar, also alle nötigen Sensoren und Signale vorhanden |
+| `binary_sensor.<pool>_sensor_health_problem` | Überwachung der Sensor-Erreichbarkeit meldet eine Störung |
+| `binary_sensor.<pool>_sensor_health_esp32_reachable` | Konfiguriertes ESP32-Gerät ist erreichbar |
+| `binary_sensor.<pool>_sensor_health_water_sensor_reachable` | Konfigurierter Erreichbarkeitssensor des Wassersensors ist an |
 | `binary_sensor.<pool>_should_main_on` | Stromversorgung sollte eingeschaltet sein |
 | `binary_sensor.<pool>_should_pump_on` | Umwälzpumpe sollte eingeschaltet sein |
 | `binary_sensor.<pool>_main_switch_on` | Physischer Hauptschalter ist aktuell EIN |
@@ -36,6 +39,8 @@ Die konkreten Entity-IDs hängen vom Namen deiner Instanz ab. Die Integration ve
 | `sensor.<pool>_status` | Enum | Aktueller Zustand: `normal`, `paused`, `frost_protection`, `maintenance`, `away`, `power_saving` |
 | `sensor.<pool>_run_reason` | Enum | Warum der Pool gerade läuft: `idle`, `bathing`, `chlorine`, `filter`, `preheat`, `pv`, `frost`, `pause`, `maintenance`, `power_saving` |
 | `sensor.<pool>_heat_reason` | Enum | Warum Heizen erlaubt oder aktiv ist: `off`, `disabled`, `bathing`, `preheat`, `pv`, `power_saving` |
+| `sensor.<pool>_sensor_health_status` | Enum | Optionaler Status der Sensor-Erreichbarkeit: `disabled`, `unknown`, `ok`, `problem` |
+| `sensor.<pool>_sensor_health_message` | Enum | Detail zur Sensor-Erreichbarkeit, z. B. `water_sensor_unreachable` |
 | `sensor.<pool>_run_credit_source` | Enum | Aktuelle Credit-Quelle, falls gerade eine Serie läuft |
 | `sensor.<pool>_run_credit_minutes` | Integer | Anrechenbare Minuten aus der aktuellen Serie |
 | `sensor.<pool>_filter_credit_minutes` | Integer | Effektive Filter-Credit-Minuten |
@@ -153,6 +158,8 @@ Die Integration stellt Schnellaktions-Buttons bereit, jeweils mit der Standardda
 - `sensor.pool_next_event` für das nächste Kalenderereignis
 - `sensor.pool_run_reason` für den aktuellen Laufgrund
 - `sensor.pool_heat_reason` für die Freigabe des Heizens
+- `sensor.pool_sensor_health_status` für den optionalen Erreichbarkeitsstatus von ESP32 und Wassersensor
+- `binary_sensor.pool_sensor_health_problem` als Störungssignal der Mess-Infrastruktur
 - `sensor.pool_run_credit_source` für die aktuelle Credit-Quelle
 - `sensor.pool_run_credit_minutes` für die aktuellen Credit-Minuten
 - `sensor.pool_filter_credit_minutes` für den effektiven Filter-Credit

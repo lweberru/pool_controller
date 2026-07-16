@@ -29,6 +29,11 @@ Configure only if using ESP32 + Blueriiot:
 - **Salt Sensor**: Salt concentration (g/L) - optional
 - **Conductivity Sensor**: µS/cm - optional
 
+### Step 3b: Sensor Reachability Monitoring (Optional)
+- **Enable sensor reachability monitoring**: shows a diagnostic problem if the configured measurement infrastructure is unavailable
+- **ESP32 device**: optional device that provides the pool measurements; reachable when at least one of its entities is available
+- **Water sensor reachability**: optional binary sensor that is `on` when the water sensor, for example BlueRiiot, is reachable
+
 ### Step 4: Sanitizer / Disinfection
 Pool Controller supports different disinfection styles and adapts some water-quality interpretation accordingly.
 

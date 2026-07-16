@@ -18,6 +18,9 @@ Entity IDs depend on your instance name, but the integration uses stable suffix 
 | `binary_sensor.<pool>_away_active` | Away mode active |
 | `binary_sensor.<pool>_power_saving_active` | Power-saving mode active |
 | `binary_sensor.<pool>_power_saving_available` | Power-saving mode available (required sensors/signals present) |
+| `binary_sensor.<pool>_sensor_health_problem` | Sensor reachability monitoring detected a problem |
+| `binary_sensor.<pool>_sensor_health_esp32_reachable` | Configured ESP32 device is reachable |
+| `binary_sensor.<pool>_sensor_health_water_sensor_reachable` | Configured water sensor reachability binary sensor is on |
 | `binary_sensor.<pool>_should_main_on` | Power supply should be on |
 | `binary_sensor.<pool>_should_pump_on` | Circulation pump should be on |
 | `binary_sensor.<pool>_main_switch_on` | Physical main switch is currently ON (mirrors the configured external switch state) |
@@ -36,6 +39,8 @@ Entity IDs depend on your instance name, but the integration uses stable suffix 
 | `sensor.<pool>_status` | Enum | Current state: `normal`, `paused`, `frost_protection`, `maintenance`, `away`, `power_saving` |
 | `sensor.<pool>_run_reason` | Enum | Why the pool is running right now: `idle`, `bathing`, `chlorine`, `filter`, `preheat`, `pv`, `frost`, `pause`, `maintenance`, `power_saving` |
 | `sensor.<pool>_heat_reason` | Enum | Why heating is allowed/active: `off`, `disabled`, `bathing`, `preheat`, `pv`, `power_saving` |
+| `sensor.<pool>_sensor_health_status` | Enum | Optional sensor reachability status: `disabled`, `unknown`, `ok`, `problem` |
+| `sensor.<pool>_sensor_health_message` | Enum | Detail for sensor reachability, e.g. `water_sensor_unreachable` |
 | `sensor.<pool>_run_credit_source` | Enum | Current credit source (if a streak is active) |
 | `sensor.<pool>_run_credit_minutes` | Integer | Minutes credited from the current streak |
 | `sensor.<pool>_filter_credit_minutes` | Integer | Effective filter credit minutes |
@@ -153,6 +158,8 @@ The integration provides four quick-action buttons (one per topic, using the def
 - `sensor.pool_next_event` - Next calendar event
 - `sensor.pool_run_reason` - Why the pool is running (idle/bathing/filter/chlorine/preheat/pv/frost/boost/manual/...)
 - `sensor.pool_heat_reason` - Why heating is allowed (off/disabled/bathing/preheat/pv/boost)
+- `sensor.pool_sensor_health_status` - Optional reachability status for ESP32 / water sensor monitoring
+- `binary_sensor.pool_sensor_health_problem` - Problem flag for measurement infrastructure reachability
 - `sensor.pool_run_credit_source` - Current credit source (if any)
 - `sensor.pool_run_credit_minutes` - Current credited minutes
 - `sensor.pool_filter_credit_minutes` - Effective filter credit

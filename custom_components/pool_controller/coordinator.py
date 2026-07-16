@@ -2117,6 +2117,38 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                         return fallback
                 return configured
 
+            def _entity_reachable(entity_id: str | None) -> bool | None:
+                if not entity_id:
+                    return None
+                state = self.hass.states.get(entity_id)
+                if state is None:
+                    return False
+                raw = str(state.state or "").strip().lower()
+                if raw in ("unknown", "unavailable"):
+                    return False
+                if raw in ("on", "home", "connected", "true", "1"):
+                    return True
+                if raw in ("off", "not_home", "disconnected", "false", "0"):
+                    return False
+                return True
+
+            def _device_reachable(device_id: str | None) -> bool | None:
+                if not device_id or not ent_reg:
+                    return None
+                try:
+                    entries = er.async_entries_for_device(ent_reg, device_id, include_disabled_entities=False)
+                except Exception:
+                    entries = []
+                seen = False
+                for entry in entries:
+                    state = self.hass.states.get(entry.entity_id)
+                    if state is None:
+                        continue
+                    seen = True
+                    if str(state.state or "").strip().lower() not in ("unknown", "unavailable"):
+                        return True
+                return False if seen else None
+
             # Keep aux_allowed in sync with persisted options.
             aux_feature_enabled = bool(
                 conf.get(
@@ -2181,6 +2213,30 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             # Sensoren
             water_temp = self._get_float(conf.get(CONF_TEMP_WATER))
             outdoor_temp = self._get_float(conf.get(CONF_TEMP_OUTDOOR))
+
+            sensor_health_enabled = bool(conf.get(CONF_ENABLE_SENSOR_HEALTH, DEFAULT_ENABLE_SENSOR_HEALTH))
+            sensor_health_esp32_ok = None
+            sensor_health_water_sensor_ok = None
+            sensor_health_status = "disabled"
+            sensor_health_message = "disabled"
+            if sensor_health_enabled:
+                sensor_health_esp32_ok = _device_reachable(conf.get(CONF_SENSOR_HEALTH_ESP32_DEVICE))
+                sensor_health_water_sensor_ok = _entity_reachable(conf.get(CONF_SENSOR_HEALTH_WATER_SENSOR))
+                monitored = [v for v in (sensor_health_esp32_ok, sensor_health_water_sensor_ok) if v is not None]
+                if not monitored:
+                    sensor_health_status = "unknown"
+                    sensor_health_message = "not_configured"
+                elif any(v is False for v in monitored):
+                    sensor_health_status = "problem"
+                    if sensor_health_esp32_ok is False and sensor_health_water_sensor_ok is False:
+                        sensor_health_message = "esp32_and_water_sensor_unreachable"
+                    elif sensor_health_esp32_ok is False:
+                        sensor_health_message = "esp32_unreachable"
+                    else:
+                        sensor_health_message = "water_sensor_unreachable"
+                else:
+                    sensor_health_status = "ok"
+                    sensor_health_message = "ok"
 
             dynamic_target = await self._compute_dynamic_target(conf, water_temp, outdoor_temp, now)
             self.target_temp_effective = float(dynamic_target.get("effective", self.target_temp))
@@ -4041,6 +4097,11 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "power_saving_available": bool(power_saving_available),
                 "power_saving_stage": int(power_saving_stage),
                 "power_saving_reason": power_saving_reason,
+                "sensor_health_status": sensor_health_status,
+                "sensor_health_message": sensor_health_message,
+                "sensor_health_problem": sensor_health_status == "problem",
+                "sensor_health_esp32_reachable": sensor_health_esp32_ok,
+                "sensor_health_water_sensor_reachable": sensor_health_water_sensor_ok,
                 "dynamic_target_enabled": bool(dynamic_target.get("enabled", False)),
                 "dynamic_target_profile": self.target_temp_profile,
                 "target_temp_base": round(target_temp_base, 2),

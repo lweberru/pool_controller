@@ -57,6 +57,21 @@
                     "tds_sensor": "Leitfähigkeitssensor (TDS)"
                 }
             },
+            "sensor_health": {
+                "title": "Überwachung der Sensor-Erreichbarkeit",
+                "description": "Optional: überwacht, ob die Mess-Infrastruktur erreichbar ist. Deaktiviert lassen, wenn dein Setup das nicht benötigt.",
+                "submit": "Weiter",
+                "data": {
+                    "enable_sensor_health": "Sensor-Erreichbarkeit überwachen",
+                    "sensor_health_esp32_device": "ESP32-Gerät",
+                    "sensor_health_water_sensor": "Erreichbarkeit des Wassersensors"
+                },
+                "data_description": {
+                    "enable_sensor_health": "Zeigt eine Störung, wenn der konfigurierte ESP32 oder Wassersensor nicht erreichbar ist.",
+                    "sensor_health_esp32_device": "Optionales Gerät, das die Pool-Messwerte bereitstellt. Es gilt als erreichbar, wenn mindestens eine Entity dieses Geräts verfügbar ist.",
+                    "sensor_health_water_sensor": "Optionaler Binary-Sensor, der eingeschaltet ist, wenn der Wassersensor (z.B. BlueRiiot) erreichbar ist."
+                }
+            },
             "sanitizer": {
                 "title": "Desinfektion",
                 "description": "Desinfektionsmodus auswählen.",
@@ -708,6 +723,15 @@
             "maintenance_active": {
                 "name": "Wartung aktiv"
             },
+            "sensor_health_problem": {
+                "name": "Sensor-Erreichbarkeit gestört"
+            },
+            "sensor_health_esp32_reachable": {
+                "name": "ESP32 erreichbar"
+            },
+            "sensor_health_water_sensor_reachable": {
+                "name": "Wassersensor erreichbar"
+            },
             "away_active": {
                 "name": "Abwesend"
             },
@@ -798,6 +822,12 @@
             },
             "heat_reason": {
                 "name": "Heizgrund"
+            },
+            "sensor_health_status": {
+                "name": "Sensor-Erreichbarkeit"
+            },
+            "sensor_health_message": {
+                "name": "Sensor-Erreichbarkeit Detail"
             },
             "run_credit_source": {
                 "name": "Gutschrift-Quelle"

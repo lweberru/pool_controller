@@ -57,6 +57,21 @@
                     "tds_sensor": "Sensor de conductividad (TDS) para calidad del agua"
                 }
             },
+            "sensor_health": {
+                "title": "Supervisión de disponibilidad de sensores",
+                "description": "Opcional: supervisa si la infraestructura de medición está disponible. Déjalo desactivado si tu instalación no lo necesita.",
+                "submit": "Continuar",
+                "data": {
+                    "enable_sensor_health": "Activar supervisión de sensores",
+                    "sensor_health_esp32_device": "Dispositivo ESP32",
+                    "sensor_health_water_sensor": "Disponibilidad del sensor de agua"
+                },
+                "data_description": {
+                    "enable_sensor_health": "Muestra un problema cuando el ESP32 o el sensor de agua configurado no está disponible.",
+                    "sensor_health_esp32_device": "Dispositivo opcional que proporciona las mediciones de la piscina. Se considera disponible cuando al menos una entidad de este dispositivo está disponible.",
+                    "sensor_health_water_sensor": "Binary sensor opcional que está encendido cuando el sensor de agua (por ejemplo BlueRiiot) está disponible."
+                }
+            },
             "sanitizer": {
                 "title": "Desinfección",
                 "description": "Elige el modo de desinfección.",
@@ -708,6 +723,15 @@
             "maintenance_active": {
                 "name": "Modo de mantenimiento"
             },
+            "sensor_health_problem": {
+                "name": "Problema de disponibilidad de sensores"
+            },
+            "sensor_health_esp32_reachable": {
+                "name": "ESP32 disponible"
+            },
+            "sensor_health_water_sensor_reachable": {
+                "name": "Sensor de agua disponible"
+            },
             "away_active": {
                 "name": "Ausente"
             },
@@ -798,6 +822,12 @@
             },
             "heat_reason": {
                 "name": "Motivo de calefacción"
+            },
+            "sensor_health_status": {
+                "name": "Disponibilidad de sensores"
+            },
+            "sensor_health_message": {
+                "name": "Detalle de disponibilidad de sensores"
             },
             "run_credit_source": {
                 "name": "Origen de crédito"

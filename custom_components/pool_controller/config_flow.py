@@ -63,6 +63,14 @@ def _water_quality_schema(curr: dict | None = None):
         vol.Optional(CONF_TDS_SENSOR, default=c.get(CONF_TDS_SENSOR, DEFAULT_TDS_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
     })
 
+def _sensor_health_schema(curr: dict | None = None):
+    c = curr or {}
+    return vol.Schema({
+        vol.Optional(CONF_ENABLE_SENSOR_HEALTH, default=c.get(CONF_ENABLE_SENSOR_HEALTH, DEFAULT_ENABLE_SENSOR_HEALTH)): bool,
+        vol.Optional(CONF_SENSOR_HEALTH_ESP32_DEVICE, default=c.get(CONF_SENSOR_HEALTH_ESP32_DEVICE, "")): selector.DeviceSelector(selector.DeviceSelectorConfig()),
+        vol.Optional(CONF_SENSOR_HEALTH_WATER_SENSOR, default=c.get(CONF_SENSOR_HEALTH_WATER_SENSOR, "")): selector.EntitySelector(selector.EntitySelectorConfig(domain="binary_sensor")),
+    })
+
 def _sanitizer_schema(default_mode):
     # returns a single-field schema for sanitizer selection; caller should pass localized `options`
     def _inner(options=None):
@@ -499,11 +507,26 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_water_quality(self, user_input=None):
         if user_input is not None:
             self.data.update(user_input)
-            return await self.async_step_sanitizer()
+            return await self.async_step_sensor_health()
 
         return self.async_show_form(
             step_id="water_quality",
             data_schema=_water_quality_schema({}),
+            last_step=False
+        )
+
+    async def async_step_sensor_health(self, user_input=None):
+        if user_input is not None:
+            normalized = dict(user_input)
+            if not bool(normalized.get(CONF_ENABLE_SENSOR_HEALTH, False)):
+                normalized[CONF_SENSOR_HEALTH_ESP32_DEVICE] = ""
+                normalized[CONF_SENSOR_HEALTH_WATER_SENSOR] = ""
+            self.data.update(normalized)
+            return await self.async_step_sanitizer()
+
+        return self.async_show_form(
+            step_id="sensor_health",
+            data_schema=_sensor_health_schema({}),
             last_step=False
         )
 
@@ -762,6 +785,7 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
                 "basic",
                 "switches",
                 "water_quality",
+                "sensor_health",
                 "sanitizer",
                 "sanitizer_product",
                 "chemistry",
@@ -827,12 +851,31 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
             self.options.update(user_input)
             if self._menu_mode:
                 return self.async_create_entry(title="", data=self.options)
-            return await self.async_step_sanitizer()
+            return await self.async_step_sensor_health()
 
         curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
         return self.async_show_form(
             step_id="water_quality",
             data_schema=_water_quality_schema(curr),
+            last_step=False
+        )
+
+    async def async_step_sensor_health(self, user_input=None):
+        """Optional monitoring for measurement infrastructure reachability."""
+        if user_input is not None:
+            normalized = dict(user_input)
+            if not bool(normalized.get(CONF_ENABLE_SENSOR_HEALTH, False)):
+                normalized[CONF_SENSOR_HEALTH_ESP32_DEVICE] = ""
+                normalized[CONF_SENSOR_HEALTH_WATER_SENSOR] = ""
+            self.options.update(normalized)
+            if self._menu_mode:
+                return self.async_create_entry(title="", data=self.options)
+            return await self.async_step_sanitizer()
+
+        curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
+        return self.async_show_form(
+            step_id="sensor_health",
+            data_schema=_sensor_health_schema(curr),
             last_step=False
         )
 

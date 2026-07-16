@@ -20,6 +20,9 @@ CONF_PH_SENSOR = "ph_sensor"
 CONF_CHLORINE_SENSOR = "chlorine_sensor"
 CONF_SALT_SENSOR = "salt_sensor"
 CONF_TDS_SENSOR = "tds_sensor"
+CONF_ENABLE_SENSOR_HEALTH = "enable_sensor_health"
+CONF_SENSOR_HEALTH_ESP32_DEVICE = "sensor_health_esp32_device"
+CONF_SENSOR_HEALTH_WATER_SENSOR = "sensor_health_water_sensor"
 CONF_PV_SURPLUS_SENSOR = "pv_surplus_sensor"
 CONF_PV_HOUSE_LOAD_SENSOR = "pv_house_load_sensor"
 CONF_POOL_CALENDAR = "pool_calendar"
@@ -95,6 +98,7 @@ CONF_ENABLE_PV_OPTIMIZATION = "enable_pv_optimization"
 CONF_ENABLE_SALTWATER = "enable_saltwater"
 CONF_ENABLE_AUX_HEATING = "enable_aux_heating"
 CONF_ENABLE_FROST_PROTECTION = "enable_frost_protection"
+DEFAULT_ENABLE_SENSOR_HEALTH = False
 
 # Sanitizer / Desinfektion
 # NOTE: `CONF_ENABLE_SALTWATER` is kept for backward compatibility.

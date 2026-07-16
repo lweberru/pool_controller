@@ -29,6 +29,11 @@ Nur konfigurieren, wenn du ESP32 plus Blueriiot verwendest:
 - **Salzsensor**: Salzkonzentration in g/L, optional
 - **Leitfähigkeitssensor**: µS/cm, optional
 
+### Schritt 3b: Überwachung der Sensor-Erreichbarkeit (optional)
+- **Sensor-Erreichbarkeit überwachen**: zeigt eine Diagnose-Störung, wenn die konfigurierte Mess-Infrastruktur nicht verfügbar ist
+- **ESP32-Gerät**: optionales Gerät, das die Pool-Messwerte bereitstellt; erreichbar, wenn mindestens eine seiner Entities verfügbar ist
+- **Erreichbarkeit des Wassersensors**: optionaler Binary-Sensor, der `on` ist, wenn der Wassersensor, z. B. BlueRiiot, erreichbar ist
+
 ### Schritt 4: Desinfektion
 Pool Controller unterstützt mehrere Desinfektionsarten und passt Teile der Wasserqualitätsbewertung entsprechend an.
 

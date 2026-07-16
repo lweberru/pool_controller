@@ -2,6 +2,10 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.11.0] - 2026-07-16
+- Sensor Reachability Feature
+
+
 ## [2.8.3] - 2026-06-29
 - Fix for effective targeting defaults and docu
 

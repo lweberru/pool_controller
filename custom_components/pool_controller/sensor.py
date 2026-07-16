@@ -26,6 +26,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolStatusSensor(coordinator),
         PoolRunReasonSensor(coordinator),
         PoolHeatReasonSensor(coordinator),
+        PoolTextSensor(coordinator, "sensor_health_status", None),
+        PoolTextSensor(coordinator, "sensor_health_message", None),
         PoolTextSensor(coordinator, "run_credit_source", None),
         PoolChemSensor(coordinator, "run_credit_minutes", None, "min", "mdi:timer-sand", state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
         PoolChemSensor(coordinator, "filter_credit_minutes", None, "min", "mdi:timer-sand", state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
