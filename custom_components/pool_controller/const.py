@@ -20,6 +20,12 @@ CONF_PH_SENSOR = "ph_sensor"
 CONF_CHLORINE_SENSOR = "chlorine_sensor"
 CONF_SALT_SENSOR = "salt_sensor"
 CONF_TDS_SENSOR = "tds_sensor"
+CONF_ENABLE_BLUERIIOT = "enable_blueriiot"
+CONF_BLUERIIOT_MAC = "blueriiot_mac"
+CONF_BLUERIIOT_INTERVAL_MINUTES = "blueriiot_interval_minutes"
+CONF_BLUERIIOT_NIGHT_INTERVAL_MINUTES = "blueriiot_night_interval_minutes"
+CONF_BLUERIIOT_NIGHT_START = "blueriiot_night_start"
+CONF_BLUERIIOT_NIGHT_END = "blueriiot_night_end"
 CONF_ENABLE_SENSOR_HEALTH = "enable_sensor_health"
 CONF_SENSOR_HEALTH_ESP32_DEVICE = "sensor_health_esp32_device"
 CONF_SENSOR_HEALTH_WATER_SENSOR = "sensor_health_water_sensor"
@@ -99,6 +105,11 @@ CONF_ENABLE_SALTWATER = "enable_saltwater"
 CONF_ENABLE_AUX_HEATING = "enable_aux_heating"
 CONF_ENABLE_FROST_PROTECTION = "enable_frost_protection"
 DEFAULT_ENABLE_SENSOR_HEALTH = False
+DEFAULT_ENABLE_BLUERIIOT = False
+DEFAULT_BLUERIIOT_INTERVAL_MINUTES = 15
+DEFAULT_BLUERIIOT_NIGHT_INTERVAL_MINUTES = 60
+DEFAULT_BLUERIIOT_NIGHT_START = "22:00:00"
+DEFAULT_BLUERIIOT_NIGHT_END = "07:00:00"
 
 # Sanitizer / Desinfektion
 # NOTE: `CONF_ENABLE_SALTWATER` is kept for backward compatibility.

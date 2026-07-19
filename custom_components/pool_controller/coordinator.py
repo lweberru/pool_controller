@@ -9,6 +9,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from homeassistant.util import dt as dt_util
 from homeassistant.helpers import entity_registry as er
 from .const import *
+from .blueriiot import BlueRiiotReader
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -16,6 +17,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
     def __init__(self, hass, entry):
         self.entry = entry
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=timedelta(seconds=30))
+        self._blueriiot_reader = BlueRiiotReader(hass)
         # Target temperature: prefer persisted option, else config value, else default.
         self.target_temp = DEFAULT_TARGET_TEMP
         if entry:
@@ -940,6 +942,99 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             return float(s) if s else None
         except Exception:
             return None
+
+    @staticmethod
+    def _blueriiot_clock_minutes(value, default: str) -> int:
+        """Return a local clock time as minutes after midnight."""
+        raw_value = str(value or default)
+        try:
+            hours, minutes, *_ = raw_value.split(":")
+            hour = int(hours)
+            minute = int(minutes)
+            if 0 <= hour <= 23 and 0 <= minute <= 59:
+                return hour * 60 + minute
+        except (TypeError, ValueError):
+            pass
+        return PoolControllerDataCoordinator._blueriiot_clock_minutes(default, default)
+
+    def _blueriiot_interval_for_time(self, conf: dict, now: datetime) -> tuple[int, bool]:
+        """Select the configured day or night interval for a local time."""
+        day_interval = max(5, int(conf.get(CONF_BLUERIIOT_INTERVAL_MINUTES, DEFAULT_BLUERIIOT_INTERVAL_MINUTES)))
+        night_interval = max(5, int(conf.get(CONF_BLUERIIOT_NIGHT_INTERVAL_MINUTES, DEFAULT_BLUERIIOT_NIGHT_INTERVAL_MINUTES)))
+        night_start = self._blueriiot_clock_minutes(conf.get(CONF_BLUERIIOT_NIGHT_START), DEFAULT_BLUERIIOT_NIGHT_START)
+        night_end = self._blueriiot_clock_minutes(conf.get(CONF_BLUERIIOT_NIGHT_END), DEFAULT_BLUERIIOT_NIGHT_END)
+        current = now.hour * 60 + now.minute
+        is_night = (
+            night_start != night_end
+            and (
+                night_start <= current < night_end
+                if night_start < night_end
+                else current >= night_start or current < night_end
+            )
+        )
+        return (night_interval if is_night else day_interval), is_night
+
+    async def async_read_blueriiot_now(self) -> bool:
+        """Perform one immediate native BlueRiiot measurement when configured."""
+        conf = {**(self.entry.data or {}), **(self.entry.options or {})}
+        if not bool(conf.get(CONF_ENABLE_BLUERIIOT, DEFAULT_ENABLE_BLUERIIOT)):
+            self._blueriiot_reader.last_error = "not_enabled"
+            return False
+
+        address = str(conf.get(CONF_BLUERIIOT_MAC) or "").strip()
+        if not address:
+            self._blueriiot_reader.last_error = "not_configured"
+            return False
+
+        interval, _ = self._blueriiot_interval_for_time(conf, dt_util.now())
+        await self._blueriiot_reader.async_read_if_due(
+            address, timedelta(minutes=interval), force=True
+        )
+        return self._blueriiot_reader.last_error is None
+
+    async def _async_push_blueriiot_proxy_display(self, data: dict) -> None:
+        """Publish the coordinator snapshot to one discovered ESPHome proxy display."""
+        esphome_services = self.hass.services.async_services().get("esphome", {})
+        matching_services = [
+            service_name
+            for service_name in esphome_services
+            if service_name.endswith("_pool_controller_display")
+        ]
+        if len(matching_services) != 1:
+            return
+
+        def _display_value(key: str) -> tuple[float, bool]:
+            value = data.get(key)
+            if value is None:
+                return 0.0, False
+            try:
+                return float(value), True
+            except (TypeError, ValueError):
+                return 0.0, False
+
+        temperature, temperature_valid = _display_value("water_temp")
+        ph, ph_valid = _display_value("ph_val")
+        orp, orp_valid = _display_value("chlor_val")
+        power, power_valid = _display_value("power")
+        try:
+            await self.hass.services.async_call(
+                "esphome",
+                matching_services[0],
+                {
+                    "temperature": temperature,
+                    "temperature_valid": temperature_valid,
+                    "ph": ph,
+                    "ph_valid": ph_valid,
+                    "orp": orp,
+                    "orp_valid": orp_valid,
+                    "reachable": bool(data.get("blueriiot_connected")),
+                    "power": power,
+                    "power_valid": power_valid,
+                },
+                blocking=False,
+            )
+        except Exception:
+            _LOGGER.debug("Could not update ESPHome pool display", exc_info=True)
 
     @staticmethod
     def _clamp(value: float, low: float, high: float) -> float:
@@ -2210,9 +2305,25 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             # First run: migrate legacy timer options (best effort)
             await self.async_migrate_legacy_timers()
             
-            # Sensoren
+            # Sensors
             water_temp = self._get_float(conf.get(CONF_TEMP_WATER))
             outdoor_temp = self._get_float(conf.get(CONF_TEMP_OUTDOOR))
+
+            blueriiot_enabled = bool(conf.get(CONF_ENABLE_BLUERIIOT, DEFAULT_ENABLE_BLUERIIOT))
+            blueriiot_reading = None
+            blueriiot_interval = DEFAULT_BLUERIIOT_INTERVAL_MINUTES
+            blueriiot_night_active = False
+            if blueriiot_enabled and str(conf.get(CONF_BLUERIIOT_MAC) or "").strip():
+                try:
+                    blueriiot_interval, blueriiot_night_active = self._blueriiot_interval_for_time(conf, now)
+                    blueriiot_reading = await self._blueriiot_reader.async_read_if_due(
+                        str(conf[CONF_BLUERIIOT_MAC]).strip(), timedelta(minutes=blueriiot_interval)
+                    )
+                except Exception:
+                    _LOGGER.exception("BlueRiiot reading failed")
+
+            if blueriiot_reading is not None:
+                water_temp = blueriiot_reading.temperature
 
             sensor_health_enabled = bool(conf.get(CONF_ENABLE_SENSOR_HEALTH, DEFAULT_ENABLE_SENSOR_HEALTH))
             sensor_health_esp32_ok = None
@@ -2221,7 +2332,12 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             sensor_health_message = "disabled"
             if sensor_health_enabled:
                 sensor_health_esp32_ok = _device_reachable(conf.get(CONF_SENSOR_HEALTH_ESP32_DEVICE))
-                sensor_health_water_sensor_ok = _entity_reachable(conf.get(CONF_SENSOR_HEALTH_WATER_SENSOR))
+                if blueriiot_enabled and str(conf.get(CONF_BLUERIIOT_MAC) or "").strip():
+                    sensor_health_water_sensor_ok = self._blueriiot_reader.is_recently_reachable(
+                        timedelta(minutes=blueriiot_interval * 2)
+                    )
+                else:
+                    sensor_health_water_sensor_ok = _entity_reachable(conf.get(CONF_SENSOR_HEALTH_WATER_SENSOR))
                 monitored = [v for v in (sensor_health_esp32_ok, sensor_health_water_sensor_ok) if v is not None]
                 if not monitored:
                     sensor_health_status = "unknown"
@@ -2253,6 +2369,11 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             chlor_val = self._get_float(conf.get(CONF_CHLORINE_SENSOR))
             salt_val = self._get_float(conf.get(CONF_SALT_SENSOR))
             conductivity_val = self._get_float(conf.get(CONF_TDS_SENSOR))  # in μS/cm
+            if blueriiot_reading is not None:
+                ph_val = blueriiot_reading.ph
+                chlor_val = blueriiot_reading.orp
+                salt_val = blueriiot_reading.salt
+                conductivity_val = blueriiot_reading.conductivity
             # TDS-Umrechnung: μS/cm * 0.64 = ppm (Standard-Konversionsfaktor)
             tds_val = round(conductivity_val * 0.64) if conductivity_val else None
 
@@ -4102,6 +4223,15 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "sensor_health_problem": sensor_health_status == "problem",
                 "sensor_health_esp32_reachable": sensor_health_esp32_ok,
                 "sensor_health_water_sensor_reachable": sensor_health_water_sensor_ok,
+                "blueriiot_enabled": blueriiot_enabled,
+                "blueriiot_interval_minutes": blueriiot_interval,
+                "blueriiot_night_active": blueriiot_night_active,
+                "blueriiot_connected": self._blueriiot_reader.is_recently_reachable(
+                    timedelta(minutes=blueriiot_interval * 2)
+                ),
+                "blueriiot_last_success": self._blueriiot_reader.last_success,
+                "blueriiot_error": self._blueriiot_reader.last_error,
+                "blueriiot_battery": round(blueriiot_reading.battery, 0) if blueriiot_reading else None,
                 "dynamic_target_enabled": bool(dynamic_target.get("enabled", False)),
                 "dynamic_target_profile": self.target_temp_profile,
                 "target_temp_base": round(target_temp_base, 2),
@@ -4441,6 +4571,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             # Cache last good data for fallback
             self.data = data
             _LOGGER.debug("Coordinator cached data updated (%s)", getattr(self.entry, "entry_id", None))
+            await self._async_push_blueriiot_proxy_display(data)
             return data
         except asyncio.CancelledError:
             # Update was cancelled (e.g., overlapping refresh). Keep cached data to

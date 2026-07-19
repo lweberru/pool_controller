@@ -5,7 +5,10 @@
     "@lweberru"
   ],
   "config_flow": true,
+  "dependencies": [
+    "bluetooth"
+  ],
   "documentation": "https://github.com/lweberru/pool_controller",
   "iot_class": "local_polling",
-  "version": "2.11.1"
+  "version": "2.12.0"
 }

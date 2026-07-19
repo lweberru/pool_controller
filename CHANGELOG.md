@@ -2,6 +2,10 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.12.0] - 2026-07-19
+- Direct Integration for blueriiot connect via esp32 bluetooth proxy
+
+
 ## [2.11.1] - 2026-07-16
 - Fix for config flow
 

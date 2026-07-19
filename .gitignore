@@ -11,6 +11,7 @@ __pycache__/
 
 # Python virtual environments
 .venv/
+.esphome/
 *.json.bak
 brands/
 pool_controller.code-workspace

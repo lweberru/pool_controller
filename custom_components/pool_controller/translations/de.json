@@ -48,13 +48,27 @@
                     "chlorine_sensor": "Chlor (Redox) Sensor",
                     "salt_sensor": "Salzgehalt Sensor",
                     "tds_sensor": "Leitfähigkeit Sensor"
+                }
+            },
+            "blueriiot": {
+                "title": "BlueRiiot Bluetooth-Leser",
+                "description": "Optional: Liest BlueRiiot-Wasserwerte direkt über Home-Assistant-Bluetooth-Adapter und -Proxys.",
+                "submit": "Weiter",
+                "data": {
+                    "enable_blueriiot": "BlueRiiot direkt auslesen",
+                    "blueriiot_mac": "BlueRiiot-Bluetooth-Adresse",
+                    "blueriiot_interval_minutes": "Ausleseintervall tagsüber",
+                    "blueriiot_night_interval_minutes": "Ausleseintervall nachts",
+                    "blueriiot_night_start": "Nachtbeginn",
+                    "blueriiot_night_end": "Nachtende"
                 },
                 "data_description": {
-                    "temp_water_sensor": "Sensor für Poolwasser-Temperatur (Pflichtfeld)",
-                    "ph_sensor": "pH-Wert Sensor (Blueriiot oder ähnlich)",
-                    "chlorine_sensor": "Redox-Sensor für Chlor-Messung in mV",
-                    "salt_sensor": "Sensor für Salzgehalt (Salzwasser)",
-                    "tds_sensor": "Leitfähigkeitssensor (TDS)"
+                    "enable_blueriiot": "Bei Aktivierung haben BlueRiiot-Werte Vorrang vor den ausgewählten Wasserqualitäts-Entities.",
+                    "blueriiot_mac": "Nahe Bluetooth-Geräte werden automatisch aufgelistet. Wähle den BlueRiiot aus oder gib seine MAC-Adresse manuell ein, falls er nicht erscheint.",
+                    "blueriiot_interval_minutes": "Mindestzeit zwischen direkten Bluetooth-Auslesungen tagsüber.",
+                    "blueriiot_night_interval_minutes": "Mindestzeit zwischen direkten Bluetooth-Auslesungen nachts.",
+                    "blueriiot_night_start": "Ortszeit, zu der das Nachtintervall beginnt.",
+                    "blueriiot_night_end": "Ortszeit, zu der wieder das Tagesintervall beginnt."
                 }
             },
             "sensor_health": {
@@ -346,7 +360,10 @@
                     "solar_energy_entity_daily": "Tägliche Solarenergie, die dem Pool zugeordnet wird (kWh). Wird für Nettokosten genutzt."
                 }
             }
-        }
+        },
+        "error": {
+                "invalid_mac": "Gib eine gültige Bluetooth-MAC-Adresse ein, zum Beispiel 00:A0:50:C7:46:C9."
+            }
     },
     "options": {
         "step": {
@@ -357,6 +374,7 @@
                     "basic": "Basis",
                     "switches": "Schalter & Leistung",
                     "water_quality": "Wasserqualität",
+                    "blueriiot": "BlueRiiot Bluetooth-Leser",
                     "sensor_health": "Sensor-Erreichbarkeit",
                     "sanitizer": "Desinfektion",
                     "sanitizer_product": "Desinfektionsmittel",
@@ -427,6 +445,27 @@
                     "chlorine_sensor": "Redox-Sensor für Chlor-Messung in mV",
                     "salt_sensor": "Salzgehalt-Sensor für Salzwasserpools",
                     "tds_sensor": "Leitfähigkeits-Sensor (TDS) für Wasserqualität"
+                }
+            },
+            "blueriiot": {
+                "title": "BlueRiiot Bluetooth-Leser",
+                "description": "Optional: Liest BlueRiiot-Wasserwerte direkt über Home-Assistant-Bluetooth-Adapter und -Proxys.",
+                "submit": "Weiter",
+                "data": {
+                    "enable_blueriiot": "BlueRiiot direkt auslesen",
+                    "blueriiot_mac": "BlueRiiot-Bluetooth-Adresse",
+                    "blueriiot_interval_minutes": "Ausleseintervall tagsüber",
+                    "blueriiot_night_interval_minutes": "Ausleseintervall nachts",
+                    "blueriiot_night_start": "Nachtbeginn",
+                    "blueriiot_night_end": "Nachtende"
+                },
+                "data_description": {
+                    "enable_blueriiot": "Bei Aktivierung haben BlueRiiot-Werte Vorrang vor den ausgewählten Wasserqualitäts-Entities.",
+                    "blueriiot_mac": "Nahe Bluetooth-Geräte werden automatisch aufgelistet. Wähle den BlueRiiot aus oder gib seine MAC-Adresse manuell ein, falls er nicht erscheint.",
+                    "blueriiot_interval_minutes": "Mindestzeit zwischen direkten Bluetooth-Auslesungen tagsüber.",
+                    "blueriiot_night_interval_minutes": "Mindestzeit zwischen direkten Bluetooth-Auslesungen nachts.",
+                    "blueriiot_night_start": "Ortszeit, zu der das Nachtintervall beginnt.",
+                    "blueriiot_night_end": "Ortszeit, zu der wieder das Tagesintervall beginnt."
                 }
             },
             "sensor_health": {
@@ -748,6 +787,9 @@
             "sensor_health_water_sensor_reachable": {
                 "name": "Wassersensor erreichbar"
             },
+            "blueriiot_connected": {
+                "name": "BlueRiiot erreichbar"
+            },
             "away_active": {
                 "name": "Abwesend"
             },
@@ -827,6 +869,9 @@
             },
             "power_saving_stop": {
                 "name": "Stromsparen aus"
+            },
+            "blueriiot_read": {
+                "name": "BlueRiiot jetzt auslesen"
             }
         },
         "sensor": {
@@ -844,6 +889,15 @@
             },
             "sensor_health_message": {
                 "name": "Sensor-Erreichbarkeit Detail"
+            },
+            "blueriiot_error": {
+                "name": "BlueRiiot-Auslesefehler"
+            },
+            "blueriiot_last_success": {
+                "name": "BlueRiiot letzte erfolgreiche Auslesung"
+            },
+            "blueriiot_battery": {
+                "name": "BlueRiiot-Batterie"
             },
             "run_credit_source": {
                 "name": "Gutschrift-Quelle"

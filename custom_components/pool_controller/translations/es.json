@@ -48,13 +48,27 @@
                     "chlorine_sensor": "Sensor de cloro (redox)",
                     "salt_sensor": "Sensor de sal",
                     "tds_sensor": "Sensor de conductividad"
+                }
+            },
+            "blueriiot": {
+                "title": "Lector Bluetooth BlueRiiot",
+                "description": "Opcional: lee valores de BlueRiiot directamente mediante adaptadores y proxies Bluetooth de Home Assistant.",
+                "submit": "Continuar",
+                "data": {
+                    "enable_blueriiot": "Leer BlueRiiot directamente",
+                    "blueriiot_mac": "Dirección Bluetooth de BlueRiiot",
+                    "blueriiot_interval_minutes": "Intervalo de lectura diurno",
+                    "blueriiot_night_interval_minutes": "Intervalo de lectura nocturno",
+                    "blueriiot_night_start": "Inicio de la noche",
+                    "blueriiot_night_end": "Fin de la noche"
                 },
                 "data_description": {
-                    "temp_water_sensor": "Sensor de temperatura del agua (obligatorio)",
-                    "ph_sensor": "Sensor de pH (Blueriiot o similar)",
-                    "chlorine_sensor": "Sensor redox para medir cloro en mV",
-                    "salt_sensor": "Sensor de sal para piscinas de agua salada",
-                    "tds_sensor": "Sensor de conductividad (TDS) para calidad del agua"
+                    "enable_blueriiot": "Al activarlo, los valores de BlueRiiot tienen prioridad sobre las entidades de calidad del agua seleccionadas.",
+                    "blueriiot_mac": "Los dispositivos Bluetooth cercanos se muestran automáticamente. Selecciona el BlueRiiot o introduce su dirección MAC manualmente si no aparece.",
+                    "blueriiot_interval_minutes": "Tiempo mínimo entre lecturas Bluetooth directas durante el día.",
+                    "blueriiot_night_interval_minutes": "Tiempo mínimo entre lecturas Bluetooth directas durante la noche.",
+                    "blueriiot_night_start": "Hora local a la que comienza el intervalo nocturno.",
+                    "blueriiot_night_end": "Hora local a la que vuelve a comenzar el intervalo diurno."
                 }
             },
             "sensor_health": {
@@ -346,7 +360,10 @@
                     "solar_energy_entity_daily": "Energía solar diaria asignada al pool (kWh). Se usa para el coste neto."
                 }
             }
-        }
+        },
+        "error": {
+                "invalid_mac": "Introduce una dirección MAC Bluetooth válida, por ejemplo 00:A0:50:C7:46:C9."
+            }
     },
     "options": {
         "step": {
@@ -357,6 +374,7 @@
                     "basic": "Básico",
                     "switches": "Interruptores y potencia",
                     "water_quality": "Calidad del agua",
+                    "blueriiot": "Lector Bluetooth BlueRiiot",
                     "sensor_health": "Disponibilidad de sensores",
                     "sanitizer": "Desinfección",
                     "sanitizer_product": "Producto desinfectante",
@@ -427,6 +445,27 @@
                     "chlorine_sensor": "Sensor redox para medición de cloro (mV)",
                     "salt_sensor": "Sensor de nivel de sal",
                     "tds_sensor": "Sensor de TDS / conductividad"
+                }
+            },
+            "blueriiot": {
+                "title": "Lector Bluetooth BlueRiiot",
+                "description": "Opcional: lee valores de BlueRiiot directamente mediante adaptadores y proxies Bluetooth de Home Assistant.",
+                "submit": "Siguiente",
+                "data": {
+                    "enable_blueriiot": "Leer BlueRiiot directamente",
+                    "blueriiot_mac": "Dirección Bluetooth de BlueRiiot",
+                    "blueriiot_interval_minutes": "Intervalo de lectura diurno",
+                    "blueriiot_night_interval_minutes": "Intervalo de lectura nocturno",
+                    "blueriiot_night_start": "Inicio de la noche",
+                    "blueriiot_night_end": "Fin de la noche"
+                },
+                "data_description": {
+                    "enable_blueriiot": "Al activarlo, los valores de BlueRiiot tienen prioridad sobre las entidades de calidad del agua seleccionadas.",
+                    "blueriiot_mac": "Los dispositivos Bluetooth cercanos se muestran automáticamente. Selecciona el BlueRiiot o introduce su dirección MAC manualmente si no aparece.",
+                    "blueriiot_interval_minutes": "Tiempo mínimo entre lecturas Bluetooth directas durante el día.",
+                    "blueriiot_night_interval_minutes": "Tiempo mínimo entre lecturas Bluetooth directas durante la noche.",
+                    "blueriiot_night_start": "Hora local a la que comienza el intervalo nocturno.",
+                    "blueriiot_night_end": "Hora local a la que vuelve a comenzar el intervalo diurno."
                 }
             },
             "sensor_health": {
@@ -748,6 +787,9 @@
             "sensor_health_water_sensor_reachable": {
                 "name": "Sensor de agua disponible"
             },
+            "blueriiot_connected": {
+                "name": "BlueRiiot disponible"
+            },
             "away_active": {
                 "name": "Ausente"
             },
@@ -827,6 +869,9 @@
             },
             "power_saving_stop": {
                 "name": "Modo ahorro energético desactivado"
+            },
+            "blueriiot_read": {
+                "name": "Leer BlueRiiot ahora"
             }
         },
         "sensor": {
@@ -844,6 +889,15 @@
             },
             "sensor_health_message": {
                 "name": "Detalle de disponibilidad de sensores"
+            },
+            "blueriiot_error": {
+                "name": "Error de lectura de BlueRiiot"
+            },
+            "blueriiot_last_success": {
+                "name": "Última lectura correcta de BlueRiiot"
+            },
+            "blueriiot_battery": {
+                "name": "Batería de BlueRiiot"
             },
             "run_credit_source": {
                 "name": "Origen de crédito"

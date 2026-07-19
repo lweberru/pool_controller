@@ -1,9 +1,12 @@
 import logging
+import re
 import voluptuous as vol
 from homeassistant import config_entries
+from homeassistant.components import bluetooth
 from homeassistant.core import callback
 from homeassistant.helpers import selector, entity_registry as er
 from .const import *
+from .blueriiot import SERVICE_UUID
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -30,6 +33,20 @@ def _validate_switch_targets(hass, data: dict | None) -> dict:
         if _is_pool_controller_switch_entity(hass, payload.get(key)):
             errors[key] = "invalid_entity"
     return errors
+
+
+def _normalize_blueriiot_options(data: dict) -> tuple[dict, dict]:
+    """Normalize a configured BlueRiiot MAC address and report invalid input."""
+    normalized = dict(data)
+    if not bool(normalized.get(CONF_ENABLE_BLUERIIOT, False)):
+        return normalized, {}
+
+    address = str(normalized.get(CONF_BLUERIIOT_MAC, "")).strip().upper()
+    if not re.fullmatch(r"[0-9A-F]{2}(?::[0-9A-F]{2}){5}", address):
+        return normalized, {CONF_BLUERIIOT_MAC: "invalid_mac"}
+
+    normalized[CONF_BLUERIIOT_MAC] = address
+    return normalized, {}
 
 
 # Shared schema builders to avoid duplication between ConfigFlow and OptionsFlow
@@ -61,6 +78,78 @@ def _water_quality_schema(curr: dict | None = None):
         vol.Optional(CONF_CHLORINE_SENSOR, default=c.get(CONF_CHLORINE_SENSOR, DEFAULT_CHLOR_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
         vol.Optional(CONF_SALT_SENSOR, default=c.get(CONF_SALT_SENSOR, DEFAULT_SALT_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
         vol.Optional(CONF_TDS_SENSOR, default=c.get(CONF_TDS_SENSOR, DEFAULT_TDS_SENS)): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+    })
+
+def _blueriiot_mac_options(hass, configured_address: str) -> list[dict[str, str]]:
+    """Return nearby Bluetooth devices, with likely BlueRiiot devices first."""
+    candidates = []
+    seen_addresses = set()
+    target_service = SERVICE_UUID.lower()
+
+    for service_info in bluetooth.async_discovered_service_info(hass, connectable=True):
+        address = str(getattr(service_info, "address", "")).strip().upper()
+        if not re.fullmatch(r"[0-9A-F]{2}(?::[0-9A-F]{2}){5}", address):
+            continue
+        if address in seen_addresses:
+            continue
+        seen_addresses.add(address)
+
+        name = str(getattr(service_info, "name", "") or "Unknown Bluetooth device")
+        service_uuids = {
+            str(service_uuid).lower()
+            for service_uuid in (getattr(service_info, "service_uuids", None) or [])
+        }
+        likely_blueriiot = (
+            target_service in service_uuids
+            or "blueriiot" in name.lower()
+            or "blue connect" in name.lower()
+        )
+        rssi = getattr(service_info, "rssi", None)
+        suffix = f" ({rssi} dBm)" if isinstance(rssi, int) else ""
+        candidates.append((not likely_blueriiot, name.lower(), {
+            "value": address,
+            "label": f"{'BlueRiiot: ' if likely_blueriiot else ''}{name} ({address}){suffix}",
+        }))
+
+    configured_address = str(configured_address or "").strip().upper()
+    if re.fullmatch(r"[0-9A-F]{2}(?::[0-9A-F]{2}){5}", configured_address):
+        if configured_address not in seen_addresses:
+            candidates.append((False, "configured", {
+                "value": configured_address,
+                "label": f"Configured BlueRiiot ({configured_address})",
+            }))
+
+    return [candidate for _, _, candidate in sorted(candidates)]
+
+
+def _blueriiot_schema(hass, curr: dict | None = None):
+    c = curr or {}
+    configured_address = c.get(CONF_BLUERIIOT_MAC, "")
+    address_options = _blueriiot_mac_options(hass, configured_address)
+    default_address = configured_address
+    detected_blueriiots = [
+        option for option in address_options
+        if option["label"].startswith("BlueRiiot:")
+    ]
+    if not default_address and len(detected_blueriiots) == 1:
+        default_address = detected_blueriiots[0]["value"]
+    return vol.Schema({
+        vol.Optional(CONF_ENABLE_BLUERIIOT, default=c.get(CONF_ENABLE_BLUERIIOT, DEFAULT_ENABLE_BLUERIIOT)): bool,
+        vol.Optional(CONF_BLUERIIOT_MAC, default=default_address): selector.SelectSelector(
+            selector.SelectSelectorConfig(
+                options=address_options,
+                custom_value=True,
+                mode=selector.SelectSelectorMode.DROPDOWN,
+            )
+        ),
+        vol.Optional(CONF_BLUERIIOT_INTERVAL_MINUTES, default=c.get(CONF_BLUERIIOT_INTERVAL_MINUTES, DEFAULT_BLUERIIOT_INTERVAL_MINUTES)): selector.NumberSelector(
+            selector.NumberSelectorConfig(min=5, max=120, step=1, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="min")
+        ),
+        vol.Optional(CONF_BLUERIIOT_NIGHT_INTERVAL_MINUTES, default=c.get(CONF_BLUERIIOT_NIGHT_INTERVAL_MINUTES, DEFAULT_BLUERIIOT_NIGHT_INTERVAL_MINUTES)): selector.NumberSelector(
+            selector.NumberSelectorConfig(min=5, max=240, step=1, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="min")
+        ),
+        vol.Optional(CONF_BLUERIIOT_NIGHT_START, default=c.get(CONF_BLUERIIOT_NIGHT_START, DEFAULT_BLUERIIOT_NIGHT_START)): selector.TimeSelector(),
+        vol.Optional(CONF_BLUERIIOT_NIGHT_END, default=c.get(CONF_BLUERIIOT_NIGHT_END, DEFAULT_BLUERIIOT_NIGHT_END)): selector.TimeSelector(),
     })
 
 def _sensor_health_schema(curr: dict | None = None):
@@ -507,12 +596,25 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_water_quality(self, user_input=None):
         if user_input is not None:
             self.data.update(user_input)
-            return await self.async_step_sensor_health()
+            return await self.async_step_blueriiot()
 
         return self.async_show_form(
             step_id="water_quality",
             data_schema=_water_quality_schema({}),
             last_step=False
+        )
+
+    async def async_step_blueriiot(self, user_input=None):
+        if user_input is not None:
+            normalized, errors = _normalize_blueriiot_options(user_input)
+            if not errors:
+                self.data.update(normalized)
+                return await self.async_step_sensor_health()
+        return self.async_show_form(
+            step_id="blueriiot",
+            errors=errors if user_input is not None else {},
+            data_schema=_blueriiot_schema(self.hass, {}),
+            last_step=False,
         )
 
     async def async_step_sensor_health(self, user_input=None):
@@ -785,6 +887,7 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
                 "basic",
                 "switches",
                 "water_quality",
+                "blueriiot",
                 "sensor_health",
                 "sanitizer",
                 "sanitizer_product",
@@ -851,13 +954,31 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
             self.options.update(user_input)
             if self._menu_mode:
                 return self.async_create_entry(title="", data=self.options)
-            return await self.async_step_sensor_health()
+            return await self.async_step_blueriiot()
 
         curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
         return self.async_show_form(
             step_id="water_quality",
             data_schema=_water_quality_schema(curr),
             last_step=False
+        )
+
+    async def async_step_blueriiot(self, user_input=None):
+        """Optional native BlueRiiot reader using Home Assistant Bluetooth."""
+        if user_input is not None:
+            normalized, errors = _normalize_blueriiot_options(user_input)
+            if not errors:
+                self.options.update(normalized)
+                if self._menu_mode:
+                    return self.async_create_entry(title="", data=self.options)
+                return await self.async_step_sensor_health()
+
+        curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
+        return self.async_show_form(
+            step_id="blueriiot",
+            errors=errors if user_input is not None else {},
+            data_schema=_blueriiot_schema(self.hass, curr),
+            last_step=False,
         )
 
     async def async_step_sensor_health(self, user_input=None):

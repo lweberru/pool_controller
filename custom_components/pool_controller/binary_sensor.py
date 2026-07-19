@@ -9,6 +9,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolBinary(coordinator, "sensor_health_problem", "Sensor-Erreichbarkeit gestört", BinarySensorDeviceClass.PROBLEM),
         PoolBinary(coordinator, "sensor_health_esp32_reachable", "ESP32 erreichbar", BinarySensorDeviceClass.CONNECTIVITY),
         PoolBinary(coordinator, "sensor_health_water_sensor_reachable", "Wassersensor erreichbar", BinarySensorDeviceClass.CONNECTIVITY),
+        PoolBinary(coordinator, "blueriiot_connected", "BlueRiiot erreichbar", BinarySensorDeviceClass.CONNECTIVITY),
         PoolBinary(coordinator, "away_active", "Abwesend", None),
         PoolBinary(coordinator, "power_saving_active", "Stromsparen aktiv", None),
         PoolBinary(coordinator, "power_saving_available", "Stromsparen verfügbar", None),

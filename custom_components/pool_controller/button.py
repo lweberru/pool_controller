@@ -13,6 +13,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         AwayStopButton(coordinator),
         PowerSavingStartButton(coordinator),
         PowerSavingStopButton(coordinator),
+        BlueRiiotReadButton(coordinator),
     ])
 
 class PoolButton(CoordinatorEntity, ButtonEntity):
@@ -109,4 +110,22 @@ class PowerSavingStopButton(PoolButton):
         self._attr_unique_id = f"{coordinator.entry.entry_id}_power_saving_stop"
     async def async_press(self):
         await self.coordinator.set_power_saving(False)
+        await self.coordinator.async_request_refresh()
+
+
+class BlueRiiotReadButton(PoolButton):
+    _attr_translation_key = "blueriiot_read"
+    _attr_icon = "mdi:bluetooth-connect"
+
+    def __init__(self, coordinator):
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.entry.entry_id}_read_blueriiot"
+
+    @property
+    def available(self) -> bool:
+        merged = {**(self.coordinator.entry.data or {}), **(self.coordinator.entry.options or {})}
+        return bool(merged.get("enable_blueriiot") and merged.get("blueriiot_mac"))
+
+    async def async_press(self):
+        await self.coordinator.async_read_blueriiot_now()
         await self.coordinator.async_request_refresh()

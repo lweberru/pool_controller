@@ -1,0 +1,303 @@
+# Bluetooth-proxy profile for the Pool Controller test phase.
+#
+# This profile intentionally has no `ble_client`: Home Assistant's
+# pool_controller integration performs the proprietary BlueRiiot GATT request
+# through this proxy. The display is populated via the `pool_controller_display`
+# API action, so it does not depend on generated Home Assistant entity IDs.
+substitutions:
+  name: esp32-5
+  roomname: Garten
+  staticip: 192.168.1.205
+  my_led: GPIO14
+
+esphome:
+  name: ${name}
+  friendly_name: ${roomname} ${name}
+  name_add_mac_suffix: true
+  platformio_options:
+    board_build.flash_mode: dio
+    board_build.f_flash: 80000000L
+    board_build.arduino.memory_type: qio_opi
+    build_flags:
+      - "-D FORECAST_DAYS=5"
+      - -Wno-maybe-uninitialized
+
+esp32:
+  board: esp32-s3-devkitc-1
+  framework:
+    type: esp-idf
+    version: recommended
+  flash_size: 16MB
+  variant: ESP32S3
+
+logger:
+
+api:
+  encryption:
+    key: "hNimJNWSN5J4JnRXhKUaSl7//R/Hxz0P1QvW8foFaXs="
+  actions:
+  - action: pool_controller_display
+    variables:
+        temperature: float
+        temperature_valid: bool
+        ph: float
+        ph_valid: bool
+        orp: float
+        orp_valid: bool
+        reachable: bool
+        power: float
+        power_valid: bool
+    then:
+    - sensor.template.publish:
+          id: pool_temperature
+          state: !lambda "return temperature;"
+    - binary_sensor.template.publish:
+          id: pool_temperature_valid
+          state: !lambda "return temperature_valid;"
+    - sensor.template.publish:
+          id: pool_ph
+          state: !lambda "return ph;"
+    - binary_sensor.template.publish:
+          id: pool_ph_valid
+          state: !lambda "return ph_valid;"
+    - sensor.template.publish:
+          id: pool_orp
+          state: !lambda "return orp;"
+    - binary_sensor.template.publish:
+          id: pool_orp_valid
+          state: !lambda "return orp_valid;"
+    - binary_sensor.template.publish:
+          id: pool_blueriiot_reachable
+          state: !lambda "return reachable;"
+    - sensor.template.publish:
+          id: power
+          state: !lambda "return power;"
+    - binary_sensor.template.publish:
+          id: power_valid
+          state: !lambda "return power_valid;"
+
+ota:
+  - platform: esphome
+    password: ""
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  manual_ip:
+    static_ip: ${staticip}
+    gateway: 192.168.1.3
+    subnet: 255.255.255.0
+  ap:
+    ssid: ${name}
+    password: "Pol8GUJw7wTe"
+
+esp32_ble_tracker:
+
+esp32_ble:
+  max_connections: 2
+  connection_timeout: 20s
+
+bluetooth_proxy:
+  active: true
+  connection_slots: 2
+
+spi:
+  clk_pin: GPIO12
+  mosi_pin: GPIO11
+
+font:
+  - file: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+    id: font_mono
+    size: 15
+  - file: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"
+    id: font_mono_bold
+    size: 15
+
+color:
+  - id: color_almost_black
+    hex: "111111"
+  - id: color_white
+    hex: FFFFFF
+  - id: color_red_alert_bg
+    hex: D10000
+  - id: color_orange_alert_bg
+    hex: FF8C00
+  - id: color_green
+    hex: 14FF00
+  - id: color_yellow
+    hex: FFFF00
+
+output:
+  - platform: ledc
+    pin: GPIO7
+    id: gpio7
+    frequency: 2000
+
+light:
+  - platform: monochromatic
+    output: gpio7
+    name: "Backlight"
+    id: displaybacklight
+    icon: mdi:brightness-7
+    restore_mode: RESTORE_AND_ON
+
+sensor:
+  - platform: template
+    id: pool_temperature
+    internal: true
+
+  - platform: template
+    id: pool_ph
+    internal: true
+
+  - platform: template
+    id: pool_orp
+    internal: true
+    on_value:
+      then:
+        - sensor.template.publish:
+            id: pool_chlor_percent
+            state: !lambda |-
+              #include <algorithm>
+              return std::max(0.0f, std::min((100.0f / 350.0f) * (x - 400.0f), 150.0f));
+
+  - platform: template
+    id: pool_chlor_percent
+    internal: true
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+
+  - platform: template
+    id: power
+    internal: true
+
+  - platform: wifi_signal
+    name: "WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 60s
+    entity_category: diagnostic
+
+  - platform: copy
+    source_id: wifi_signal_db
+    name: "WiFi Signal Percent"
+    id: wifi_signal_percent
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "Signal %"
+    entity_category: diagnostic
+    device_class: ""
+
+binary_sensor:
+  - platform: template
+    id: pool_temperature_valid
+    internal: true
+
+  - platform: template
+    id: pool_ph_valid
+    internal: true
+
+  - platform: template
+    id: pool_orp_valid
+    internal: true
+
+  - platform: template
+    id: pool_blueriiot_reachable
+    internal: true
+
+  - platform: template
+    id: power_valid
+    internal: true
+
+  - platform: gpio
+    pin:
+      number: GPIO0
+      inverted: true
+    name: "Baden Button"
+    id: baden_button
+    icon: mdi:swim
+    on_press:
+      then:
+        - logger.log:
+            format: "Button pressed"
+
+button:
+  - platform: restart
+    name: "Restart"
+
+display:
+  - platform: ili9xxx
+    model: "TFT 2.4"
+    dimensions:
+      height: 240
+      width: 135
+      offset_height: 40
+      offset_width: 53
+    transform:
+      swap_xy: true
+    color_order: rgb
+    data_rate: 80MHz
+    cs_pin: GPIO10
+    dc_pin: GPIO8
+    reset_pin: GPIO9
+    invert_colors: true
+    pages:
+      - id: water
+        lambda: |-
+          it.clear();
+
+          if (id(pool_temperature_valid).state) {
+            it.printf(8, 20, id(font_mono), id(color_white), "%-6s %.1f °C", "Temp:", id(pool_temperature).state);
+          } else {
+            it.printf(8, 20, id(font_mono), id(color_white), "%-6s %s", "Temp:", "--");
+          }
+
+          float ph = id(pool_ph).state;
+          if (!id(pool_ph_valid).state) {
+            it.printf(8, 50, id(font_mono), id(color_white), "%-6s %s", "pH:", "--");
+          } else if (ph < 6.6 || ph > 8.4) {
+            it.filled_rectangle(0, 42, 135, 28, id(color_orange_alert_bg));
+            it.printf(8, 50, id(font_mono_bold), id(color_almost_black), "%-6s %.1f", "pH:", ph);
+          } else if (ph >= 7.2 && ph <= 7.6) {
+            it.printf(8, 50, id(font_mono), id(color_green), "%-6s %.1f", "pH:", ph);
+          } else {
+            it.printf(8, 50, id(font_mono), id(color_yellow), "%-6s %.1f", "pH:", ph);
+          }
+
+          float chlor_percent = id(pool_chlor_percent).state;
+          float orp_raw = id(pool_orp).state;
+          if (!id(pool_orp_valid).state) {
+            it.printf(8, 80, id(font_mono), id(color_white), "%-6s %s", "Chlor:", "--");
+          } else if (orp_raw < 400 || orp_raw > 900) {
+            it.filled_rectangle(0, 72, 135, 28, id(color_orange_alert_bg));
+            it.printf(8, 80, id(font_mono_bold), id(color_almost_black), "%-6s %.0f %%", "Chlor:", chlor_percent);
+          } else if (orp_raw >= 650 && orp_raw <= 750) {
+            it.printf(8, 80, id(font_mono), id(color_green), "%-6s %.0f %%", "Chlor:", chlor_percent);
+          } else {
+            it.printf(8, 80, id(font_mono), id(color_yellow), "%-6s %.0f %%", "Chlor:", chlor_percent);
+          }
+
+          bool is_reachable = id(pool_blueriiot_reachable).state;
+          if (!is_reachable) {
+            it.filled_rectangle(0, 102, 135, 28, id(color_red_alert_bg));
+            it.printf(8, 110, id(font_mono_bold), id(color_white), "%-6s %s", "Link:", "OFF");
+          } else {
+            it.printf(8, 110, id(font_mono), id(color_white), "%-6s %s", "Link:", "OK");
+          }
+
+          it.printf(8, 140, id(font_mono), id(color_green), "%-6s %s", "Proxy:", "ON");
+
+          float power_val = id(power).state;
+          if (id(power_valid).state) {
+            Color power_color = power_val > 0.0f ? id(color_green) : id(color_white);
+            it.printf(8, 170, id(font_mono), power_color, "%-6s %.1f W", "Power:", power_val);
+          } else {
+            it.printf(8, 170, id(font_mono), id(color_white), "%-6s %s", "Power:", "--");
+          }
+
+          float wifi = id(wifi_signal_percent).state;
+          if (wifi < 30.0f) {
+            it.filled_rectangle(0, 192, 135, 28, id(color_red_alert_bg));
+            it.printf(8, 200, id(font_mono_bold), id(color_white), "%-6s %.0f %%", "WiFi:", wifi);
+          } else {
+            it.printf(8, 200, id(font_mono), id(color_white), "%-6s %.0f %%", "WiFi:", wifi);
+          }

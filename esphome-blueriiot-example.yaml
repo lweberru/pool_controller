@@ -1,3 +1,5 @@
+# Direct-client fallback profile. This configuration owns the BlueRiiot GATT
+# connection locally and must not be used as a Bluetooth proxy at the same time.
 substitutions:
   name: esp32-5
   roomname: Garten
@@ -6,6 +8,7 @@ substitutions:
   blueriiot1_name_prefix: 'whirlpool'
   blueriiot1_id_prefix: 'p2'
   bluerioot1_write_delay: '2s'
+  blueriiot1_health_timeout: '20min'
   blueriiot_send_service_uuid: 'F3300001-F0A2-9B06-0C59-1BC4763B5C00'
   blueriiot_send_characteristic_uuid: 'F3300002-F0A2-9B06-0C59-1BC4763B5C00'
   blueriiot_recieve_service_uuid: 'F3300001-F0A2-9B06-0C59-1BC4763B5C00'
@@ -23,9 +26,6 @@ esphome:
     build_flags: 
       - "-D FORECAST_DAYS=5"
       - -Wno-maybe-uninitialized
-
-packages:
-  esphome.bluetooth-proxy: github://esphome/bluetooth-proxies/esp32-generic.yaml@main
 
 esp32:
   board: esp32-s3-devkitc-1
@@ -56,15 +56,15 @@ wifi:
     ssid: ${name}
     password: "Pol8GUJw7wTe"
 
-bluetooth_proxy:
-  active: true
-
+# BlueRiiot needs an active scan to be discovered reliably. Keep ESPHome's
+# moderate scan interval and window instead of using an almost continuous scan.
 esp32_ble_tracker:
   scan_parameters:
-    interval: 1100ms
-    window: 1100ms
     active: true
-  max_connections: 6
+
+esp32_ble:
+  max_connections: 2
+  connection_timeout: 20s
 
 globals:
   - id: timeout
@@ -196,6 +196,7 @@ color:
 ble_client:
   - mac_address: ${blueriiot1_mac}
     id: ble_client_${blueriiot1_id_prefix}
+    auto_connect: true
     on_connect: 
       then:
         - logger.log: 
@@ -215,7 +216,15 @@ switch:
     ble_client_id: ble_client_${blueriiot1_id_prefix}
     name: "${blueriiot1_name_prefix} Enable"
     id: switch_${blueriiot1_id_prefix}_enable
-    restore_mode: ALWAYS_OFF
+    restore_mode: RESTORE_DEFAULT_OFF
+
+script:
+  - id: ${blueriiot1_id_prefix}_mark_unreachable
+    mode: restart
+    then:
+      - delay: ${blueriiot1_health_timeout}
+      - lambda: |-
+          id(binary_sensor_${blueriiot1_id_prefix}_presence).publish_state(false);
     
 sensor:
   - platform: homeassistant
@@ -310,10 +319,14 @@ binary_sensor:
     device_class: connectivity
     entity_category: diagnostic
 
-  - platform: ble_presence
+  # This entity is consumed by pool_controller. A local BLE client suppresses
+  # advertisements while connected, so successful readings are more reliable
+  # than BLE advertisements as the health signal.
+  - platform: template
     id: binary_sensor_${blueriiot1_id_prefix}_presence
-    mac_address: ${blueriiot1_mac}
     name: ${blueriiot1_name_prefix} Presence
+    device_class: connectivity
+    entity_category: diagnostic
 
   - platform: gpio
     pin: 
@@ -372,6 +385,11 @@ text_sensor:
     on_notify:
       then:
         lambda: |-
+          if (x.size() < 12) {
+            ESP_LOGW("blueriiot", "Ignoring incomplete BlueRiiot payload (%u bytes)", x.size());
+            return;
+          }
+
           std::string rawhex = format_hex_pretty((uint8_t *) x.c_str(), x.size()).c_str();
           ESP_LOGD("raw_hex", "%s", rawhex.c_str());
 
@@ -400,4 +418,6 @@ text_sensor:
           ESP_LOGD("bat", "%f", bat);
           id(sensor_${blueriiot1_id_prefix}_bat).publish_state(bat);
 
+          id(binary_sensor_${blueriiot1_id_prefix}_presence).publish_state(true);
+          id(${blueriiot1_id_prefix}_mark_unreachable).execute();
           id(switch_${blueriiot1_id_prefix}_enable).turn_off();

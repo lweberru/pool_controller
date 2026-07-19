@@ -57,6 +57,27 @@
           "tds_sensor": "Conductivity sensor (TDS) for water quality"
         }
       },
+      "blueriiot": {
+        "title": "BlueRiiot Bluetooth reader",
+        "description": "Optional: reads BlueRiiot water values directly through Home Assistant Bluetooth adapters and proxies.",
+        "submit": "Continue",
+        "data": {
+          "enable_blueriiot": "Read BlueRiiot directly",
+          "blueriiot_mac": "BlueRiiot Bluetooth address",
+          "blueriiot_interval_minutes": "Daytime reading interval",
+          "blueriiot_night_interval_minutes": "Nighttime reading interval",
+          "blueriiot_night_start": "Nighttime starts",
+          "blueriiot_night_end": "Nighttime ends"
+        },
+        "data_description": {
+          "enable_blueriiot": "When enabled, BlueRiiot values take priority over the selected water-quality sensor entities.",
+          "blueriiot_mac": "Nearby Bluetooth devices are listed automatically. Select the BlueRiiot device, or enter its MAC address manually if it is not listed.",
+          "blueriiot_interval_minutes": "Minimum time between direct Bluetooth readings during the day.",
+          "blueriiot_night_interval_minutes": "Minimum time between direct Bluetooth readings at night.",
+          "blueriiot_night_start": "Local time at which the nighttime interval starts.",
+          "blueriiot_night_end": "Local time at which the daytime interval starts again."
+        }
+      },
       "sensor_health": {
         "title": "Sensor reachability monitoring",
         "description": "Optional: monitors whether the measurement infrastructure is reachable. Leave disabled if your setup does not need it.",
@@ -327,7 +348,10 @@
           "solar_energy_entity_daily": "Daily solar energy allocated to the pool (kWh). Used to compute net cost."
         }
       }
-    }
+    },
+    "error": {
+        "invalid_mac": "Enter a valid Bluetooth MAC address, for example 00:A0:50:C7:46:C9."
+      }
   },
   "options": {
     "step": {
@@ -338,6 +362,7 @@
           "basic": "Basic settings",
           "switches": "Switches & power",
           "water_quality": "Water quality",
+          "blueriiot": "BlueRiiot Bluetooth reader",
           "sensor_health": "Sensor reachability",
           "sanitizer": "Sanitizer",
           "chemistry": "Chemistry estimation",
@@ -407,6 +432,27 @@
           "chlorine_sensor": "Redox sensor for chlorine measurement in mV",
           "salt_sensor": "Salt content sensor for saltwater pools",
           "tds_sensor": "Conductivity sensor (TDS) for water quality"
+        }
+      },
+      "blueriiot": {
+        "title": "BlueRiiot Bluetooth reader",
+        "description": "Optional: reads BlueRiiot water values directly through Home Assistant Bluetooth adapters and proxies.",
+        "submit": "Submit",
+        "data": {
+          "enable_blueriiot": "Read BlueRiiot directly",
+          "blueriiot_mac": "BlueRiiot Bluetooth address",
+          "blueriiot_interval_minutes": "Daytime reading interval",
+          "blueriiot_night_interval_minutes": "Nighttime reading interval",
+          "blueriiot_night_start": "Nighttime starts",
+          "blueriiot_night_end": "Nighttime ends"
+        },
+        "data_description": {
+          "enable_blueriiot": "When enabled, BlueRiiot values take priority over the selected water-quality sensor entities.",
+          "blueriiot_mac": "Nearby Bluetooth devices are listed automatically. Select the BlueRiiot device, or enter its MAC address manually if it is not listed.",
+          "blueriiot_interval_minutes": "Minimum time between direct Bluetooth readings during the day.",
+          "blueriiot_night_interval_minutes": "Minimum time between direct Bluetooth readings at night.",
+          "blueriiot_night_start": "Local time at which the nighttime interval starts.",
+          "blueriiot_night_end": "Local time at which the daytime interval starts again."
         }
       },
       "sensor_health": {
@@ -693,6 +739,7 @@
       "sensor_health_problem": { "name": "Sensor reachability problem" },
       "sensor_health_esp32_reachable": { "name": "ESP32 reachable" },
       "sensor_health_water_sensor_reachable": { "name": "Water sensor reachable" },
+      "blueriiot_connected": { "name": "BlueRiiot reachable" },
       "away_active": { "name": "Away mode active" },
       "power_saving_active": { "name": "Power-saving mode active" },
       "power_saving_available": { "name": "Power-saving mode available" },
@@ -720,7 +767,8 @@
       "away_start": { "name": "Away on" },
       "away_stop": { "name": "Away off" },
       "power_saving_start": { "name": "Power saving on" },
-      "power_saving_stop": { "name": "Power saving off" }
+      "power_saving_stop": { "name": "Power saving off" },
+      "blueriiot_read": { "name": "Read BlueRiiot now" }
     },
     "sensor": {
       "status": { "name": "Status" },
@@ -728,6 +776,9 @@
       "heat_reason": { "name": "Heating reason" },
       "sensor_health_status": { "name": "Sensor reachability" },
       "sensor_health_message": { "name": "Sensor reachability detail" },
+      "blueriiot_error": { "name": "BlueRiiot read error" },
+      "blueriiot_last_success": { "name": "BlueRiiot last successful read" },
+      "blueriiot_battery": { "name": "BlueRiiot battery" },
       "run_credit_source": { "name": "Run credit source" },
       "run_credit_minutes": { "name": "Run credit (min)" },
       "filter_credit_minutes": { "name": "Filter credit (min)" },
