@@ -18,6 +18,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self.entry = entry
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=timedelta(seconds=30))
         self._blueriiot_reader = BlueRiiotReader(hass)
+        self._active_notification_alerts: set[str] = set()
         # Target temperature: prefer persisted option, else config value, else default.
         self.target_temp = DEFAULT_TARGET_TEMP
         if entry:
@@ -1035,6 +1036,50 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             )
         except Exception:
             _LOGGER.debug("Could not update ESPHome pool display", exc_info=True)
+
+    async def _async_notify_maintenance_alerts(self, conf: dict, data: dict) -> None:
+        """Notify once when a configured maintenance condition becomes active."""
+        notify_service = str(conf.get(CONF_NOTIFY_SERVICE) or "").strip()
+        if not notify_service:
+            self._active_notification_alerts.clear()
+            return
+
+        active_alerts: dict[str, str] = {}
+        if bool(conf.get(CONF_NOTIFY_SENSOR_HEALTH, DEFAULT_NOTIFY_SENSOR_HEALTH)):
+            if data.get("sensor_health_status") == "problem":
+                active_alerts["sensor_health"] = "Mindestens ein überwachter Pool-Sensor oder das ESP32 ist nicht erreichbar."
+
+        if bool(conf.get(CONF_NOTIFY_WATER_QUALITY, DEFAULT_NOTIFY_WATER_QUALITY)):
+            tds_status = data.get("tds_status")
+            if tds_status in {"critical", "urgent"}:
+                active_alerts["tds"] = "Die Leitfähigkeit (TDS) benötigt Aufmerksamkeit."
+            alkalinity_status = data.get("alkalinity_status")
+            if alkalinity_status in {"very_low", "low", "high", "critical_high"}:
+                active_alerts["alkalinity"] = "Die Alkalinität liegt außerhalb des empfohlenen Bereichs."
+
+        new_alert_keys = set(active_alerts) - self._active_notification_alerts
+        if not new_alert_keys:
+            self._active_notification_alerts = set(active_alerts)
+            return
+
+        if notify_service not in self.hass.services.async_services().get("notify", {}):
+            _LOGGER.warning("Configured notification service notify.%s is not available", notify_service)
+            return
+
+        messages = [active_alerts[key] for key in sorted(new_alert_keys)]
+        try:
+            await self.hass.services.async_call(
+                "notify",
+                notify_service,
+                {
+                    "title": "Pool Controller: Wartung erforderlich",
+                    "message": "\n".join(messages),
+                },
+                blocking=False,
+            )
+            self._active_notification_alerts = set(active_alerts)
+        except Exception:
+            _LOGGER.warning("Could not send pool maintenance notification", exc_info=True)
 
     @staticmethod
     def _clamp(value: float, low: float, high: float) -> float:
@@ -4572,6 +4617,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             self.data = data
             _LOGGER.debug("Coordinator cached data updated (%s)", getattr(self.entry, "entry_id", None))
             await self._async_push_blueriiot_proxy_display(data)
+            await self._async_notify_maintenance_alerts(conf, data)
             return data
         except asyncio.CancelledError:
             # Update was cancelled (e.g., overlapping refresh). Keep cached data to

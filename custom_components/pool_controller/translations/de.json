@@ -86,6 +86,21 @@
                     "sensor_health_water_sensor": "Optionaler Binary-Sensor, der eingeschaltet ist, wenn der Wassersensor (z.B. BlueRiiot) erreichbar ist."
                 }
             },
+            "notifications": {
+                "title": "Wartungsbenachrichtigungen",
+                "description": "Informiert optional eine Home-Assistant-Mobile-App, wenn ein Sensor nicht erreichbar ist oder die Wasserqualität Aufmerksamkeit benötigt. Ein Alarm wird nur beim Eintritt in den Zustand gesendet.",
+                "submit": "Weiter",
+                "data": {
+                    "notify_service": "Handy",
+                    "notify_sensor_health": "Bei nicht erreichbarem Sensor informieren",
+                    "notify_water_quality": "Über Wasserqualität informieren"
+                },
+                "data_description": {
+                    "notify_service": "Eine Mobile-App-Benachrichtigung auswählen. Deaktiviert lassen, um keine Benachrichtigungen zu senden.",
+                    "notify_sensor_health": "Informiert, wenn das konfigurierte ESP32 oder der Wassersensor nicht erreichbar ist.",
+                    "notify_water_quality": "Informiert bei kritischem TDS-Wert oder Alkalinität außerhalb des empfohlenen Bereichs."
+                }
+            },
             "sanitizer": {
                 "title": "Desinfektion",
                 "description": "Desinfektionsmodus auswählen.",
@@ -376,6 +391,7 @@
                     "water_quality": "Wasserqualität",
                     "blueriiot": "BlueRiiot Bluetooth-Leser",
                     "sensor_health": "Sensor-Erreichbarkeit",
+                    "notifications": "Wartungsbenachrichtigungen",
                     "sanitizer": "Desinfektion",
                     "sanitizer_product": "Desinfektionsmittel",
                     "chemistry": "Chemie-Schätzung",
@@ -481,6 +497,21 @@
                     "enable_sensor_health": "Zeigt eine Störung, wenn der konfigurierte ESP32 oder Wassersensor nicht erreichbar ist.",
                     "sensor_health_esp32_device": "Optionales Gerät, das die Pool-Messwerte bereitstellt. Es gilt als erreichbar, wenn mindestens eine Entity dieses Geräts verfügbar ist.",
                     "sensor_health_water_sensor": "Optionaler Binary-Sensor, der eingeschaltet ist, wenn der Wassersensor (z.B. BlueRiiot) erreichbar ist."
+                }
+            },
+            "notifications": {
+                "title": "Wartungsbenachrichtigungen",
+                "description": "Informiert optional eine Home-Assistant-Mobile-App, wenn ein Sensor nicht erreichbar ist oder die Wasserqualität Aufmerksamkeit benötigt. Ein Alarm wird nur beim Eintritt in den Zustand gesendet.",
+                "submit": "Speichern",
+                "data": {
+                    "notify_service": "Handy",
+                    "notify_sensor_health": "Bei nicht erreichbarem Sensor informieren",
+                    "notify_water_quality": "Über Wasserqualität informieren"
+                },
+                "data_description": {
+                    "notify_service": "Eine Mobile-App-Benachrichtigung auswählen. Deaktiviert lassen, um keine Benachrichtigungen zu senden.",
+                    "notify_sensor_health": "Informiert, wenn das konfigurierte ESP32 oder der Wassersensor nicht erreichbar ist.",
+                    "notify_water_quality": "Informiert bei kritischem TDS-Wert oder Alkalinität außerhalb des empfohlenen Bereichs."
                 }
             },
             "sanitizer": {

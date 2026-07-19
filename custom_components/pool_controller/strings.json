@@ -93,6 +93,21 @@
           "sensor_health_water_sensor": "Optional binary sensor that is on when the water sensor (for example BlueRiiot) is reachable."
         }
       },
+      "notifications": {
+        "title": "Maintenance notifications",
+        "description": "Optionally notify a Home Assistant mobile app when a sensor becomes unreachable or water quality needs attention. Alerts are sent once when a condition begins.",
+        "submit": "Continue",
+        "data": {
+          "notify_service": "Phone",
+          "notify_sensor_health": "Notify when a sensor is unreachable",
+          "notify_water_quality": "Notify about water quality"
+        },
+        "data_description": {
+          "notify_service": "Select a mobile app notification service. Leave disabled to send no notifications.",
+          "notify_sensor_health": "Sends an alert when the configured ESP32 or water sensor is unreachable.",
+          "notify_water_quality": "Sends an alert for critical TDS or out-of-range alkalinity values."
+        }
+      },
       "sanitizer": {
         "title": "Sanitizer",
         "description": "Choose how the pool is sanitized. For saltwater or mixed operation, you will be asked for a target salt level.",
@@ -364,6 +379,7 @@
           "water_quality": "Water quality",
           "blueriiot": "BlueRiiot Bluetooth reader",
           "sensor_health": "Sensor reachability",
+          "notifications": "Maintenance notifications",
           "sanitizer": "Sanitizer",
           "chemistry": "Chemistry estimation",
           "climate": "Temperature control",
@@ -468,6 +484,21 @@
           "enable_sensor_health": "Shows a problem when the configured ESP32 or water sensor is unreachable.",
           "sensor_health_esp32_device": "Optional device that provides the pool measurement values. The integration treats it as reachable when at least one entity of this device is available.",
           "sensor_health_water_sensor": "Optional binary sensor that is on when the water sensor (for example BlueRiiot) is reachable."
+        }
+      },
+      "notifications": {
+        "title": "Maintenance notifications",
+        "description": "Optionally notify a Home Assistant mobile app when a sensor becomes unreachable or water quality needs attention. Alerts are sent once when a condition begins.",
+        "submit": "Save",
+        "data": {
+          "notify_service": "Phone",
+          "notify_sensor_health": "Notify when a sensor is unreachable",
+          "notify_water_quality": "Notify about water quality"
+        },
+        "data_description": {
+          "notify_service": "Select a mobile app notification service. Leave disabled to send no notifications.",
+          "notify_sensor_health": "Sends an alert when the configured ESP32 or water sensor is unreachable.",
+          "notify_water_quality": "Sends an alert for critical TDS or out-of-range alkalinity values."
         }
       },
       "sanitizer": {

@@ -160,6 +160,33 @@ def _sensor_health_schema(curr: dict | None = None):
         vol.Optional(CONF_SENSOR_HEALTH_WATER_SENSOR, default=c.get(CONF_SENSOR_HEALTH_WATER_SENSOR, "")): selector.EntitySelector(selector.EntitySelectorConfig(domain="binary_sensor")),
     })
 
+
+def _notification_service_options(hass, configured_service: str) -> list[dict[str, str]]:
+    """List installed Home Assistant mobile-app notification services."""
+    services = hass.services.async_services().get("notify", {})
+    service_names = sorted(name for name in services if name.startswith("mobile_app_"))
+    configured_service = str(configured_service or "").strip()
+    if configured_service and configured_service not in service_names:
+        service_names.append(configured_service)
+    return [{"value": "", "label": "Disabled"}] + [
+        {"value": service_name, "label": service_name.removeprefix("mobile_app_").replace("_", " ").title()}
+        for service_name in service_names
+    ]
+
+
+def _notifications_schema(hass, curr: dict | None = None):
+    c = curr or {}
+    return vol.Schema({
+        vol.Optional(CONF_NOTIFY_SERVICE, default=c.get(CONF_NOTIFY_SERVICE, "")): selector.SelectSelector(
+            selector.SelectSelectorConfig(
+                options=_notification_service_options(hass, c.get(CONF_NOTIFY_SERVICE, "")),
+                mode=selector.SelectSelectorMode.DROPDOWN,
+            )
+        ),
+        vol.Optional(CONF_NOTIFY_SENSOR_HEALTH, default=c.get(CONF_NOTIFY_SENSOR_HEALTH, DEFAULT_NOTIFY_SENSOR_HEALTH)): bool,
+        vol.Optional(CONF_NOTIFY_WATER_QUALITY, default=c.get(CONF_NOTIFY_WATER_QUALITY, DEFAULT_NOTIFY_WATER_QUALITY)): bool,
+    })
+
 def _sanitizer_schema(default_mode):
     # returns a single-field schema for sanitizer selection; caller should pass localized `options`
     def _inner(options=None):
@@ -624,12 +651,22 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 normalized[CONF_SENSOR_HEALTH_ESP32_DEVICE] = ""
                 normalized[CONF_SENSOR_HEALTH_WATER_SENSOR] = ""
             self.data.update(normalized)
-            return await self.async_step_sanitizer()
+            return await self.async_step_notifications()
 
         return self.async_show_form(
             step_id="sensor_health",
             data_schema=_sensor_health_schema({}),
             last_step=False
+        )
+
+    async def async_step_notifications(self, user_input=None):
+        if user_input is not None:
+            self.data.update(user_input)
+            return await self.async_step_sanitizer()
+        return self.async_show_form(
+            step_id="notifications",
+            data_schema=_notifications_schema(self.hass, self.data),
+            last_step=False,
         )
 
     async def async_step_sanitizer(self, user_input=None):
@@ -889,6 +926,7 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
                 "water_quality",
                 "blueriiot",
                 "sensor_health",
+                "notifications",
                 "sanitizer",
                 "sanitizer_product",
                 "chemistry",
@@ -991,13 +1029,27 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
             self.options.update(normalized)
             if self._menu_mode:
                 return self.async_create_entry(title="", data=self.options)
-            return await self.async_step_sanitizer()
+            return await self.async_step_notifications()
 
         curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
         return self.async_show_form(
             step_id="sensor_health",
             data_schema=_sensor_health_schema(curr),
             last_step=False
+        )
+
+    async def async_step_notifications(self, user_input=None):
+        if user_input is not None:
+            self.options.update(user_input)
+            if self._menu_mode:
+                return self.async_create_entry(title="", data=self.options)
+            return await self.async_step_sanitizer()
+
+        curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
+        return self.async_show_form(
+            step_id="notifications",
+            data_schema=_notifications_schema(self.hass, curr),
+            last_step=False,
         )
 
     async def async_step_sanitizer(self, user_input=None):

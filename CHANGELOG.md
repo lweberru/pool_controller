@@ -2,6 +2,10 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.13.0] - 2026-07-19
+- Notify mobile device on water quality issues or sensor health topics
+
+
 ## [2.12.0] - 2026-07-19
 - Direct Integration for blueriiot connect via esp32 bluetooth proxy
 
