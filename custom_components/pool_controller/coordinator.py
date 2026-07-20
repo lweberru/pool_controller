@@ -2395,7 +2395,12 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 except Exception:
                     _LOGGER.exception("BlueRiiot reading failed")
 
-            use_blueriiot_reading = bool(blueriiot_reading is not None and blueriiot_reading_fresh)
+            use_blueriiot_reading = bool(
+                blueriiot_reading is not None
+                and self._blueriiot_reader.is_recently_reachable(
+                    timedelta(minutes=blueriiot_interval * 2)
+                )
+            )
 
             if use_blueriiot_reading:
                 water_temp = blueriiot_reading.temperature
