@@ -2,6 +2,10 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.13.1] - 2026-07-20
+- Sync scan logic with real scans by sensor
+
+
 ## [2.13.0] - 2026-07-19
 - Notify mobile device on water quality issues or sensor health topics
 

@@ -34,6 +34,13 @@ Nur konfigurieren, wenn du ESP32 plus Blueriiot verwendest:
 - **ESP32-Gerät**: optionales Gerät, das die Pool-Messwerte bereitstellt; erreichbar, wenn mindestens eine seiner Entities verfügbar ist
 - **Erreichbarkeit des Wassersensors**: optionaler Binary-Sensor, der `on` ist, wenn der Wassersensor, z. B. BlueRiiot, erreichbar ist
 
+### Schritt 3c: Wartungsbenachrichtigungen (optional)
+- **Handy**: Einen vorhandenen Dienst der Home-Assistant-Companion-App (`notify.mobile_app_*`) auswählen, zum Beispiel dein iPhone. Deaktiviert lassen, um keine Push-Benachrichtigungen zu senden.
+- **Bei nicht erreichbarem Sensor informieren**: sendet eine Nachricht, wenn das konfigurierte ESP32 oder der Wassersensor nicht mehr erreichbar ist.
+- **Über Wasserqualität informieren**: sendet eine Nachricht bei `critical` oder `urgent` TDS sowie bei Alkalinität außerhalb des empfohlenen Bereichs.
+
+Ein Alarm wird nur beim Eintritt in den Zustand versendet und nicht durch den normalen 30-Sekunden-Zyklus wiederholt. Nach einer Entwarnung erzeugt ein späteres erneutes Auftreten wieder eine Nachricht. Ist der gewählte Handy-Dienst vorübergehend nicht verfügbar, wird der Alarm nachgeholt, sobald der Dienst wieder verfügbar ist.
+
 ### Schritt 4: Desinfektion
 Pool Controller unterstützt mehrere Desinfektionsarten und passt Teile der Wasserqualitätsbewertung entsprechend an.
 

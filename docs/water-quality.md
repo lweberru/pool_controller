@@ -31,6 +31,18 @@ The integration works best with a dedicated ESP32 device running ESPHome that br
 
 See `esphome-blueriiot-example.yaml` in the repository root for a complete working example.
 
+### Recommended: Native Reading via ESPHome Bluetooth Proxy
+
+The preferred setup is `esphome-blueriiot-proxy-example.yaml`. In this profile, ESPHome acts only as a Bluetooth proxy; Pool Controller performs the proprietary BlueRiiot GATT request itself through Home Assistant Bluetooth.
+
+1. Flash `esphome-blueriiot-proxy-example.yaml` to the ESP32 and add the device to the ESPHome integration.
+2. In the Pool Controller setup or options flow, enable **Read BlueRiiot directly** and select the BlueRiiot Bluetooth address. Nearby devices are discovered automatically; a MAC address can still be entered manually.
+3. Configure the daytime and nighttime intervals. The dashboard and the `Read BlueRiiot now` button can request an immediate reading without bypassing the BLE connection lock.
+
+The proxy profile keeps the display and hardware button, but its display values are supplied by Pool Controller through an ESPHome API action. Consequently, no generated Home Assistant entity IDs need to be maintained in the YAML after an instance-name change.
+
+Do not run the proxy profile and the legacy direct `ble_client` profile for the same BlueRiiot at the same time. The old `esphome-blueriiot-example.yaml` remains available as a direct-ESPHome fallback.
+
 ```yaml
 substitutions:
   name: esp32-5

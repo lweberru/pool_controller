@@ -1050,6 +1050,28 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 active_alerts["sensor_health"] = "Mindestens ein überwachter Pool-Sensor oder das ESP32 ist nicht erreichbar."
 
         if bool(conf.get(CONF_NOTIFY_WATER_QUALITY, DEFAULT_NOTIFY_WATER_QUALITY)):
+            ph_val = data.get("ph_val")
+            if ph_val is not None:
+                try:
+                    ph_value = float(ph_val)
+                except Exception:
+                    ph_value = None
+                if ph_value is not None and (ph_value < 7.1 or ph_value > 7.4):
+                    active_alerts["ph"] = (
+                        f"Der pH-Wert liegt außerhalb des empfohlenen Bereichs (7.1-7.4): {ph_value:.2f}."
+                    )
+
+            chlor_val = data.get("chlor_val")
+            if chlor_val is not None:
+                try:
+                    chlor_value = float(chlor_val)
+                except Exception:
+                    chlor_value = None
+                if chlor_value is not None and chlor_value < 600:
+                    active_alerts["chlor"] = (
+                        f"Der Chlor-/ORP-Wert ist zu niedrig: {int(round(chlor_value))} mV."
+                    )
+
             tds_status = data.get("tds_status")
             if tds_status in {"critical", "urgent"}:
                 active_alerts["tds"] = "Die Leitfähigkeit (TDS) benötigt Aufmerksamkeit."
@@ -2358,16 +2380,24 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             blueriiot_reading = None
             blueriiot_interval = DEFAULT_BLUERIIOT_INTERVAL_MINUTES
             blueriiot_night_active = False
+            blueriiot_last_success_before = self._blueriiot_reader.last_success
+            blueriiot_reading_fresh = False
             if blueriiot_enabled and str(conf.get(CONF_BLUERIIOT_MAC) or "").strip():
                 try:
                     blueriiot_interval, blueriiot_night_active = self._blueriiot_interval_for_time(conf, now)
                     blueriiot_reading = await self._blueriiot_reader.async_read_if_due(
                         str(conf[CONF_BLUERIIOT_MAC]).strip(), timedelta(minutes=blueriiot_interval)
                     )
+                    blueriiot_reading_fresh = bool(
+                        blueriiot_reading is not None
+                        and self._blueriiot_reader.last_success != blueriiot_last_success_before
+                    )
                 except Exception:
                     _LOGGER.exception("BlueRiiot reading failed")
 
-            if blueriiot_reading is not None:
+            use_blueriiot_reading = bool(blueriiot_reading is not None and blueriiot_reading_fresh)
+
+            if use_blueriiot_reading:
                 water_temp = blueriiot_reading.temperature
 
             sensor_health_enabled = bool(conf.get(CONF_ENABLE_SENSOR_HEALTH, DEFAULT_ENABLE_SENSOR_HEALTH))
@@ -2377,7 +2407,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             sensor_health_message = "disabled"
             if sensor_health_enabled:
                 sensor_health_esp32_ok = _device_reachable(conf.get(CONF_SENSOR_HEALTH_ESP32_DEVICE))
-                if blueriiot_enabled and str(conf.get(CONF_BLUERIIOT_MAC) or "").strip():
+                if use_blueriiot_reading:
                     sensor_health_water_sensor_ok = self._blueriiot_reader.is_recently_reachable(
                         timedelta(minutes=blueriiot_interval * 2)
                     )
@@ -2414,7 +2444,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             chlor_val = self._get_float(conf.get(CONF_CHLORINE_SENSOR))
             salt_val = self._get_float(conf.get(CONF_SALT_SENSOR))
             conductivity_val = self._get_float(conf.get(CONF_TDS_SENSOR))  # in μS/cm
-            if blueriiot_reading is not None:
+            if use_blueriiot_reading:
                 ph_val = blueriiot_reading.ph
                 chlor_val = blueriiot_reading.orp
                 salt_val = blueriiot_reading.salt
@@ -2610,20 +2640,22 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             else:
                 alkalinity_measurement_reason = "insufficient_history"
 
-            self._append_chem_history_sample(
-                now=now,
-                ph_val=ph_val,
-                chlor_val=chlor_val,
-                tds_effective=tds_for_maintenance,
-                alk_raw=alkalinity_estimated_ppm_raw,
-                stable=stable_now,
-                reason=("ok" if stable_now else alkalinity_measurement_reason),
-            )
+            should_record_chem_history = not (blueriiot_reading is not None and not use_blueriiot_reading)
+            if should_record_chem_history:
+                self._append_chem_history_sample(
+                    now=now,
+                    ph_val=ph_val,
+                    chlor_val=chlor_val,
+                    tds_effective=tds_for_maintenance,
+                    alk_raw=alkalinity_estimated_ppm_raw,
+                    stable=stable_now,
+                    reason=("ok" if stable_now else alkalinity_measurement_reason),
+                )
 
-            try:
-                await self._maybe_persist_chemistry_history(now)
-            except Exception:
-                pass
+                try:
+                    await self._maybe_persist_chemistry_history(now)
+                except Exception:
+                    pass
 
             stable_samples = self._recent_chem_samples(now, profile["lookback_minutes"], stable_only=True)
             alk_stable_samples = [s for s in stable_samples if s.get("alk_raw") is not None]
@@ -4276,7 +4308,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 ),
                 "blueriiot_last_success": self._blueriiot_reader.last_success,
                 "blueriiot_error": self._blueriiot_reader.last_error,
-                "blueriiot_battery": round(blueriiot_reading.battery, 0) if blueriiot_reading else None,
+                "blueriiot_battery": round(blueriiot_reading.battery, 0) if use_blueriiot_reading else None,
                 "dynamic_target_enabled": bool(dynamic_target.get("enabled", False)),
                 "dynamic_target_profile": self.target_temp_profile,
                 "target_temp_base": round(target_temp_base, 2),

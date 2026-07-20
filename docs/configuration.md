@@ -34,6 +34,13 @@ Configure only if using ESP32 + Blueriiot:
 - **ESP32 device**: optional device that provides the pool measurements; reachable when at least one of its entities is available
 - **Water sensor reachability**: optional binary sensor that is `on` when the water sensor, for example BlueRiiot, is reachable
 
+### Step 3c: Maintenance Notifications (Optional)
+- **Phone**: choose an installed Home Assistant Companion App service (`notify.mobile_app_*`), for example your iPhone. Leave disabled to send no push notifications.
+- **Notify when a sensor is unreachable**: sends a notification when the configured ESP32 or water sensor becomes unavailable.
+- **Notify about water quality**: sends a notification for `critical` or `urgent` TDS, or for alkalinity outside the recommended range.
+
+An alert is sent only when a condition begins. It is not repeated by the normal 30-second update cycle. Once the condition has cleared, a later recurrence creates a new notification. If the selected phone service is temporarily unavailable, the alert is retried when it becomes available again.
+
 ### Step 4: Sanitizer / Disinfection
 Pool Controller supports different disinfection styles and adapts some water-quality interpretation accordingly.
 

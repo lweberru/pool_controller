@@ -52,7 +52,7 @@
             },
             "blueriiot": {
                 "title": "BlueRiiot Bluetooth-Leser",
-                "description": "Optional: Liest BlueRiiot-Wasserwerte direkt über Home-Assistant-Bluetooth-Adapter und -Proxys.",
+                "description": "Optional: Liest BlueRiiot-Wasserwerte direkt über Home-Assistant-Bluetooth-Adapter und -Proxys. Deaktiviert lassen, wenn der klassische Sensor-Fallback genutzt werden soll.",
                 "submit": "Weiter",
                 "data": {
                     "enable_blueriiot": "BlueRiiot direkt auslesen",
@@ -63,7 +63,7 @@
                     "blueriiot_night_end": "Nachtende"
                 },
                 "data_description": {
-                    "enable_blueriiot": "Bei Aktivierung haben BlueRiiot-Werte Vorrang vor den ausgewählten Wasserqualitäts-Entities.",
+                    "enable_blueriiot": "Bei Aktivierung haben frische BlueRiiot-Messungen Vorrang. Wenn keine frische Messung vorliegt, bleiben die konfigurierten klassischen Sensor-Entities als Fallback erhalten.",
                     "blueriiot_mac": "Nahe Bluetooth-Geräte werden automatisch aufgelistet. Wähle den BlueRiiot aus oder gib seine MAC-Adresse manuell ein, falls er nicht erscheint.",
                     "blueriiot_interval_minutes": "Mindestzeit zwischen direkten Bluetooth-Auslesungen tagsüber.",
                     "blueriiot_night_interval_minutes": "Mindestzeit zwischen direkten Bluetooth-Auslesungen nachts.",
@@ -88,7 +88,7 @@
             },
             "notifications": {
                 "title": "Wartungsbenachrichtigungen",
-                "description": "Informiert optional eine Home-Assistant-Mobile-App, wenn ein Sensor nicht erreichbar ist oder die Wasserqualität Aufmerksamkeit benötigt. Ein Alarm wird nur beim Eintritt in den Zustand gesendet.",
+                "description": "Informiert optional eine Home-Assistant-Mobile-App, wenn ein Sensor nicht erreichbar ist oder die Wasserqualität Aufmerksamkeit benötigt. Ein Alarm wird nur beim Eintritt in den Zustand gesendet, inklusive pH- und Chlor/ORP-Warnungen.",
                 "submit": "Weiter",
                 "data": {
                     "notify_service": "Handy",
@@ -98,7 +98,7 @@
                 "data_description": {
                     "notify_service": "Eine Mobile-App-Benachrichtigung auswählen. Deaktiviert lassen, um keine Benachrichtigungen zu senden.",
                     "notify_sensor_health": "Informiert, wenn das konfigurierte ESP32 oder der Wassersensor nicht erreichbar ist.",
-                    "notify_water_quality": "Informiert bei kritischem TDS-Wert oder Alkalinität außerhalb des empfohlenen Bereichs."
+                    "notify_water_quality": "Informiert bei kritischem TDS-Wert, Alkalinität außerhalb des empfohlenen Bereichs, niedrigem pH oder niedrigem Chlor/ORP-Wert."
                 }
             },
             "sanitizer": {

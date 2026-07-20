@@ -52,7 +52,7 @@
             },
             "blueriiot": {
                 "title": "Lecteur Bluetooth BlueRiiot",
-                "description": "Optionnel : lit les valeurs BlueRiiot directement via les adaptateurs et proxys Bluetooth de Home Assistant.",
+                "description": "Optionnel : lit les valeurs BlueRiiot directement via les adaptateurs et proxys Bluetooth de Home Assistant. Laissez-le désactivé pour conserver le repli classique basé sur les capteurs.",
                 "submit": "Continuer",
                 "data": {
                     "enable_blueriiot": "Lire BlueRiiot directement",
@@ -63,7 +63,7 @@
                     "blueriiot_night_end": "Fin de la nuit"
                 },
                 "data_description": {
-                    "enable_blueriiot": "Lorsqu'il est activé, les valeurs BlueRiiot sont prioritaires sur les entités de qualité de l'eau sélectionnées.",
+                    "enable_blueriiot": "Lorsqu'il est activé, les lectures BlueRiiot fraîches sont prioritaires. Si aucune lecture fraîche n'est disponible, les entités de capteurs classiques configurées restent le repli.",
                     "blueriiot_mac": "Les appareils Bluetooth proches sont listés automatiquement. Sélectionnez le BlueRiiot ou saisissez son adresse MAC manuellement s'il n'apparaît pas.",
                     "blueriiot_interval_minutes": "Temps minimal entre deux lectures Bluetooth directes le jour.",
                     "blueriiot_night_interval_minutes": "Temps minimal entre deux lectures Bluetooth directes la nuit.",
@@ -88,7 +88,7 @@
             },
             "notifications": {
                 "title": "Notifications de maintenance",
-                "description": "Informe facultativement une application mobile Home Assistant lorsqu'un capteur est indisponible ou que la qualité de l'eau nécessite une attention. Les alertes sont envoyées une seule fois lorsqu'une condition commence.",
+                "description": "Informe facultativement une application mobile Home Assistant lorsqu'un capteur est indisponible ou que la qualité de l'eau nécessite une attention. Les alertes sont envoyées une seule fois lorsqu'une condition commence, y compris pour le pH et le chlore/ORP.",
                 "submit": "Continuer",
                 "data": {
                     "notify_service": "Téléphone",
@@ -98,7 +98,7 @@
                 "data_description": {
                     "notify_service": "Sélectionnez un service de notification d'application mobile. Laissez désactivé pour ne pas envoyer de notifications.",
                     "notify_sensor_health": "Envoie une alerte lorsque l'ESP32 configuré ou le capteur d'eau est indisponible.",
-                    "notify_water_quality": "Envoie une alerte pour un TDS critique ou une alcalinité hors de la plage recommandée."
+                    "notify_water_quality": "Envoie une alerte pour un TDS critique, une alcalinité hors de la plage recommandée, un pH bas ou un chlore/ORP bas."
                 }
             },
             "sanitizer": {

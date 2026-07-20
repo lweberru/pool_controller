@@ -59,7 +59,7 @@
       },
       "blueriiot": {
         "title": "BlueRiiot Bluetooth reader",
-        "description": "Optional: reads BlueRiiot water values directly through Home Assistant Bluetooth adapters and proxies.",
+        "description": "Optional: reads BlueRiiot water values directly through Home Assistant Bluetooth adapters and proxies. Leave this off to keep the classic sensor-based fallback.",
         "submit": "Continue",
         "data": {
           "enable_blueriiot": "Read BlueRiiot directly",
@@ -70,7 +70,7 @@
           "blueriiot_night_end": "Nighttime ends"
         },
         "data_description": {
-          "enable_blueriiot": "When enabled, BlueRiiot values take priority over the selected water-quality sensor entities.",
+          "enable_blueriiot": "When enabled, fresh BlueRiiot reads take priority. If no fresh read is available, the configured classic sensor entities remain the fallback.",
           "blueriiot_mac": "Nearby Bluetooth devices are listed automatically. Select the BlueRiiot device, or enter its MAC address manually if it is not listed.",
           "blueriiot_interval_minutes": "Minimum time between direct Bluetooth readings during the day.",
           "blueriiot_night_interval_minutes": "Minimum time between direct Bluetooth readings at night.",
@@ -95,7 +95,7 @@
       },
       "notifications": {
         "title": "Maintenance notifications",
-        "description": "Optionally notify a Home Assistant mobile app when a sensor becomes unreachable or water quality needs attention. Alerts are sent once when a condition begins.",
+        "description": "Optionally notify a Home Assistant mobile app when a sensor becomes unreachable or water quality needs attention. Alerts are sent once when a condition begins, including pH and chlorine/ORP warnings.",
         "submit": "Continue",
         "data": {
           "notify_service": "Phone",
@@ -105,7 +105,7 @@
         "data_description": {
           "notify_service": "Select a mobile app notification service. Leave disabled to send no notifications.",
           "notify_sensor_health": "Sends an alert when the configured ESP32 or water sensor is unreachable.",
-          "notify_water_quality": "Sends an alert for critical TDS or out-of-range alkalinity values."
+          "notify_water_quality": "Sends an alert for critical TDS, out-of-range alkalinity, low pH, or low chlorine/ORP values."
         }
       },
       "sanitizer": {
