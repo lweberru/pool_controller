@@ -2,6 +2,10 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.13.2] - 2026-07-20
+- Fix for blueriiot config flow
+
+
 ## [2.13.1] - 2026-07-20
 - Sync scan logic with real scans by sensor
 

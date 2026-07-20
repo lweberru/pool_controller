@@ -119,7 +119,9 @@ def _blueriiot_mac_options(hass, configured_address: str) -> list[dict[str, str]
                 "label": f"Configured BlueRiiot ({configured_address})",
             }))
 
-    return [candidate for _, _, candidate in sorted(candidates)]
+    return [candidate for _, _, candidate in sorted(
+        candidates, key=lambda candidate: (candidate[0], candidate[1], candidate[2]["value"])
+    )]
 
 
 def _blueriiot_schema(hass, curr: dict | None = None):
