@@ -26,7 +26,9 @@
                     "enable_aux_heating": "Habilitar calefactor auxiliar",
                     "aux_heating_switch": "Interruptor del calefactor auxiliar",
                     "main_power_sensor": "Sensor de potencia principal",
-                    "aux_power_sensor": "Sensor de potencia del calefactor auxiliar"
+                    "aux_power_sensor": "Sensor de potencia del calefactor auxiliar",
+                    "heater_base_power_w": "Potencia base de calefacción (W)",
+                    "heater_aux_power_w": "Potencia del calentador auxiliar (W)"
                 },
                 "data_description": {
                     "main_switch": "Interruptor principal / alimentación de la piscina (obligatorio)",
@@ -35,12 +37,14 @@
                     "enable_aux_heating": "Habilita el calefactor auxiliar para calentar más rápido",
                     "aux_heating_switch": "Interruptor del calefactor auxiliar eléctrico",
                     "main_power_sensor": "Sensor de potencia de la bomba principal en vatios",
-                    "aux_power_sensor": "Sensor de potencia del calefactor en vatios"
+                    "aux_power_sensor": "Sensor de potencia del calefactor en vatios",
+                    "heater_base_power_w": "Contribución base (p. ej. calor residual de la bomba) usada para estimar el precalentamiento.",
+                    "heater_aux_power_w": "Potencia nominal del calentador auxiliar (W) usada para estimar el precalentamiento cuando la calefacción auxiliar está activada. Total = base + auxiliar."
                 }
             },
             "water_quality": {
                 "title": "Calidad del agua",
-                "description": "Selecciona sensores de temperatura y (opcionalmente) química.",
+                "description": "Selecciona sensores clásicos de temperatura y química. Déjalo vacío cuando la lectura directa de BlueRiiot esté activada.",
                 "submit": "Continuar",
                 "data": {
                     "temp_water_sensor": "Temperatura del agua",
@@ -48,6 +52,13 @@
                     "chlorine_sensor": "Sensor de cloro (redox)",
                     "salt_sensor": "Sensor de sal",
                     "tds_sensor": "Sensor de conductividad"
+                },
+                "data_description": {
+                    "temp_water_sensor": "Optional pool water temperature sensor when direct BlueRiiot reading is not used",
+                    "ph_sensor": "pH value sensor (Blueriiot or similar)",
+                    "chlorine_sensor": "Redox sensor for chlorine measurement in mV",
+                    "salt_sensor": "Salt content sensor for saltwater pools",
+                    "tds_sensor": "Conductivity sensor (TDS) for water quality"
                 }
             },
             "blueriiot": {
@@ -81,7 +92,7 @@
                     "sensor_health_water_sensor": "Disponibilidad del sensor de agua"
                 },
                 "data_description": {
-                    "enable_sensor_health": "Muestra un problema cuando el ESP32 o el sensor de agua configurado no está disponible.",
+                    "enable_sensor_health": "Muestra un problema cuando la infraestructura de medición configurada no está disponible. Con lectura directa de BlueRiiot se usa el estado interno del lector.",
                     "sensor_health_esp32_device": "Dispositivo opcional que proporciona las mediciones de la piscina. Se considera disponible cuando al menos una entidad de este dispositivo está disponible.",
                     "sensor_health_water_sensor": "Binary sensor opcional que está encendido cuando el sensor de agua (por ejemplo BlueRiiot) está disponible."
                 }
@@ -103,13 +114,15 @@
             },
             "sanitizer": {
                 "title": "Desinfección",
-                "description": "Elige el modo de desinfección.",
+                "description": "Elige el modo de desinfección y el producto desinfectante utilizado.",
                 "submit": "Continuar",
                 "data": {
-                    "sanitizer_mode": "Modo de desinfección"
+                    "sanitizer_mode": "Modo de desinfección",
+                    "sanitizer_product": "Producto de cloro"
                 },
                 "data_description": {
-                    "sanitizer_mode": "Cloro = dosificación clásica, Salmuera = clorador salino, Mixto = ambos"
+                    "sanitizer_mode": "Cloro = dosificación clásica, Salmuera = clorador salino, Mixto = ambos",
+                    "sanitizer_product": "Elige el producto principal de cloro. En modo solo salino se usa automáticamente el perfil de célula salina."
                 }
             },
             "sanitizer_product": {
@@ -163,8 +176,6 @@
                     "min_temp": "Temperatura mínima",
                     "max_temp": "Temperatura máxima",
                     "target_temp_step": "Paso de temperatura",
-                    "heater_base_power_w": "Potencia base de calefacción (W)",
-                    "heater_aux_power_w": "Potencia del calentador auxiliar (W)",
                     "cold_tolerance": "Tolerancia fría",
                     "hot_tolerance": "Tolerancia caliente"
                 },
@@ -174,8 +185,6 @@
                     "min_temp": "Consigna mínima disponible",
                     "max_temp": "Consigna máxima disponible",
                     "target_temp_step": "Paso para ajustar la temperatura objetivo",
-                    "heater_base_power_w": "Contribución base (p. ej. calor residual de la bomba) usada para estimar el precalentamiento.",
-                    "heater_aux_power_w": "Potencia nominal del calentador auxiliar (W) usada para estimar el precalentamiento cuando la calefacción auxiliar está activada. Total = base + auxiliar.",
                     "cold_tolerance": "El calentador arranca cuando la temperatura del agua está por debajo de objetivo menos este valor",
                     "hot_tolerance": "El calentador se detiene cuando la temperatura del agua es igual o superior a objetivo más este valor"
                 }
@@ -377,8 +386,8 @@
             }
         },
         "error": {
-                "invalid_mac": "Introduce una dirección MAC Bluetooth válida, por ejemplo 00:A0:50:C7:46:C9."
-            }
+            "invalid_mac": "Introduce una dirección MAC Bluetooth válida, por ejemplo 00:A0:50:C7:46:C9."
+        }
     },
     "options": {
         "step": {
@@ -394,7 +403,6 @@
                     "notifications": "Notificaciones de mantenimiento",
                     "sanitizer": "Desinfección",
                     "sanitizer_product": "Producto desinfectante",
-                    "chemistry": "Estimación química",
                     "climate": "Control de temperatura",
                     "dynamic_target": "Temperatura objetivo dinámica",
                     "frost": "Protección contra heladas",
@@ -432,7 +440,9 @@
                     "enable_aux_heating": "Activar calefacción auxiliar",
                     "aux_heating_switch": "Interruptor calefacción auxiliar",
                     "main_power_sensor": "Sensor de potencia principal",
-                    "aux_power_sensor": "Sensor de potencia auxiliar"
+                    "aux_power_sensor": "Sensor de potencia auxiliar",
+                    "heater_base_power_w": "Potencia base de calefacción (W)",
+                    "heater_aux_power_w": "Potencia del calentador auxiliar (W)"
                 },
                 "data_description": {
                     "main_switch": "Interruptor principal / alimentación eléctrica de la piscina (obligatorio)",
@@ -441,12 +451,14 @@
                     "enable_aux_heating": "Activa un calentador adicional",
                     "aux_heating_switch": "Interruptor del calentador auxiliar",
                     "main_power_sensor": "Sensor de potencia de la bomba principal (W)",
-                    "aux_power_sensor": "Sensor de potencia del calentador (W)"
+                    "aux_power_sensor": "Sensor de potencia del calentador (W)",
+                    "heater_base_power_w": "Contribución base (p. ej. calor residual de la bomba) usada para estimar el precalentamiento.",
+                    "heater_aux_power_w": "Potencia nominal del calentador auxiliar (W) usada para estimar el precalentamiento cuando la calefacción auxiliar está activada. Total = base + auxiliar."
                 }
             },
             "water_quality": {
                 "title": "Calidad del agua",
-                "description": "Actualiza la asignación de sensores para temperatura y (opcionalmente) química.",
+                "description": "Actualiza la asignación de sensores clásicos de temperatura y química. Déjalo vacío cuando la lectura directa de BlueRiiot esté activada.",
                 "submit": "Siguiente",
                 "data": {
                     "temp_water_sensor": "Temperatura del agua",
@@ -456,7 +468,7 @@
                     "tds_sensor": "Sensor de TDS"
                 },
                 "data_description": {
-                    "temp_water_sensor": "Sensor de temperatura del agua (obligatorio)",
+                    "temp_water_sensor": "Sensor opcional de temperatura del agua cuando no se usa lectura directa de BlueRiiot",
                     "ph_sensor": "Sensor de pH (p. ej. Blueriiot)",
                     "chlorine_sensor": "Sensor redox para medición de cloro (mV)",
                     "salt_sensor": "Sensor de nivel de sal",
@@ -470,18 +482,12 @@
                 "data": {
                     "enable_blueriiot": "Leer BlueRiiot directamente",
                     "blueriiot_mac": "Dirección Bluetooth de BlueRiiot",
-                    "blueriiot_interval_minutes": "Intervalo de lectura diurno",
-                    "blueriiot_night_interval_minutes": "Intervalo de lectura nocturno",
-                    "blueriiot_night_start": "Inicio de la noche",
-                    "blueriiot_night_end": "Fin de la noche"
+                    "blueriiot_interval_minutes": "Intervalo de lectura diurno"
                 },
                 "data_description": {
                     "enable_blueriiot": "Al activarlo, los valores de BlueRiiot tienen prioridad sobre las entidades de calidad del agua seleccionadas.",
                     "blueriiot_mac": "Los dispositivos Bluetooth cercanos se muestran automáticamente. Selecciona el BlueRiiot o introduce su dirección MAC manualmente si no aparece.",
-                    "blueriiot_interval_minutes": "Tiempo mínimo entre lecturas Bluetooth directas durante el día.",
-                    "blueriiot_night_interval_minutes": "Tiempo mínimo entre lecturas Bluetooth directas durante la noche.",
-                    "blueriiot_night_start": "Hora local a la que comienza el intervalo nocturno.",
-                    "blueriiot_night_end": "Hora local a la que vuelve a comenzar el intervalo diurno."
+                    "blueriiot_interval_minutes": "Tiempo mínimo entre lecturas Bluetooth directas durante el día."
                 }
             },
             "sensor_health": {
@@ -494,7 +500,7 @@
                     "sensor_health_water_sensor": "Disponibilidad del sensor de agua"
                 },
                 "data_description": {
-                    "enable_sensor_health": "Muestra un problema cuando el ESP32 o el sensor de agua configurado no está disponible.",
+                    "enable_sensor_health": "Muestra un problema cuando la infraestructura de medición configurada no está disponible. Con lectura directa de BlueRiiot se usa el estado interno del lector.",
                     "sensor_health_esp32_device": "Dispositivo opcional que proporciona las mediciones de la piscina. Se considera disponible cuando al menos una entidad de este dispositivo está disponible.",
                     "sensor_health_water_sensor": "Binary sensor opcional que está encendido cuando el sensor de agua (por ejemplo BlueRiiot) está disponible."
                 }
@@ -511,18 +517,20 @@
                 "data_description": {
                     "notify_service": "Selecciona un servicio de notificación de aplicación móvil. Déjalo desactivado para no enviar notificaciones.",
                     "notify_sensor_health": "Envía una alerta cuando el ESP32 configurado o el sensor de agua no está disponible.",
-                    "notify_water_quality": "Envía una alerta por TDS crítico o alcalinidad fuera del rango recomendado."
+                    "notify_water_quality": "Envía una alerta por TDS crítico, alcalinidad fuera del rango recomendado, pH bajo o cloro/ORP bajo."
                 }
             },
             "sanitizer": {
                 "title": "Desinfección",
-                "description": "Elige cómo se desinfecta la piscina.",
+                "description": "Elige cómo se desinfecta la piscina y qué producto desinfectante se usa.",
                 "submit": "Siguiente",
                 "data": {
-                    "sanitizer_mode": "Modo de desinfección"
+                    "sanitizer_mode": "Modo de desinfección",
+                    "sanitizer_product": "Producto de cloro"
                 },
                 "data_description": {
-                    "sanitizer_mode": "Cloro = dosificación clásica, Agua salada = clorador salino, Mixto = ambos"
+                    "sanitizer_mode": "Cloro = dosificación clásica, Agua salada = clorador salino, Mixto = ambos",
+                    "sanitizer_product": "Elige el producto principal de cloro. En modo solo salino se usa automáticamente el perfil de célula salina."
                 }
             },
             "sanitizer_product": {
@@ -576,8 +584,6 @@
                     "min_temp": "Temperatura mínima",
                     "max_temp": "Temperatura máxima",
                     "target_temp_step": "Paso de temperatura",
-                    "heater_base_power_w": "Potencia base de calefacción (W)",
-                    "heater_aux_power_w": "Potencia del calentador auxiliar (W)",
                     "cold_tolerance": "Tolerancia fría",
                     "hot_tolerance": "Tolerancia caliente"
                 },
@@ -587,8 +593,6 @@
                     "min_temp": "Consigna mínima disponible",
                     "max_temp": "Consigna máxima disponible",
                     "target_temp_step": "Paso para ajustar la temperatura objetivo",
-                    "heater_base_power_w": "Contribución base (p. ej. calor residual de la bomba) usada para estimar el precalentamiento.",
-                    "heater_aux_power_w": "Potencia nominal del calentador auxiliar (W) usada para estimar el precalentamiento cuando la calefacción auxiliar está activada. Total = base + auxiliar.",
                     "cold_tolerance": "El calentador arranca cuando la temperatura del agua está por debajo de objetivo menos este valor",
                     "hot_tolerance": "El calentador se detiene cuando la temperatura del agua es igual o superior a objetivo más este valor"
                 }

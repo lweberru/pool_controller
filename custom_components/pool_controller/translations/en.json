@@ -26,7 +26,9 @@
           "enable_aux_heating": "Enable auxiliary heating",
           "aux_heating_switch": "Auxiliary heater switch",
           "main_power_sensor": "Main power sensor",
-          "aux_power_sensor": "Aux heater power sensor"
+          "aux_power_sensor": "Aux heater power sensor",
+          "heater_base_power_w": "Base heating power (W)",
+          "heater_aux_power_w": "Aux heater power (W)"
         },
         "data_description": {
           "main_switch": "Main power / supply switch for the pool (required)",
@@ -35,12 +37,14 @@
           "enable_aux_heating": "Enables auxiliary heater for faster heating",
           "aux_heating_switch": "Switch for electric auxiliary heater",
           "main_power_sensor": "Main pump power sensor in watts",
-          "aux_power_sensor": "Heater power sensor in watts"
+          "aux_power_sensor": "Heater power sensor in watts",
+          "heater_base_power_w": "Base heating contribution while the circulation pump runs (e.g. waste heat). Used for preheat estimation.",
+          "heater_aux_power_w": "Aux heater rated power (watts). Used for preheat estimation when aux heating is enabled. Total = base + aux."
         }
       },
       "water_quality": {
         "title": "Water quality",
-        "description": "Select temperature and (optional) water chemistry sensors.",
+        "description": "Select classic temperature and water chemistry sensors. Leave this empty when direct BlueRiiot reading is enabled.",
         "submit": "Continue",
         "data": {
           "temp_water_sensor": "Water temperature",
@@ -50,7 +54,7 @@
           "tds_sensor": "Conductivity sensor"
         },
         "data_description": {
-          "temp_water_sensor": "Pool water temperature sensor (required)",
+          "temp_water_sensor": "Optional pool water temperature sensor when direct BlueRiiot reading is not used",
           "ph_sensor": "pH value sensor (Blueriiot or similar)",
           "chlorine_sensor": "Redox sensor for chlorine measurement in mV",
           "salt_sensor": "Salt content sensor for saltwater pools",
@@ -88,7 +92,7 @@
           "sensor_health_water_sensor": "Water sensor reachability"
         },
         "data_description": {
-          "enable_sensor_health": "Shows a problem when the configured ESP32 or water sensor is unreachable.",
+          "enable_sensor_health": "Shows a problem when the configured measurement infrastructure is unreachable. With direct BlueRiiot reading, the internal reader status is used.",
           "sensor_health_esp32_device": "Optional device that provides the pool measurement values. The integration treats it as reachable when at least one entity of this device is available.",
           "sensor_health_water_sensor": "Optional binary sensor that is on when the water sensor (for example BlueRiiot) is reachable."
         }
@@ -110,13 +114,15 @@
       },
       "sanitizer": {
         "title": "Sanitizer",
-        "description": "Choose how the pool is sanitized. For saltwater or mixed operation, you will be asked for a target salt level.",
+        "description": "Choose how the pool is sanitized and which sanitizer product is used. For saltwater or mixed operation, you will be asked for a target salt level.",
         "submit": "Continue",
         "data": {
-          "sanitizer_mode": "Sanitizer mode"
+          "sanitizer_mode": "Sanitizer mode",
+          "sanitizer_product": "Chlorine product"
         },
         "data_description": {
-          "sanitizer_mode": "Chlorine = classic dosing, Saltwater = salt chlorinator, Mixed = both"
+          "sanitizer_mode": "Chlorine = classic dosing, Saltwater = salt chlorinator, Mixed = both",
+          "sanitizer_product": "Choose the primary chlorine product. Pure saltwater mode automatically uses the salt cell profile."
         }
       },
       "sanitizer_product": {
@@ -170,8 +176,6 @@
           "min_temp": "Minimum temperature",
           "max_temp": "Maximum temperature",
           "target_temp_step": "Temperature step",
-          "heater_base_power_w": "Base heating power (W)",
-          "heater_aux_power_w": "Aux heater power (W)",
           "cold_tolerance": "Cold tolerance",
           "hot_tolerance": "Hot tolerance"
         },
@@ -181,8 +185,6 @@
           "min_temp": "Minimum setpoint available",
           "max_temp": "Maximum setpoint available",
           "target_temp_step": "Step size for setting the target temperature",
-          "heater_base_power_w": "Base heating contribution while the circulation pump runs (e.g. waste heat). Used for preheat estimation.",
-          "heater_aux_power_w": "Aux heater rated power (watts). Used for preheat estimation when aux heating is enabled. Total = base + aux.",
           "cold_tolerance": "Heater starts when water temperature is below target minus this value",
           "hot_tolerance": "Heater stops when water temperature is at or above target plus this value"
         }
@@ -438,7 +440,9 @@
           "enable_aux_heating": "Enable auxiliary heating",
           "aux_heating_switch": "Auxiliary heater switch",
           "main_power_sensor": "Main power sensor",
-          "aux_power_sensor": "Aux heater power sensor"
+          "aux_power_sensor": "Aux heater power sensor",
+          "heater_base_power_w": "Base heating power (W)",
+          "heater_aux_power_w": "Aux heater power (W)"
         },
         "data_description": {
           "main_switch": "Main power / supply switch for the pool (required)",
@@ -447,12 +451,14 @@
           "enable_aux_heating": "Enables auxiliary heater for faster heating",
           "aux_heating_switch": "Switch for electric auxiliary heater",
           "main_power_sensor": "Main pump power sensor in watts",
-          "aux_power_sensor": "Heater power sensor in watts"
+          "aux_power_sensor": "Heater power sensor in watts",
+          "heater_base_power_w": "Base heating contribution while the circulation pump runs (e.g. waste heat). Used for preheat estimation.",
+          "heater_aux_power_w": "Aux heater rated power (watts). Used for preheat estimation when aux heating is enabled. Total = base + aux."
         }
       },
       "water_quality": {
         "title": "Water quality",
-        "description": "Update sensor mapping for temperature and (optionally) chemistry.",
+        "description": "Update classic temperature and water chemistry sensor mapping. Leave this empty when direct BlueRiiot reading is enabled.",
         "submit": "Continue",
         "data": {
           "temp_water_sensor": "Water temperature",
@@ -462,7 +468,7 @@
           "tds_sensor": "Conductivity sensor"
         },
         "data_description": {
-          "temp_water_sensor": "Pool water temperature sensor (required)",
+          "temp_water_sensor": "Optional pool water temperature sensor when direct BlueRiiot reading is not used",
           "ph_sensor": "pH value sensor (Blueriiot or similar)",
           "chlorine_sensor": "Redox sensor for chlorine measurement in mV",
           "salt_sensor": "Salt content sensor for saltwater pools",
@@ -494,7 +500,7 @@
           "sensor_health_water_sensor": "Water sensor reachability"
         },
         "data_description": {
-          "enable_sensor_health": "Shows a problem when the configured ESP32 or water sensor is unreachable.",
+          "enable_sensor_health": "Shows a problem when the configured measurement infrastructure is unreachable. With direct BlueRiiot reading, the internal reader status is used.",
           "sensor_health_esp32_device": "Optional device that provides the pool measurement values. The integration treats it as reachable when at least one entity of this device is available.",
           "sensor_health_water_sensor": "Optional binary sensor that is on when the water sensor (for example BlueRiiot) is reachable."
         }
@@ -511,18 +517,20 @@
         "data_description": {
           "notify_service": "Select a mobile app notification service. Leave disabled to send no notifications.",
           "notify_sensor_health": "Sends an alert when the configured ESP32 or water sensor is unreachable.",
-          "notify_water_quality": "Sends an alert for critical TDS or out-of-range alkalinity values."
+          "notify_water_quality": "Sends an alert for critical TDS, out-of-range alkalinity, low pH, or low chlorine/ORP values."
         }
       },
       "sanitizer": {
         "title": "Sanitizer",
-        "description": "Choose how the pool is sanitized.",
+        "description": "Choose how the pool is sanitized and which sanitizer product is used.",
         "submit": "Continue",
         "data": {
-          "sanitizer_mode": "Sanitizer mode"
+          "sanitizer_mode": "Sanitizer mode",
+          "sanitizer_product": "Chlorine product"
         },
         "data_description": {
-          "sanitizer_mode": "Chlorine = classic dosing, Saltwater = salt chlorinator, Mixed = both"
+          "sanitizer_mode": "Chlorine = classic dosing, Saltwater = salt chlorinator, Mixed = both",
+          "sanitizer_product": "Choose the primary chlorine product. Pure saltwater mode automatically uses the salt cell profile."
         }
       },
       "sanitizer_product": {
@@ -576,8 +584,6 @@
           "min_temp": "Minimum temperature",
           "max_temp": "Maximum temperature",
           "target_temp_step": "Temperature step",
-          "heater_base_power_w": "Base heating power (W)",
-          "heater_aux_power_w": "Aux heater power (W)",
           "cold_tolerance": "Cold tolerance",
           "hot_tolerance": "Hot tolerance"
         },
@@ -587,8 +593,6 @@
           "min_temp": "Minimum setpoint available",
           "max_temp": "Maximum setpoint available",
           "target_temp_step": "Step size for setting the target temperature",
-          "heater_base_power_w": "Base heating contribution while the circulation pump runs (e.g. waste heat). Used for preheat estimation.",
-          "heater_aux_power_w": "Aux heater rated power (watts). Used for preheat estimation when aux heating is enabled. Total = base + aux.",
           "cold_tolerance": "Heater starts when water temperature is below target minus this value",
           "hot_tolerance": "Heater stops when water temperature is at or above target plus this value"
         }

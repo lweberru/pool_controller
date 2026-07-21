@@ -26,7 +26,9 @@
                     "enable_aux_heating": "Zusatzheizung aktivieren",
                     "aux_heating_switch": "Zusatzheizung-Schalter",
                     "main_power_sensor": "Haupt-Leistungssensor",
-                    "aux_power_sensor": "Zusatzheizung Leistungssensor"
+                    "aux_power_sensor": "Zusatzheizung Leistungssensor",
+                    "heater_base_power_w": "Basis-Heizleistung (W)",
+                    "heater_aux_power_w": "Zusatzheizung-Leistung (W)"
                 },
                 "data_description": {
                     "main_switch": "Hauptschalter / Stromversorgung für den Pool (Pflichtfeld)",
@@ -35,12 +37,14 @@
                     "enable_aux_heating": "Aktiviert zusätzliche Heizung für schnelleres Aufheizen",
                     "aux_heating_switch": "Schalter für elektrische Zusatzheizung",
                     "main_power_sensor": "Leistungssensor der Hauptpumpe in Watt",
-                    "aux_power_sensor": "Leistungssensor der Heizung in Watt"
+                    "aux_power_sensor": "Leistungssensor der Heizung in Watt",
+                    "heater_base_power_w": "Basis-Heizanteil (z.B. Pumpen-Abwärme) für die Vorheiz-Zeitberechnung.",
+                    "heater_aux_power_w": "Nennleistung der Zusatzheizung (W) für die Vorheiz-Zeitberechnung (wenn Zusatzheizung aktiviert ist). Gesamt = Basis + Zusatz."
                 }
             },
             "water_quality": {
                 "title": "Wasserqualität",
-                "description": "Sensor-Zuordnung für Temperatur und (optional) Wasserwerte.",
+                "description": "Sensor-Zuordnung für klassische Temperatur- und Wasserwerte. Bei direktem BlueRiiot bleibt dieser Schritt leer.",
                 "submit": "Weiter",
                 "data": {
                     "temp_water_sensor": "Wassertemperatur",
@@ -48,6 +52,13 @@
                     "chlorine_sensor": "Chlor (Redox) Sensor",
                     "salt_sensor": "Salzgehalt Sensor",
                     "tds_sensor": "Leitfähigkeit Sensor"
+                },
+                "data_description": {
+                    "temp_water_sensor": "Optional pool water temperature sensor when direct BlueRiiot reading is not used",
+                    "ph_sensor": "pH value sensor (Blueriiot or similar)",
+                    "chlorine_sensor": "Redox sensor for chlorine measurement in mV",
+                    "salt_sensor": "Salt content sensor for saltwater pools",
+                    "tds_sensor": "Conductivity sensor (TDS) for water quality"
                 }
             },
             "blueriiot": {
@@ -81,7 +92,7 @@
                     "sensor_health_water_sensor": "Erreichbarkeit des Wassersensors"
                 },
                 "data_description": {
-                    "enable_sensor_health": "Zeigt eine Störung, wenn der konfigurierte ESP32 oder Wassersensor nicht erreichbar ist.",
+                    "enable_sensor_health": "Zeigt eine Störung, wenn die konfigurierte Mess-Infrastruktur nicht erreichbar ist. Beim direkten BlueRiiot-Leser wird dessen interner Status genutzt.",
                     "sensor_health_esp32_device": "Optionales Gerät, das die Pool-Messwerte bereitstellt. Es gilt als erreichbar, wenn mindestens eine Entity dieses Geräts verfügbar ist.",
                     "sensor_health_water_sensor": "Optionaler Binary-Sensor, der eingeschaltet ist, wenn der Wassersensor (z.B. BlueRiiot) erreichbar ist."
                 }
@@ -103,13 +114,15 @@
             },
             "sanitizer": {
                 "title": "Desinfektion",
-                "description": "Desinfektionsmodus auswählen.",
+                "description": "Desinfektionsmodus und verwendetes Desinfektionsmittel einstellen.",
                 "submit": "Weiter",
                 "data": {
-                    "sanitizer_mode": "Desinfektionsmodus"
+                    "sanitizer_mode": "Desinfektionsmodus",
+                    "sanitizer_product": "Chlorprodukt"
                 },
                 "data_description": {
-                    "sanitizer_mode": "Chlor = klassische Dosierung, Salzwasser = Salzelektrolyse, Mischbetrieb = Salz + Chlor"
+                    "sanitizer_mode": "Chlor = klassische Dosierung, Salzwasser = Salzelektrolyse, Mischbetrieb = Salz + Chlor",
+                    "sanitizer_product": "Wähle das hauptsächlich verwendete Chlorprodukt. Bei reinem Salzwasser wird automatisch Salzelektrolyse genutzt."
                 }
             },
             "sanitizer_product": {
@@ -163,8 +176,6 @@
                     "min_temp": "Minimum-Temperatur",
                     "max_temp": "Maximum-Temperatur",
                     "target_temp_step": "Schrittweite",
-                    "heater_base_power_w": "Basis-Heizleistung (W)",
-                    "heater_aux_power_w": "Zusatzheizung-Leistung (W)",
                     "cold_tolerance": "Kalt-Toleranz",
                     "hot_tolerance": "Warm-Toleranz"
                 },
@@ -174,8 +185,6 @@
                     "min_temp": "Minimaler einstellbarer Sollwert",
                     "max_temp": "Maximaler einstellbarer Sollwert",
                     "target_temp_step": "Schrittweite für das Setzen der Zieltemperatur",
-                    "heater_base_power_w": "Basis-Heizanteil (z.B. Pumpen-Abwärme) für die Vorheiz-Zeitberechnung.",
-                    "heater_aux_power_w": "Nennleistung der Zusatzheizung (W) für die Vorheiz-Zeitberechnung (wenn Zusatzheizung aktiviert ist). Gesamt = Basis + Zusatz.",
                     "cold_tolerance": "Heizung startet, wenn Wassertemperatur unter Ziel minus diesem Wert liegt",
                     "hot_tolerance": "Heizung stoppt, wenn Wassertemperatur bei/über Ziel plus diesem Wert liegt"
                 }
@@ -377,8 +386,8 @@
             }
         },
         "error": {
-                "invalid_mac": "Gib eine gültige Bluetooth-MAC-Adresse ein, zum Beispiel 00:A0:50:C7:46:C9."
-            }
+            "invalid_mac": "Gib eine gültige Bluetooth-MAC-Adresse ein, zum Beispiel 00:A0:50:C7:46:C9."
+        }
     },
     "options": {
         "step": {
@@ -394,7 +403,6 @@
                     "notifications": "Wartungsbenachrichtigungen",
                     "sanitizer": "Desinfektion",
                     "sanitizer_product": "Desinfektionsmittel",
-                    "chemistry": "Chemie-Schätzung",
                     "climate": "Temperaturregelung",
                     "dynamic_target": "Dynamische Zieltemperatur",
                     "frost": "Frostschutz",
@@ -432,7 +440,9 @@
                     "enable_aux_heating": "Zusatzheizung aktivieren",
                     "aux_heating_switch": "Zusatzheizung Schalter",
                     "main_power_sensor": "Haupt-Leistungssensor",
-                    "aux_power_sensor": "Zusatzheizung Leistungssensor"
+                    "aux_power_sensor": "Zusatzheizung Leistungssensor",
+                    "heater_base_power_w": "Basis-Heizleistung (W)",
+                    "heater_aux_power_w": "Zusatzheizung-Leistung (W)"
                 },
                 "data_description": {
                     "main_switch": "Hauptschalter / Stromversorgung für den Pool (Pflichtfeld)",
@@ -441,12 +451,14 @@
                     "enable_aux_heating": "Aktiviert zusätzliche Heizung für schnelleres Aufheizen",
                     "aux_heating_switch": "Schalter für elektrische Zusatzheizung",
                     "main_power_sensor": "Leistungssensor der Hauptpumpe in Watt",
-                    "aux_power_sensor": "Leistungssensor der Heizung in Watt"
+                    "aux_power_sensor": "Leistungssensor der Heizung in Watt",
+                    "heater_base_power_w": "Basis-Heizanteil (z.B. Pumpen-Abwärme) für die Vorheiz-Zeitberechnung.",
+                    "heater_aux_power_w": "Nennleistung der Zusatzheizung (W) für die Vorheiz-Zeitberechnung (wenn Zusatzheizung aktiviert ist). Gesamt = Basis + Zusatz."
                 }
             },
             "water_quality": {
                 "title": "Wasserqualität",
-                "description": "Sensor-Zuordnung für Temperatur und (optional) Wasserwerte.",
+                "description": "Sensor-Zuordnung für klassische Temperatur- und Wasserwerte. Bei direktem BlueRiiot bleibt dieser Schritt leer.",
                 "submit": "Weiter",
                 "data": {
                     "temp_water_sensor": "Wassertemperatur",
@@ -456,7 +468,7 @@
                     "tds_sensor": "Leitfähigkeit Sensor"
                 },
                 "data_description": {
-                    "temp_water_sensor": "Sensor für Poolwasser-Temperatur (Pflichtfeld)",
+                    "temp_water_sensor": "Optionaler Sensor für Poolwasser-Temperatur, wenn kein direkter BlueRiiot-Leser genutzt wird",
                     "ph_sensor": "pH-Wert Sensor (Blueriiot oder ähnlich)",
                     "chlorine_sensor": "Redox-Sensor für Chlor-Messung in mV",
                     "salt_sensor": "Salzgehalt-Sensor für Salzwasserpools",
@@ -470,18 +482,12 @@
                 "data": {
                     "enable_blueriiot": "BlueRiiot direkt auslesen",
                     "blueriiot_mac": "BlueRiiot-Bluetooth-Adresse",
-                    "blueriiot_interval_minutes": "Ausleseintervall tagsüber",
-                    "blueriiot_night_interval_minutes": "Ausleseintervall nachts",
-                    "blueriiot_night_start": "Nachtbeginn",
-                    "blueriiot_night_end": "Nachtende"
+                    "blueriiot_interval_minutes": "Ausleseintervall tagsüber"
                 },
                 "data_description": {
                     "enable_blueriiot": "Bei Aktivierung haben BlueRiiot-Werte Vorrang vor den ausgewählten Wasserqualitäts-Entities.",
                     "blueriiot_mac": "Nahe Bluetooth-Geräte werden automatisch aufgelistet. Wähle den BlueRiiot aus oder gib seine MAC-Adresse manuell ein, falls er nicht erscheint.",
-                    "blueriiot_interval_minutes": "Mindestzeit zwischen direkten Bluetooth-Auslesungen tagsüber.",
-                    "blueriiot_night_interval_minutes": "Mindestzeit zwischen direkten Bluetooth-Auslesungen nachts.",
-                    "blueriiot_night_start": "Ortszeit, zu der das Nachtintervall beginnt.",
-                    "blueriiot_night_end": "Ortszeit, zu der wieder das Tagesintervall beginnt."
+                    "blueriiot_interval_minutes": "Mindestzeit zwischen direkten Bluetooth-Auslesungen tagsüber."
                 }
             },
             "sensor_health": {
@@ -494,7 +500,7 @@
                     "sensor_health_water_sensor": "Erreichbarkeit des Wassersensors"
                 },
                 "data_description": {
-                    "enable_sensor_health": "Zeigt eine Störung, wenn der konfigurierte ESP32 oder Wassersensor nicht erreichbar ist.",
+                    "enable_sensor_health": "Zeigt eine Störung, wenn die konfigurierte Mess-Infrastruktur nicht erreichbar ist. Beim direkten BlueRiiot-Leser wird dessen interner Status genutzt.",
                     "sensor_health_esp32_device": "Optionales Gerät, das die Pool-Messwerte bereitstellt. Es gilt als erreichbar, wenn mindestens eine Entity dieses Geräts verfügbar ist.",
                     "sensor_health_water_sensor": "Optionaler Binary-Sensor, der eingeschaltet ist, wenn der Wassersensor (z.B. BlueRiiot) erreichbar ist."
                 }
@@ -511,18 +517,20 @@
                 "data_description": {
                     "notify_service": "Eine Mobile-App-Benachrichtigung auswählen. Deaktiviert lassen, um keine Benachrichtigungen zu senden.",
                     "notify_sensor_health": "Informiert, wenn das konfigurierte ESP32 oder der Wassersensor nicht erreichbar ist.",
-                    "notify_water_quality": "Informiert bei kritischem TDS-Wert oder Alkalinität außerhalb des empfohlenen Bereichs."
+                    "notify_water_quality": "Informiert bei kritischem TDS-Wert, Alkalinität außerhalb des empfohlenen Bereichs, niedrigem pH oder niedrigem Chlor/ORP-Wert."
                 }
             },
             "sanitizer": {
                 "title": "Desinfektion",
-                "description": "Desinfektionsmodus einstellen.",
+                "description": "Desinfektionsmodus und verwendetes Desinfektionsmittel einstellen.",
                 "submit": "Weiter",
                 "data": {
-                    "sanitizer_mode": "Desinfektionsmodus"
+                    "sanitizer_mode": "Desinfektionsmodus",
+                    "sanitizer_product": "Chlorprodukt"
                 },
                 "data_description": {
-                    "sanitizer_mode": "Chlor = klassische Dosierung, Salzwasser = Salzelektrolyse, Mischbetrieb = Salz + Chlor"
+                    "sanitizer_mode": "Chlor = klassische Dosierung, Salzwasser = Salzelektrolyse, Mischbetrieb = Salz + Chlor",
+                    "sanitizer_product": "Wähle das hauptsächlich verwendete Chlorprodukt. Bei reinem Salzwasser wird automatisch Salzelektrolyse genutzt."
                 }
             },
             "sanitizer_product": {
@@ -576,8 +584,6 @@
                     "min_temp": "Minimum-Temperatur",
                     "max_temp": "Maximum-Temperatur",
                     "target_temp_step": "Schrittweite",
-                    "heater_base_power_w": "Basis-Heizleistung (W)",
-                    "heater_aux_power_w": "Zusatzheizung-Leistung (W)",
                     "cold_tolerance": "Kalt-Toleranz",
                     "hot_tolerance": "Warm-Toleranz"
                 },
@@ -587,8 +593,6 @@
                     "min_temp": "Minimaler einstellbarer Sollwert",
                     "max_temp": "Maximaler einstellbarer Sollwert",
                     "target_temp_step": "Schrittweite für das Setzen der Zieltemperatur",
-                    "heater_base_power_w": "Basis-Heizanteil (z.B. Pumpen-Abwärme) für die Vorheiz-Zeitberechnung.",
-                    "heater_aux_power_w": "Nennleistung der Zusatzheizung (W) für die Vorheiz-Zeitberechnung (wenn Zusatzheizung aktiviert ist). Gesamt = Basis + Zusatz.",
                     "cold_tolerance": "Heizung startet, wenn Wassertemperatur unter Ziel minus diesem Wert liegt",
                     "hot_tolerance": "Heizung stoppt, wenn Wassertemperatur bei/über Ziel plus diesem Wert liegt"
                 }

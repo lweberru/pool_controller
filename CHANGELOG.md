@@ -2,6 +2,10 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.13.5] - 2026-07-21
+- refactor of config flow and remove of bugs cause of blueriiot feature
+
+
 ## [2.13.4] - 2026-07-21
 - service to get config settings
 
