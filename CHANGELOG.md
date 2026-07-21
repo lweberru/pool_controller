@@ -2,6 +2,11 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.14.2] - 2026-07-21
+- support for critical water situations in addition to normal warnings
+- support for release of alerts
+
+
 ## [2.14.1] - 2026-07-21
 - fine tuning of dynamic target temp
 - optimize of ha api tool

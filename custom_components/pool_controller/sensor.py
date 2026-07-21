@@ -66,6 +66,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolChemSensor(coordinator, "salt_val", None, "g/L", "mdi:shaker"),
         PoolChemSensor(coordinator, "tds_val", None, "ppm", "mdi:water-opacity"),
         PoolChemSensor(coordinator, "tds_effective", None, "ppm", "mdi:water-opacity"),
+        PoolTextSensor(coordinator, "water_safety_status", None),
+        PoolTextSensor(coordinator, "water_safety_reason", None),
         PoolChemSensor(coordinator, "alkalinity_estimated_ppm", None, "ppm", "mdi:flask-round-bottom", state_class=SensorStateClass.MEASUREMENT),
         PoolChemSensor(coordinator, "alkalinity_status", None, None, "mdi:water-check", state_class=None, entity_category=EntityCategory.DIAGNOSTIC),
         PoolChemSensor(coordinator, "alkalinity_action", None, None, "mdi:clipboard-check", state_class=None, entity_category=EntityCategory.DIAGNOSTIC),

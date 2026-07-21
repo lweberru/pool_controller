@@ -30,6 +30,7 @@ Die konkreten Entity-IDs hängen vom Namen deiner Instanz ab. Die Integration ve
 | `binary_sensor.<pool>_low_chlor` | Chlorniveau unter dem empfohlenen Bereich |
 | `binary_sensor.<pool>_ph_alert` | pH außerhalb des akzeptablen Bereichs |
 | `binary_sensor.<pool>_tds_high` | TDS zu hoch, Wasserwechsel empfohlen |
+| `binary_sensor.<pool>_water_safety_risk` | Kombiniertes pH-/ORP-Wasser-kippt-Risiko ist Warnung oder kritisch |
 | `binary_sensor.<pool>_event_rain_blocked` | Nächstes oder laufendes Kalenderevent wird wegen Regenwahrscheinlichkeit blockiert |
 
 ## Sensoren numerisch und Status
@@ -65,6 +66,8 @@ Die konkreten Entity-IDs hängen vom Namen deiner Instanz ab. Die Integration ve
 | `sensor.<pool>_heat_startup_offset_minutes` | Float | Gelernte Anlaufverzögerung der Heizung in Minuten |
 | `sensor.<pool>_sanitizer_mode` | Enum | Desinfektionsart: `chlorine`, `saltwater`, `mixed` |
 | `sensor.<pool>_tds_status` | Enum | Backend-abgeleitete Wasserqualitätsbewertung |
+| `sensor.<pool>_water_safety_status` | Enum | Kombinierter pH-/ORP-Sicherheitsstatus: `unknown`, `ok`, `warning`, `critical` |
+| `sensor.<pool>_water_safety_reason` | Enum | Grund für den Sicherheitsstatus: `missing_data`, `ok`, `very_low_orp`, `high_ph_low_orp`, `low_orp`, `ph_out_of_range` |
 | `sensor.<pool>_ph_val` | Float | Wasser-pH im Bereich 0 bis 14 |
 | `sensor.<pool>_chlor_val` | Float | Chlor beziehungsweise ORP in mV |
 | `sensor.<pool>_salt_val` | Float | Salzkonzentration in g/L, optional |

@@ -9,3 +9,4 @@ Persistiert Chemie-Historie und Cooldown über Home-Assistant-Neustarts via entr
 Erweitert Config- und Options-Flow um einfache Chemistry-Tuning-Parameter (TDS, Alkalinität, Cooldown, Lookback, Min-Samples)
 Aktualisiert Entitäten/Service-Dokumentation und ergänzt klare Hinweise: Schätzung ist kein Laborwert
 Ergänzt/überarbeitet Übersetzungen (de/en/es/fr) für neue Chemistry-Flow-Felder
+Verschärft Wasserqualitäts-Alarmierung mit kombiniertem pH-/ORP-Wasser-kippt-Risiko, Status-/Grund-Sensoren und Entwarnungsbenachrichtigungen

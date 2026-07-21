@@ -1050,15 +1050,41 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 active_alerts["sensor_health"] = "Mindestens ein überwachter Pool-Sensor oder das ESP32 ist nicht erreichbar."
 
         if bool(conf.get(CONF_NOTIFY_WATER_QUALITY, DEFAULT_NOTIFY_WATER_QUALITY)):
+            water_safety_status = data.get("water_safety_status")
+            water_safety_reason = data.get("water_safety_reason")
+            if water_safety_status in {"warning", "critical"}:
+                ph_val = data.get("ph_val")
+                chlor_val = data.get("chlor_val")
+                details = []
+                if ph_val is not None:
+                    try:
+                        details.append(f"pH {float(ph_val):.2f}")
+                    except Exception:
+                        pass
+                if chlor_val is not None:
+                    try:
+                        details.append(f"ORP {int(round(float(chlor_val)))} mV")
+                    except Exception:
+                        pass
+                prefix = "Kritisches Wasser-kippt-Risiko" if water_safety_status == "critical" else "Erhöhtes Wasser-kippt-Risiko"
+                suffix = f" ({', '.join(details)})" if details else ""
+                reason_text = {
+                    "very_low_orp": "Desinfektionsleistung ist sehr niedrig.",
+                    "high_ph_low_orp": "Hoher pH-Wert und niedriger ORP-Wert machen die Desinfektion unwirksam.",
+                    "low_orp": "Der ORP-/Chlorwert ist zu niedrig.",
+                    "ph_out_of_range": "Der pH-Wert liegt außerhalb des Komfortbereichs.",
+                }.get(str(water_safety_reason), "Wasserqualität benötigt Aufmerksamkeit.")
+                active_alerts["water_safety"] = f"{prefix}{suffix}: {reason_text}"
+
             ph_val = data.get("ph_val")
             if ph_val is not None:
                 try:
                     ph_value = float(ph_val)
                 except Exception:
                     ph_value = None
-                if ph_value is not None and (ph_value < 7.1 or ph_value > 7.4):
+                if ph_value is not None and (ph_value < 7.1 or ph_value > 7.6) and "water_safety" not in active_alerts:
                     active_alerts["ph"] = (
-                        f"Der pH-Wert liegt außerhalb des empfohlenen Bereichs (7.1-7.4): {ph_value:.2f}."
+                        f"Der pH-Wert liegt außerhalb des empfohlenen Bereichs (7.1-7.6): {ph_value:.2f}."
                     )
 
             chlor_val = data.get("chlor_val")
@@ -1067,7 +1093,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     chlor_value = float(chlor_val)
                 except Exception:
                     chlor_value = None
-                if chlor_value is not None and chlor_value < 600:
+                if chlor_value is not None and chlor_value < 650 and "water_safety" not in active_alerts:
                     active_alerts["chlor"] = (
                         f"Der Chlor-/ORP-Wert ist zu niedrig: {int(round(chlor_value))} mV."
                     )
@@ -1079,8 +1105,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             if alkalinity_status in {"very_low", "low", "high", "critical_high"}:
                 active_alerts["alkalinity"] = "Die Alkalinität liegt außerhalb des empfohlenen Bereichs."
 
-        new_alert_keys = set(active_alerts) - self._active_notification_alerts
-        if not new_alert_keys:
+        previous_alerts = set(self._active_notification_alerts)
+        new_alert_keys = set(active_alerts) - previous_alerts
+        resolved_alert_keys = previous_alerts - set(active_alerts)
+        if not new_alert_keys and not resolved_alert_keys:
             self._active_notification_alerts = set(active_alerts)
             return
 
@@ -1089,12 +1117,22 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             return
 
         messages = [active_alerts[key] for key in sorted(new_alert_keys)]
+        resolved_messages = {
+            "water_safety": "Entwarnung: pH und ORP sind wieder im unkritischen Bereich.",
+            "ph": "Entwarnung: Der pH-Wert ist wieder im empfohlenen Bereich.",
+            "chlor": "Entwarnung: Der Chlor-/ORP-Wert ist wieder im empfohlenen Bereich.",
+            "tds": "Entwarnung: TDS benötigt aktuell keine kritische Wartung mehr.",
+            "alkalinity": "Entwarnung: Die Alkalinitätslage ist wieder unkritisch.",
+            "sensor_health": "Entwarnung: Die überwachten Pool-Sensoren sind wieder erreichbar.",
+        }
+        messages.extend(resolved_messages.get(key, f"Entwarnung: {key}") for key in sorted(resolved_alert_keys))
+        title = "Pool Controller: Wartung erforderlich" if new_alert_keys else "Pool Controller: Entwarnung"
         try:
             await self.hass.services.async_call(
                 "notify",
                 notify_service,
                 {
-                    "title": "Pool Controller: Wartung erforderlich",
+                    "title": title,
                     "message": "\n".join(messages),
                 },
                 blocking=False,
@@ -2515,6 +2553,9 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             tds_water_change_liters = 0
             tds_water_change_percent = 0
             tds_high = False
+            water_safety_status = "unknown"
+            water_safety_reason = "missing_data"
+            water_safety_risk = False
 
             # Alkalinitäts-Schätzung (ppm als CaCO3):
             # Heuristik aus effektivem TDS + pH (optional ORP-Korrektur).
@@ -2588,6 +2629,36 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 if vol_l and tds_for_maintenance > target_tds:
                     tds_water_change_liters = round(vol_l * (tds_for_maintenance - target_tds) / tds_for_maintenance)
                     tds_water_change_percent = round((tds_water_change_liters / vol_l) * 100)
+
+            try:
+                ph_float = float(ph_val) if ph_val is not None else None
+            except Exception:
+                ph_float = None
+            try:
+                chlor_float = float(chlor_val) if chlor_val is not None else None
+            except Exception:
+                chlor_float = None
+            if ph_float is not None and chlor_float is not None:
+                ph_outside_comfort = ph_float < 7.1 or ph_float > 7.6
+                ph_high = ph_float > 7.8
+                orp_low = chlor_float < 650
+                orp_very_low = chlor_float < 450
+                if orp_very_low:
+                    water_safety_status = "critical"
+                    water_safety_reason = "very_low_orp"
+                elif ph_high and orp_low:
+                    water_safety_status = "critical"
+                    water_safety_reason = "high_ph_low_orp"
+                elif orp_low:
+                    water_safety_status = "warning"
+                    water_safety_reason = "low_orp"
+                elif ph_outside_comfort:
+                    water_safety_status = "warning"
+                    water_safety_reason = "ph_out_of_range"
+                else:
+                    water_safety_status = "ok"
+                    water_safety_reason = "ok"
+                water_safety_risk = water_safety_status in {"warning", "critical"}
 
             profile = self._chemistry_profile(sanitizer_mode, sanitizer_product)
             profile["min_samples"] = max(int(profile.get("min_samples", 0) or 0), conf_min_samples)
@@ -4323,6 +4394,9 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "tds_effective": tds_effective,
                 "tds_status": tds_status,
                 "tds_high": tds_high,
+                "water_safety_status": water_safety_status,
+                "water_safety_reason": water_safety_reason,
+                "water_safety_risk": water_safety_risk,
                 "tds_water_change_liters": tds_water_change_liters,
                 "tds_water_change_percent": tds_water_change_percent,
                 "alkalinity_estimated_ppm": alkalinity_estimated_ppm,

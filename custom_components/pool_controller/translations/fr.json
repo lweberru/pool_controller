@@ -867,6 +867,9 @@
             "tds_high": {
                 "name": "TDS élevé"
             },
+            "water_safety_risk": {
+                "name": "Risque de dégradation de l'eau"
+            },
             "event_rain_blocked": {
                 "name": "Événement bloqué par la pluie"
             },
@@ -1023,6 +1026,12 @@
             },
             "tds_status": {
                 "name": "État TDS"
+            },
+            "water_safety_status": {
+                "name": "État de sécurité de l'eau"
+            },
+            "water_safety_reason": {
+                "name": "Raison de sécurité de l'eau"
             },
             "alkalinity_estimated_ppm": {
                 "name": "Alcalinité estimée"

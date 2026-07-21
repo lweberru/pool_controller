@@ -30,6 +30,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PoolBinary(coordinator, "low_chlor", "Niedriger Chlorwert", None),
         PoolBinary(coordinator, "ph_alert", "pH außerhalb Bereich", None),
         PoolBinary(coordinator, "tds_high", "TDS zu hoch", BinarySensorDeviceClass.PROBLEM),
+        PoolBinary(coordinator, "water_safety_risk", "Wasser-kippt-Risiko", BinarySensorDeviceClass.PROBLEM),
         PoolBinary(coordinator, "event_rain_blocked", "Event wegen Regen blockiert", BinarySensorDeviceClass.PROBLEM),
     ])
 
