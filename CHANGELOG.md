@@ -2,6 +2,11 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.14.0] - 2026-07-21
+- refactoring and remove of unused sensors
+- bugfix for config flow
+
+
 ## [2.13.5] - 2026-07-21
 - refactor of config flow and remove of bugs cause of blueriiot feature
 

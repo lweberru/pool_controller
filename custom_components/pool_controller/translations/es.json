@@ -402,7 +402,7 @@
                     "sensor_health": "Disponibilidad de sensores",
                     "notifications": "Notificaciones de mantenimiento",
                     "sanitizer": "Desinfección",
-                    "sanitizer_product": "Producto desinfectante",
+                    "chemistry": "Estimación química",
                     "climate": "Control de temperatura",
                     "dynamic_target": "Temperatura objetivo dinámica",
                     "frost": "Protección contra heladas",
@@ -1051,12 +1051,6 @@
             "alkalinity_water_change_percent": {
                 "name": "Cambio de agua antes de corregir alcalinidad (%)"
             },
-            "alkalinity_plus_g": {
-                "name": "Subir alcalinidad (g)"
-            },
-            "alkalinity_minus_g": {
-                "name": "Bajar alcalinidad (g)"
-            },
             "tds_water_change_liters": {
                 "name": "Cambio de agua recomendado (L)"
             },
@@ -1125,18 +1119,6 @@
             },
             "power_saving_aux_threshold": {
                 "name": "Umbral ahorro calefacción auxiliar"
-            },
-            "pv_band_low": {
-                "name": "Banda PV baja"
-            },
-            "pv_band_mid_on": {
-                "name": "Banda PV media (encendido)"
-            },
-            "pv_band_mid_off": {
-                "name": "Banda PV media (apagado)"
-            },
-            "pv_band_high": {
-                "name": "Banda PV alta"
             },
             "main_power": {
                 "name": "Potencia principal"

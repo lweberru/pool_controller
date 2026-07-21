@@ -90,10 +90,6 @@ Die konkreten Entity-IDs hängen vom Namen deiner Instanz ab. Die Integration ve
 | `sensor.<pool>_frost_timer_mins` | Integer | Restminuten des aktiven Frostzyklus mit Attributen `active`, `duration_minutes` |
 | `sensor.<pool>_pv_power` | Float | PV-Leistung in Watt aus dem konfigurierten Sensor |
 | `sensor.<pool>_pv_smoothed` | Float | Geglättete PV-Leistung in Watt für die PV-Hysterese |
-| `sensor.<pool>_pv_band_low` | Float | PV-Leistung im unteren Bereich unterhalb oder gleich OFF-Schwelle |
-| `sensor.<pool>_pv_band_mid_on` | Float | PV-Leistung im mittleren Bereich, wenn PV freigegeben ist |
-| `sensor.<pool>_pv_band_mid_off` | Float | PV-Leistung im mittleren Bereich, wenn PV nicht freigegeben ist |
-| `sensor.<pool>_pv_band_high` | Float | PV-Leistung im hohen Bereich oberhalb oder gleich ON-Schwelle |
 | `sensor.<pool>_pv_on_threshold` | Integer | Konfigurierte PV-ON-Schwelle in Watt |
 | `sensor.<pool>_pv_off_threshold` | Integer | Konfigurierte PV-OFF-Schwelle in Watt |
 | `sensor.<pool>_main_power` | Float | Leistungsaufnahme der Hauptpumpe in Watt |

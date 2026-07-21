@@ -90,10 +90,6 @@ Entity IDs depend on your instance name, but the integration uses stable suffix 
 | `sensor.<pool>_frost_timer_mins` | Integer | Remaining minutes of the active frost cycle (if any). Attributes: `active`, `duration_minutes` |
 | `sensor.<pool>_pv_power` | Float | PV power (W) derived from the configured PV sensor |
 | `sensor.<pool>_pv_smoothed` | Float | Smoothed PV power (W) used for PV hysteresis |
-| `sensor.<pool>_pv_band_low` | Float | PV power in low band (≤ OFF threshold) |
-| `sensor.<pool>_pv_band_mid_on` | Float | PV power in mid band while PV is allowed (ON state) |
-| `sensor.<pool>_pv_band_mid_off` | Float | PV power in mid band while PV is not allowed (OFF state) |
-| `sensor.<pool>_pv_band_high` | Float | PV power in high band (≥ ON threshold) |
 | `sensor.<pool>_pv_on_threshold` | Integer | Configured PV ON threshold (W) |
 | `sensor.<pool>_pv_off_threshold` | Integer | Configured PV OFF threshold (W) |
 | `sensor.<pool>_main_power` | Float | Main pump power consumption (W) |

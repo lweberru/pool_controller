@@ -2517,8 +2517,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             # Ziel ist eine praktikable Orientierung, keine Labor-Analyse.
             alkalinity_estimated_ppm = None
             alkalinity_status = "unknown"
-            alkalinity_plus_g = 0
-            alkalinity_minus_g = 0
+            alkalinity_raise_dose_g = 0
+            alkalinity_lower_dose_g = 0
             alkalinity_action = "measure_first"
             alkalinity_total_dose_g = 0
             alkalinity_step_dose_g = 0
@@ -2698,13 +2698,13 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     if volume_m3 > 0:
                         if alkalinity_estimated_ppm < alk_low_threshold:
                             delta_up = max(0.0, float(alkalinity_target_ppm) - float(alkalinity_estimated_ppm))
-                            alkalinity_plus_g = int(round(volume_m3 * (delta_up / 10.0) * 18.0))
+                            alkalinity_raise_dose_g = int(round(volume_m3 * (delta_up / 10.0) * 18.0))
                         elif alkalinity_estimated_ppm > alk_high_threshold:
                             delta_down = max(0.0, float(alkalinity_estimated_ppm) - float(alkalinity_target_ppm))
-                            alkalinity_minus_g = int(round(volume_m3 * (delta_down / 10.0) * 15.0))
+                            alkalinity_lower_dose_g = int(round(volume_m3 * (delta_down / 10.0) * 15.0))
                 except Exception:
-                    alkalinity_plus_g = 0
-                    alkalinity_minus_g = 0
+                    alkalinity_raise_dose_g = 0
+                    alkalinity_lower_dose_g = 0
 
             # Konkrete Handlungsempfehlung aus Alkalinitäts-/TDS-Lage ableiten.
             # Empfehlung nur bei stabiler, historisch abgesicherter Messlage.
@@ -2715,7 +2715,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 alkalinity_water_change_percent = int(tds_water_change_percent or 0)
             elif alkalinity_estimated_ppm < alk_low_threshold:
                 alkalinity_action = "raise_bicarbonate"
-                alkalinity_total_dose_g = int(alkalinity_plus_g or 0)
+                alkalinity_total_dose_g = int(alkalinity_raise_dose_g or 0)
                 try:
                     v_m3 = (float(vol_l) / 1000.0) if vol_l else 0.0
                 except Exception:
@@ -2727,7 +2727,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     alkalinity_step_dose_g = max(1, (alkalinity_total_dose_g + alkalinity_steps - 1) // alkalinity_steps)
             elif alkalinity_estimated_ppm > alk_high_threshold:
                 alkalinity_action = "lower_ph_minus"
-                alkalinity_total_dose_g = int(alkalinity_minus_g or 0)
+                alkalinity_total_dose_g = int(alkalinity_lower_dose_g or 0)
                 try:
                     v_m3 = (float(vol_l) / 1000.0) if vol_l else 0.0
                 except Exception:
@@ -3539,32 +3539,6 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     # desired == pv_allows -> clear candidate if any
                     self._pv_candidate_since = None
 
-            # PV band sensors for chart coloring (low/mid/high based on thresholds + pv_allows hysteresis)
-            pv_band_low = None
-            pv_band_mid_on = None
-            pv_band_mid_off = None
-            pv_band_high = None
-            try:
-                pv_for_band = pv_raw if pv_raw is not None else pv_smoothed
-                pv_num = float(pv_for_band) if pv_for_band is not None else None
-            except Exception:
-                pv_num = None
-            if pv_num is not None:
-                try:
-                    if pv_num <= float(off_th):
-                        pv_band_low = round(pv_num, 1)
-                    elif pv_num >= float(on_th):
-                        pv_band_high = round(pv_num, 1)
-                    else:
-                        if pv_allows:
-                            pv_band_mid_on = round(pv_num, 1)
-                        else:
-                            pv_band_mid_off = round(pv_num, 1)
-                except Exception:
-                    pv_band_low = None
-                    pv_band_mid_on = None
-                    pv_band_mid_off = None
-                    pv_band_high = None
             # quiet time check: C and E should not activate during quiet; A/B/D always allowed
             def _in_quiet_period(cfg):
                 try:
@@ -4350,8 +4324,6 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "alkalinity_estimated_ppm": alkalinity_estimated_ppm,
                 "alkalinity_estimated_ppm_raw": alkalinity_estimated_ppm_raw,
                 "alkalinity_status": alkalinity_status,
-                "alkalinity_plus_g": alkalinity_plus_g,
-                "alkalinity_minus_g": alkalinity_minus_g,
                 "alkalinity_action": alkalinity_action,
                 "alkalinity_measurement_valid": alkalinity_measurement_valid,
                 "alkalinity_measurement_reason": alkalinity_measurement_reason,
@@ -4396,11 +4368,6 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 "pv_smoothed": round(pv_smoothed, 1) if pv_smoothed is not None else None,
                 "power_saving_pump_threshold": round(float(power_saving_pump_threshold_w), 1) if power_saving_pump_threshold_w is not None else None,
                 "power_saving_aux_threshold": round(float(power_saving_aux_threshold_w), 1) if power_saving_aux_threshold_w is not None else None,
-                # PV band sensors for chart coloring (low/mid/high)
-                "pv_band_low": pv_band_low,
-                "pv_band_mid_on": pv_band_mid_on,
-                "pv_band_mid_off": pv_band_mid_off,
-                "pv_band_high": pv_band_high,
                 "pv_allows": pv_allows,
                 "in_quiet": in_quiet,
                 "main_power": round(main_power, 1) if main_power is not None else None,
