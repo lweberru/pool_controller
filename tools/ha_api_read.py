@@ -2,10 +2,12 @@
 """Home Assistant REST API helper.
 
 Usage examples:
-  python3 tools/ha_api_read.py states
+    python3 tools/ha_api_read.py states
     python3 tools/ha_api_read.py states --compact --contains whirlpool
+    python3 tools/ha_api_read.py states --domain sensor --state-min 30 --state-max 35 --name-contains temperatur
   python3 tools/ha_api_read.py state climate.pool
     python3 tools/ha_api_read.py pool --entity-id climate.whirlpool
+    python3 tools/ha_api_read.py pool --entity-id climate.whirlpool --focus dynamic-target
     python3 tools/ha_api_read.py pool --device-id 0123456789abcdef
     python3 tools/ha_api_read.py pool-config --entity-id climate.whirlpool
   python3 tools/ha_api_read.py history sensor.pool_temp --hours 24
@@ -360,6 +362,24 @@ def _entity_id_matches_query(state: dict, query: str) -> bool:
     return q in str(state.get("entity_id", "")).lower() or q in str(state.get("attributes", {}).get("friendly_name", "")).lower()
 
 
+def _num_or_none(value: object) -> float | None:
+    try:
+        if value in (None, "", "unknown", "unavailable"):
+            return None
+        return float(value)
+    except Exception:
+        return None
+
+
+def _state_by_entity_id(states: list[dict], entity_id: str | None) -> dict | None:
+    if not entity_id:
+        return None
+    for state in states:
+        if state.get("entity_id") == entity_id:
+            return state
+    return None
+
+
 def _looks_like_pool_climate(state: dict, name_query: str | None = None) -> bool:
     if not str(state.get("entity_id", "")).startswith("climate."):
         return False
@@ -491,12 +511,22 @@ def _cmd_states(args: argparse.Namespace, ha_url: str, token: str) -> None:
         return
 
     filtered = data
+    if args.entity_id:
+        wanted = {item.lower() for item in args.entity_id}
+        filtered = [x for x in filtered if str(x.get("entity_id", "")).lower() in wanted]
     if args.domain:
         dom = args.domain.lower() + "."
         filtered = [x for x in filtered if str(x.get("entity_id", "")).lower().startswith(dom)]
     if args.contains:
         q = args.contains.lower()
         filtered = [x for x in filtered if q in str(x.get("entity_id", "")).lower()]
+    if args.name_contains:
+        q = args.name_contains.lower()
+        filtered = [x for x in filtered if q in str(x.get("attributes", {}).get("friendly_name", "")).lower()]
+    if args.state_min is not None:
+        filtered = [x for x in filtered if (num := _num_or_none(x.get("state"))) is not None and num >= args.state_min]
+    if args.state_max is not None:
+        filtered = [x for x in filtered if (num := _num_or_none(x.get("state"))) is not None and num <= args.state_max]
 
     if args.limit and args.limit > 0:
         filtered = filtered[: args.limit]
@@ -567,6 +597,119 @@ def _state_summary(state: dict, full: bool = False) -> dict:
     }
 
 
+def _pool_config_entry(config: dict) -> dict:
+    matches = config.get("matched_config_entries") if isinstance(config, dict) else None
+    if isinstance(matches, list) and matches and isinstance(matches[0], dict):
+        return matches[0]
+    return {}
+
+
+def _effective_config(config: dict) -> dict:
+    entry = _pool_config_entry(config)
+    for key in ("effective", "persistent_options", "options", "data"):
+        value = entry.get(key)
+        if isinstance(value, dict):
+            if key == "effective":
+                return value
+            merged = dict(entry.get("data") or {})
+            merged.update(value)
+            return merged
+    return {}
+
+
+def _focused_dynamic_target_output(
+    args: argparse.Namespace,
+    climate: dict,
+    config: dict,
+    all_states: list[dict],
+    dynamic_entities: list[dict],
+) -> dict:
+    attrs = climate.get("attributes", {}) if isinstance(climate.get("attributes"), dict) else {}
+    effective_config = _effective_config(config)
+    dynamic_by_suffix = {}
+    for state in dynamic_entities:
+        entity_id = str(state.get("entity_id", "")).lower()
+        for suffix in (
+            "target_temperature_base",
+            "target_temperature_effective",
+            "target_offset",
+            "saison_offset",
+            "wetter_offset",
+            "dynamisches_zielprofil",
+        ):
+            if suffix in entity_id:
+                dynamic_by_suffix[suffix] = state
+
+    outdoor_entity = effective_config.get("temp_outdoor_sensor")
+    weather_entity = effective_config.get("dynamic_target_weather_entity") or effective_config.get("event_weather_entity")
+    outdoor_state = _state_by_entity_id(all_states, str(outdoor_entity) if outdoor_entity else None)
+    weather_state = _state_by_entity_id(all_states, str(weather_entity) if weather_entity else None)
+    weather_attrs = weather_state.get("attributes", {}) if isinstance(weather_state, dict) and isinstance(weather_state.get("attributes"), dict) else {}
+
+    water_temp = _num_or_none(attrs.get("current_temperature"))
+    effective_target = _num_or_none(dynamic_by_suffix.get("target_temperature_effective", {}).get("state"))
+    base_target = _num_or_none(dynamic_by_suffix.get("target_temperature_base", {}).get("state"))
+    water_gap = None
+    if water_temp is not None and effective_target is not None:
+        water_gap = round(effective_target - water_temp, 2)
+
+    dynamic_config_keys = [
+        "enable_dynamic_target",
+        "target_temp",
+        "temp_outdoor_sensor",
+        "dynamic_target_weather_entity",
+        "dynamic_target_winter_offset",
+        "dynamic_target_spring_offset",
+        "dynamic_target_summer_offset",
+        "dynamic_target_autumn_offset",
+        "dynamic_target_min_offset",
+        "dynamic_target_max_offset",
+        "dynamic_target_weather_max_offset",
+        "dynamic_target_weather_weight_temp",
+        "dynamic_target_weather_weight_feels_like",
+        "dynamic_target_weather_weight_wind",
+        "dynamic_target_weather_weight_uv",
+        "dynamic_target_weather_weight_cloud",
+        "dynamic_target_weather_weight_forecast",
+        "dynamic_target_ema_alpha",
+        "dynamic_target_max_step_per_hour",
+    ]
+
+    return {
+        "pool": {
+            "entity_id": climate.get("entity_id"),
+            "state": climate.get("state"),
+            "water_temperature": water_temp,
+            "climate_target_temperature": _num_or_none(attrs.get("temperature")),
+            "hvac_action": attrs.get("hvac_action"),
+            "preset_mode": attrs.get("preset_mode"),
+        },
+        "dynamic_target": {
+            "enabled": effective_config.get("enable_dynamic_target"),
+            "profile": dynamic_by_suffix.get("dynamisches_zielprofil", {}).get("state"),
+            "base_target": base_target,
+            "effective_target": effective_target,
+            "total_offset": _num_or_none(dynamic_by_suffix.get("target_offset", {}).get("state")),
+            "season_offset": _num_or_none(dynamic_by_suffix.get("saison_offset", {}).get("state")),
+            "weather_offset": _num_or_none(dynamic_by_suffix.get("wetter_offset", {}).get("state")),
+            "water_gap_to_effective_target": water_gap,
+            "would_heat_by_temperature": water_gap is not None and water_gap > 0,
+        },
+        "inputs": {
+            "local_outdoor": _state_summary(outdoor_state, args.full) if outdoor_state else None,
+            "weather": _state_summary(weather_state, True) if weather_state else None,
+            "weather_values": {
+                "temperature": _num_or_none(weather_attrs.get("temperature")),
+                "apparent_temperature": _num_or_none(weather_attrs.get("apparent_temperature")),
+                "wind_speed": _num_or_none(weather_attrs.get("wind_speed")),
+                "uv_index": _num_or_none(weather_attrs.get("uv_index")),
+                "cloud_coverage": _num_or_none(weather_attrs.get("cloud_coverage")),
+            },
+        },
+        "config": {key: effective_config.get(key) for key in dynamic_config_keys if key in effective_config},
+    }
+
+
 def _cmd_pool(args: argparse.Namespace, ha_url: str, token: str) -> None:
     climate = _find_pool_climate(args, ha_url, token)
     if not isinstance(climate, dict) or not climate.get("entity_id"):
@@ -620,9 +763,18 @@ def _cmd_pool(args: argparse.Namespace, ha_url: str, token: str) -> None:
         if any(key in str(state.get("entity_id", "")).lower() for key in dynamic_keys)
     ]
 
+    config = _pool_config(args, ha_url, token, climate_entity_id)
+
+    if getattr(args, "focus", "all") == "dynamic-target":
+        _print_json(
+            _focused_dynamic_target_output(args, climate, config, all_states, dynamic_entities),
+            args.compact,
+        )
+        return
+
     output = {
         "pool": _state_summary(climate, args.full),
-        "config": _pool_config(args, ha_url, token, climate_entity_id),
+        "config": config,
         "dynamic_target": [_state_summary(state, args.full) for state in sorted(dynamic_entities, key=lambda item: str(item.get("entity_id", "")))],
         "weather": [_state_summary(state, args.full) for state in sorted(weather_states, key=lambda item: str(item.get("entity_id", "")))],
         "related_entities": [_state_summary(state, args.full) for state in sorted(related_states, key=lambda item: str(item.get("entity_id", "")))],
@@ -702,17 +854,17 @@ def _cmd_apply_dynamic_target_defaults(args: argparse.Namespace, ha_url: str, to
         "weather_entity": args.weather_entity,
         "winter_offset": 2.0,
         "spring_offset": 1.0,
-        "summer_offset": -1.5,
+        "summer_offset": -2.0,
         "autumn_offset": 0.5,
         "min_offset": -5.0,
         "max_offset": 5.0,
         "weather_max_offset": 3.0,
-        "weight_temp": 0.55,
-        "weight_feels_like": 0.30,
-        "weight_wind": 0.15,
-        "weight_uv": 0.10,
-        "weight_cloud": 0.10,
-        "weight_forecast": 0.10,
+        "weight_temp": 1.00,
+        "weight_feels_like": 0.10,
+        "weight_wind": 0.10,
+        "weight_uv": 0.15,
+        "weight_cloud": 0.05,
+        "weight_forecast": 0.05,
         "ema_alpha": 0.20,
         "max_step_per_hour": 1.0,
     }
@@ -780,8 +932,12 @@ def _build_parser() -> argparse.ArgumentParser:
     sub = p.add_subparsers(dest="command", required=True)
 
     ps = sub.add_parser("states", parents=[global_args], help="Read /api/states with optional filters")
+    ps.add_argument("--entity-id", action="append", help="Exact entity_id filter. Can be repeated")
     ps.add_argument("--domain", help="Filter by entity domain, e.g. sensor")
     ps.add_argument("--contains", help="Filter entity_id substring")
+    ps.add_argument("--name-contains", help="Filter friendly_name substring")
+    ps.add_argument("--state-min", type=float, help="Keep only numeric states >= this value")
+    ps.add_argument("--state-max", type=float, help="Keep only numeric states <= this value")
     ps.add_argument("--limit", type=int, help="Limit output rows")
 
     pe = sub.add_parser("state", parents=[global_args], help="Read one entity from /api/states/<entity_id>")
@@ -831,6 +987,7 @@ def _build_parser() -> argparse.ArgumentParser:
     pp = sub.add_parser("pool", parents=[global_args], help="Read a focused pool summary from live states plus remote config options")
     _add_pool_selector_args(pp)
     pp.add_argument("--full", action="store_true", help="Include full attributes for matching entities")
+    pp.add_argument("--focus", choices=("all", "dynamic-target"), default="all", help="Return only one focused diagnostic view")
 
     ppc = sub.add_parser("pool-config", parents=[global_args], help="Read pool_controller config-entry data/options from Home Assistant WebSocket API")
     _add_pool_selector_args(ppc)

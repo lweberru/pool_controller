@@ -1221,16 +1221,17 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     forecast_temp = float(sum(vals) / len(vals))
 
         # Normalize factors to roughly [-1, 1]. Positive means "warmer preference".
-        # Mild summer air should be neutral instead of cooling the pool just because it is above 18 C.
+        # Prefer the local pool-side outdoor sensor for temperature comfort; official
+        # weather stations are often shaded/cooler and should not cancel hot pool-side air.
         def _norm_temp(v: float | None):
             if v is None:
                 return None
             temp = float(v)
             if temp < 24.0:
                 return self._clamp((24.0 - temp) / 12.0, 0.0, 1.0)
-            if temp <= 30.0:
+            if temp <= 29.0:
                 return 0.0
-            return -self._clamp((temp - 30.0) / 10.0, 0.0, 1.0)
+            return -self._clamp((temp - 29.0) / 6.0, 0.0, 1.0)
 
         def _norm_wind(v: float | None):
             if v is None:
@@ -1263,13 +1264,15 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             w_forecast = DEFAULT_DYNAMIC_TARGET_WEATHER_WEIGHT_FORECAST
 
         temp_input = outdoor_temp if outdoor_temp is not None else weather_temp
+        use_official_weather_temperature = outdoor_temp is None
         comp = []
         n = _norm_temp(temp_input)
         if n is not None and w_temp > 0:
             comp.append((n, w_temp))
-        n = _norm_temp(weather_feels)
-        if n is not None and w_feels > 0:
-            comp.append((n, w_feels))
+        if use_official_weather_temperature:
+            n = _norm_temp(weather_feels)
+            if n is not None and w_feels > 0:
+                comp.append((n, w_feels))
         n = _norm_wind(weather_wind)
         if n is not None and w_wind > 0:
             comp.append((n, w_wind))
@@ -1279,9 +1282,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         n = _norm_cloud(weather_cloud)
         if n is not None and w_cloud > 0:
             comp.append((n, w_cloud))
-        n = _norm_temp(forecast_temp)
-        if n is not None and w_forecast > 0:
-            comp.append((n, w_forecast))
+        if use_official_weather_temperature:
+            n = _norm_temp(forecast_temp)
+            if n is not None and w_forecast > 0:
+                comp.append((n, w_forecast))
 
         weather_offset = 0.0
         if weather_limit > 0 and comp:

@@ -2,6 +2,11 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.14.1] - 2026-07-21
+- fine tuning of dynamic target temp
+- optimize of ha api tool
+
+
 ## [2.14.0] - 2026-07-21
 - refactoring and remove of unused sensors
 - bugfix for config flow

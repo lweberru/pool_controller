@@ -69,7 +69,18 @@ Read `/api/states` with optional filters.
 python3 tools/ha_api_read.py states
 python3 tools/ha_api_read.py --compact states --domain sensor --contains whirlpool
 python3 tools/ha_api_read.py --compact states --contains alkal --limit 50
+python3 tools/ha_api_read.py --compact states --domain sensor --name-contains temperatur --state-min 30 --state-max 35
+python3 tools/ha_api_read.py --compact states --entity-id sensor.hue_outdoor_motion_sensor_1_temperatur --entity-id weather.openweathermap
 ```
+
+Useful filters:
+
+- `--entity-id <entity>`: exact entity filter; can be repeated
+- `--domain <domain>`: domain filter, for example `sensor`
+- `--contains <text>`: substring match on `entity_id`
+- `--name-contains <text>`: substring match on `friendly_name`
+- `--state-min <number>` / `--state-max <number>`: numeric state range filter
+- `--limit <n>`: cap result count
 
 ### state
 
@@ -120,11 +131,14 @@ Reads a focused pool summary: the climate entity, dynamic-target diagnostics, we
 
 ```bash
 python3 tools/ha_api_read.py pool --entity-id climate.whirlpool --compact
+python3 tools/ha_api_read.py pool --entity-id climate.whirlpool --focus dynamic-target --compact
 python3 tools/ha_api_read.py pool --device-id <ha_device_id> --compact
 python3 tools/ha_api_read.py pool --name whirlpool --full
 ```
 
 Use this first for pool-controller live debugging instead of starting with broad `states` dumps.
+
+Use `--focus dynamic-target` when investigating target-temperature behavior. It returns only the pool climate state, dynamic target sensors, local outdoor sensor, configured weather entity, relevant weather attributes, and the effective dynamic-target options.
 
 ### pool-config
 

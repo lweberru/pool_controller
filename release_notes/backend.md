@@ -1,4 +1,6 @@
 Stabilisiert Chemie-Empfehlungen mit historienbasierter Median-Logik statt Einzelmessungen
+Optimiert die dynamische Zieltemperatur für lokale Pool-Außentemperatur in Sonne: offizielles Wetter bleibt Kontext, neutralisiert den lokalen Sensor aber nicht mehr
+Erweitert `tools/ha_api_read.py` um `pool --focus dynamic-target` sowie exakte Entity-, Friendly-Name- und numerische Range-Filter für `states`
 Verbessert den Config-/Options-Flow für direkte BlueRiiot-Nutzung, Sensor-Erreichbarkeit und Desinfektionsmittel-Auswahl
 Verschiebt Heizleistungswerte in den Bereich Schalter & Leistung und entfernt das Pflichtfeld für klassische Wasserqualitätssensoren bei BlueRiiot-Setups
 Entfernt alte Alkalinität-plus/minus-Entities und redundante PV-Band-Sensoren

@@ -69,7 +69,18 @@ Liest `/api/states` mit optionalen Filtern.
 python3 tools/ha_api_read.py states
 python3 tools/ha_api_read.py --compact states --domain sensor --contains whirlpool
 python3 tools/ha_api_read.py --compact states --contains alkal --limit 50
+python3 tools/ha_api_read.py --compact states --domain sensor --name-contains temperatur --state-min 30 --state-max 35
+python3 tools/ha_api_read.py --compact states --entity-id sensor.hue_outdoor_motion_sensor_1_temperatur --entity-id weather.openweathermap
 ```
+
+Nützliche Filter:
+
+- `--entity-id <entity>`: exakte Entity-Auswahl; mehrfach nutzbar
+- `--domain <domain>`: Domain-Filter, z. B. `sensor`
+- `--contains <text>`: Teilstring-Suche in `entity_id`
+- `--name-contains <text>`: Teilstring-Suche im `friendly_name`
+- `--state-min <zahl>` / `--state-max <zahl>`: numerischer Zustandsbereich
+- `--limit <n>`: Ergebnisanzahl begrenzen
 
 ### state
 
@@ -120,11 +131,14 @@ Liest eine fokussierte Pool-Zusammenfassung: Climate-Entity, Dynamic-Target-Diag
 
 ```bash
 python3 tools/ha_api_read.py pool --entity-id climate.whirlpool --compact
+python3 tools/ha_api_read.py pool --entity-id climate.whirlpool --focus dynamic-target --compact
 python3 tools/ha_api_read.py pool --device-id <ha_device_id> --compact
 python3 tools/ha_api_read.py pool --name whirlpool --full
 ```
 
 Diesen Befehl bei pool_controller-Live-Debugging zuerst nutzen, statt mit breiten `states`-Dumps zu beginnen.
+
+Nutze `--focus dynamic-target`, wenn du das Zieltemperaturverhalten analysierst. Die Ausgabe enthält nur Climate-Status, Dynamic-Target-Sensoren, lokalen Außensensor, konfigurierte Wetter-Entity, relevante Wetterattribute und die effektiven Dynamic-Target-Optionen.
 
 ### pool-config
 
