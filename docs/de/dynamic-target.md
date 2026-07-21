@@ -37,16 +37,22 @@ Das Feature ist bewusst ausgewogen und standardmäßig deaktiviert:
 
 Defaults:
 
-- Winter: `+4.0°C`
-- Frühling: `+2.0°C`
-- Sommer: `-4.5°C`
-- Herbst: `+1.0°C`
-- Gesamtgrenzen: `[-6.5°C, +5.0°C]`
+- Winter: `+2.0°C`
+- Frühling: `+1.0°C`
+- Sommer: `-1.5°C`
+- Herbst: `+0.5°C`
+- Gesamtgrenzen: `[-5.0°C, +5.0°C]`
 
 ### 2. Wetteranteil
 
 Wenn eine Wetter-Entity gesetzt ist, wird ein zusätzlicher wetterbasierter Korrekturwert berechnet.
 Der Wetteranteil wird über `dynamic_target_weather_max_offset` begrenzt (Default `±3.0°C`).
+
+Außentemperatur, gefühlte Temperatur und Vorhersage-Temperatur verwenden eine Komfortkurve:
+
+- unter `24°C`: positiver Beitrag, wärmerer Pool bevorzugt
+- `24°C` bis `30°C`: neutraler Beitrag
+- über `30°C`: negativer Beitrag, kühlerer Pool bevorzugt
 
 Unterstützte gewichtete Eingänge:
 

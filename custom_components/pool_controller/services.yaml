@@ -146,6 +146,36 @@ stop_power_saving:
     entity:
       domain: climate
 
+get_options:
+  name: Get Options
+  description: Return the selected pool controller config data and options for remote diagnostics
+  target:
+    device:
+      integration: pool_controller
+    entity:
+      domain: climate
+  response:
+    optional: false
+    fields:
+      entry_id:
+        name: Entry ID
+        description: Config entry ID
+      title:
+        name: Title
+        description: Config entry title
+      data:
+        name: Data
+        description: Original config entry data
+      options:
+        name: Options
+        description: Current config entry options, including runtime-persisted values
+      persistent_options:
+        name: Persistent Options
+        description: Options excluding transient timer/runtime keys
+      effective:
+        name: Effective Config
+        description: Config data merged with options
+
 set_dynamic_target:
   name: Set Dynamic Target
   description: Update dynamic target temperature settings for the selected pool

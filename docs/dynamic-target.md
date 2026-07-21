@@ -37,16 +37,22 @@ A smooth annual interpolation is applied between four anchor offsets:
 
 Defaults:
 
-- Winter: `+4.0°C`
-- Spring: `+2.0°C`
-- Summer: `-4.5°C`
-- Autumn: `+1.0°C`
-- Total clamp: `[-6.5°C, +5.0°C]`
+- Winter: `+2.0°C`
+- Spring: `+1.0°C`
+- Summer: `-1.5°C`
+- Autumn: `+0.5°C`
+- Total clamp: `[-5.0°C, +5.0°C]`
 
 ### 2. Weather contribution
 
 If a weather entity is configured, a weather-based correction is added.
 The contribution is limited by `dynamic_target_weather_max_offset` (default `±3.0°C`).
+
+Air temperature, feels-like temperature, and forecast temperature use a comfort curve:
+
+- below `24°C`: positive contribution, warmer pool preferred
+- `24°C` to `30°C`: neutral contribution
+- above `30°C`: negative contribution, cooler pool preferred
 
 Supported weighted inputs:
 

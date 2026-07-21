@@ -31,3 +31,4 @@
 ## Dev-Workflow (lokal)
 - Für schnelle Iteration: Integration in HA `custom_components/` einhängen (Symlink/Copy), Logging für `custom_components.pool_controller` auf `debug`, HA neu starten.
 - Demo-Mode beachten: Switch-Calls dürfen im Demo-Mode nicht echte Hardware schalten.
+- Live-Diagnose bevorzugt mit `python3 tools/ha_api_read.py --local pool --entity-id climate.whirlpool --compact` bzw. `--url http://192.168.1.196:8123`, wenn im eigenen Netz; das umgeht den nginx-Proxy. Das Tool akzeptiert globale Optionen auch nach dem Subcommand und hat automatischen TLS-Fallback. Config-/Options-Werte remote mit `pool-config` lesen; lokale `.storage` ignorieren, sie ist nicht produktionsrelevant.

@@ -1221,10 +1221,16 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                     forecast_temp = float(sum(vals) / len(vals))
 
         # Normalize factors to roughly [-1, 1]. Positive means "warmer preference".
+        # Mild summer air should be neutral instead of cooling the pool just because it is above 18 C.
         def _norm_temp(v: float | None):
             if v is None:
                 return None
-            return self._clamp((18.0 - float(v)) / 18.0, -1.0, 1.0)
+            temp = float(v)
+            if temp < 24.0:
+                return self._clamp((24.0 - temp) / 12.0, 0.0, 1.0)
+            if temp <= 30.0:
+                return 0.0
+            return -self._clamp((temp - 30.0) / 10.0, 0.0, 1.0)
 
         def _norm_wind(v: float | None):
             if v is None:

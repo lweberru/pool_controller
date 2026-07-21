@@ -1,4 +1,5 @@
 {
   "ha_url": "http://homeassistant.local:8123",
+  "ha_local_url": "http://192.168.1.196:8123",
   "ha_token": "YOUR_LONG_LIVED_ACCESS_TOKEN"
 }

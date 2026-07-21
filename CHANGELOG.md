@@ -2,6 +2,10 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.13.4] - 2026-07-21
+- service to get config settings
+
+
 ## [2.13.3] - 2026-07-20
 - fix for missing data points
 

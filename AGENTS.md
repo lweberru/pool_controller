@@ -39,6 +39,13 @@
 - Backend: nach Zustandsänderungen immer `await coordinator.async_request_refresh()`.
 - Frontend: keine externen Dependencies/Build; alles in `main.js`; Strings über `I18N`/`_t()` (de/en/es/fr).
 
+## Live-Diagnose via Home Assistant API
+- Für pool_controller-Livewerte zuerst `python3 tools/ha_api_read.py pool --entity-id climate.whirlpool --compact` nutzen; bei bekannter HA-`device_id` alternativ `--device-id <id>`.
+- Im eigenen Netz bevorzugt den direkten HA-Endpunkt verwenden: `python3 tools/ha_api_read.py --local pool --entity-id climate.whirlpool --compact` mit `ha_local_url`/`HA_LOCAL_URL` (aktuell `http://192.168.1.196:8123`) oder `--url http://192.168.1.196:8123`.
+- Das Tool akzeptiert globale Optionen vor oder nach dem Subcommand (`states --compact ...` ist gültig) und fällt bei TLS-Zertifikatsfehlern automatisch auf unsichere lokale Verbindung zurück.
+- Config-/Options-Werte remote über `python3 tools/ha_api_read.py pool-config --entity-id climate.whirlpool` lesen. Nicht lokale `config/.storage` nutzen; sie hat für Produktion keine Bedeutung. Das Tool nutzt HA WebSocket und nach Release den read-only Service `pool_controller.get_options`.
+- Für Dynamic-Target-Debugging liefert `pool` direkt Basis-/Effektivziel, Gesamt-/Saison-/Wetter-Offset, Profil und Wetter-States.
+
 ## Übersetzungen / JSON-Qualität
 - Vor jedem Release JSON-Lint/Check für die Übersetzungsdateien ausführen.
 - Übersetzungen ausschließlich über die Tools im `tools/`-Verzeichnis konsolidieren (z.B. `sync_translations.py` oder `translations_rebuild.py`).
