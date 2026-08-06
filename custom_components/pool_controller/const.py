@@ -396,3 +396,7 @@ OPT_KEY_DERIVED_COST_NET_MONTH_TOTAL = "derived_cost_net_month_total"
 OPT_KEY_DERIVED_COST_NET_YEAR_TOTAL = "derived_cost_net_year_total"
 OPT_KEY_DERIVED_COST_NET_MONTH_ID = "derived_cost_net_month_id"
 OPT_KEY_DERIVED_COST_NET_YEAR_ID = "derived_cost_net_year_id"
+# --- Heating/Cooling mode (ice bath) --------------------------------
+# Live-toggled via the climate entity hvac_mode (heat vs cool); persisted here.
+OPT_KEY_COOL_MODE = "cool_mode"
+DEFAULT_COOL_MODE = False
