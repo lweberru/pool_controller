@@ -41,7 +41,7 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
     _attr_has_entity_name = True
     _attr_translation_key = "pool_climate" # Ermöglicht Übersetzung via de.json
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
-    _attr_hvac_modes = [HVACMode.OFF, HVACMode.HEAT]
+    _attr_hvac_modes = [HVACMode.OFF, HVACMode.HEAT, HVACMode.COOL]
     _attr_supported_features = ClimateEntityFeature.TARGET_TEMPERATURE | ClimateEntityFeature.PRESET_MODE
     # Defaults; will be overridden from entry config/options in __init__.
     _attr_min_temp = DEFAULT_MIN_TEMP
@@ -123,7 +123,7 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
             return HVACMode.OFF
         if not bool(getattr(self.coordinator, "hvac_enabled", True)):
             return HVACMode.OFF
-        return HVACMode.HEAT
+        return HVACMode.COOL if bool(getattr(self.coordinator, "cool_mode", False)) else HVACMode.HEAT
 
     @property
     def hvac_action(self):
@@ -145,8 +145,11 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
         except Exception:
             power_saving_stage = 0
 
+        cool = bool(getattr(self.coordinator, "cool_mode", False))
         wants_heat = heat_reason not in ("", "off", "disabled")
         temp_below_target = (cur is not None and tgt is not None and cur < tgt)
+        temp_above_target = (cur is not None and tgt is not None and cur > tgt)
+        temp_demand = temp_above_target if cool else temp_below_target
 
         heating_active = False
         if data.get("frost_timer_active"):
@@ -155,12 +158,14 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
             heating_active = True
         elif bool(data.get("should_pump_on")) and (
             power_saving_stage >= 1 or run_reason == "power_saving"
-        ) and (temp_below_target or cur is None or tgt is None):
+        ) and (temp_demand or cur is None or tgt is None):
             heating_active = True
-        elif wants_heat and temp_below_target and bool(data.get("should_pump_on")):
+        elif wants_heat and temp_demand and bool(data.get("should_pump_on")):
             heating_active = True
 
-        return HVACAction.HEATING if heating_active else HVACAction.IDLE
+        if not heating_active:
+            return HVACAction.IDLE
+        return HVACAction.COOLING if cool else HVACAction.HEATING
 
     @property
     def preset_mode(self):
@@ -209,9 +214,12 @@ class WhirlpoolClimate(CoordinatorEntity, ClimateEntity):
         if hvac_mode == HVACMode.OFF:
             await self.coordinator.stop_manual_heat()
             await self.coordinator.set_hvac_enabled(False)
-        else:
+        elif hvac_mode == HVACMode.COOL:
+            await self.coordinator.set_cool_mode(True)
             await self.coordinator.set_hvac_enabled(True)
-            await self.coordinator.start_manual_heat_to_target()
+        else:
+            await self.coordinator.set_cool_mode(False)
+            await self.coordinator.set_hvac_enabled(True)
         await self.coordinator.async_request_refresh()
 
     async def async_set_preset_mode(self, preset_mode: str):

@@ -66,6 +66,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         self.maintenance_active = False
         # HVAC enabled state (thermostat-style heating when PV optimization is disabled).
         self.hvac_enabled = True
+        self.cool_mode = DEFAULT_COOL_MODE
         # Away mode (reduced activity)
         self.away_active = False
         self.away_temp = DEFAULT_AWAY_TEMP
@@ -209,6 +210,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         if entry and entry.options:
             self.maintenance_active = bool(entry.options.get(OPT_KEY_MAINTENANCE_ACTIVE, False))
             self.hvac_enabled = bool(entry.options.get(OPT_KEY_HVAC_ENABLED, True))
+            self.cool_mode = bool(entry.options.get(OPT_KEY_COOL_MODE, False))
             self.away_active = bool(entry.options.get(OPT_KEY_AWAY_ACTIVE, False))
             self.power_saving_active = bool(entry.options.get(OPT_KEY_POWER_SAVING_ACTIVE, False))
             self.manual_mode_active = bool(entry.options.get(OPT_KEY_MANUAL_MODE_ACTIVE, False))
@@ -1937,6 +1939,20 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         except Exception:
             _LOGGER.exception("Fehler beim Speichern von boost mode")
 
+    async def set_cool_mode(self, cool: bool):
+        """Switch between heating and cooling regulation (persisted)."""
+        cool = bool(cool)
+        if cool == bool(getattr(self, "cool_mode", False)):
+            return
+        self.cool_mode = cool
+        try:
+            new_opts = {**(self.entry.options or {})}
+            new_opts[OPT_KEY_COOL_MODE] = cool
+            await self._async_update_entry_options(new_opts)
+        except Exception:
+            pass
+        await self.async_request_refresh()
+
     async def set_hvac_enabled(self, enabled: bool):
         """Enable/disable thermostat behavior (independent from maintenance)."""
         enabled = bool(enabled)
@@ -2119,6 +2135,12 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             hot = float(hot_tolerance)
         except Exception:
             return prev_on
+        if getattr(self, "cool_mode", False):
+            # Cooling: ON above (target+hot), OFF at/below (target-cold).
+            if prev_on:
+                return ct > (tt - cold)
+            return ct > (tt + hot)
+        # Heating (unchanged):
         if prev_on:
             return ct < (tt + hot)
         return ct < (tt - cold)
@@ -4200,7 +4222,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
 
             # PV-based run should stop once target is reached (with same hysteresis).
             try:
-                if water_temp is not None and float(water_temp) >= float(target_temp_effective):
+                if water_temp is not None and (
+                        (float(water_temp) <= float(target_temp_effective)) if getattr(self, "cool_mode", False)
+                        else (float(water_temp) >= float(target_temp_effective))
+                    ):
                     pv_heat_demand = False
                 else:
                     pv_heat_demand = self._thermostat_demand(
@@ -4268,7 +4293,10 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 # Aux heater is strictly for heating. Once target is reached, keep it OFF
                 # even if a manual timer (e.g. bathing/filter/chlorine) is active.
                 try:
-                    if water_temp is not None and float(water_temp) >= float(target_temp_effective):
+                    if water_temp is not None and (
+                        (float(water_temp) <= float(target_temp_effective)) if getattr(self, "cool_mode", False)
+                        else (float(water_temp) >= float(target_temp_effective))
+                    ):
                         aux_heat_demand = False
                     else:
                         aux_heat_demand = self._thermostat_demand(
