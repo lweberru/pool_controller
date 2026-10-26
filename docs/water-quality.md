@@ -39,6 +39,14 @@ The battery percentage is derived from the BlueRiiot raw value. For Plus Salt mo
 
 Use an ESPHome Bluetooth proxy only when the BlueRiiot is out of range of the Home Assistant host. `esphome-blueriiot-proxy-example.yaml` is available as a proxy and display example; it does not read the proprietary GATT protocol itself. Do not run the legacy direct `ble_client` profile and Pool Controller's native reader for the same BlueRiiot at the same time.
 
+### Optional BlueRiiot Bluetooth integration source
+
+From Pool Controller 2.14.10, select **BlueRiiot Bluetooth integration** under **Configure → Measurement infrastructure**, then choose a device configured in [BlueRiiot Bluetooth](https://github.com/lweberru/ha_blueriiot). Version 1.0.7 of that integration adds active scan requests. Measurements and diagnostics are discovered from the device's stable entity unique IDs, so renaming entities is supported. Manual readings are delegated to its refresh button. Pool Controller never opens a BLE connection in this mode and rejects unavailable or stale measurements. Its existing ESPHome display updates remain supported.
+
+Set polling and salt calibration in BlueRiiot Bluetooth; Pool Controller's day/night settings only apply to its direct reader. Existing direct-reader and manual-entity configurations keep working. When migrating, first disable the direct reader by choosing **Sensor entities**, then configure BlueRiiot Bluetooth, and finally select it as the new source. This avoids two integrations polling the same device during setup.
+
+The ESP32 can remain a standard Bluetooth proxy. Keep the proxy/display profile if you also use its display. Use **Auto** or **Active** scanning: BlueRiiot Bluetooth requests active scan windows from Home Assistant, but an explicitly **Passive** scanner is not overridden.
+
 ### Sensor Values in Pool Controller
 
 Once configured, the integration automatically:

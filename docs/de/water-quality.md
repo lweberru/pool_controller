@@ -39,6 +39,20 @@ Der Batteriestand wird aus dem BlueRiiot-Rohwert berechnet. Für Plus-Salt-Model
 
 Einen ESPHome-Bluetooth-Proxy nur einsetzen, wenn der BlueRiiot außerhalb der Reichweite des Home-Assistant-Hosts liegt. `esphome-blueriiot-proxy-example.yaml` bleibt als Proxy- und Display-Beispiel verfügbar, liest das proprietäre GATT-Protokoll jedoch nicht selbst. Das alte direkte `ble_client`-Profil und der native Leser von Pool Controller dürfen nicht gleichzeitig für denselben BlueRiiot laufen.
 
+### Optional: die Integration BlueRiiot Bluetooth verwenden
+
+Ab Pool Controller 2.14.10 kann [BlueRiiot Bluetooth](https://github.com/lweberru/ha_blueriiot) das Auslesen vollständig übernehmen:
+
+1. BlueRiiot Bluetooth über HACS installieren und dort das Messgerät einrichten. Für die aktive Scan-Anforderung mindestens Version 1.0.7 verwenden.
+2. Im Pool Controller unter **Konfigurieren → Messinfrastruktur** die Messwertquelle **Integration BlueRiiot Bluetooth** wählen und das dort eingerichtete Gerät auswählen.
+3. Das Abfrageintervall und die Salzkalibrierung in BlueRiiot Bluetooth einstellen. Die Tag-/Nachtintervalle des Pool Controllers gelten ausschließlich für dessen direkte Auslesung.
+
+Temperatur, pH, ORP, Salz, Leitfähigkeit, Batterie und Erreichbarkeit werden automatisch anhand der Geräte-Entitäten zugeordnet. Umbenannte Entitäten werden weiterhin erkannt. **BlueRiiot jetzt auslesen** betätigt die Mess-Schaltfläche der BlueRiiot-Integration. Der Pool Controller öffnet in diesem Modus keine eigene BLE-Verbindung. Entfallene oder veraltete Messwerte werden nicht für die Steuerung übernommen. Die bestehende ESPHome-Display-Anbindung bleibt erhalten.
+
+Beim Wechsel von der direkten Auslesung zuerst diese im Pool Controller abschalten (**Sensor-Entitäten** wählen), dann BlueRiiot Bluetooth einrichten und anschließend die neue Quelle auswählen. So lesen während der Einrichtung nicht zwei Integrationen dasselbe Gerät parallel aus. Die bisherigen Messwertquellen bleiben verfügbar; vorhandene Installationen werden nicht automatisch umgestellt.
+
+Der ESP32 kann ein normaler ESPHome-Bluetooth-Proxy bleiben. Für ein vorhandenes Display ist weiterhin das Proxy-/Display-Profil nötig. BlueRiiot Bluetooth ab 1.0.7 fordert für seine Geräte aktive Scanfenster über die Home-Assistant-Bluetooth-API an und wartet bei fehlender Erkennung auf ein Advertisement. Dafür den Scanmodus des Proxys auf **Auto** oder **Aktiv** stellen; ein ausdrücklich auf **Passiv** gesetzter Proxy wird von Home Assistant nicht überschrieben.
+
 ### Sensorwerte im Pool Controller
 
 Nach der Konfiguration übernimmt die Integration automatisch:

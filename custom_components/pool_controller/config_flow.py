@@ -4,7 +4,7 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.components import bluetooth
 from homeassistant.core import callback
-from homeassistant.helpers import selector, entity_registry as er
+from homeassistant.helpers import selector, entity_registry as er, device_registry as dr
 from .const import *
 from .blueriiot import SERVICE_UUID
 
@@ -54,9 +54,23 @@ def _apply_sanitizer_options(target: dict, payload: dict) -> None:
     target[CONF_SANITIZER_PRODUCT] = "salt_cell" if mode == "saltwater" else product
 
 
-def _normalize_blueriiot_options(data: dict) -> tuple[dict, dict]:
+def _normalize_blueriiot_options(data: dict, hass=None) -> tuple[dict, dict]:
     """Normalize a configured BlueRiiot MAC address and report invalid input."""
     normalized = dict(data)
+    source = blueriiot_source(normalized)
+    if source not in ("native", "integration", "entities"):
+        return normalized, {CONF_BLUERIIOT_SOURCE: "invalid_source"}
+    normalized[CONF_BLUERIIOT_SOURCE] = source
+    normalized[CONF_ENABLE_BLUERIIOT] = source == "native"
+    if source == "integration":
+        if not normalized.get(CONF_BLUERIIOT_DEVICE):
+            return normalized, {CONF_BLUERIIOT_DEVICE: "blueriiot_device_required"}
+        if hass is not None:
+            device = dr.async_get(hass).async_get(normalized[CONF_BLUERIIOT_DEVICE])
+            entries = [hass.config_entries.async_get_entry(eid) for eid in device.config_entries] if device else []
+            if not any(entry and entry.domain == "blueriiot" for entry in entries):
+                return normalized, {CONF_BLUERIIOT_DEVICE: "invalid_blueriiot_device"}
+        return normalized, {}
     if not bool(normalized.get(CONF_ENABLE_BLUERIIOT, False)):
         return normalized, {}
 
@@ -199,7 +213,12 @@ def _blueriiot_schema(hass, curr: dict | None = None):
     if not default_address and len(detected_blueriiots) == 1:
         default_address = detected_blueriiots[0]["value"]
     return vol.Schema({
-        vol.Optional(CONF_ENABLE_BLUERIIOT, default=c.get(CONF_ENABLE_BLUERIIOT, DEFAULT_ENABLE_BLUERIIOT)): bool,
+        vol.Required(CONF_BLUERIIOT_SOURCE, default=blueriiot_source(c)): selector.SelectSelector(
+            selector.SelectSelectorConfig(options=["entities", "native", "integration"], translation_key="blueriiot_source", mode=selector.SelectSelectorMode.DROPDOWN)
+        ),
+        vol.Optional(CONF_BLUERIIOT_DEVICE, default=c.get(CONF_BLUERIIOT_DEVICE) or None): selector.DeviceSelector(
+            selector.DeviceSelectorConfig(integration="blueriiot")
+        ),
         vol.Optional(CONF_BLUERIIOT_MAC, default=default_address): selector.SelectSelector(
             selector.SelectSelectorConfig(
                 options=address_options,
@@ -709,18 +728,18 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="water_quality",
-            data_schema=_water_quality_schema(self.data, not bool(self.data.get(CONF_ENABLE_BLUERIIOT, False))),
+            data_schema=_water_quality_schema(self.data, blueriiot_source(self.data) == "entities"),
             last_step=False
         )
 
     async def async_step_measurement(self, user_input=None):
         """Configure the direct reader and optional reachability monitoring together."""
         if user_input is not None:
-            normalized, errors = _normalize_blueriiot_options(user_input)
+            normalized, errors = _normalize_blueriiot_options(user_input, self.hass)
             if not errors:
-                if bool(normalized.get(CONF_ENABLE_BLUERIIOT, False)):
+                if blueriiot_source(normalized) != "entities":
                     _clear_water_quality_entities(normalized)
-                if bool(normalized.get(CONF_ENABLE_BLUERIIOT, False)) or not bool(normalized.get(CONF_ENABLE_SENSOR_HEALTH, False)):
+                if blueriiot_source(normalized) != "entities" or not bool(normalized.get(CONF_ENABLE_SENSOR_HEALTH, False)):
                     normalized[CONF_SENSOR_HEALTH_ESP32_DEVICE] = ""
                     normalized[CONF_SENSOR_HEALTH_WATER_SENSOR] = ""
                 self.data.update(normalized)
@@ -735,12 +754,12 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_blueriiot(self, user_input=None):
         if user_input is not None:
-            normalized, errors = _normalize_blueriiot_options(user_input)
+            normalized, errors = _normalize_blueriiot_options(user_input, self.hass)
             if not errors:
-                if bool(normalized.get(CONF_ENABLE_BLUERIIOT, False)):
+                if blueriiot_source(normalized) != "entities":
                     _clear_water_quality_entities(normalized)
                 self.data.update(normalized)
-                if bool(normalized.get(CONF_ENABLE_BLUERIIOT, False)):
+                if blueriiot_source(normalized) != "entities":
                     return await self.async_step_sensor_health()
                 return await self.async_step_water_quality()
         return self.async_show_form(
@@ -753,7 +772,7 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_sensor_health(self, user_input=None):
         if user_input is not None:
             normalized = dict(user_input)
-            if bool(self.data.get(CONF_ENABLE_BLUERIIOT, False)) or not bool(normalized.get(CONF_ENABLE_SENSOR_HEALTH, False)):
+            if blueriiot_source(self.data) != "entities" or not bool(normalized.get(CONF_ENABLE_SENSOR_HEALTH, False)):
                 normalized[CONF_SENSOR_HEALTH_ESP32_DEVICE] = ""
                 normalized[CONF_SENSOR_HEALTH_WATER_SENSOR] = ""
             self.data.update(normalized)
@@ -761,7 +780,7 @@ class PoolControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="sensor_health",
-            data_schema=_sensor_health_schema({}, bool(self.data.get(CONF_ENABLE_BLUERIIOT, False))),
+            data_schema=_sensor_health_schema({}, blueriiot_source(self.data) != "entities"),
             last_step=False
         )
 
@@ -1103,18 +1122,18 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
 
         return self.async_show_form(
             step_id="water_quality",
-            data_schema=_water_quality_schema(curr, not bool(curr.get(CONF_ENABLE_BLUERIIOT, False))),
+            data_schema=_water_quality_schema(curr, blueriiot_source(curr) == "entities"),
             last_step=False
         )
 
     async def async_step_measurement(self, user_input=None):
         """Configure BlueRiiot and reachability monitoring as one chapter."""
         if user_input is not None:
-            normalized, errors = _normalize_blueriiot_options(user_input)
+            normalized, errors = _normalize_blueriiot_options(user_input, self.hass)
             if not errors:
-                if bool(normalized.get(CONF_ENABLE_BLUERIIOT, False)):
+                if blueriiot_source(normalized) != "entities":
                     _clear_water_quality_entities(normalized)
-                if bool(normalized.get(CONF_ENABLE_BLUERIIOT, False)) or not bool(normalized.get(CONF_ENABLE_SENSOR_HEALTH, False)):
+                if blueriiot_source(normalized) != "entities" or not bool(normalized.get(CONF_ENABLE_SENSOR_HEALTH, False)):
                     normalized[CONF_SENSOR_HEALTH_ESP32_DEVICE] = ""
                     normalized[CONF_SENSOR_HEALTH_WATER_SENSOR] = ""
                 self.options.update(normalized)
@@ -1132,14 +1151,14 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_blueriiot(self, user_input=None):
         """Optional native BlueRiiot reader using Home Assistant Bluetooth."""
         if user_input is not None:
-            normalized, errors = _normalize_blueriiot_options(user_input)
+            normalized, errors = _normalize_blueriiot_options(user_input, self.hass)
             if not errors:
-                if bool(normalized.get(CONF_ENABLE_BLUERIIOT, False)):
+                if blueriiot_source(normalized) != "entities":
                     _clear_water_quality_entities(normalized)
                 self.options.update(normalized)
                 if self._menu_mode:
                     return self.async_create_entry(title="", data=self.options)
-                if bool(normalized.get(CONF_ENABLE_BLUERIIOT, False)):
+                if blueriiot_source(normalized) != "entities":
                     return await self.async_step_sensor_health()
                 return await self.async_step_water_quality()
 
@@ -1156,7 +1175,7 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             normalized = dict(user_input)
             curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
-            if bool(curr.get(CONF_ENABLE_BLUERIIOT, False)) or not bool(normalized.get(CONF_ENABLE_SENSOR_HEALTH, False)):
+            if blueriiot_source(curr) != "entities" or not bool(normalized.get(CONF_ENABLE_SENSOR_HEALTH, False)):
                 normalized[CONF_SENSOR_HEALTH_ESP32_DEVICE] = ""
                 normalized[CONF_SENSOR_HEALTH_WATER_SENSOR] = ""
             self.options.update(normalized)
@@ -1167,7 +1186,7 @@ class PoolControllerOptionsFlowHandler(config_entries.OptionsFlow):
         curr = {**self._config_entry.data, **self._config_entry.options, **self.options}
         return self.async_show_form(
             step_id="sensor_health",
-            data_schema=_sensor_health_schema(curr, bool(curr.get(CONF_ENABLE_BLUERIIOT, False))),
+            data_schema=_sensor_health_schema(curr, blueriiot_source(curr) != "entities"),
             last_step=False
         )
 

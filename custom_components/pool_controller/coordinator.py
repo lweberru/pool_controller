@@ -10,6 +10,7 @@ from homeassistant.util import dt as dt_util
 from homeassistant.helpers import entity_registry as er
 from .const import *
 from .blueriiot import BlueRiiotReader
+from .blueriiot_integration import BlueRiiotIntegrationReader
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -17,7 +18,9 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
     def __init__(self, hass, entry):
         self.entry = entry
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=timedelta(seconds=30))
-        self._blueriiot_reader = BlueRiiotReader(hass)
+        self._native_blueriiot_reader = BlueRiiotReader(hass)
+        self._integration_blueriiot_reader = BlueRiiotIntegrationReader(hass)
+        self._blueriiot_reader = self._native_blueriiot_reader
         self._active_notification_alerts: set[str] = set()
         # Target temperature: prefer persisted option, else config value, else default.
         self.target_temp = DEFAULT_TARGET_TEMP
@@ -976,9 +979,16 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
         return (night_interval if is_night else day_interval), is_night
 
     async def async_read_blueriiot_now(self) -> bool:
-        """Perform one immediate native BlueRiiot measurement when configured."""
+        """Request an immediate measurement from the selected BlueRiiot source."""
         conf = {**(self.entry.data or {}), **(self.entry.options or {})}
-        if not bool(conf.get(CONF_ENABLE_BLUERIIOT, DEFAULT_ENABLE_BLUERIIOT)):
+        source = blueriiot_source(conf)
+        self._blueriiot_reader = self._integration_blueriiot_reader if source == "integration" else self._native_blueriiot_reader
+        if source == "integration":
+            await self._blueriiot_reader.async_read_if_due(
+                conf.get(CONF_BLUERIIOT_DEVICE, ""), timedelta(), force=True
+            )
+            return self._blueriiot_reader.last_error is None
+        if source != "native":
             self._blueriiot_reader.last_error = "not_enabled"
             return False
 
@@ -2428,14 +2438,27 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             # Sensors
             water_temp = self._get_float(conf.get(CONF_TEMP_WATER))
             outdoor_temp = self._get_float(conf.get(CONF_TEMP_OUTDOOR))
+            if blueriiot_source(conf) == "integration":
+                water_temp = None
 
-            blueriiot_enabled = bool(conf.get(CONF_ENABLE_BLUERIIOT, DEFAULT_ENABLE_BLUERIIOT))
+            source = blueriiot_source(conf)
+            blueriiot_enabled = source != "entities"
+            self._blueriiot_reader = self._integration_blueriiot_reader if source == "integration" else self._native_blueriiot_reader
             blueriiot_reading = None
             blueriiot_interval = DEFAULT_BLUERIIOT_INTERVAL_MINUTES
             blueriiot_night_active = False
             blueriiot_last_success_before = self._blueriiot_reader.last_success
             blueriiot_reading_fresh = False
-            if blueriiot_enabled and str(conf.get(CONF_BLUERIIOT_MAC) or "").strip():
+            if source == "integration":
+                blueriiot_reading = await self._blueriiot_reader.async_read_if_due(
+                    conf.get(CONF_BLUERIIOT_DEVICE, ""), timedelta()
+                )
+                blueriiot_interval = self._blueriiot_reader.interval_minutes
+                blueriiot_reading_fresh = bool(
+                    blueriiot_reading is not None
+                    and self._blueriiot_reader.last_success != blueriiot_last_success_before
+                )
+            elif source == "native" and str(conf.get(CONF_BLUERIIOT_MAC) or "").strip():
                 try:
                     blueriiot_interval, blueriiot_night_active = self._blueriiot_interval_for_time(conf, now)
                     blueriiot_reading = await self._blueriiot_reader.async_read_if_due(
@@ -2472,7 +2495,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             sensor_health_message = "disabled"
             if sensor_health_enabled:
                 sensor_health_esp32_ok = _device_reachable(conf.get(CONF_SENSOR_HEALTH_ESP32_DEVICE))
-                if use_blueriiot_reading:
+                if blueriiot_enabled:
                     sensor_health_water_sensor_ok = self._blueriiot_reader.is_recently_reachable(
                         timedelta(minutes=blueriiot_interval * 2)
                     )
@@ -2509,6 +2532,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
             chlor_val = self._get_float(conf.get(CONF_CHLORINE_SENSOR))
             salt_val = self._get_float(conf.get(CONF_SALT_SENSOR))
             conductivity_val = self._get_float(conf.get(CONF_TDS_SENSOR))  # in μS/cm
+            if source == "integration":
+                ph_val = chlor_val = salt_val = conductivity_val = None
             if use_blueriiot_reading:
                 ph_val = blueriiot_reading.ph
                 chlor_val = blueriiot_reading.orp
@@ -2757,6 +2782,8 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 alkalinity_measurement_reason = "insufficient_history"
 
             should_record_chem_history = not (blueriiot_reading is not None and not use_blueriiot_reading)
+            if source == "integration":
+                should_record_chem_history = use_blueriiot_reading
             if should_record_chem_history:
                 self._append_chem_history_sample(
                     now=now,
@@ -4398,7 +4425,7 @@ class PoolControllerDataCoordinator(DataUpdateCoordinator):
                 ),
                 "blueriiot_last_success": self._blueriiot_reader.last_success,
                 "blueriiot_error": self._blueriiot_reader.last_error,
-                "blueriiot_battery": round(blueriiot_reading.battery, 0) if use_blueriiot_reading else None,
+                "blueriiot_battery": round(blueriiot_reading.battery, 0) if use_blueriiot_reading and blueriiot_reading.battery is not None else None,
                 "dynamic_target_enabled": bool(dynamic_target.get("enabled", False)),
                 "dynamic_target_profile": self.target_temp_profile,
                 "target_temp_base": round(target_temp_base, 2),

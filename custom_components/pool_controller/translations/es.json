@@ -77,7 +77,7 @@
             },
             "blueriiot": {
                 "title": "Lector Bluetooth BlueRiiot",
-                "description": "Opcional: lee valores de BlueRiiot directamente mediante adaptadores y proxies Bluetooth de Home Assistant. Déjalo desactivado para usar el fallback clásico basado en sensores.",
+                "description": "Elige quién obtiene las mediciones. Con la integración BlueRiiot, Pool Controller utiliza sus entidades sin abrir otra conexión Bluetooth. La dirección MAC, la calibración y los intervalos diurnos/nocturnos solo se aplican a la lectura directa.",
                 "submit": "Continuar",
                 "data": {
                     "enable_blueriiot": "Leer BlueRiiot directamente",
@@ -86,7 +86,9 @@
                     "blueriiot_interval_minutes": "Intervalo de lectura diurno",
                     "blueriiot_night_interval_minutes": "Intervalo de lectura nocturno",
                     "blueriiot_night_start": "Inicio de la noche",
-                    "blueriiot_night_end": "Fin de la noche"
+                    "blueriiot_night_end": "Fin de la noche",
+                    "blueriiot_source": "Origen de las mediciones",
+                    "blueriiot_device": "Dispositivo de BlueRiiot Bluetooth"
                 },
                 "data_description": {
                     "enable_blueriiot": "Al activarlo, las lecturas nuevas de BlueRiiot tienen prioridad. Si no hay una lectura nueva, las entidades de sensores clásicas configuradas siguen siendo el fallback.",
@@ -95,7 +97,9 @@
                     "blueriiot_interval_minutes": "Tiempo mínimo entre lecturas Bluetooth directas durante el día.",
                     "blueriiot_night_interval_minutes": "Tiempo mínimo entre lecturas Bluetooth directas durante la noche.",
                     "blueriiot_night_start": "Hora local a la que comienza el intervalo nocturno.",
-                    "blueriiot_night_end": "Hora local a la que vuelve a comenzar el intervalo diurno."
+                    "blueriiot_night_end": "Hora local a la que vuelve a comenzar el intervalo diurno.",
+                    "blueriiot_source": "Elige quién obtiene las mediciones. Con la integración BlueRiiot, Pool Controller utiliza sus entidades sin abrir otra conexión Bluetooth. La dirección MAC, la calibración y los intervalos diurnos/nocturnos solo se aplican a la lectura directa.",
+                    "blueriiot_device": "Selecciona un dispositivo configurado en BlueRiiot Bluetooth. Las mediciones, la conectividad y el botón de lectura se asignan automáticamente. Configura el intervalo y la calibración de sal en BlueRiiot Bluetooth."
                 }
             },
             "sensor_health": {
@@ -115,7 +119,7 @@
             },
             "measurement": {
                 "title": "Measurement infrastructure",
-                "description": "Configure direct BlueRiiot readings and optional reachability monitoring together.",
+                "description": "Elige quién obtiene las mediciones. Con la integración BlueRiiot, Pool Controller utiliza sus entidades sin abrir otra conexión Bluetooth. La dirección MAC, la calibración y los intervalos diurnos/nocturnos solo se aplican a la lectura directa.",
                 "submit": "Continue",
                 "data": {
                     "enable_blueriiot": "Read BlueRiiot directly",
@@ -126,7 +130,13 @@
                     "blueriiot_night_end": "Nighttime ends",
                     "enable_sensor_health": "Enable reachability monitoring",
                     "sensor_health_esp32_device": "ESP32 device",
-                    "sensor_health_water_sensor": "Water sensor reachability"
+                    "sensor_health_water_sensor": "Water sensor reachability",
+                    "blueriiot_source": "Origen de las mediciones",
+                    "blueriiot_device": "Dispositivo de BlueRiiot Bluetooth"
+                },
+                "data_description": {
+                    "blueriiot_source": "Elige quién obtiene las mediciones. Con la integración BlueRiiot, Pool Controller utiliza sus entidades sin abrir otra conexión Bluetooth. La dirección MAC, la calibración y los intervalos diurnos/nocturnos solo se aplican a la lectura directa.",
+                    "blueriiot_device": "Selecciona un dispositivo configurado en BlueRiiot Bluetooth. Las mediciones, la conectividad y el botón de lectura se asignan automáticamente. Configura el intervalo y la calibración de sal en BlueRiiot Bluetooth."
                 }
             },
             "notifications": {
@@ -418,7 +428,10 @@
             }
         },
         "error": {
-            "invalid_mac": "Introduce una dirección MAC Bluetooth válida, por ejemplo 00:A0:50:C7:46:C9."
+            "invalid_mac": "Introduce una dirección MAC Bluetooth válida, por ejemplo 00:A0:50:C7:46:C9.",
+            "blueriiot_device_required": "Selecciona un dispositivo de BlueRiiot Bluetooth.",
+            "invalid_blueriiot_device": "El dispositivo no pertenece a BlueRiiot Bluetooth.",
+            "invalid_source": "Selecciona un origen de mediciones válido."
         }
     },
     "options": {
@@ -521,19 +534,23 @@
             },
             "blueriiot": {
                 "title": "Lector Bluetooth BlueRiiot",
-                "description": "Opcional: lee valores de BlueRiiot directamente mediante adaptadores y proxies Bluetooth de Home Assistant.",
+                "description": "Elige quién obtiene las mediciones. Con la integración BlueRiiot, Pool Controller utiliza sus entidades sin abrir otra conexión Bluetooth. La dirección MAC, la calibración y los intervalos diurnos/nocturnos solo se aplican a la lectura directa.",
                 "submit": "Siguiente",
                 "data": {
                     "enable_blueriiot": "Leer BlueRiiot directamente",
                     "blueriiot_mac": "Dirección Bluetooth de BlueRiiot",
                     "blueriiot_salt_divisor": "Divisor de calibración de sal",
-                    "blueriiot_interval_minutes": "Intervalo de lectura diurno"
+                    "blueriiot_interval_minutes": "Intervalo de lectura diurno",
+                    "blueriiot_source": "Origen de las mediciones",
+                    "blueriiot_device": "Dispositivo de BlueRiiot Bluetooth"
                 },
                 "data_description": {
                     "enable_blueriiot": "Al activarlo, los valores de BlueRiiot tienen prioridad sobre las entidades de calidad del agua seleccionadas.",
                     "blueriiot_mac": "Los dispositivos Bluetooth cercanos se muestran automáticamente. Selecciona el BlueRiiot o introduce su dirección MAC manualmente si no aparece.",
                     "blueriiot_salt_divisor": "Valor predeterminado 18 para Blue Connect Plus Salt. Cámbialo solo con una medición de referencia fiable.",
-                    "blueriiot_interval_minutes": "Tiempo mínimo entre lecturas Bluetooth directas durante el día."
+                    "blueriiot_interval_minutes": "Tiempo mínimo entre lecturas Bluetooth directas durante el día.",
+                    "blueriiot_source": "Elige quién obtiene las mediciones. Con la integración BlueRiiot, Pool Controller utiliza sus entidades sin abrir otra conexión Bluetooth. La dirección MAC, la calibración y los intervalos diurnos/nocturnos solo se aplican a la lectura directa.",
+                    "blueriiot_device": "Selecciona un dispositivo configurado en BlueRiiot Bluetooth. Las mediciones, la conectividad y el botón de lectura se asignan automáticamente. Configura el intervalo y la calibración de sal en BlueRiiot Bluetooth."
                 }
             },
             "sensor_health": {
@@ -553,7 +570,7 @@
             },
             "measurement": {
                 "title": "Measurement infrastructure",
-                "description": "Configure direct BlueRiiot readings and optional reachability monitoring together.",
+                "description": "Elige quién obtiene las mediciones. Con la integración BlueRiiot, Pool Controller utiliza sus entidades sin abrir otra conexión Bluetooth. La dirección MAC, la calibración y los intervalos diurnos/nocturnos solo se aplican a la lectura directa.",
                 "submit": "Save",
                 "data": {
                     "enable_blueriiot": "Read BlueRiiot directly",
@@ -564,7 +581,13 @@
                     "blueriiot_night_end": "Nighttime ends",
                     "enable_sensor_health": "Enable reachability monitoring",
                     "sensor_health_esp32_device": "ESP32 device",
-                    "sensor_health_water_sensor": "Water sensor reachability"
+                    "sensor_health_water_sensor": "Water sensor reachability",
+                    "blueriiot_source": "Origen de las mediciones",
+                    "blueriiot_device": "Dispositivo de BlueRiiot Bluetooth"
+                },
+                "data_description": {
+                    "blueriiot_source": "Elige quién obtiene las mediciones. Con la integración BlueRiiot, Pool Controller utiliza sus entidades sin abrir otra conexión Bluetooth. La dirección MAC, la calibración y los intervalos diurnos/nocturnos solo se aplican a la lectura directa.",
+                    "blueriiot_device": "Selecciona un dispositivo configurado en BlueRiiot Bluetooth. Las mediciones, la conectividad y el botón de lectura se asignan automáticamente. Configura el intervalo y la calibración de sal en BlueRiiot Bluetooth."
                 }
             },
             "notifications": {
@@ -854,6 +877,11 @@
                     "solar_energy_entity_daily": "Energía solar diaria asignada al pool (kWh). Se usa para el coste neto."
                 }
             }
+        },
+        "error": {
+            "blueriiot_device_required": "Selecciona un dispositivo de BlueRiiot Bluetooth.",
+            "invalid_blueriiot_device": "El dispositivo no pertenece a BlueRiiot Bluetooth.",
+            "invalid_source": "Selecciona un origen de mediciones válido."
         }
     },
     "entity": {
@@ -1319,6 +1347,15 @@
                     "summer": "Verano",
                     "autumn": "Otoño"
                 }
+            }
+        }
+    },
+    "selector": {
+        "blueriiot_source": {
+            "options": {
+                "entities": "Entidades de sensores",
+                "native": "Lectura Bluetooth directa",
+                "integration": "Integración BlueRiiot Bluetooth"
             }
         }
     }

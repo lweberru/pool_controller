@@ -21,6 +21,17 @@ CONF_CHLORINE_SENSOR = "chlorine_sensor"
 CONF_SALT_SENSOR = "salt_sensor"
 CONF_TDS_SENSOR = "tds_sensor"
 CONF_ENABLE_BLUERIIOT = "enable_blueriiot"
+CONF_BLUERIIOT_SOURCE = "blueriiot_source"
+CONF_BLUERIIOT_DEVICE = "blueriiot_device"
+
+
+def blueriiot_source(config: dict) -> str:
+    """Preserve the selected source for entries predating the source selector."""
+    return config.get(CONF_BLUERIIOT_SOURCE) or (
+        "native" if config.get(CONF_ENABLE_BLUERIIOT, False) else "entities"
+    )
+
+
 CONF_BLUERIIOT_MAC = "blueriiot_mac"
 CONF_BLUERIIOT_SALT_DIVISOR = "blueriiot_salt_divisor"
 CONF_BLUERIIOT_INTERVAL_MINUTES = "blueriiot_interval_minutes"
