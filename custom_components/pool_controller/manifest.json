@@ -11,5 +11,5 @@
   "after_dependencies": ["blueriiot"],
   "documentation": "https://github.com/lweberru/pool_controller",
   "iot_class": "local_polling",
-  "version": "2.14.10"
+  "version": "2.14.11"
 }

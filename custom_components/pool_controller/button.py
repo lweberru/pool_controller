@@ -1,6 +1,9 @@
 from homeassistant.components.button import ButtonEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from .const import DOMAIN, MANUFACTURER
+from .const import (
+    DOMAIN, MANUFACTURER, CONF_BLUERIIOT_DEVICE, CONF_BLUERIIOT_MAC,
+    blueriiot_source,
+)
 
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
@@ -124,7 +127,10 @@ class BlueRiiotReadButton(PoolButton):
     @property
     def available(self) -> bool:
         merged = {**(self.coordinator.entry.data or {}), **(self.coordinator.entry.options or {})}
-        return bool(merged.get("enable_blueriiot") and merged.get("blueriiot_mac"))
+        source = blueriiot_source(merged)
+        if source == "integration":
+            return bool(merged.get(CONF_BLUERIIOT_DEVICE))
+        return source == "native" and bool(merged.get(CONF_BLUERIIOT_MAC))
 
     async def async_press(self):
         await self.coordinator.async_read_blueriiot_now()

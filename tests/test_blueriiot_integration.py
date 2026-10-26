@@ -153,6 +153,29 @@ class SourceOptionsTest(unittest.IsolatedAsyncioTestCase):
         native.async_read_if_due.assert_not_called()
         external.async_read_if_due.assert_awaited_once_with("pool", timedelta(), force=True)
 
+    def test_manual_read_button_availability_follows_selected_source(self):
+        tree = ast.parse((ROOT / "button.py").read_text())
+        button = next(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == "BlueRiiotReadButton")
+        method = next(node for node in button.body if isinstance(node, ast.FunctionDef) and node.name == "available")
+        method.decorator_list = []
+        tree.body = [method]
+        exec(compile(tree, "button.py", "exec"), self.namespace)
+        available = self.namespace["available"]
+        cases = [
+            ({"enable_blueriiot": True, "blueriiot_mac": "AA:BB:CC:DD:EE:FF"}, {}, True),
+            ({"enable_blueriiot": True, "blueriiot_mac": "AA:BB:CC:DD:EE:FF"},
+             {"enable_blueriiot": False, "blueriiot_source": "integration", "blueriiot_device": "pool"}, True),
+            ({}, {"blueriiot_source": "integration", "blueriiot_device": "pool"}, True),
+            ({}, {"blueriiot_source": "integration"}, False),
+            ({}, {"blueriiot_source": "native"}, False),
+            ({"enable_blueriiot": True, "blueriiot_mac": "AA:BB:CC:DD:EE:FF"},
+             {"blueriiot_source": "entities"}, False),
+        ]
+        for data, options, expected in cases:
+            with self.subTest(data=data, options=options):
+                instance = NS(coordinator=NS(entry=NS(data=data, options=options)))
+                self.assertEqual(available(instance), expected)
+
 
 if __name__ == "__main__":
     unittest.main()

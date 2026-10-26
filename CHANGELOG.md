@@ -2,6 +2,9 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.14.11] - 2026-10-26
+- Fix the manual BlueRiiot reading button being unavailable when using the BlueRiiot Bluetooth integration as the measurement source.
+
 ## [2.14.10] - 2026-10-26
 - Optionally select a BlueRiiot Bluetooth integration device as the measurement source, with automatic entity mapping and delegated manual readings.
 - Respect the source integration's polling interval, connectivity and measurement timestamps; reject stale measurements without a second BLE reader.
