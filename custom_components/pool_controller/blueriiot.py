@@ -16,6 +16,10 @@ SERVICE_UUID = "F3300001-F0A2-9B06-0C59-1BC4763B5C00"
 COMMAND_CHARACTERISTIC_UUID = "F3300002-F0A2-9B06-0C59-1BC4763B5C00"
 NOTIFY_CHARACTERISTIC_UUID = "F3300003-F0A2-9B06-0C59-1BC4763B5C00"
 
+RETRY_INTERVAL = timedelta(minutes=1)
+MAX_FAST_RETRIES = 2
+REACHABILITY_GRACE = timedelta(minutes=5)
+
 
 @dataclass(frozen=True, slots=True)
 class BlueRiiotReading:
@@ -35,6 +39,7 @@ class BlueRiiotReader:
     def __init__(self, hass: HomeAssistant) -> None:
         self._hass = hass
         self._address: str | None = None
+        self._failed_attempts = 0
         self._last_attempt = None
         self.last_success = None
         self.last_error: str | None = None
@@ -54,19 +59,29 @@ class BlueRiiotReader:
         now = dt_util.now()
         if normalized_address != self._address:
             self._address = normalized_address
+            self._failed_attempts = 0
             self._last_attempt = None
             self.last_success = None
             self.last_error = None
             self.reading = None
 
-        if not force and self._last_attempt and now - self._last_attempt < minimum_interval:
+        if (
+            not force and self._last_attempt
+            and now - self._last_attempt < self._attempt_interval(minimum_interval)
+        ):
             return self.reading
 
         async with self._lock:
             now = dt_util.now()
-            if not force and self._last_attempt and now - self._last_attempt < minimum_interval:
+            if (
+                not force and self._last_attempt
+                and now - self._last_attempt < self._attempt_interval(minimum_interval)
+            ):
                 return self.reading
             self._last_attempt = now
+            if self._failed_attempts > MAX_FAST_RETRIES:
+                self._failed_attempts = 0
+            self._failed_attempts += 1
             if salt_divisor <= 0:
                 self.last_error = "invalid_salt_divisor"
                 return self.reading
@@ -99,6 +114,7 @@ class BlueRiiotReader:
                 self.reading = self._decode(payload, salt_divisor=salt_divisor)
                 self.last_success = dt_util.now()
                 self.last_error = None
+                self._failed_attempts = 0
             except asyncio.TimeoutError:
                 self.last_error = "notification_timeout"
             except Exception as err:  # BLE backends expose several backend-specific errors.
@@ -109,13 +125,23 @@ class BlueRiiotReader:
                         await client.disconnect()
                     except Exception:
                         pass
+                self._last_attempt = dt_util.now()
         return self.reading
+
+    def _attempt_interval(self, minimum_interval: timedelta) -> timedelta:
+        if (
+            self.last_error and self.last_error != "invalid_salt_divisor"
+            and 0 < self._failed_attempts <= MAX_FAST_RETRIES
+        ):
+            return min(minimum_interval, RETRY_INTERVAL)
+        return minimum_interval
 
     def is_recently_reachable(self, maximum_age: timedelta) -> bool:
         """Return whether a successful direct measurement is still recent."""
         return bool(
             self.last_success
-            and dt_util.now() - self.last_success <= maximum_age
+            and timedelta(0) <= dt_util.now() - self.last_success
+            <= maximum_age + REACHABILITY_GRACE
         )
 
     @staticmethod

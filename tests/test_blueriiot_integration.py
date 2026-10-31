@@ -77,6 +77,16 @@ class IntegrationReaderTest(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(self.reader.is_recently_reachable(timedelta(days=1)))
         self.assertEqual(self.reader.last_error, "source_measurements_stale")
 
+    async def test_five_minute_grace_at_default_source_interval(self):
+        self.hass.config_entries.async_get_entry = lambda eid: NS(
+            domain="blueriiot", unique_id="AA:BB:CC:DD:EE:FF", options={"update_interval": 15}
+        )
+        for age, expected in ((30, True), (34, True), (35, True), (36, False), (-1, False)):
+            with self.subTest(age=age):
+                self.set_state("last_success", (NOW - timedelta(minutes=age)).isoformat())
+                await self.read()
+                self.assertEqual(self.reader.is_recently_reachable(timedelta(minutes=30)), expected)
+
     async def test_disconnected_source_rejects_preserved_values(self):
         self.set_state("connected", "off")
         await self.read()

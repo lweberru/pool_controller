@@ -103,5 +103,5 @@ class BlueRiiotIntegrationReader:
             self._connected and self.reading and self.last_success
             and self.last_success.tzinfo is not None
             and timedelta(0) <= dt_util.utcnow() - self.last_success
-            <= timedelta(minutes=max(30, self.interval_minutes * 2))
+            <= timedelta(minutes=max(30, self.interval_minutes * 2) + 5)
         )

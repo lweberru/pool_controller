@@ -2,6 +2,10 @@
 
 All notable changes to this integration are documented in this file.
 
+## [2.14.12] - 2026-10-31
+- Allow five minutes of timing reserve when assessing BlueRiiot measurement age, including the external integration source.
+- Retry failed native Bluetooth reads after one minute, with at most two fast retries before returning to the configured interval.
+
 ## [2.14.11] - 2026-10-26
 - Fix the manual BlueRiiot reading button being unavailable when using the BlueRiiot Bluetooth integration as the measurement source.
 
